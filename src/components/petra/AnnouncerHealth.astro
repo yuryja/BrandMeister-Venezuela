@@ -1,0 +1,361 @@
+---
+import type { PetraHealth, PetraAlert } from '../../lib/petra';
+import { formatDuration, formatRelativeTime, formatAlertTitle } from '../../lib/petra';
+
+interface Props {
+  health: PetraHealth;
+  alerts: PetraAlert[];
+}
+
+const { health, alerts = [] } = Astro.props;
+const busyCount = health.beacons_skipped?.busy || 0;
+---
+
+<div class="petra-announcer-grid">
+  <!-- Columna Izquierda: Salud del Anunciador -->
+  <div class="petra-panel-card health-card">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <h3 class="panel-title">Salud del Anunciador</h3>
+        <span class="panel-subtitle">Supervisión del servicio de voz automática en TG 734</span>
+      </div>
+      <div class="health-status-badge">
+        <span class="status-dot status-dot--ok"></span>
+        <span>Sin errores</span>
+      </div>
+    </div>
+
+    <div class="health-metrics-grid">
+      <div class="health-metric-box">
+        <span class="hm-label">Balizas emitidas (24h)</span>
+        <span class="hm-val">{health.beacons_sent}</span>
+        <span class="hm-sub">Verificaciones horarias</span>
+      </div>
+
+      <div class="health-metric-box">
+        <span class="hm-label">Pospuestas por tráfico</span>
+        <span class="hm-val">{busyCount}</span>
+        <span class="hm-sub">Canal ocupado (prioridad QSO)</span>
+      </div>
+
+      <div class="health-metric-box">
+        <span class="hm-label">Reportes sísmicos</span>
+        <span class="hm-val hm-val--red">{health.alerts_seismic}</span>
+        <span class="hm-sub">Boletines Funvisis / INPRES</span>
+      </div>
+
+      <div class="health-metric-box">
+        <span class="hm-label">Boletines del clima</span>
+        <span class="hm-val hm-val--orange">{health.alerts_meteo}</span>
+        <span class="hm-sub">Reportes INAMEH emitidos</span>
+      </div>
+    </div>
+
+    <div class="last-beacon-footer">
+      <div class="lb-info">
+        <span class="lb-label">Última baliza horaria transmitida:</span>
+        <strong class="lb-time" data-timestamp={health.last_beacon_at}>
+          {formatRelativeTime(health.last_beacon_at)}
+        </strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Columna Derecha: Lo Último al Aire (Feed) -->
+  <div class="petra-panel-card feed-card">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <h3 class="panel-title">Lo Último al Aire</h3>
+        <span class="panel-subtitle">Registro de boletines, avisos y balizas transmitidas</span>
+      </div>
+    </div>
+
+    <div class="alerts-feed-list">
+      {alerts.length > 0 ? (
+        alerts.map((alert) => {
+          const info = formatAlertTitle(alert);
+
+          return (
+            <div class={`alert-item alert-item--${info.category}`}>
+              <div class="alert-icon-box">
+                {info.category === 'sismo' ? (
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  </svg>
+                ) : info.category === 'meteo' ? (
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                )}
+              </div>
+
+              <div class="alert-info-col">
+                <div class="alert-title-line">
+                  <span class="alert-title">{info.title}</span>
+                  <span class="alert-dur">{formatDuration(alert.dur_ms)}</span>
+                </div>
+                <div class="alert-meta-line">
+                  <span class="alert-file">{alert.file}</span>
+                  <span class="alert-sep">·</span>
+                  <span class="alert-time" data-timestamp={alert.at}>
+                    {formatRelativeTime(alert.at)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <div class="empty-feed">
+          <span>Sin avisos recientes en el registro</span>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  .petra-announcer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .petra-panel-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .panel-title {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.2rem;
+  }
+
+  .panel-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .health-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #10B981;
+    background: rgba(16, 185, 129, 0.08);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  .status-dot--ok {
+    background: #10B981;
+  }
+
+  /* Métricas de Salud */
+  .health-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .health-metric-box {
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .hm-label {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  .hm-val {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.1;
+  }
+
+  .hm-val--red {
+    color: var(--bm-red);
+  }
+
+  .hm-val--orange {
+    color: var(--bm-orange);
+  }
+
+  .hm-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+  }
+
+  .last-beacon-footer {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 0.85rem;
+    margin-top: auto;
+  }
+
+  .lb-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .lb-time {
+    color: var(--text-main);
+    font-family: var(--font-mono, monospace);
+  }
+
+  /* Feed de Alertas */
+  .alerts-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    overflow-y: auto;
+    max-height: 380px;
+    padding-right: 0.25rem;
+  }
+
+  .alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card-subtle);
+    border-left: 3px solid var(--border-subtle);
+    transition: all 0.15s ease;
+  }
+
+  .alert-item--sismo {
+    border-left-color: var(--bm-red);
+    background: rgba(232, 38, 28, 0.04);
+  }
+
+  .alert-item--meteo {
+    border-left-color: var(--bm-orange);
+    background: rgba(238, 108, 31, 0.04);
+  }
+
+  .alert-item--baliza {
+    border-left-color: var(--bm-yellow);
+    background: rgba(242, 169, 59, 0.04);
+  }
+
+  .alert-icon-box {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+  }
+
+  .alert-item--sismo .alert-icon-box {
+    color: var(--bm-red);
+    border-color: rgba(232, 38, 28, 0.3);
+  }
+
+  .alert-item--meteo .alert-icon-box {
+    color: var(--bm-orange);
+    border-color: rgba(238, 108, 31, 0.3);
+  }
+
+  .alert-item--baliza .alert-icon-box {
+    color: var(--bm-orange);
+    border-color: rgba(242, 169, 59, 0.35);
+  }
+
+  .alert-info-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .alert-title-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .alert-title {
+    font-family: var(--font-heading);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .alert-dur {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  .alert-meta-line {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+  }
+
+  .empty-feed {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+</style>

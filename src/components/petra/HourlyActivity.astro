@@ -1,0 +1,240 @@
+---
+import { formatDuration } from '../../lib/petra';
+
+interface Props {
+  hourly: number[];
+}
+
+const { hourly = new Array(24).fill(0) } = Astro.props;
+const maxAir = Math.max(...hourly, 1000);
+const totalTodayMs = hourly.reduce((acc, curr) => acc + curr, 0);
+---
+
+<div class="petra-chart-card">
+  <div class="chart-header">
+    <div class="chart-title-group">
+      <h3 class="chart-title">Actividad por Hora (Hoy)</h3>
+      <span class="chart-subtitle">Tiempo acumulado al aire en cada franja horaria</span>
+    </div>
+    <div class="chart-legend">
+      <span class="legend-badge">Total: <strong>{formatDuration(totalTodayMs)}</strong></span>
+    </div>
+  </div>
+
+  <div class="hourly-bars-wrapper" role="region" aria-label="Gráfico de barras de actividad por hora">
+    <div class="hourly-bars">
+      {hourly.map((val, idx) => {
+        const heightPct = val > 0 ? Math.max(4, Math.round((val / maxAir) * 100)) : 2;
+        const hourStr = `${String(idx).padStart(2, '0')}:00`;
+        const durStr = val > 0 ? formatDuration(val) : 'Sin tráfico';
+        const isHot = val > maxAir * 0.7;
+        const isWarm = val > maxAir * 0.35;
+
+        return (
+          <div class="bar-col-wrapper" data-hour={hourStr} data-duration={durStr}>
+            <div
+              class={`bar-col ${isHot ? 'bar-col--hot' : isWarm ? 'bar-col--warm' : val > 0 ? 'bar-col--normal' : 'bar-col--empty'}`}
+              style={`height: ${heightPct}%;`}
+            >
+              <div class="bar-tooltip">
+                <span class="tt-hour">{hourStr}</span>
+                <span class="tt-dur">{durStr}</span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+
+    <div class="hourly-axis">
+      <span>00:00</span>
+      <span>04:00</span>
+      <span>08:00</span>
+      <span>12:00</span>
+      <span>16:00</span>
+      <span>20:00</span>
+      <span>23:00</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .petra-chart-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2.5rem;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.2rem;
+  }
+
+  .chart-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .legend-badge {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: var(--bg-card-subtle);
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .legend-badge strong {
+    color: var(--bm-red);
+  }
+
+  .hourly-bars-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .hourly-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 160px;
+    padding-top: 3.2rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .bar-col-wrapper {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+  }
+
+  .bar-col {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+
+  .bar-col--empty {
+    background: #F1F5F9;
+  }
+
+  .bar-col--normal {
+    background: #FEF3C7;
+  }
+
+  .bar-col--warm {
+    background: var(--bm-orange);
+  }
+
+  .bar-col--hot {
+    background: var(--bm-red);
+    box-shadow: 0 0 10px rgba(232, 38, 28, 0.25);
+  }
+
+  .bar-col:hover {
+    transform: scaleY(1.04);
+    filter: brightness(1.1);
+  }
+
+  /* Tooltip con protección contra overflow */
+  .bar-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0F172A;
+    color: #FFFFFF;
+    padding: 0.35rem 0.65rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 25;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .bar-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px;
+    border-style: solid;
+    border-color: #0F172A transparent transparent transparent;
+  }
+
+  /* Evitar overflow en las primeras columnas */
+  .bar-col-wrapper:nth-child(-n+3) .bar-tooltip {
+    left: 0;
+    transform: none;
+    align-items: flex-start;
+  }
+
+  .bar-col-wrapper:nth-child(-n+3) .bar-tooltip::after {
+    left: 10px;
+    transform: none;
+  }
+
+  /* Evitar overflow en las últimas columnas */
+  .bar-col-wrapper:nth-last-child(-n+3) .bar-tooltip {
+    left: auto;
+    right: 0;
+    transform: none;
+    align-items: flex-end;
+  }
+
+  .bar-col-wrapper:nth-last-child(-n+3) .bar-tooltip::after {
+    left: auto;
+    right: 10px;
+    transform: none;
+  }
+
+  .bar-col:hover .bar-tooltip {
+    opacity: 1;
+  }
+
+  .tt-hour {
+    font-weight: 700;
+    color: var(--bm-orange);
+  }
+
+  .tt-dur {
+    color: #F1F5F9;
+  }
+
+  .hourly-axis {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    padding: 0 4px;
+  }
+</style>

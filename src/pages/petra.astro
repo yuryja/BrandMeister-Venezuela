@@ -1,0 +1,385 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getPetraData } from '../lib/petra';
+import LiveStrip from '../components/petra/LiveStrip.astro';
+import SummaryTiles from '../components/petra/SummaryTiles.astro';
+import HourlyActivity from '../components/petra/HourlyActivity.astro';
+import CalendarActivity from '../components/petra/CalendarActivity.astro';
+import TopOperators from '../components/petra/TopOperators.astro';
+import RecentTransmissions from '../components/petra/RecentTransmissions.astro';
+import WeeklyHeatmap from '../components/petra/WeeklyHeatmap.astro';
+import AnnouncerHealth from '../components/petra/AnnouncerHealth.astro';
+
+const data = await getPetraData();
+---
+
+<Layout
+  title="Conoce a Petra · Plataforma Informativa y Telemetría del TG 734 · BrandMeister Venezuela"
+  description="Conoce a Petra, plataforma informativa y de telemetría en la red BrandMeister Venezuela. Emite al TG 734 reportes meteorológicos, alertas sísmicas y balizas horarias en telegrafía. Desarrollado por YY3BIG · Yury Jajitzky."
+>
+  <main class="petra-page">
+    <!-- Hero 50vh con degradado lateral estilo Hero Principal -->
+    <section class="petra-hero">
+      <div class="container">
+        <div class="petra-hero-content">
+          <div class="petra-badge">
+            <span>Desarrollo Comunitario Venezolano</span>
+          </div>
+          <h1 class="petra-title">Conoce a Petra</h1>
+          <p class="petra-subtitle">
+            Plataforma informativa y de telemetría integrada en la red BrandMeister Venezuela. Conectada a servicios de monitoreo nacional, genera y emite al <strong>TG 734</strong> reportes meteorológicos y alertas sísmicas en tiempo real, transmitiendo a su vez una baliza horaria que evoca la nostalgia de los repetidores analógicos mediante telegrafía.
+          </p>
+          <div class="petra-meta-author">
+            Desarrollado y mantenido con dedicación para la comunidad por <strong>YY3BIG · Yury Jajitzky</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Línea divisoria con degradado de 3 colores BrandMeister -->
+    <div class="bm-stripe"></div>
+
+    <!-- Suite Completa de Telemetría y Estadísticas Petra -->
+    <section class="petra-telemetry-body section-padding">
+      <div class="container">
+        <!-- 1. Enlace BM & Último Escuchado -->
+        <LiveStrip live={data.live} />
+
+        <!-- 2. 4 Tarjetas de Resumen KPI -->
+        <SummaryTiles summary={data.summary} />
+
+        <!-- 3. Gráfico de Actividad por Hora (Hoy) -->
+        <HourlyActivity hourly={data.hourly} />
+
+        <!-- 4. Actividad Diaria (30 Días) y Mensual -->
+        <CalendarActivity calendar={data.calendar} />
+
+        <!-- 5. Grid de 2 Columnas: Más Escuchados & Últimas Intervenciones -->
+        <div class="petra-split-grid">
+          <div class="split-col">
+            <TopOperators top={data.top} />
+          </div>
+          <div class="split-col">
+            <RecentTransmissions recent={data.live.recent} />
+          </div>
+        </div>
+
+        <!-- 6. Mapa de Calor Semanal (7x24) -->
+        <WeeklyHeatmap heatmap={data.heatmap} />
+
+        <!-- 7. Salud del Anunciador de Voz & Feed de Alertas / Boletines -->
+        <AnnouncerHealth health={data.health} alerts={data.alerts} />
+
+        <!-- Botón de navegación -->
+        <div class="petra-footer-cta">
+          <a href="/" class="btn btn-secondary">
+            <span>← Volver al Portal Principal</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .petra-page {
+    background: #FAFAFA;
+    min-height: 100vh;
+  }
+
+  /* Hero a 50vh con mismo tratamiento que el Hero Principal */
+  .petra-hero {
+    position: relative;
+    min-height: 50vh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    background-image:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 42%, rgba(255, 255, 255, 0.65) 68%, rgba(255, 255, 255, 0.15) 100%),
+      linear-gradient(0deg, #FAFAFA 0%, rgba(255, 255, 255, 0.8) 12%, transparent 35%),
+      url('/assets/petra-hero-bg.jpg');
+    background-size: cover;
+    background-position: right center;
+    background-repeat: no-repeat;
+    padding: 3.5rem 0;
+  }
+
+  /* Línea divisoria con degradado corporativo a 3 colores */
+  .bm-stripe {
+    height: 3px;
+    background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
+    width: 100%;
+    display: block;
+    position: relative;
+    z-index: 10;
+  }
+
+  @media (max-width: 768px) {
+    .petra-hero {
+      min-height: 50vh;
+      background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 50%, rgba(255, 255, 255, 0.65) 80%, rgba(255, 255, 255, 0.35) 100%),
+        url('/assets/petra-hero-bg.jpg');
+      background-position: center top;
+      background-size: cover;
+      padding: 2.5rem 0;
+    }
+  }
+
+  .petra-hero-content {
+    max-width: 720px;
+  }
+
+  .petra-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--bm-red);
+    border: 1px solid rgba(232, 38, 28, 0.45);
+    background: rgba(232, 38, 28, 0.04);
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 1.1rem;
+    letter-spacing: 0.01em;
+  }
+
+  .petra-title {
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.15;
+    margin-bottom: 0.85rem;
+  }
+
+  .petra-subtitle {
+    font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin-bottom: 1.1rem;
+  }
+
+  .petra-meta-author {
+    font-size: 0.95rem;
+    color: var(--text-faint);
+    line-height: 1.5;
+  }
+
+  .petra-meta-author strong {
+    color: var(--text-main);
+  }
+
+  .petra-telemetry-body {
+    padding-top: clamp(2.5rem, 4vw, 3.5rem);
+    padding-bottom: clamp(3rem, 5vw, 5rem);
+  }
+
+  .petra-split-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 1.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 960px) {
+    .petra-split-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .split-col {
+    min-width: 0;
+  }
+
+  .petra-footer-cta {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .petra-footer-cta .btn {
+    border-radius: var(--radius-pill);
+    padding: 0.75rem 1.6rem;
+    font-weight: 700;
+  }
+</style>
+
+<script>
+  const PETRA_API = 'https://petra.brandmeisteryv.net/api';
+
+  // ── Callsign → country code map (for flag updates during polling) ─────────────
+  const PREFIX_MAP = {"YV":"ve","YX":"ve","YY":"ve","AA":"us","AB":"us","AC":"us","AD":"us","AE":"us","AF":"us","AG":"us","AH":"us","AI":"us","AJ":"us","AK":"us","AL":"us","K":"us","N":"us","W":"us","VA":"ca","VB":"ca","VC":"ca","VD":"ca","VE":"ca","VF":"ca","VG":"ca","VY":"ca","CF":"ca","CG":"ca","CH":"ca","CI":"ca","CJ":"ca","CK":"ca","VX":"ca","XA":"mx","XB":"mx","XC":"mx","XD":"mx","XE":"mx","XF":"mx","PP":"br","PQ":"br","PR":"br","PS":"br","PT":"br","PU":"br","PV":"br","PW":"br","PX":"br","PY":"br","LO":"ar","LP":"ar","LQ":"ar","LR":"ar","LS":"ar","LT":"ar","LU":"ar","LV":"ar","LW":"ar","HJ":"co","HK":"co","CA":"cl","CB":"cl","CC":"cl","CD":"cl","CE":"cl","XQ":"cl","XR":"cl","OA":"pe","OB":"pe","OC":"pe","CP":"bo","HC":"ec","HD":"ec","ZP":"py","CV":"uy","CX":"uy","CL":"cu","CM":"cu","CN":"cu","CO":"cu","T4":"cu","HI":"do","HP":"pa","TE":"cr","TI":"cr","TG":"gt","HR":"hn","YS":"sv","YN":"ni","V3":"bz","HH":"ht","EA":"es","EB":"es","EC":"es","ED":"es","EE":"es","EF":"es","EG":"es","EH":"es","AM":"es","AN":"es","AO":"es","CR":"pt","CS":"pt","CT":"pt","CU":"pt","F":"fr","DA":"de","DB":"de","DC":"de","DD":"de","DE":"de","DF":"de","DG":"de","DH":"de","DI":"de","DJ":"de","DK":"de","DL":"de","DM":"de","DN":"de","DO":"de","DP":"de","DQ":"de","DR":"de","G":"gb","M":"gb","I":"it","PA":"nl","PB":"nl","PC":"nl","PD":"nl","PE":"nl","PF":"nl","PG":"nl","PH":"nl","PI":"nl","ON":"be","OO":"be","HB":"ch","HE":"ch","OE":"at","SA":"se","SB":"se","SC":"se","SD":"se","SE":"se","SF":"se","SG":"se","SH":"se","SI":"se","SJ":"se","SK":"se","SL":"se","SM":"se","LA":"no","LB":"no","LC":"no","LD":"no","LE":"no","LF":"no","LG":"no","LH":"no","LI":"no","LJ":"no","LK":"no","LL":"no","LM":"no","LN":"no","OZ":"dk","OU":"dk","OV":"dk","OW":"dk","OF":"fi","OG":"fi","OH":"fi","OI":"fi","OJ":"fi","RA":"ru","RB":"ru","RC":"ru","RD":"ru","RE":"ru","RF":"ru","RG":"ru","RH":"ru","RI":"ru","RJ":"ru","RK":"ru","RL":"ru","RM":"ru","RN":"ru","RO":"ru","RP":"ru","RQ":"ru","RR":"ru","RS":"ru","RT":"ru","RU":"ru","RV":"ru","RW":"ru","RX":"ru","RY":"ru","RZ":"ru","UA":"ru","UB":"ru","UC":"ru","UD":"ru","UE":"ru","UF":"ru","UG":"ru","UH":"ru","UI":"ru","JA":"jp","JB":"jp","JC":"jp","JD":"jp","JE":"jp","JF":"jp","JG":"jp","JH":"jp","JI":"jp","JJ":"jp","JK":"jp","JL":"jp","JM":"jp","JN":"jp","JO":"jp","JP":"jp","JQ":"jp","JR":"jp","JS":"jp","BA":"cn","BB":"cn","BC":"cn","BD":"cn","BE":"cn","BF":"cn","BG":"cn","BH":"cn","BI":"cn","BJ":"cn","BK":"cn","BL":"cn","BM":"cn","BN":"cn","BO":"cn","BP":"cn","BQ":"cn","BR":"cn","BS":"cn","BT":"cn","BU":"cn","BV":"tw","DS":"kr","DT":"kr","HL":"kr","VH":"au","VI":"au","VJ":"au","VK":"au","VL":"au","VM":"au","VN":"au","AX":"au","ZK":"nz","ZL":"nz","ZM":"nz","ZR":"za","ZS":"za","ZT":"za","ZU":"za","AT":"in","AU":"in","AV":"in","AW":"in","VU":"in","VV":"in","VW":"in"};
+
+  function callsignToCountry(cs) {
+    if (!cs) return null;
+    cs = cs.toUpperCase().trim();
+    for (let len = 4; len >= 1; len--) {
+      const code = PREFIX_MAP[cs.slice(0, len)];
+      if (code) return code;
+    }
+    return null;
+  }
+
+  function setFlag(flagEl, callsign) {
+    if (!flagEl) return;
+    const country = callsignToCountry(callsign);
+    if (country) {
+      flagEl.className = `fi fi-${country} cs-flag cs-flag--md`;
+      flagEl.title = country.toUpperCase();
+      flagEl.style.display = '';
+    } else {
+      flagEl.style.display = 'none';
+    }
+  }
+
+  // ── Helpers (mirrors petra.ts logic) ────────────────────────────────────────
+
+  function fmtDuration(ms) {
+    const sec = Math.round(ms / 1000);
+    if (sec < 60) return `${sec} s`;
+    const min = Math.floor(sec / 60);
+    const remSec = sec % 60;
+    if (min < 60) return `${min} m ${remSec} s`;
+    const hr = Math.floor(min / 60);
+    return `${hr} h ${min % 60} m`;
+  }
+
+  function fmtAirTimeSplit(ms) {
+    const min = Math.round(ms / 60000);
+    if (min < 1) return { value: String(Math.round(ms / 1000)), unit: 's' };
+    if (min < 60) return { value: String(min), unit: 'min' };
+    const hr = Math.floor(min / 60);
+    return { value: `${hr} h ${String(min % 60).padStart(2, '0')}`, unit: 'm' };
+  }
+
+  function fmtRelative(ts) {
+    const diffSec = Math.max(0, Math.round((Date.now() - ts) / 1000));
+    if (diffSec < 45) return 'hace unos segundos';
+    if (diffSec < 90) return 'hace 1 min';
+    if (diffSec < 3600) return `hace ${Math.floor(diffSec / 60)} min`;
+    if (diffSec < 86400) return `hace ${Math.floor(diffSec / 3600)} h`;
+    return `hace ${Math.floor(diffSec / 86400)} d`;
+  }
+
+  function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  }
+
+  // ── Tick: update all [data-timestamp] elements ───────────────────────────────
+
+  function tickRelativeTimes() {
+    document.querySelectorAll('[data-timestamp]').forEach((el) => {
+      const ts = Number(el.getAttribute('data-timestamp'));
+      if (ts && !isNaN(ts)) el.textContent = fmtRelative(ts);
+    });
+  }
+
+  // ── Fetch /live and update LiveStrip + tiles that depend on live ─────────────
+
+  async function pollLive() {
+    try {
+      const res = await fetch(`${PETRA_API}/live?limit=10&tg=734`, {
+        headers: { accept: 'application/json' },
+        cache: 'no-cache'
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const link = data.link ?? {};
+      const last = data.last_heard;
+
+      // Link state
+      const isUp = link.state === 'up';
+      const dot = document.getElementById('petra-status-dot');
+      const txt = document.getElementById('petra-status-text');
+      if (dot) {
+        dot.className = `status-dot ${isUp ? 'status-dot--ok' : 'status-dot--err'}`;
+      }
+      if (txt) txt.textContent = isUp ? 'Enlace Activo' : 'Enlace Inactivo';
+
+      // Uptime & drops
+      const uptime = document.getElementById('petra-uptime');
+      if (uptime) uptime.textContent = `${link.uptime_24h ?? 0}%`;
+      const drops = document.getElementById('petra-drops-badge');
+      if (drops) {
+        drops.textContent = `${link.drops_24h ?? 0} caídas`;
+        drops.className = `drops-badge${(link.drops_24h ?? 0) > 0 ? ' drops-badge--warn' : ''}`;
+      }
+
+      // Last heard
+      if (last) {
+        const callsignEl = document.getElementById('petra-lh-callsign');
+        if (callsignEl) {
+          // Update flag sprite (first child if it's a span.fi, else nothing)
+          const flagEl = callsignEl.querySelector('.fi');
+          if (flagEl) {
+            setFlag(flagEl, last.callsign);
+          }
+          // Update text node (last child text)
+          const textNode = [...callsignEl.childNodes].find(n => n.nodeType === 3);
+          if (textNode) {
+            textNode.textContent = last.callsign;
+          } else {
+            callsignEl.appendChild(document.createTextNode(last.callsign));
+          }
+          callsignEl.href = `https://www.qrz.com/db/${last.callsign}`;
+          callsignEl.title = `Ver ficha de ${last.callsign} en QRZ.com`;
+        }
+        setText('petra-lh-name', last.name || 'Operador DMR');
+        setText('petra-lh-id', `ID ${last.src_id}`);
+        setText('petra-lh-dur', fmtDuration(last.dur_ms));
+
+        const timeEl = document.getElementById('petra-lh-time');
+        if (timeEl) {
+          timeEl.setAttribute('data-timestamp', String(last.at));
+          timeEl.textContent = fmtRelative(last.at);
+        }
+
+        const carrier = document.getElementById('petra-carrier');
+        if (carrier) {
+          carrier.classList.toggle('hidden', !last.open);
+        }
+      }
+    } catch (_) { /* silent fail */ }
+  }
+
+  // ── Fetch /summary and update SummaryTiles ────────────────────────────────────
+
+  async function pollSummary() {
+    try {
+      const res = await fetch(`${PETRA_API}/summary?tg=734`, {
+        headers: { accept: 'application/json' },
+        cache: 'no-cache'
+      });
+      if (!res.ok) return;
+      const { today: t } = await res.json();
+
+      setText('petra-tile-count', (t.count ?? 0).toLocaleString('es-VE'));
+
+      const air = fmtAirTimeSplit(t.air_ms ?? 0);
+      setText('petra-tile-air-value', air.value);
+      setText('petra-tile-air-unit', air.unit);
+
+      setText('petra-tile-ops', String(t.uniq_ops ?? 0));
+      setText('petra-tile-longest', t.longest_s > 0 ? fmtDuration(t.longest_s * 1000) : '—');
+    } catch (_) { /* silent fail */ }
+  }
+
+  // ── Bootstrap ─────────────────────────────────────────────────────────────────
+
+  // Relative times: every 20 s
+  setInterval(tickRelativeTimes, 20_000);
+
+  // Live data: every 20 s
+  pollLive();
+  setInterval(pollLive, 20_000);
+
+  // Summary tiles: every 60 s
+  pollSummary();
+  setInterval(pollSummary, 60_000);
+</script>
+

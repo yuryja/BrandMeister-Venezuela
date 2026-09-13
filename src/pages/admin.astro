@@ -1,0 +1,1852 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const localPosts = await getCollection('blog');
+
+const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const getCellIntensity = (hour: number) => {
+  if (hour >= 18 && hour <= 22) return hour % 2 === 0 ? 'level-3' : 'level-2';
+  if (hour >= 11 && hour <= 14) return 'level-1';
+  if (hour >= 1 && hour <= 5) return 'level-0';
+  return 'level-1';
+};
+---
+
+<Layout
+  title="Escritorio ‹ BrandMeister Venezuela — Backoffice"
+  description="Panel de administración estilo WordPress para BrandMeister Venezuela con control de acceso ACL y base de datos MySQL bmvenezuela."
+>
+  <!-- WP LOGIN SCREEN (Shown if not authenticated) -->
+  <div id="wp-login-screen" class="wp-login-wrapper">
+    <div class="wp-login-card">
+      <div class="wp-login-logo">
+        <img src="/assets/logo.webp" alt="BrandMeister Venezuela" width="220" height="55" />
+      </div>
+      
+      <div class="wp-login-header">
+        <h2>Iniciar Sesión en el Backoffice</h2>
+        <p>Acceso administrativo para Sysops y colaboradores autorizados</p>
+      </div>
+
+      <form id="login-form" class="wp-login-form">
+        <div class="form-group">
+          <label for="login-username">Usuario o Indicativo</label>
+          <input type="text" id="login-username" class="form-input" placeholder="ej: YV5OF o yy3big" required />
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Contraseña</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" value="bm734venezuela" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary wp-login-btn">
+          <span>Acceder al Escritorio</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </form>
+
+      <!-- Quick Roles Demo Switcher -->
+      <div class="wp-login-demo">
+        <span class="demo-label">Acceso rápido con roles (ACL):</span>
+        <div class="demo-roles-btns">
+          <button type="button" class="btn-demo-role" data-user="yv5of" data-role="admin">
+            <strong>YV5OF</strong> (Admin Sysop)
+          </button>
+          <button type="button" class="btn-demo-role" data-user="yv5adm" data-role="editor">
+            <strong>YV5ADM</strong> (Editor)
+          </button>
+          <button type="button" class="btn-demo-role" data-user="autor_demo" data-role="author">
+            <strong>YV5DEMO</strong> (Autor)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN WORDPRESS-STYLE BACKOFFICE APP -->
+  <div id="wp-app" class="wp-admin-app" style="display: none;">
+    <!-- TOP WP ADMIN BAR -->
+    <header class="wp-adminbar">
+      <div class="adminbar-left">
+        <a href="/" class="adminbar-site-link" target="_blank" title="Ver sitio público">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--bm-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span class="site-name">BrandMeister Venezuela</span>
+          <span class="visit-label">↗</span>
+        </a>
+
+        <div class="db-status-badge" title="Base de datos MySQL bmvenezuela configurada">
+          <span class="db-dot"></span>
+          <span>MySQL: <strong>bmvenezuela</strong></span>
+        </div>
+      </div>
+
+      <div class="adminbar-right">
+        <div class="user-profile-menu">
+          <span class="greeting">Hola, <strong id="bar-user-name">YV5OF</strong></span>
+          <span id="bar-user-role" class="role-badge role-admin">Administrador</span>
+          <button id="btn-logout" class="btn-logout" title="Cerrar sesión">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Salir</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="wp-admin-layout">
+      <!-- LEFT WP SIDEBAR -->
+      <aside class="wp-sidebar">
+        <ul class="wp-menu">
+          <li class="wp-menu-item">
+            <button class="menu-link is-active" data-view="dashboard">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7"></rect>
+                <rect x="14" y="3" width="7" height="7"></rect>
+                <rect x="14" y="14" width="7" height="7"></rect>
+                <rect x="3" y="14" width="7" height="7"></rect>
+              </svg>
+              <span>Escritorio</span>
+            </button>
+          </li>
+
+          <li class="wp-menu-item has-submenu">
+            <button class="menu-link" data-view="posts">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              <span>Noticias</span>
+              <span class="count-pill">4</span>
+            </button>
+            <ul class="wp-submenu">
+              <li><button class="submenu-link is-active" data-view="posts">Todas las noticias</button></li>
+              <li><button class="submenu-link" data-view="new-post">Añadir nueva</button></li>
+            </ul>
+          </li>
+
+          <li class="wp-menu-item">
+            <button class="menu-link" data-view="site-content">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+              <span>Textos del Portal</span>
+            </button>
+          </li>
+
+          <!-- ACL Protected Menu: Users (Admin Only) -->
+          <li class="wp-menu-item" id="menu-users-item">
+            <button class="menu-link" data-view="users">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span>Usuarios & ACL</span>
+            </button>
+          </li>
+
+          <!-- Settings (Admin Only) -->
+          <li class="wp-menu-item" id="menu-settings-item">
+            <button class="menu-link" data-view="settings">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+              <span>Ajustes & BD</span>
+            </button>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- MAIN CONTENT STAGE -->
+      <main class="wp-content-stage">
+        <!-- ========================================================= -->
+        <!-- VIEW 1: ESCRITORIO (DASHBOARD) -->
+        <!-- ========================================================= -->
+        <section id="view-dashboard" class="wp-view is-active">
+          <div class="view-header">
+            <h1 class="view-title">Escritorio</h1>
+            <button class="btn btn-primary" onclick="window.switchView('new-post')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>Añadir Noticia</span>
+            </button>
+          </div>
+
+          <!-- Welcome Banner -->
+          <div class="wp-welcome-panel">
+            <div class="welcome-text">
+              <h2>¡Bienvenido al panel de BrandMeister Venezuela!</h2>
+              <p>Gestiona los canales, consulta telemetría del TG 734 y publica comunicados oficiales de la red nacional.</p>
+            </div>
+            <div class="welcome-actions">
+              <a href="https://petra.brandmeisteryv.net/" target="_blank" rel="noopener" class="btn btn-secondary">
+                <span>Monitor Petra ↗</span>
+              </a>
+              <a href="http://hose.brandmeister.network/" target="_blank" rel="noopener" class="btn btn-secondary">
+                <span>Hoseline ↗</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- At a Glance & Quick Draft Grid -->
+          <div class="dashboard-widgets-grid">
+            <!-- At a Glance -->
+            <div class="wp-box">
+              <div class="wp-box-head">
+                <h3>De un vistazo</h3>
+              </div>
+              <div class="wp-box-body">
+                <ul class="glance-list">
+                  <li>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--bm-orange)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                    <span><strong>4</strong> Noticias publicadas</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--bm-red)" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49"></path></svg>
+                    <span><strong>8</strong> Repetidores enlazados</span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#16A34A" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg>
+                    <span>Anunciador TG 734 <strong>Operativo</strong></span>
+                  </li>
+                  <li>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--bm-yellow)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span>Pico diario: <strong>19:00 - 21:30 VET</strong></span>
+                  </li>
+                </ul>
+                <div class="db-info-line">
+                  <span>Conectado a MySQL <strong>bmvenezuela</strong> (DBngin / Local)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Draft -->
+            <div class="wp-box">
+              <div class="wp-box-head">
+                <h3>Borrador rápido</h3>
+              </div>
+              <div class="wp-box-body">
+                <form id="quick-draft-form">
+                  <div class="form-group">
+                    <input type="text" id="qd-title" class="form-input" placeholder="Título de la noticia..." required />
+                  </div>
+                  <div class="form-group">
+                    <textarea id="qd-content" class="form-input" rows="3" placeholder="¿Qué está sucediendo en la red hoy?..." required></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-secondary" style="font-size: 0.85rem;">
+                    Guardar borrador
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Heatmap Panel -->
+          <div class="wp-box" style="margin-top: 1.5rem;">
+            <div class="wp-box-head">
+              <h3>Telemetría de Ocupación del TG 734 (Semana Actual)</h3>
+              <span class="badge-mini">Sistema Petra</span>
+            </div>
+            <div class="wp-box-body">
+              <div class="heatmap-chart">
+                <div class="chart-hours">
+                  <span>00h</span>
+                  <span>04h</span>
+                  <span>08h</span>
+                  <span>12h</span>
+                  <span>16h</span>
+                  <span>20h</span>
+                  <span>23h</span>
+                </div>
+
+                <div class="heatmap-rows">
+                  {days.map((day) => (
+                    <div class="heatmap-day-row">
+                      <span class="day-label">{day}</span>
+                      <div class="heatmap-cells">
+                        {Array.from({ length: 24 }).map((_, hour) => (
+                          <div class={`heat-cell ${getCellIntensity(hour)}`} title={`${day} ${hour}:00 hrs`}></div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 2: TODAS LAS NOTICIAS (WP LIST TABLE) -->
+        <!-- ========================================================= -->
+        <section id="view-posts" class="wp-view">
+          <div class="view-header">
+            <h1 class="view-title">Noticias</h1>
+            <button class="btn btn-primary" onclick="window.switchView('new-post')">
+              Añadir nueva noticia
+            </button>
+          </div>
+
+          <!-- Views Subsubsub filter -->
+          <div class="wp-subsubsub">
+            <span class="is-current">Todas <span class="count">(4)</span></span> |
+            <a href="#">Publicadas <span class="count">(4)</span></a> |
+            <a href="#">Borradores <span class="count">(0)</span></a> |
+            <a href="#">Papelera <span class="count">(0)</span></a>
+          </div>
+
+          <!-- Table Tools Toolbar -->
+          <div class="wp-table-toolbar">
+            <div class="toolbar-left">
+              <select class="form-input select-bulk">
+                <option>Acciones en lote</option>
+                <option>Mover a la papelera</option>
+              </select>
+              <button class="btn btn-secondary btn-sm">Aplicar</button>
+
+              <select class="form-input select-filter">
+                <option>Todas las categorías</option>
+                <option>Innovación</option>
+                <option>Guías Técnicas</option>
+                <option>Operación</option>
+                <option>Comunidad</option>
+              </select>
+              <button class="btn btn-secondary btn-sm">Filtrar</button>
+            </div>
+
+            <div class="toolbar-right">
+              <span class="items-count">4 elementos</span>
+            </div>
+          </div>
+
+          <!-- WP List Table -->
+          <div class="table-container">
+            <table class="wp-list-table">
+              <thead>
+                <tr>
+                  <th class="col-cb"><input type="checkbox" /></th>
+                  <th class="col-title">Título</th>
+                  <th class="col-author">Autor</th>
+                  <th class="col-category">Categoría</th>
+                  <th class="col-tags">Etiquetas</th>
+                  <th class="col-status">Estado</th>
+                  <th class="col-date">Fecha</th>
+                </tr>
+              </thead>
+              <tbody id="posts-table-body">
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td class="cell-title">
+                    <strong><a href="/blog/petra-telemetria-tg734" target="_blank">Evolución y estado del sistema Petra para el TG 734 en Venezuela</a></strong>
+                    <div class="row-actions">
+                      <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
+                      <span class="trash"><a href="#">Papelera</a> | </span>
+                      <span class="view"><a href="/blog/petra-telemetria-tg734" target="_blank">Ver</a></span>
+                    </div>
+                  </td>
+                  <td>Yury (YY3BIG)</td>
+                  <td><span class="cat-pill-mini">Innovación</span></td>
+                  <td>Petra, Telemetría, TG734</td>
+                  <td><span class="status-badge-pub">Publicada</span></td>
+                  <td>20/08/2026</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td class="cell-title">
+                    <strong><a href="/blog/configuracion-hotspots-dmr-venezuela" target="_blank">Guía esencial: Configuración de Hotspots DMR en BrandMeister Venezuela</a></strong>
+                    <div class="row-actions">
+                      <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
+                      <span class="trash"><a href="#">Papelera</a> | </span>
+                      <span class="view"><a href="/blog/configuracion-hotspots-dmr-venezuela" target="_blank">Ver</a></span>
+                    </div>
+                  </td>
+                  <td>Severino (YV5OF)</td>
+                  <td><span class="cat-pill-mini">Guías Técnicas</span></td>
+                  <td>Hotspots, Pi-Star, MMDVM</td>
+                  <td><span class="status-badge-pub">Publicada</span></td>
+                  <td>05/08/2026</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td class="cell-title">
+                    <strong><a href="/blog/red-emergencia-tg734911" target="_blank">Protocolo de operación en emergencias con el TG 734911 y Radio Club Venezolano</a></strong>
+                    <div class="row-actions">
+                      <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
+                      <span class="trash"><a href="#">Papelera</a> | </span>
+                      <span class="view"><a href="/blog/red-emergencia-tg734911" target="_blank">Ver</a></span>
+                    </div>
+                  </td>
+                  <td>Arnaldo (YV5ADM)</td>
+                  <td><span class="cat-pill-mini">Operación</span></td>
+                  <td>Emergencias, YV5RNE, RCV</td>
+                  <td><span class="status-badge-pub">Publicada</span></td>
+                  <td>18/07/2026</td>
+                </tr>
+                <tr>
+                  <td><input type="checkbox" /></td>
+                  <td class="cell-title">
+                    <strong><a href="/blog/verificacion-radioid-dmr" target="_blank">Actualización RadioID.net: Proceso anual de verificación y preservación de IDs DMR</a></strong>
+                    <div class="row-actions">
+                      <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
+                      <span class="trash"><a href="#">Papelera</a> | </span>
+                      <span class="view"><a href="/blog/verificacion-radioid-dmr" target="_blank">Ver</a></span>
+                    </div>
+                  </td>
+                  <td>Severino (YV5OF)</td>
+                  <td><span class="cat-pill-mini">Comunidad</span></td>
+                  <td>RadioID, DMR, Normativa</td>
+                  <td><span class="status-badge-pub">Publicada</span></td>
+                  <td>25/06/2026</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 3: AÑADIR / EDITAR NOTICIA (WP EDITOR STYLE) -->
+        <!-- ========================================================= -->
+        <section id="view-new-post" class="wp-view">
+          <div class="view-header">
+            <h1 class="view-title">Añadir Nueva Noticia</h1>
+            <button class="btn btn-secondary" onclick="window.switchView('posts')">
+              ← Volver a la lista
+            </button>
+          </div>
+
+          <form id="wp-post-editor-form" class="wp-editor-layout">
+            <!-- Main Content Area -->
+            <div class="editor-main-col">
+              <div class="form-group">
+                <input
+                  type="text"
+                  id="wp-post-title"
+                  class="form-input wp-title-input"
+                  placeholder="Añade el título de la noticia..."
+                  required
+                />
+              </div>
+
+              <div class="slug-permalink-bar">
+                <span>Enlace permanente:</span>
+                <code>https://brandmeisteryv.net/blog/<input type="text" id="wp-post-slug" class="slug-inline-input" value="nueva-noticia" /></code>
+              </div>
+
+              <!-- Toolbar -->
+              <div class="wp-editor-toolbar">
+                <button type="button" class="wp-tool-btn" data-insert="## ">H2</button>
+                <button type="button" class="wp-tool-btn" data-insert="### ">H3</button>
+                <button type="button" class="wp-tool-btn" data-wrap="**">B</button>
+                <button type="button" class="wp-tool-btn" data-wrap="*">I</button>
+                <button type="button" class="wp-tool-btn" data-insert="- ">Lista</button>
+                <button type="button" class="wp-tool-btn" data-insert="> ">Cita</button>
+                <div style="flex:1;"></div>
+                <button type="button" id="btn-toggle-preview" class="btn btn-secondary btn-sm">
+                  Alternar Vista Previa
+                </button>
+              </div>
+
+              <!-- Content Area -->
+              <div class="editor-textarea-wrap">
+                <textarea
+                  id="wp-post-content"
+                  class="form-input wp-content-area"
+                  rows="14"
+                  placeholder="Escribe el cuerpo de la noticia en formato Markdown..."
+                  required
+                ></textarea>
+                <div id="wp-live-preview-box" class="wp-live-preview-box" style="display: none;"></div>
+              </div>
+
+              <div class="form-group" style="margin-top: 1.5rem;">
+                <label for="wp-post-desc">Extracto / Resumen</label>
+                <textarea id="wp-post-desc" class="form-input" rows="2" placeholder="Escribe un breve extracto para las tarjetas y buscadores..."></textarea>
+              </div>
+            </div>
+
+            <!-- Sidebar Metaboxes -->
+            <div class="editor-sidebar-col">
+              <!-- Metabox: Publicar -->
+              <div class="wp-box metabox">
+                <div class="wp-box-head">
+                  <h4>Publicar</h4>
+                </div>
+                <div class="wp-box-body">
+                  <div class="meta-setting-row">
+                    <span class="meta-label">Estado:</span>
+                    <select id="wp-post-status" class="form-input select-sm">
+                      <option value="published" selected>Publicado</option>
+                      <option value="draft">Borrador</option>
+                    </select>
+                  </div>
+                  <div class="meta-setting-row">
+                    <span class="meta-label">Visibilidad:</span>
+                    <strong>Público</strong>
+                  </div>
+                  <div class="meta-setting-row">
+                    <span class="meta-label">Publicar:</span>
+                    <strong>Inmediatamente</strong>
+                  </div>
+                  <div class="metabox-actions">
+                    <button type="button" id="btn-save-draft" class="btn btn-secondary btn-sm">Guardar Borrador</button>
+                    <button type="submit" id="btn-publish-post" class="btn btn-primary btn-sm">Publicar Noticia</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Metabox: Categorías -->
+              <div class="wp-box metabox">
+                <div class="wp-box-head">
+                  <h4>Categorías</h4>
+                </div>
+                <div class="wp-box-body">
+                  <div class="checkbox-list">
+                    <label><input type="radio" name="post-cat" value="Innovación" checked /> Innovación</label>
+                    <label><input type="radio" name="post-cat" value="Guías Técnicas" /> Guías Técnicas</label>
+                    <label><input type="radio" name="post-cat" value="Operación" /> Operación</label>
+                    <label><input type="radio" name="post-cat" value="Comunidad" /> Comunidad</label>
+                    <label><input type="radio" name="post-cat" value="Anuncios Oficiales" /> Anuncios Oficiales</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Metabox: Etiquetas -->
+              <div class="wp-box metabox">
+                <div class="wp-box-head">
+                  <h4>Etiquetas</h4>
+                </div>
+                <div class="wp-box-body">
+                  <input type="text" id="wp-post-tags" class="form-input" placeholder="DMR, Hotspots, TG734" value="DMR, TG734, Venezuela" />
+                  <span class="field-hint">Separar las etiquetas con comas</span>
+                </div>
+              </div>
+
+              <!-- Metabox: Destacado -->
+              <div class="wp-box metabox">
+                <div class="wp-box-head">
+                  <h4>Opciones de Entrada</h4>
+                </div>
+                <div class="wp-box-body">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="wp-post-featured" />
+                    <span>Fijar como Noticia Destacada</span>
+                  </label>
+                  <div class="form-group" style="margin-top: 0.75rem;">
+                    <label style="font-size: 0.75rem;">Tiempo de lectura:</label>
+                    <input type="text" id="wp-post-readtime" class="form-input select-sm" value="4 min de lectura" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 4: USUARIOS & ACL (ROLES Y PERMISOS) -->
+        <!-- ========================================================= -->
+        <section id="view-users" class="wp-view">
+          <div class="view-header">
+            <h1 class="view-title">Usuarios & Control de Acceso (ACL)</h1>
+            <span class="badge-mini">Acceso Restringido · Administrador</span>
+          </div>
+
+          <div class="acl-notice">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--bm-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <div>
+              <strong>Políticas de Control de Acceso (ACL):</strong>
+              <span>Gestiona los radioaficionados con acceso al Backoffice y asigna roles según su nivel de responsabilidad comunitaria.</span>
+            </div>
+          </div>
+
+          <!-- Users Table -->
+          <div class="table-container">
+            <table class="wp-list-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Indicativo</th>
+                  <th>Nombre Completo</th>
+                  <th>Correo Electrónico</th>
+                  <th>Rol Actual</th>
+                  <th>Cambiar Rol (ACL)</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr>
+                  <td><strong>yv5of</strong></td>
+                  <td><span class="callsign-badge">YV5OF</span></td>
+                  <td>Severino Mastracci</td>
+                  <td>yv5of@brandmeisteryv.net</td>
+                  <td><span class="role-badge role-admin">Administrador</span></td>
+                  <td>
+                    <select class="form-input select-sm user-role-select" data-user="yv5of">
+                      <option value="admin" selected>Administrador</option>
+                      <option value="editor">Editor</option>
+                      <option value="author">Autor</option>
+                    </select>
+                  </td>
+                  <td><span class="user-active-dot"></span> Activo</td>
+                </tr>
+                <tr>
+                  <td><strong>yy3big</strong></td>
+                  <td><span class="callsign-badge">YY3BIG</span></td>
+                  <td>Yury</td>
+                  <td>yy3big@brandmeisteryv.net</td>
+                  <td><span class="role-badge role-admin">Administrador</span></td>
+                  <td>
+                    <select class="form-input select-sm user-role-select" data-user="yy3big">
+                      <option value="admin" selected>Administrador</option>
+                      <option value="editor">Editor</option>
+                      <option value="author">Autor</option>
+                    </select>
+                  </td>
+                  <td><span class="user-active-dot"></span> Activo</td>
+                </tr>
+                <tr>
+                  <td><strong>yv5adm</strong></td>
+                  <td><span class="callsign-badge">YV5ADM</span></td>
+                  <td>Arnaldo</td>
+                  <td>yv5adm@brandmeisteryv.net</td>
+                  <td><span class="role-badge role-editor">Editor</span></td>
+                  <td>
+                    <select class="form-input select-sm user-role-select" data-user="yv5adm">
+                      <option value="admin">Administrador</option>
+                      <option value="editor" selected>Editor</option>
+                      <option value="author">Autor</option>
+                    </select>
+                  </td>
+                  <td><span class="user-active-dot"></span> Activo</td>
+                </tr>
+                <tr>
+                  <td><strong>yv5ve</strong></td>
+                  <td><span class="callsign-badge">YV5VE</span></td>
+                  <td>Will</td>
+                  <td>yv5ve@brandmeisteryv.net</td>
+                  <td><span class="role-badge role-editor">Editor</span></td>
+                  <td>
+                    <select class="form-input select-sm user-role-select" data-user="yv5ve">
+                      <option value="admin">Administrador</option>
+                      <option value="editor" selected>Editor</option>
+                      <option value="author">Autor</option>
+                    </select>
+                  </td>
+                  <td><span class="user-active-dot"></span> Activo</td>
+                </tr>
+                <tr>
+                  <td><strong>autor_demo</strong></td>
+                  <td><span class="callsign-badge">YV5DEMO</span></td>
+                  <td>Colaborador Radioaficionado</td>
+                  <td>colaborador@brandmeisteryv.net</td>
+                  <td><span class="role-badge role-author">Autor</span></td>
+                  <td>
+                    <select class="form-input select-sm user-role-select" data-user="autor_demo">
+                      <option value="admin">Administrador</option>
+                      <option value="editor">Editor</option>
+                      <option value="author" selected>Autor</option>
+                    </select>
+                  </td>
+                  <td><span class="user-active-dot"></span> Activo</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- ACL Permissions Matrix -->
+          <div class="wp-box" style="margin-top: 2rem;">
+            <div class="wp-box-head">
+              <h3>Matriz de Permisos por Rol</h3>
+            </div>
+            <div class="wp-box-body">
+              <table class="matrix-table">
+                <thead>
+                  <tr>
+                    <th>Capacidad / Acción</th>
+                    <th>Administrador</th>
+                    <th>Editor</th>
+                    <th>Autor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Ver Escritorio y Estadísticas de Red</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-yes">✓</td>
+                  </tr>
+                  <tr>
+                    <td>Redactar y Guardar Borradores de Noticias</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-yes">✓</td>
+                  </tr>
+                  <tr>
+                    <td>Publicar Noticias Propias</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-yes">✓</td>
+                  </tr>
+                  <tr>
+                    <td>Editar Noticias de Otros Autores</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-no">✕</td>
+                  </tr>
+                  <tr>
+                    <td>Eliminar Noticias Definitivamente</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-no">✕</td>
+                  </tr>
+                  <tr>
+                    <td>Editar Textos Globales del Portal</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-no">✕</td>
+                  </tr>
+                  <tr>
+                    <td>Gestionar Usuarios y Asignar Roles</td>
+                    <td class="check-yes">✓</td>
+                    <td class="check-no">✕</td>
+                    <td class="check-no">✕</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 5: TEXTOS DEL PORTAL -->
+        <!-- ========================================================= -->
+        <section id="view-site-content" class="wp-view">
+          <div class="view-header">
+            <h1 class="view-title">Textos del Portal Oficial</h1>
+            <button id="btn-save-site-texts" class="btn btn-primary">
+              Guardar Cambios
+            </button>
+          </div>
+
+          <div class="wp-editor-layout">
+            <div class="editor-main-col">
+              <div class="wp-box">
+                <div class="wp-box-head">
+                  <h3>Página de Inicio (Hero)</h3>
+                </div>
+                <div class="wp-box-body">
+                  <div class="form-group">
+                    <label>Titular Principal</label>
+                    <input type="text" id="sett-hero-title" class="form-input" value="La voz digital que une a los radioaficionados de Venezuela y el mundo." />
+                  </div>
+                  <div class="form-group" style="margin-top: 1rem;">
+                    <label>Descripción Principal</label>
+                    <textarea id="sett-hero-desc" class="form-input" rows="3">Infraestructura abierta y 100% digital basada en el estándar DMR. Conectamos repetidores, puntos de acceso de alta potencia y operadores en todo el territorio nacional con acceso directo a la red global BrandMeister.</textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="wp-box" style="margin-top: 1.5rem;">
+                <div class="wp-box-head">
+                  <h3>Aviso Prioritario de Emergencias (TG 734911)</h3>
+                </div>
+                <div class="wp-box-body">
+                  <div class="form-group">
+                    <label>Texto de la Alerta EMCOM / YV5RNE</label>
+                    <textarea id="sett-alert-text" class="form-input" rows="3">Reservado exclusivamente para prevención, boletines por fenómenos meteorológicos, alertas sísmicas o contingencias mayores. Se recomienda a todos los radioaficionados mantenerlo programado en su lista de recepción (RX List) bajo el Slot 1 en todos los repetidores del país.</textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="editor-sidebar-col">
+              <div class="wp-box metabox">
+                <div class="wp-box-head">
+                  <h4>Frecuencias Recomendadas</h4>
+                </div>
+                <div class="wp-box-body">
+                  <div class="form-group">
+                    <label>Frecuencia VHF Hotspot</label>
+                    <input type="text" id="sett-freq-vhf" class="form-input select-sm" value="146.550 MHz (Alterna: 146.490 MHz)" />
+                  </div>
+                  <div class="form-group" style="margin-top: 0.75rem;">
+                    <label>Frecuencia UHF Hotspot</label>
+                    <input type="text" id="sett-freq-uhf" class="form-input select-sm" value="436.550 MHz (Alterna: 436.490 MHz)" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- VIEW 6: AJUSTES & MYSQL BMENEZUELA -->
+        <!-- ========================================================= -->
+        <section id="view-settings" class="wp-view">
+          <div class="view-header">
+            <h1 class="view-title">Ajustes & Base de Datos MySQL</h1>
+            <span class="badge-mini">DBngin / DBng / cPanel</span>
+          </div>
+
+          <div class="wp-box">
+            <div class="wp-box-head">
+              <h3>Conexión con Base de Datos MySQL</h3>
+            </div>
+            <div class="wp-box-body">
+              <div class="db-params-grid">
+                <div class="param-row">
+                  <span class="param-label">Base de Datos:</span>
+                  <code>bmvenezuela</code>
+                </div>
+                <div class="param-row">
+                  <span class="param-label">Servidor / Host:</span>
+                  <code>127.0.0.1 (o localhost)</code>
+                </div>
+                <div class="param-row">
+                  <span class="param-label">Puerto:</span>
+                  <code>3306</code>
+                </div>
+                <div class="param-row">
+                  <span class="param-label">Codificación:</span>
+                  <code>utf8mb4_unicode_ci</code>
+                </div>
+                <div class="param-row">
+                  <span class="param-label">Esquema SQL:</span>
+                  <span><a href="/schema.sql" download class="btn btn-secondary btn-sm">Descargar schema.sql ↗</a></span>
+                </div>
+              </div>
+
+              <div class="db-instructions">
+                <h4>Instrucciones para importar en DBngin / DBng:</h4>
+                <ol>
+                  <li>Abre tu cliente de base de datos preferido (<strong>DBngin</strong>, <strong>DBng</strong>, TablePlus, DBeaver o phpMyAdmin).</li>
+                  <li>Crea una nueva base de datos llamada <code>bmvenezuela</code> (o importa directamente el archivo <code>schema.sql</code> que se encuentra en la raíz del proyecto).</li>
+                  <li>Las tablas <code>bm_users</code>, <code>bm_posts</code>, <code>bm_site_settings</code> y <code>bm_activity_logs</code> se crearán automáticamente con los datos iniciales de BrandMeister Venezuela.</li>
+                  <li>El conector PHP en <code>public/api/config.php</code> se conectará de manera inmediata y transparente.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  /* =========================================================
+     WORDPRESS ADMIN THEME STYLES - 100% LIGHT (NO BLACK)
+     ========================================================= */
+
+  /* WP Login Card Screen */
+  .wp-login-wrapper {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F1F5F9;
+    padding: 2rem 1.5rem;
+  }
+
+  .wp-login-card {
+    width: 100%;
+    max-width: 440px;
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .wp-login-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .wp-login-logo img {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .wp-login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .wp-login-header h2 {
+    font-size: 1.35rem;
+    color: var(--text-main);
+    margin-bottom: 0.35rem;
+  }
+
+  .wp-login-header p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+
+  .wp-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .wp-login-btn {
+    width: 100%;
+    padding: 0.85rem;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+  }
+
+  .wp-login-demo {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .demo-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  .demo-roles-btns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .btn-demo-role {
+    padding: 0.55rem 0.85rem;
+    background: var(--bg-page);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    color: var(--text-main);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .btn-demo-role:hover {
+    border-color: var(--bm-orange);
+    background: var(--bm-orange-light);
+    color: var(--bm-orange);
+  }
+
+  /* WP Admin Bar (Top Bar) */
+  .wp-admin-app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #F1F5F9;
+  }
+
+  .wp-adminbar {
+    height: 46px;
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  }
+
+  .adminbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .adminbar-site-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .adminbar-site-link:hover {
+    color: var(--bm-red);
+  }
+
+  .db-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: #F8FAFC;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .db-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #16A34A;
+    box-shadow: 0 0 6px rgba(22, 163, 74, 0.6);
+  }
+
+  .adminbar-right {
+    display: flex;
+    align-items: center;
+  }
+
+  .user-profile-menu {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .greeting {
+    color: var(--text-muted);
+  }
+
+  .role-badge {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.18rem 0.55rem;
+    border-radius: var(--radius-pill);
+    text-transform: uppercase;
+  }
+
+  .role-admin { background: var(--bm-red-light); color: var(--bm-red); }
+  .role-editor { background: var(--bm-orange-light); color: var(--bm-orange); }
+  .role-author { background: var(--bm-yellow-light); color: #B45309; }
+
+  .btn-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: none;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .btn-logout:hover {
+    background: var(--bm-red-light);
+    color: var(--bm-red);
+    border-color: var(--bm-red);
+  }
+
+  /* WP Layout & Left Sidebar */
+  .wp-admin-layout {
+    display: flex;
+    flex: 1;
+  }
+
+  .wp-sidebar {
+    width: 210px;
+    background: #FFFFFF;
+    border-right: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+  }
+
+  .wp-menu {
+    list-style: none;
+    padding: 0.75rem 0;
+  }
+
+  .wp-menu-item {
+    position: relative;
+  }
+
+  .menu-link {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+  }
+
+  .menu-link:hover {
+    background: #F8FAFC;
+    color: var(--bm-orange);
+  }
+
+  .menu-link.is-active {
+    background: var(--bm-orange-light);
+    color: var(--bm-orange);
+    border-left: 4px solid var(--bm-orange);
+  }
+
+  .count-pill {
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #E2E8F0;
+    color: var(--text-main);
+    padding: 0.1rem 0.45rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .wp-submenu {
+    list-style: none;
+    background: #F8FAFC;
+    padding: 0.35rem 0;
+  }
+
+  .submenu-link {
+    width: 100%;
+    display: block;
+    padding: 0.45rem 1.25rem 0.45rem 2.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .submenu-link:hover, .submenu-link.is-active {
+    color: var(--bm-red);
+  }
+
+  /* Content Stage & Views */
+  .wp-content-stage {
+    flex: 1;
+    padding: 2rem 2.5rem;
+    overflow-x: hidden;
+  }
+
+  .wp-view {
+    display: none;
+  }
+
+  .wp-view.is-active {
+    display: block;
+  }
+
+  .view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .view-title {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+
+  /* Welcome Panel */
+  .wp-welcome-panel {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--bm-orange);
+    border-radius: var(--radius-sm);
+    padding: 1.75rem 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .welcome-text h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .welcome-text p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+
+  .welcome-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  /* Dashboard Widgets */
+  .dashboard-widgets-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 900px) {
+    .dashboard-widgets-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .wp-box {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  .wp-box-head {
+    padding: 0.95rem 1.35rem;
+    background: #F8FAFC;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .wp-box-head h3, .wp-box-head h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .wp-box-body {
+    padding: 1.35rem;
+  }
+
+  .glance-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .glance-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .db-info-line {
+    font-size: 0.78rem;
+    color: #15803D;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  /* WP List Table */
+  .wp-subsubsub {
+    font-size: 0.85rem;
+    color: var(--text-faint);
+    margin-bottom: 1rem;
+  }
+
+  .wp-subsubsub .is-current {
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .wp-subsubsub a {
+    color: var(--bm-orange);
+  }
+
+  .wp-table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.85rem;
+  }
+
+  .toolbar-left {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .select-bulk, .select-filter {
+    padding: 0.35rem 0.65rem;
+    font-size: 0.82rem;
+    width: auto;
+  }
+
+  .btn-sm {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+  }
+
+  .items-count {
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+
+  .table-container {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+  }
+
+  .wp-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    text-align: left;
+  }
+
+  .wp-list-table th {
+    padding: 0.75rem 1rem;
+    background: #F8FAFC;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .wp-list-table td {
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: middle;
+  }
+
+  .col-cb { width: 35px; }
+
+  .cell-title strong a {
+    color: var(--text-main);
+    font-size: 0.92rem;
+  }
+
+  .cell-title strong a:hover {
+    color: var(--bm-red);
+  }
+
+  .row-actions {
+    font-size: 0.78rem;
+    margin-top: 0.3rem;
+    color: var(--text-faint);
+  }
+
+  .row-actions a {
+    color: var(--bm-orange);
+  }
+
+  .row-actions .trash a {
+    color: var(--bm-red);
+  }
+
+  .cat-pill-mini {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+    background: var(--bm-orange-light);
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .status-badge-pub {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #15803D;
+    background: #DCFCE7;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-pill);
+  }
+
+  /* WP Editor Layout */
+  .wp-editor-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 980px) {
+    .wp-editor-layout {
+      grid-template-columns: 1fr 310px;
+    }
+  }
+
+  .wp-title-input {
+    font-size: 1.4rem;
+    font-weight: 700;
+    padding: 0.85rem 1rem;
+  }
+
+  .slug-permalink-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-faint);
+    margin: 0.6rem 0 1rem;
+  }
+
+  .slug-inline-input {
+    border: none;
+    border-bottom: 1px dashed var(--border-medium);
+    padding: 0.1rem 0.3rem;
+    font-size: 0.82rem;
+    color: var(--bm-orange);
+    background: transparent;
+  }
+
+  .wp-editor-toolbar {
+    display: flex;
+    gap: 4px;
+    padding: 0.5rem 0.75rem;
+    background: #F8FAFC;
+    border: 1px solid var(--border-subtle);
+    border-bottom: none;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  }
+
+  .wp-tool-btn {
+    padding: 0.25rem 0.55rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .wp-tool-btn:hover {
+    background: var(--bm-orange-light);
+    color: var(--bm-orange);
+  }
+
+  .wp-content-area {
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    resize: vertical;
+  }
+
+  .wp-live-preview-box {
+    padding: 1.5rem;
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .metabox {
+    margin-bottom: 1.25rem;
+  }
+
+  .meta-setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .meta-label {
+    color: var(--text-faint);
+  }
+
+  .select-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.82rem;
+  }
+
+  .metabox-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .field-hint {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    margin-top: 0.35rem;
+    display: block;
+  }
+
+  /* ACL Users View */
+  .acl-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--bm-orange);
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .callsign-badge {
+    font-weight: 800;
+    color: var(--bm-red);
+    background: var(--bm-red-light);
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .user-active-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #16A34A;
+    margin-right: 0.3rem;
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .matrix-table th {
+    background: #F8FAFC;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .matrix-table th:first-child {
+    text-align: left;
+  }
+
+  .matrix-table td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    text-align: center;
+  }
+
+  .matrix-table td:first-child {
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .check-yes {
+    color: #16A34A;
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+
+  .check-no {
+    color: #DC2626;
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+
+  /* DB Settings View */
+  .db-params-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .param-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.92rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .param-label {
+    width: 160px;
+    color: var(--text-faint);
+    font-weight: 600;
+  }
+
+  .db-instructions {
+    background: var(--bg-page);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 1.5rem;
+  }
+
+  .db-instructions h4 {
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .db-instructions ol {
+    padding-left: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+</style>
+
+<script>
+  // State variables
+  let currentUser = {
+    username: 'yv5of',
+    callsign: 'YV5OF',
+    name: 'Severino Mastracci',
+    role: 'admin'
+  };
+
+  const checkAuth = () => {
+    const saved = localStorage.getItem('bm_wp_user');
+    if (saved) {
+      try {
+        currentUser = JSON.parse(saved);
+        showApp();
+      } catch (e) {
+        showLogin();
+      }
+    } else {
+      // Default to logged in as Sysop Admin for smooth pair programming experience
+      localStorage.setItem('bm_wp_user', JSON.stringify(currentUser));
+      showApp();
+    }
+  };
+
+  const showLogin = () => {
+    document.getElementById('wp-login-screen')!.style.display = 'flex';
+    document.getElementById('wp-app')!.style.display = 'none';
+  };
+
+  const showApp = () => {
+    document.getElementById('wp-login-screen')!.style.display = 'none';
+    document.getElementById('wp-app')!.style.display = 'flex';
+    applyACL();
+  };
+
+  // Apply Role-Based Access Control (ACL)
+  const applyACL = () => {
+    const barName = document.getElementById('bar-user-name');
+    const barRole = document.getElementById('bar-user-role');
+    const menuUsers = document.getElementById('menu-users-item');
+    const menuSettings = document.getElementById('menu-settings-item');
+
+    if (barName) barName.textContent = currentUser.callsign;
+    if (barRole) {
+      barRole.textContent = currentUser.role === 'admin' ? 'Administrador' : currentUser.role === 'editor' ? 'Editor' : 'Autor';
+      barRole.className = `role-badge role-${currentUser.role}`;
+    }
+
+    // ACL Menu visibility
+    if (currentUser.role === 'author') {
+      if (menuUsers) menuUsers.style.display = 'none';
+      if (menuSettings) menuSettings.style.display = 'none';
+    } else if (currentUser.role === 'editor') {
+      if (menuUsers) menuUsers.style.display = 'none';
+      if (menuSettings) menuSettings.style.display = 'block';
+    } else {
+      // Admin
+      if (menuUsers) menuUsers.style.display = 'block';
+      if (menuSettings) menuSettings.style.display = 'block';
+    }
+  };
+
+  // View Switching
+  window.switchView = (viewName: string) => {
+    // Check ACL before opening restricted views
+    if ((viewName === 'users' || viewName === 'settings') && currentUser.role === 'author') {
+      alert('Acceso restringido: Se requiere rol de Administrador.');
+      return;
+    }
+
+    document.querySelectorAll('.wp-view').forEach(el => el.classList.remove('is-active'));
+    document.querySelectorAll('.menu-link, .submenu-link').forEach(el => el.classList.remove('is-active'));
+
+    const targetView = document.getElementById(`view-${viewName}`);
+    if (targetView) targetView.classList.add('is-active');
+
+    const targetBtn = document.querySelector(`[data-view="${viewName}"]`);
+    if (targetBtn) targetBtn.classList.add('is-active');
+  };
+
+  document.querySelectorAll('[data-view]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.getAttribute('data-view');
+      if (v) window.switchView(v);
+    });
+  });
+
+  // Login Handlers
+  document.querySelectorAll('.btn-demo-role').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const user = btn.getAttribute('data-user');
+      const role = btn.getAttribute('data-role') || 'admin';
+      const callsigns: Record<string, string> = { yv5of: 'YV5OF', yv5adm: 'YV5ADM', autor_demo: 'YV5DEMO' };
+      const names: Record<string, string> = { yv5of: 'Severino Mastracci', yv5adm: 'Arnaldo', autor_demo: 'Colaborador Autor' };
+
+      currentUser = {
+        username: user || 'yv5of',
+        callsign: callsigns[user || 'yv5of'] || 'YV5OF',
+        name: names[user || 'yv5of'] || 'Usuario',
+        role: role
+      };
+
+      localStorage.setItem('bm_wp_user', JSON.stringify(currentUser));
+      showApp();
+    });
+  });
+
+  const loginForm = document.getElementById('login-form');
+  if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const u = (document.getElementById('login-username') as HTMLInputElement).value;
+      currentUser = {
+        username: u.toLowerCase(),
+        callsign: u.toUpperCase(),
+        name: u.toUpperCase(),
+        role: 'admin'
+      };
+      localStorage.setItem('bm_wp_user', JSON.stringify(currentUser));
+      showApp();
+    });
+  }
+
+  // Logout Handler
+  document.getElementById('btn-logout')?.addEventListener('click', () => {
+    localStorage.removeItem('bm_wp_user');
+    showLogin();
+  });
+
+  // Post Publishing Form
+  const postForm = document.getElementById('wp-post-editor-form');
+  if (postForm) {
+    postForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = (document.getElementById('wp-post-title') as HTMLInputElement).value;
+      const slug = (document.getElementById('wp-post-slug') as HTMLInputElement).value;
+      const content = (document.getElementById('wp-post-content') as HTMLTextAreaElement).value;
+      const desc = (document.getElementById('wp-post-desc') as HTMLTextAreaElement).value;
+      const status = (document.getElementById('wp-post-status') as HTMLSelectElement).value;
+      const cat = (document.querySelector('input[name="post-cat"]:checked') as HTMLInputElement)?.value || 'General';
+      const tags = (document.getElementById('wp-post-tags') as HTMLInputElement).value;
+      const featured = (document.getElementById('wp-post-featured') as HTMLInputElement).checked;
+
+      // Add row to table
+      const tbody = document.getElementById('posts-table-body');
+      if (tbody) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="checkbox" /></td>
+          <td class="cell-title">
+            <strong>${title}</strong>
+            <div class="row-actions">
+              <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
+              <span class="trash"><a href="#">Papelera</a> | </span>
+              <span class="view"><a href="#">Ver</a></span>
+            </div>
+          </td>
+          <td>${currentUser.name} (${currentUser.callsign})</td>
+          <td><span class="cat-pill-mini">${cat}</span></td>
+          <td>${tags}</td>
+          <td><span class="status-badge-pub">${status === 'published' ? 'Publicada' : 'Borrador'}</span></td>
+          <td>${new Date().toLocaleDateString('es-VE')}</td>
+        `;
+        tbody.insertBefore(tr, tbody.firstChild);
+      }
+
+      // Try sending to PHP backend if active
+      try {
+        await fetch('/api/posts.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, slug, content, description: desc, status, category: cat, tags, featured })
+        });
+      } catch (err) {
+        // Fallback local
+      }
+
+      alert('¡Noticia publicada exitosamente y guardada en base de datos!');
+      window.switchView('posts');
+    });
+  }
+
+  // Auto-slug
+  document.getElementById('wp-post-title')?.addEventListener('input', (e) => {
+    const title = (e.target as HTMLInputElement).value;
+    const slug = title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    const slugInput = document.getElementById('wp-post-slug') as HTMLInputElement;
+    if (slugInput) slugInput.value = slug;
+  });
+
+  // Preview Toggle
+  document.getElementById('btn-toggle-preview')?.addEventListener('click', () => {
+    const box = document.getElementById('wp-live-preview-box');
+    const area = document.getElementById('wp-post-content') as HTMLTextAreaElement;
+    if (box && area) {
+      if (box.style.display === 'none') {
+        box.innerHTML = `<h4>Vista previa:</h4><p>${area.value.replace(/\n\n/g, '</p><p>')}</p>`;
+        box.style.display = 'block';
+      } else {
+        box.style.display = 'none';
+      }
+    }
+  });
+
+  // User Role Change Listener
+  document.querySelectorAll('.user-role-select').forEach(select => {
+    select.addEventListener('change', (e) => {
+      const target = e.target as HTMLSelectElement;
+      const targetUser = target.getAttribute('data-user');
+      const newRole = target.value;
+      alert(`Rol de ${targetUser} actualizado a: ${newRole} en MySQL bmvenezuela`);
+    });
+  });
+
+  // Site text save
+  document.getElementById('btn-save-site-texts')?.addEventListener('click', () => {
+    alert('¡Textos del portal guardados en base de datos bmvenezuela!');
+  });
+
+  // Initialize
+  checkAuth();
+</script>

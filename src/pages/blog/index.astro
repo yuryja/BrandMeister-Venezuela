@@ -1,0 +1,284 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog');
+const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// Collect all unique categories
+const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
+---
+
+<Layout
+  title="Noticias & Comunicados Técnicos · BrandMeister Venezuela"
+  description="Noticias, guías de configuración de hotspots, protocolos de emergencia y novedades de la comunidad BrandMeister Venezuela DMR."
+>
+  <div class="blog-page-header">
+    <div class="container">
+      <div class="header-breadcrumbs">
+        <a href="/">Inicio</a>
+        <span>/</span>
+        <span class="current">Noticias</span>
+      </div>
+      <div class="section-tag">Archivo Oficial</div>
+      <h1 class="page-title">Noticias, Novedades y Guías Técnicas DMR</h1>
+      <p class="page-subtitle">
+        Documentación técnica elaborada por los Sysops y colaboradores de BrandMeister Venezuela para fortalecer el conocimiento de nuestra comunidad.
+      </p>
+
+      <!-- Category Filter Pills -->
+      <div class="category-pills" id="category-filters">
+        <button class="cat-pill is-active" data-cat="all">Todos ({allPosts.length})</button>
+        {categories.map(cat => (
+          <button class="cat-pill" data-cat={cat}>{cat}</button>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <section class="blog-list-section section-padding">
+    <div class="container">
+      <div class="articles-archive" id="articles-container">
+        {sortedPosts.map(post => (
+          <article class="archive-item" data-category={post.data.category}>
+            <div class="item-meta">
+              <span class="item-cat">{post.data.category}</span>
+              <time datetime={post.data.pubDate.toISOString()} class="item-date">
+                {post.data.pubDate.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </time>
+              <span class="item-read">{post.data.readTime}</span>
+            </div>
+
+            <h2 class="item-title">
+              <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+            </h2>
+
+            <p class="item-desc">{post.data.description}</p>
+
+            <div class="item-footer">
+              <div class="item-author">
+                <span>Por <strong>{post.data.author}</strong></span>
+                {post.data.authorCallsign && (
+                  <span class="item-callsign">{post.data.authorCallsign}</span>
+                )}
+              </div>
+
+              <div class="item-tags">
+                {post.data.tags.map(t => (
+                  <span class="tag-label">#{t}</span>
+                ))}
+              </div>
+
+              <a href={`/blog/${post.slug}`} class="item-read-link">
+                Leer noticia →
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .blog-page-header {
+    padding-top: clamp(3.5rem, 6vw, 5rem);
+    padding-bottom: clamp(3rem, 5vw, 4rem);
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .header-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-faint);
+    margin-bottom: 1.5rem;
+  }
+
+  .header-breadcrumbs a {
+    color: var(--bm-orange);
+  }
+
+  .header-breadcrumbs .current {
+    color: var(--text-muted);
+  }
+
+  .page-title {
+    margin-bottom: 1rem;
+    max-width: 850px;
+  }
+
+  .page-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    max-width: 720px;
+    margin-bottom: 2rem;
+  }
+
+  .category-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .cat-pill {
+    background: var(--bg-page);
+    border: 1px solid var(--border-subtle);
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .cat-pill:hover {
+    border-color: var(--bm-orange);
+    color: var(--bm-orange);
+  }
+
+  .cat-pill.is-active {
+    background: var(--bm-red);
+    color: #FFFFFF;
+    border-color: var(--bm-red);
+  }
+
+  /* Articles Archive (Linear, Editorial, NOT box cards) */
+  .blog-list-section {
+    background: var(--bg-page);
+  }
+
+  .articles-archive {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 900px;
+  }
+
+  .archive-item {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: clamp(1.75rem, 3.5vw, 2.5rem);
+    transition: all 0.2s ease;
+  }
+
+  .archive-item:hover {
+    border-color: var(--bm-orange);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+  }
+
+  .item-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .item-cat {
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--bm-red);
+  }
+
+  .item-date {
+    color: var(--text-faint);
+  }
+
+  .item-read {
+    color: var(--text-faint);
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--border-subtle);
+  }
+
+  .item-title {
+    font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+    margin-bottom: 0.85rem;
+  }
+
+  .item-title a:hover {
+    color: var(--bm-red);
+  }
+
+  .item-desc {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .item-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .item-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    color: var(--text-main);
+  }
+
+  .item-callsign {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+    background: rgba(238, 108, 31, 0.1);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .item-tags {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .tag-label {
+    font-size: 0.78rem;
+    color: var(--text-faint);
+  }
+
+  .item-read-link {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+  }
+
+  .item-read-link:hover {
+    color: var(--bm-red);
+  }
+</style>
+
+<script>
+  const catButtons = document.querySelectorAll('#category-filters .cat-pill');
+  const articles = document.querySelectorAll('#articles-container .archive-item');
+
+  catButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      catButtons.forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+
+      const cat = btn.getAttribute('data-cat');
+
+      articles.forEach(art => {
+        const itemCat = art.getAttribute('data-category');
+        if (cat === 'all' || itemCat === cat) {
+          (art as HTMLElement).style.display = 'block';
+        } else {
+          (art as HTMLElement).style.display = 'none';
+        }
+      });
+    });
+  });
+</script>

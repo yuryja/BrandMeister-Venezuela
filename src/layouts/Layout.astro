@@ -1,0 +1,107 @@
+---
+import '../styles/global.css';
+import 'flag-icons/css/flag-icons.min.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import HoselineDock from '../components/HoselineDock.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title = "BrandMeister Venezuela · Red Digital DMR TG 734",
+  description = "Comunidad oficial de radioaficionados en la red BrandMeister DMR en Venezuela. Talkgroups nacionales, circuitos, repetidores, Petra y voz digital.",
+  image = "/assets/logo.webp"
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://brandmeisteryv.net');
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Favicon Oficial BrandMeister -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#E8261C" />
+
+    <!-- Open Graph / Redes Sociales -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={image} />
+
+    <!-- Preconnect Google Fonts & Load Montserrat + Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- JSON-LD Datos Estructurados -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "BrandMeister Venezuela",
+      "url": "https://brandmeisteryv.net",
+      "logo": "https://brandmeisteryv.net/assets/logo.webp",
+      "sameAs": [
+        "https://www.instagram.com/brandmeister_yv/",
+        "https://t.me/+_NUvASaZZGxhYTkx",
+        "https://wiki.brandmeister.network/index.php/Venezuela"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "sysop@brandmeisteryv.net",
+        "contactType": "technical support"
+      }
+    })} />
+  </head>
+  <body>
+    <Header />
+    <main id="main-content">
+      <slot />
+    </main>
+    <Footer />
+    <HoselineDock />
+
+    <!-- Script de Animaciones por Scroll sin dependencias externas -->
+    <script>
+      const initScrollObserver = () => {
+        const elements = document.querySelectorAll('.reveal-on-scroll');
+        if (!elements.length) return;
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.12,
+          rootMargin: '0px 0px -40px 0px'
+        });
+
+        elements.forEach(el => observer.observe(el));
+      };
+
+      // Iniciar en carga y en navegaciones
+      document.addEventListener('DOMContentLoaded', initScrollObserver);
+      initScrollObserver();
+    </script>
+  </body>
+</html>

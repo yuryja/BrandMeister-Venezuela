@@ -1,0 +1,403 @@
+---
+import type { PetraCalendar } from '../../lib/petra';
+import { formatDuration } from '../../lib/petra';
+
+interface Props {
+  calendar: PetraCalendar;
+}
+
+const { calendar } = Astro.props;
+const days = calendar.days || [];
+// Filter months that have activity
+const months = (calendar.months || []).filter(m => m.air_s > 0 || m.n > 0);
+
+const maxDayAir = Math.max(...days.map(d => d.air_s), 100);
+const maxMonthAir = Math.max(...months.map(m => m.air_s), 100);
+---
+
+<div class="petra-chart-card calendar-chart-card">
+  <div class="chart-header">
+    <div class="chart-title-group">
+      <h3 class="chart-title">Actividad Diaria y Mensual</h3>
+      <span class="chart-subtitle">Volumen de transmisión y número de contactos registrados</span>
+    </div>
+
+    <!-- Pestañas interactivas -->
+    <div class="calendar-tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        aria-selected="true"
+        class="cal-tab-btn active"
+        data-target="days"
+      >
+        Últimos 30 días
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected="false"
+        class="cal-tab-btn"
+        data-target="months"
+      >
+        Por mes
+      </button>
+    </div>
+  </div>
+
+  <!-- Vista 30 Días -->
+  <div id="cal-view-days" class="cal-view active">
+    <div class="daily-bars-container">
+      <div class="daily-bars">
+        {days.map((d) => {
+          const heightPct = d.air_s > 0 ? Math.max(5, Math.round((d.air_s / maxDayAir) * 100)) : 2;
+          const durStr = formatDuration(d.air_s * 1000);
+          const [yr, mo, dayNum] = d.label.split('-');
+          const shortDate = `${dayNum}/${mo}`;
+
+          return (
+            <div class="day-bar-col">
+              <div
+                class={`day-bar-fill ${d.air_s > 0 ? 'day-bar-fill--active' : 'day-bar-fill--empty'}`}
+                style={`height: ${heightPct}%;`}
+              >
+                <div class="bar-tooltip">
+                  <span class="tt-date">{d.label}</span>
+                  <span class="tt-dur">{durStr} al aire</span>
+                  <span class="tt-count">{d.n} transmisiones</span>
+                </div>
+              </div>
+              <span class="day-bar-label">{dayNum}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+    <div class="cal-axis-note">
+      <span>Día del mes (eje inferior) · Hover sobre cada barra para detalle completo</span>
+    </div>
+  </div>
+
+  <!-- Vista Meses -->
+  <div id="cal-view-months" class="cal-view">
+    <div class="months-grid">
+      {months.map((m) => {
+        const heightPct = m.air_s > 0 ? Math.max(8, Math.round((m.air_s / maxMonthAir) * 100)) : 3;
+        const durStr = formatDuration(m.air_s * 1000);
+
+        return (
+          <div class="month-card">
+            <div class="month-card-header">
+              <span class="month-label">{m.label}</span>
+              <span class="month-transmissions">{m.n.toLocaleString('es-VE')} QSOs</span>
+            </div>
+            <div class="month-bar-track">
+              <div class="month-bar-fill" style={`width: ${heightPct}%;`}></div>
+            </div>
+            <div class="month-airtime">
+              <strong>{durStr}</strong> de modulación
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</div>
+
+<style>
+  .calendar-chart-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2.5rem;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.2rem;
+  }
+
+  .chart-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .calendar-tabs {
+    display: inline-flex;
+    background: var(--bg-card-subtle);
+    padding: 0.25rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    gap: 0.2rem;
+  }
+
+  .cal-tab-btn {
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.4rem 0.95rem;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .cal-tab-btn:hover {
+    color: var(--text-main);
+  }
+
+  .cal-tab-btn.active {
+    background: #FFFFFF;
+    color: var(--bm-red);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Vistas */
+  .cal-view {
+    display: none;
+  }
+
+  .cal-view.active {
+    display: block;
+  }
+
+  /* Vista Días */
+  .daily-bars-container {
+    overflow-x: auto;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .daily-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 165px;
+    min-width: 680px;
+    padding-top: 3.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .day-bar-col {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    position: relative;
+  }
+
+  .day-bar-fill {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }
+
+  .day-bar-fill--empty {
+    background: #F1F5F9;
+  }
+
+  .day-bar-fill--active {
+    background: linear-gradient(180deg, var(--bm-orange) 0%, var(--bm-red) 100%);
+  }
+
+  .day-bar-fill:hover {
+    transform: scaleY(1.04);
+    filter: brightness(1.15);
+  }
+
+  .day-bar-label {
+    font-size: 0.68rem;
+    color: var(--text-faint);
+    margin-top: 0.4rem;
+  }
+
+  /* Tooltip con protección contra overflow */
+  .bar-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0F172A;
+    color: #FFFFFF;
+    padding: 0.4rem 0.7rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 25;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .bar-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px;
+    border-style: solid;
+    border-color: #0F172A transparent transparent transparent;
+  }
+
+  /* Evitar overflow en los primeros días */
+  .day-bar-col:nth-child(-n+4) .bar-tooltip {
+    left: 0;
+    transform: none;
+    align-items: flex-start;
+  }
+
+  .day-bar-col:nth-child(-n+4) .bar-tooltip::after {
+    left: 10px;
+    transform: none;
+  }
+
+  /* Evitar overflow en los últimos días */
+  .day-bar-col:nth-last-child(-n+4) .bar-tooltip {
+    left: auto;
+    right: 0;
+    transform: none;
+    align-items: flex-end;
+  }
+
+  .day-bar-col:nth-last-child(-n+4) .bar-tooltip::after {
+    left: auto;
+    right: 10px;
+    transform: none;
+  }
+
+  .day-bar-fill:hover .bar-tooltip {
+    opacity: 1;
+  }
+
+  .tt-date {
+    font-weight: 700;
+    color: var(--bm-orange);
+  }
+
+  .tt-dur {
+    color: #FFFFFF;
+  }
+
+  .tt-count {
+    color: #CBD5E1;
+    font-size: 0.68rem;
+  }
+
+  .cal-axis-note {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    margin-top: 0.75rem;
+    text-align: right;
+  }
+
+  /* Vista Meses */
+  .months-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .month-card {
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.4rem;
+  }
+
+  .month-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.75rem;
+  }
+
+  .month-label {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+
+  .month-transmissions {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: #FFFFFF;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .month-bar-track {
+    height: 8px;
+    background: #E2E8F0;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+
+  .month-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--bm-orange) 0%, var(--bm-red) 100%);
+    border-radius: var(--radius-pill);
+  }
+
+  .month-airtime {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .month-airtime strong {
+    color: var(--text-main);
+  }
+</style>
+
+<script>
+  function initCalendarTabs() {
+    const tabBtns = document.querySelectorAll('.cal-tab-btn');
+    tabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-target');
+        tabBtns.forEach((b) => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-selected', 'true');
+
+        document.querySelectorAll('.cal-view').forEach((v) => v.classList.remove('active'));
+        const activeView = document.getElementById(`cal-view-${target}`);
+        if (activeView) activeView.classList.add('active');
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initCalendarTabs);
+</script>

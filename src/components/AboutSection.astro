@@ -1,0 +1,396 @@
+---
+const teamMembers = [
+  {
+    callsign: "YV5OF",
+    name: "Severino Mastracci",
+    role: "Main Sysop & Administrador de Red",
+    link: "https://brandmeister.network/#/profile/YV5OF",
+  },
+  {
+    callsign: "YV5ADM",
+    name: "Arnaldo",
+    role: "Coordinador Técnico y Colaborador",
+    link: "https://brandmeister.network/#/profile/YV5ADM",
+  },
+  {
+    callsign: "YV5VE",
+    name: "Will",
+    role: "Coordinador de Repetidores y Enlaces",
+    link: "https://brandmeister.network/#/profile/YV5VE",
+  },
+  {
+    callsign: "YY3BIG",
+    name: "Yury",
+    role: "Desarrollo Web, Petra y Sistemas",
+    link: "https://brandmeister.network/#/profile/YY3BIG",
+  },
+];
+
+// Repeated 3 times for a completely seamless, continuous CSS infinite scroll
+const carouselList = [...teamMembers, ...teamMembers, ...teamMembers];
+---
+
+<section id="comunidad" class="about-section section-padding">
+  <div class="container">
+    <div class="section-header reveal-on-scroll">
+      <div class="section-tag">Nuestra Identidad y Filosofía</div>
+      <h2 class="section-title">
+        Pioneros de la voz digital DMR en Venezuela: tecnología libre, transparente y 100% digital.
+      </h2>
+      <p class="section-lead">
+        La Red BrandMeister es una plataforma mundial descentralizada concebida por y para radioaficionados. En Venezuela, unimos voluntades técnicas para brindar una red robusta, moderna y con cobertura nacional continua.
+      </p>
+    </div>
+
+    <!-- Editorial 2-column feature layout -->
+    <div class="about-editorial-grid reveal-on-scroll">
+      <div class="editorial-column">
+        <div class="editorial-block">
+          <h3 class="block-title">Filosofía 100% Digital DMR</h3>
+          <p class="block-text">
+            BrandMeister opera bajo los estrictos estándares de Voz Digital DMR (ETSI TS 102 361). A diferencia de redes mixtas, priorizamos enlaces directos nativos sin pasarelas analógicas que degraden la calidad acústica o la señalización de datos. Esto nos permite aprovechar al máximo la doble ranura TDMA (Slot 1 y Slot 2) en una misma frecuencia de repetición.
+          </p>
+        </div>
+
+        <div class="editorial-block">
+          <h3 class="block-title">Historia y Consolidación Nacional</h3>
+          <p class="block-text">
+            La experimentación en DMR en Venezuela inició en el año 2010 con el despliegue del histórico repetidor <strong>734500</strong> en la ciudad de Caracas, con el respaldo del Servidor Máster de México. Desde entonces, radioaficionados de todo el país han sumado repetidores VHF/UHF y puntos de acceso de alta potencia para cubrir cada rincón del territorio.
+          </p>
+        </div>
+      </div>
+
+      <div class="editorial-column">
+        <div class="editorial-block">
+          <h3 class="block-title">Sistemas Avanzados: Petra y APRS</h3>
+          <p class="block-text">
+            Nuestra red incorpora innovaciones comunitarias como el sistema <strong>Petra</strong> (monitoreo de telemetría y salud del anunciador en tiempo real para el TG 734) y la integración del protocolo APRS vía DMR. Los operadores pueden transmitir balizas de posición GPS y mensajes de telemetría sin interferir las conversaciones de voz.
+          </p>
+        </div>
+
+        <div class="editorial-block">
+          <h3 class="block-title">Infraestructura de Servidores Máster</h3>
+          <p class="block-text">
+            Para garantizar latencias mínimas y redundancia absoluta en toda la región latinoamericana, el tráfico de los repetidores y puntos de acceso venezolanos se enruta principalmente a través de:
+          </p>
+          <ul class="server-list">
+            <li>
+              <strong>Máster México (3341):</strong> Servidor principal de enlace regional de alta disponibilidad.
+            </li>
+            <li>
+              <strong>Máster Chile (7301):</strong> Servidor alterno para balanceo y redundancia en el cono sur.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sysops & Community Leadership Infinite Carousel -->
+    <div class="sysops-strip reveal-on-scroll">
+      <div class="sysops-heading">
+        <span class="sysops-tag">Equipo Coordinador</span>
+        <h3 class="sysops-title">Administración y Soporte de BrandMeister Venezuela</h3>
+      </div>
+
+      <div class="team-carousel-container" aria-label="Carrusel de equipo coordinador">
+        <div class="team-carousel-track">
+          {carouselList.map((m) => (
+            <div class="team-card">
+              <!-- Foto en círculo -->
+              <div class="team-avatar-ring">
+                <div class="team-avatar-circle">
+                  <svg class="avatar-icon" viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Indicativo -->
+              <span class="team-callsign">{m.callsign}</span>
+
+              <!-- Nombre (Montserrat 800) -->
+              <h4 class="team-name">{m.name}</h4>
+
+              <!-- Texto / Rol -->
+              <p class="team-role">{m.role}</p>
+
+              <!-- Enlace -->
+              <a
+                href={m.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="team-link"
+              >
+                <span>Perfil BM ↗</span>
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-section {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .about-editorial-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    margin-bottom: clamp(3.5rem, 6vw, 5rem);
+  }
+
+  @media (min-width: 860px) {
+    .about-editorial-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+  }
+
+  .editorial-column {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+  }
+
+  .editorial-block {
+    position: relative;
+    padding-left: 2rem;
+    border-left: 2px solid var(--border-subtle);
+    transition: border-color 0.3s ease;
+  }
+
+  .editorial-block:hover {
+    border-left-color: var(--bm-orange);
+  }
+
+  .block-title {
+    position: relative;
+    display: inline-block;
+    font-size: 1.35rem;
+    margin-bottom: 0.85rem;
+    color: var(--text-main);
+    padding-bottom: 6px;
+  }
+
+  .block-title::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #F2A93B 0%, #EE6C1F 50%, #E8261C 100%);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.32s ease;
+  }
+
+  .editorial-block:hover .block-title::after {
+    transform: scaleX(1);
+  }
+
+  .block-text {
+    font-size: 1.02rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+
+  .server-list {
+    margin-top: 0.85rem;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .server-list li {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    padding-left: 1.25rem;
+    position: relative;
+  }
+
+  .server-list li::before {
+    content: "•";
+    color: var(--bm-orange);
+    position: absolute;
+    left: 0;
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  /* Sysops Strip & Infinite Carousel */
+  .sysops-strip {
+    background: var(--bg-page);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 2.5vw, 2rem);
+    overflow: hidden;
+  }
+
+  .sysops-heading {
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .sysops-tag {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--bm-red);
+    display: block;
+    margin-bottom: 0.35rem;
+    letter-spacing: 0 !important;
+  }
+
+  .sysops-title {
+    font-size: clamp(1.3rem, 2vw, 1.6rem);
+    letter-spacing: 0 !important;
+  }
+
+  /* Infinite Marquee Carousel Container */
+  .team-carousel-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+    padding: 0.8rem 0;
+  }
+
+  .team-carousel-track {
+    display: flex;
+    gap: 1.5rem;
+    width: max-content;
+    animation: infinite-team-scroll 24s linear infinite;
+  }
+
+  .team-carousel-container:hover .team-carousel-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes infinite-team-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      /* 4 items out of 12 = exactly -33.33333% */
+      transform: translateX(calc(-100% / 3));
+    }
+  }
+
+  /* Team Card */
+  .team-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 1.85rem 1.4rem;
+    width: 275px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 18px -4px rgba(15, 23, 42, 0.05);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+
+  .team-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--bm-orange);
+    box-shadow: 0 14px 28px -6px rgba(238, 108, 31, 0.16);
+  }
+
+  /* Foto en Círculo */
+  .team-avatar-ring {
+    width: 82px;
+    height: 82px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, var(--bm-red) 0%, var(--bm-orange) 50%, var(--bm-yellow) 100%);
+    margin-bottom: 0.95rem;
+    box-shadow: 0 6px 16px -2px rgba(238, 108, 31, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .team-avatar-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #FFFDF9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bm-orange);
+    overflow: hidden;
+  }
+
+  .avatar-icon {
+    stroke: var(--bm-orange);
+  }
+
+  /* Indicativo */
+  .team-callsign {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--bm-red);
+    background: rgba(232, 38, 28, 0.08);
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0 !important;
+    margin-bottom: 0.55rem;
+  }
+
+  /* Nombre (Montserrat 800) */
+  .team-name {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 1.12rem;
+    color: var(--text-main);
+    margin-bottom: 0.35rem;
+    letter-spacing: 0 !important;
+  }
+
+  /* Texto (Rol) */
+  .team-role {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    min-height: 38px;
+    margin-bottom: 1.15rem;
+    letter-spacing: 0 !important;
+  }
+
+  /* Enlace */
+  .team-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+    background: #FFF7ED;
+    border: 1px solid rgba(238, 108, 31, 0.3);
+    padding: 0.35rem 0.95rem;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .team-link:hover {
+    background: var(--bm-orange);
+    color: #FFFFFF;
+    border-color: var(--bm-orange);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(238, 108, 31, 0.25);
+  }
+</style>

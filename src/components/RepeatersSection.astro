@@ -1,0 +1,530 @@
+---
+const repeaters = [
+  {
+    id: "734500",
+    callsign: "YV5DMR",
+    location: "Caracas, Distrito Capital",
+    band: "VHF",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Pionero en Venezuela desde 2010. Cobertura en la Gran Caracas y valles del Tuy."
+  },
+  {
+    id: "734014",
+    callsign: "YV5VE",
+    location: "Caracas, Distrito Capital",
+    band: "UHF",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Enlace UHF de alta penetración urbana en el área metropolitana."
+  },
+  {
+    id: "734016",
+    callsign: "YV5CBO",
+    location: "La Guaira",
+    band: "VHF",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Cobertura en el litoral central y zona costera de La Guaira."
+  },
+  {
+    id: "734013",
+    callsign: "YV4EGG",
+    location: "Valencia, Carabobo",
+    band: "VHF",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Cobertura regional en el estado Carabobo y zonas adyacentes del centro."
+  },
+  {
+    id: "734009",
+    callsign: "YV5VE",
+    location: "San Juan de los Morros, Guárico",
+    band: "VHF",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Enlace estratégico en los llanos centrales."
+  },
+  {
+    id: "734012",
+    callsign: "YV5VE",
+    location: "Guárico",
+    band: "VHF",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Ampliación de cobertura en la región llanera."
+  },
+  {
+    id: "734004",
+    callsign: "YV4KWT",
+    location: "Guárico",
+    band: "VHF",
+    status: "Local",
+    type: "Repetidor Local",
+    notes: "Enlace en modo de operación local."
+  },
+  {
+    id: "734015",
+    callsign: "YV1GDQ",
+    location: "Ciudad Ojeda, Zulia",
+    band: "UHF",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Cobertura en la Costa Oriental del Lago y occidente venezolano."
+  },
+  {
+    id: "734026401",
+    callsign: "YV3ARO",
+    location: "Araure, Portuguesa",
+    band: "VHF",
+    status: "Activo",
+    type: "Hotspot Alta Potencia",
+    notes: "Acceso comunitario extendido para la zona metropolitana de Acarigua-Araure."
+  }
+];
+---
+
+<section id="repetidores" class="repeaters-section section-padding">
+  <div class="container">
+    <div class="section-header reveal-on-scroll">
+      <div class="section-tag">Infraestructura de Transmisión</div>
+      <h2 class="section-title">
+        Red Nacional de Repetidores y Puntos de Acceso de Alta Potencia
+      </h2>
+      <p class="section-lead">
+        Sistemas enlazados permanentemente al Máster de BrandMeister para brindar cobertura por radio en las principales ciudades y regiones de Venezuela.
+      </p>
+    </div>
+
+    <!-- Filter Buttons Toolbar with Outline Icons -->
+    <div class="filter-toolbar reveal-on-scroll">
+      <div class="filter-buttons" id="repeater-filters">
+        <button class="filter-btn is-active" data-filter="all">Todos ({repeaters.length})</button>
+        <button class="filter-btn" data-filter="VHF">Banda VHF</button>
+        <button class="filter-btn" data-filter="UHF">Banda UHF</button>
+        <button class="filter-btn" data-filter="Hotspot">Hotspot Alta Potencia</button>
+      </div>
+
+      <div class="filter-legend">
+        <span class="legend-item">Enlace Activo</span>
+        <span class="legend-item">Operación Local</span>
+      </div>
+    </div>
+
+    <!-- Technical Repeater Table (NO cards) -->
+    <div class="table-container reveal-on-scroll">
+      <div class="repeater-table" id="repeater-list">
+        <div class="table-head">
+          <div class="col-id">ID Dispositivo</div>
+          <div class="col-call">Indicativo</div>
+          <div class="col-loc">Ubicación</div>
+          <div class="col-band">Banda</div>
+          <div class="col-type">Modalidad</div>
+          <div class="col-status">Estado</div>
+          <div class="col-action">Telemetría</div>
+        </div>
+
+        {repeaters.map(r => (
+          <div
+            class="table-row repeater-row"
+            data-band={r.band}
+            data-type={r.type.includes('Hotspot') ? 'Hotspot' : 'Repeater'}
+          >
+            <div class="col-id">
+              <span class="id-tag">{r.id}</span>
+            </div>
+            <div class="col-call">
+              <strong class="callsign">{r.callsign}</strong>
+            </div>
+            <div class="col-loc">
+              <span class="location-name">{r.location}</span>
+              <span class="location-notes">{r.notes}</span>
+            </div>
+            <div class="col-band">
+              <span class={`band-badge band-${r.band.toLowerCase()}`}>{r.band}</span>
+            </div>
+            <div class="col-type">
+              <span class="type-name">{r.type}</span>
+            </div>
+            <div class="col-status">
+              <span class={`status-pill ${r.status === 'Activo' ? 'is-active' : 'is-local'}`}>
+                {r.status}
+              </span>
+            </div>
+            <div class="col-action">
+              <a
+                href={`https://brandmeister.network/#/device/${r.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-inspect"
+                title={`Ver estado del repetidor ${r.id} en BrandMeister`}
+              >
+                <span>Inspeccionar</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Technical Callout for Repeater Projects -->
+    <div class="repeater-callout reveal-on-scroll">
+      <div class="callout-icon">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--bm-orange)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="2"></circle>
+          <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>
+        </svg>
+      </div>
+      <div class="callout-body">
+        <h4>¿Deseas activar un Repetidor o Hotspot de Alta Potencia?</h4>
+        <p>
+          Si cuentas con infraestructura, equipos repetidores DMR comerciales (Motorola, Hytera) o sistemas basados en MMDVM y deseas enlazarlos a la red BrandMeister Venezuela, nuestro equipo sysop te proporciona asesoría técnica, asignación de ID de repetidor e inclusión oficial en el enrutamiento.
+        </p>
+      </div>
+      <div class="callout-action">
+        <a href="mailto:sysop@brandmeisteryv.net?subject=Solicitud%20de%20Enlace%20Repetidor%20BrandMeister%20Venezuela" class="btn-callout-contact">
+          <span>Contactar Sysops</span>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .repeaters-section {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .filter-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .filter-btn {
+    background: var(--bg-page);
+    border: 1px solid var(--border-subtle);
+    padding: 0.55rem 1.15rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover {
+    border-color: var(--bm-orange);
+    color: var(--bm-orange);
+  }
+
+  .filter-btn.is-active {
+    background: var(--bm-red);
+    color: #FFFFFF;
+    border-color: var(--bm-red);
+  }
+
+  .filter-legend {
+    display: flex;
+    gap: 1.25rem;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* Table Structure */
+  .table-container {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    overflow-x: auto;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .repeater-table {
+    min-width: 850px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .table-head {
+    display: grid;
+    grid-template-columns: 140px 110px 1.8fr 90px 170px 110px 140px;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    letter-spacing: 0 !important;
+  }
+
+  .table-head > div {
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .table-row {
+    display: grid;
+    grid-template-columns: 140px 110px 1.8fr 90px 170px 110px 140px;
+    padding: 1.25rem 1.5rem;
+    align-items: center;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background-color 0.18s ease;
+  }
+
+  .table-row:last-child {
+    border-bottom: none;
+  }
+
+  .table-row:hover {
+    background: var(--bg-warm);
+  }
+
+  .id-tag {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: 0 !important;
+  }
+
+  .callsign {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--bm-red);
+    letter-spacing: 0 !important;
+  }
+
+  .col-loc {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .location-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: 0 !important;
+  }
+
+  .location-notes {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* Band badges strictly in BrandMeister palette */
+  .band-badge {
+    display: inline-block;
+    font-size: 0.74rem;
+    font-weight: 800;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-sm);
+    letter-spacing: 0 !important;
+  }
+
+  .band-vhf {
+    background: #FFF7ED;
+    color: var(--bm-orange);
+    border: 1px solid rgba(238, 108, 31, 0.3);
+  }
+
+  .band-uhf {
+    background: #FEE2E2;
+    color: var(--bm-red);
+    border: 1px solid rgba(232, 38, 28, 0.25);
+  }
+
+  .type-name {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  /* Status pills strictly in BrandMeister palette */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0 !important;
+  }
+
+  .status-pill.is-active {
+    background: #FFF7ED;
+    color: #D95D14;
+    border: 1px solid rgba(238, 108, 31, 0.3);
+  }
+
+  .status-pill.is-local {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid rgba(242, 169, 59, 0.35);
+  }
+
+  /* Inspect button matching Perfil BM pill style */
+  .btn-inspect {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+    padding: 0.32rem 0.8rem;
+    border: 1px solid rgba(238, 108, 31, 0.3);
+    border-radius: var(--radius-pill);
+    background: #FFF7ED;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    letter-spacing: 0 !important;
+  }
+
+  .btn-inspect:hover {
+    border-color: var(--bm-orange);
+    background: var(--bm-orange);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(238, 108, 31, 0.25);
+  }
+
+  /* Repeater Callout */
+  .repeater-callout {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+    padding: 2rem 2.5rem;
+    background: #FFFFFF;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+
+  .repeater-callout::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
+  }
+
+  @media (min-width: 860px) {
+    .repeater-callout {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .callout-icon {
+    color: var(--bm-orange);
+    flex-shrink: 0;
+  }
+
+  .callout-body {
+    flex: 1;
+  }
+
+  .callout-body h4 {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 1.25rem;
+    margin-bottom: 0.45rem;
+    letter-spacing: 0 !important;
+    background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+
+  .callout-body p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  .btn-callout-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.6rem;
+    background: var(--bm-gradient);
+    color: #FFFFFF !important;
+    font-size: 0.92rem;
+    font-weight: 700;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(232, 38, 28, 0.4);
+    box-shadow: 0 4px 18px -2px rgba(232, 38, 28, 0.4);
+    text-decoration: none;
+    transition: all 0.22s ease;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: 0 !important;
+  }
+
+  .btn-callout-contact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -2px rgba(232, 38, 28, 0.55);
+    color: #FFFFFF !important;
+  }
+</style>
+
+<script>
+  const filterButtons = document.querySelectorAll('#repeater-filters .filter-btn');
+  const rows = document.querySelectorAll('#repeater-list .repeater-row');
+
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+
+      const filter = btn.getAttribute('data-filter');
+
+      rows.forEach(row => {
+        const band = row.getAttribute('data-band');
+        const type = row.getAttribute('data-type');
+
+        if (filter === 'all') {
+          (row as HTMLElement).style.display = 'grid';
+        } else if (filter === 'VHF' || filter === 'UHF') {
+          (row as HTMLElement).style.display = (band === filter) ? 'grid' : 'none';
+        } else if (filter === 'Hotspot') {
+          (row as HTMLElement).style.display = (type === 'Hotspot') ? 'grid' : 'none';
+        }
+      });
+    });
+  });
+</script>

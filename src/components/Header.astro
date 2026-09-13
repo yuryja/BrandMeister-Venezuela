@@ -1,0 +1,297 @@
+---
+---
+
+<div class="bm-stripe"></div>
+<header class="site-header">
+  <div class="container header-container">
+    <a href="/" class="brand-link" aria-label="BrandMeister Venezuela - Inicio">
+      <img
+        src="/assets/logo.webp"
+        alt="BrandMeister Venezuela"
+        class="brand-logo"
+        width="220"
+        height="55"
+      />
+    </a>
+
+    <nav class="nav-desktop" aria-label="Navegación principal">
+      <ul class="nav-list">
+        <li><a href="/" class="nav-link">Inicio</a></li>
+        <li><a href="/comunidad" class="nav-link">Comunidad</a></li>
+        <li><a href="/talkgroups" class="nav-link">Talkgroups</a></li>
+        <li><a href="/repetidores" class="nav-link">Repetidores</a></li>
+        <li>
+          <a href="/petra" class="nav-link">
+            Petra
+          </a>
+        </li>
+        <li><a href="/blog" class="nav-link">Noticias</a></li>
+        <li><a href="/#contacto" class="nav-link">Contacto</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn-hoseline btn-hoseline-native js-toggle-hoseline"
+        title="Escuchar audio en vivo de BrandMeister TG 734"
+      >
+        <!-- Play icon (shown when idle) -->
+        <svg class="icon-play" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <polygon points="6 4 20 12 6 20 6 4"></polygon>
+        </svg>
+        <!-- Pause icon (shown when active) -->
+        <svg class="icon-pause" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+          <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+        </svg>
+        <span class="btn-label">Audio en Vivo</span>
+      </button>
+
+      <button id="mobile-toggle" class="mobile-toggle" aria-label="Abrir menú" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer -->
+  <div id="mobile-nav" class="mobile-nav" aria-hidden="true">
+    <div class="mobile-nav-inner">
+      <a href="/" class="mobile-nav-link">Inicio</a>
+      <a href="/comunidad" class="mobile-nav-link">Comunidad</a>
+      <a href="/talkgroups" class="mobile-nav-link">Talkgroups y Circuitos</a>
+      <a href="/repetidores" class="mobile-nav-link">Repetidores Activos</a>
+      <a href="/petra" class="mobile-nav-link">
+        Petra
+      </a>
+      <a href="/blog" class="mobile-nav-link">Noticias</a>
+      <a href="/#contacto" class="mobile-nav-link">Contacto y Redes</a>
+      <button
+        type="button"
+        class="btn-hoseline btn-hoseline-native js-toggle-hoseline mobile-hoseline-btn"
+      >
+        <svg class="icon-play" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <polygon points="6 4 20 12 6 20 6 4"></polygon>
+        </svg>
+        <svg class="icon-pause" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+          <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+        </svg>
+        <span class="btn-label">Audio en Vivo</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-subtle);
+    transition: all 0.25s ease;
+  }
+
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 78px;
+    gap: 1.25rem;
+  }
+
+  .brand-link {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .brand-logo {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .nav-desktop {
+    display: none;
+  }
+
+  @media (min-width: 1040px) {
+    .nav-desktop {
+      display: block;
+    }
+  }
+
+  .nav-list {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+    list-style: none;
+  }
+
+  .nav-link {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    position: relative;
+    padding: 0.35rem 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .nav-link:hover {
+    color: var(--bm-red);
+  }
+
+  .nav-link-admin {
+    color: var(--bm-orange);
+    padding: 0.25rem 0.65rem;
+    background: var(--bm-orange-light);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+  }
+
+  .nav-link-admin:hover {
+    color: var(--bm-red);
+    background: var(--bm-red-light);
+  }
+
+  .nav-link-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .badge-mini {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: var(--radius-pill);
+    background: rgba(238, 108, 31, 0.14);
+    color: var(--bm-orange);
+    text-transform: uppercase;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Audio en Vivo button styled identically to Hero button (BrandMeister gradient pill) */
+  .btn-hoseline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.55rem 1.25rem;
+    background: var(--bm-gradient);
+    color: #FFFFFF;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(232, 38, 28, 0.4);
+    box-shadow: 0 4px 16px -3px rgba(232, 38, 28, 0.4);
+    transition: all 0.22s ease;
+    cursor: pointer;
+  }
+
+  .btn-hoseline:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px -4px rgba(232, 38, 28, 0.55);
+    color: #FFFFFF;
+  }
+
+  .btn-hoseline .icon-pause {
+    display: none;
+  }
+
+  .btn-hoseline.is-active .icon-play {
+    display: none;
+  }
+
+  .btn-hoseline.is-active .icon-pause {
+    display: inline-block;
+  }
+
+  .mobile-hoseline-btn {
+    margin-top: 1rem;
+    width: 100%;
+    justify-content: center;
+    border: none;
+  }
+
+  .mobile-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0.4rem;
+    color: var(--text-main);
+    cursor: pointer;
+  }
+
+  @media (min-width: 1040px) {
+    .mobile-toggle {
+      display: none;
+    }
+  }
+
+  .mobile-nav {
+    display: none;
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .mobile-nav.is-open {
+    display: block;
+  }
+
+  .mobile-nav-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mobile-nav-link {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-main);
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .mobile-nav-link:hover {
+    color: var(--bm-red);
+  }
+</style>
+
+<script>
+  const toggle = document.getElementById('mobile-toggle');
+  const nav = document.getElementById('mobile-nav');
+
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => {
+      const isOpen = nav.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      nav.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+    });
+
+    nav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        nav.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        nav.setAttribute('aria-hidden', 'true');
+      });
+    });
+  }
+</script>

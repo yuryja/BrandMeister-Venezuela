@@ -1,0 +1,384 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post }
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+const currentUrl = `https://brandmeisteryv.net/blog/${post.slug}`;
+---
+
+<Layout
+  title={`${post.data.title} · BrandMeister Venezuela`}
+  description={post.data.description}
+>
+  <article class="article-page">
+    <!-- Article Header -->
+    <header class="article-header">
+      <div class="container container-reading">
+        <nav class="article-breadcrumbs" aria-label="Breadcrumb">
+          <a href="/">Inicio</a>
+          <span>/</span>
+          <a href="/blog">Noticias</a>
+          <span>/</span>
+          <span class="current">{post.data.category}</span>
+        </nav>
+
+        <div class="article-meta-badge">
+          <span class="category-tag">{post.data.category}</span>
+          <span class="read-time">{post.data.readTime}</span>
+        </div>
+
+        <h1 class="article-headline">{post.data.title}</h1>
+
+        <p class="article-lead">{post.data.description}</p>
+
+        <div class="article-byline">
+          <div class="author-details">
+            <span class="by-text">Publicado por</span>
+            <span class="author-name">{post.data.author}</span>
+            {post.data.authorCallsign && (
+              <span class="callsign-chip">{post.data.authorCallsign}</span>
+            )}
+          </div>
+
+          <time datetime={post.data.pubDate.toISOString()} class="pub-date">
+            {post.data.pubDate.toLocaleDateString('es-VE', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </time>
+        </div>
+      </div>
+    </header>
+
+    <!-- Article Content Body -->
+    <div class="article-body section-padding">
+      <div class="container container-reading">
+        <div class="prose-content">
+          <Content />
+        </div>
+
+        <!-- Tags Row -->
+        <div class="article-tags-row">
+          <span class="tags-title">Etiquetas:</span>
+          <div class="tags-list">
+            {post.data.tags.map(tag => (
+              <span class="tag-badge">#{tag}</span>
+            ))}
+          </div>
+        </div>
+
+        <!-- Share & Navigation Strip -->
+        <div class="article-share-strip">
+          <div class="share-actions">
+            <span class="share-title">Compartir:</span>
+            <a
+              href={`https://api.whatsapp.com/send?text=${encodeURIComponent(post.data.title + ' - ' + currentUrl)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="share-btn whatsapp"
+            >
+              WhatsApp
+            </a>
+            <a
+              href={`https://t.me/share/url?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(post.data.title)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="share-btn telegram"
+            >
+              Telegram
+            </a>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.data.title)}&url=${encodeURIComponent(currentUrl)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="share-btn twitter"
+            >
+              X (Twitter)
+            </a>
+          </div>
+
+          <a href="/blog" class="btn btn-secondary">
+            ← Volver a Noticias
+          </a>
+        </div>
+      </div>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .container-reading {
+    max-width: 820px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .article-header {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-top: clamp(3rem, 5vw, 4.5rem);
+    padding-bottom: clamp(3rem, 5vw, 4rem);
+  }
+
+  .article-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-faint);
+    margin-bottom: 1.5rem;
+  }
+
+  .article-breadcrumbs a {
+    color: var(--bm-orange);
+  }
+
+  .article-breadcrumbs .current {
+    color: var(--text-muted);
+  }
+
+  .article-meta-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .category-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--bm-red);
+    background: rgba(232, 38, 28, 0.08);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .read-time {
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+
+  .article-headline {
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+    color: var(--text-main);
+  }
+
+  .article-lead {
+    font-size: 1.25rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .article-byline {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .author-details {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .by-text {
+    color: var(--text-faint);
+  }
+
+  .author-name {
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .callsign-chip {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+    background: rgba(238, 108, 31, 0.1);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .pub-date {
+    font-size: 0.85rem;
+    color: var(--text-faint);
+    text-transform: capitalize;
+  }
+
+  /* Prose Content Styling (Strictly NO monospace, letter-spacing 0) */
+  .article-body {
+    background: var(--bg-page);
+  }
+
+  .prose-content {
+    font-size: 1.12rem;
+    line-height: 1.8;
+    color: #1E293B;
+  }
+
+  .prose-content :global(h2) {
+    font-size: 1.85rem;
+    margin-top: 2.75rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 0.5rem;
+  }
+
+  .prose-content :global(h3) {
+    font-size: 1.45rem;
+    margin-top: 2.2rem;
+    margin-bottom: 0.85rem;
+    color: var(--text-main);
+  }
+
+  .prose-content :global(p) {
+    margin-bottom: 1.5rem;
+    font-size: 1.12rem;
+    line-height: 1.8;
+    color: #334155;
+  }
+
+  .prose-content :global(ul), .prose-content :global(ol) {
+    margin-bottom: 1.75rem;
+    padding-left: 1.75rem;
+  }
+
+  .prose-content :global(li) {
+    margin-bottom: 0.6rem;
+    line-height: 1.7;
+    color: #334155;
+  }
+
+  .prose-content :global(a) {
+    color: var(--bm-orange);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 600;
+  }
+
+  .prose-content :global(a:hover) {
+    color: var(--bm-red);
+  }
+
+  .prose-content :global(strong) {
+    color: var(--text-main);
+    font-weight: 700;
+  }
+
+  /* Code-like tags styled with sans-serif font instead of monospace */
+  .prose-content :global(code) {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 0.95em;
+    background: #E2E8F0;
+    color: #0F172A;
+    padding: 0.2rem 0.45rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+  }
+
+  /* Tags Row */
+  .article-tags-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .tags-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-faint);
+  }
+
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag-badge {
+    font-size: 0.8rem;
+    color: var(--bm-orange);
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Share Strip */
+  .article-share-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    padding: 1.5rem 2rem;
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+  }
+
+  .share-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .share-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+
+  .share-btn {
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.4rem 0.85rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    transition: all 0.18s ease;
+  }
+
+  .share-btn.whatsapp:hover {
+    background: #25D366;
+    color: #FFFFFF;
+    border-color: #25D366;
+  }
+
+  .share-btn.telegram:hover {
+    background: #0088CC;
+    color: #FFFFFF;
+    border-color: #0088CC;
+  }
+
+  .share-btn.twitter:hover {
+    background: #000000;
+    color: #FFFFFF;
+    border-color: #000000;
+  }
+</style>

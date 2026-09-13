@@ -1,0 +1,600 @@
+---
+const nationalTGs = [
+  {
+    tg: "734911",
+    name: "Emergencias EMCOM",
+    slot: "Slot 1",
+    desc: "Tráfico prioritario y contingencias",
+    badge: "Emergencia",
+    isEmergency: true
+  },
+  {
+    tg: "73473",
+    name: "Radio Club Venezolano",
+    slot: "Slot 2",
+    desc: "Ruedas y actividad institucional",
+    badge: "Institucional"
+  },
+  {
+    tg: "73452",
+    name: "Emisiones YV5RNE",
+    slot: "Slot 2",
+    desc: "Boletines técnicos de la red",
+    badge: "Servicio"
+  }
+];
+
+const circuits = [
+  { tg: "7341", name: "Circuito 1", states: "Falcón, Trujillo, Zulia" },
+  { tg: "7342", name: "Circuito 2", states: "Barinas, Mérida, Táchira" },
+  { tg: "7343", name: "Circuito 3", states: "Lara, Portuguesa, Yaracuy" },
+  { tg: "7344", name: "Circuito 4", states: "Aragua, Carabobo, Cojedes" },
+  { tg: "7345", name: "Circuito 5", states: "Caracas, Miranda, La Guaira, Guárico" },
+  { tg: "7346", name: "Circuito 6", states: "Anzoátegui, Bolívar" },
+  { tg: "7347", name: "Circuito 7", states: "Nueva Esparta, Sucre" },
+  { tg: "7348", name: "Circuito 8", states: "Monagas, Delta Amacuro" },
+  { tg: "7349", name: "Circuito 9", states: "Apure, Amazonas" }
+];
+---
+
+<section id="talkgroups" class="tg-section">
+  <!-- Sutil glow ambiental -->
+  <div class="tg-ambient-glow"></div>
+
+  <div class="container tg-container">
+    <!-- Header Minimalista y Compacto -->
+    <div class="tg-header reveal-on-scroll">
+      <span class="tg-tag">Directorio DMR</span>
+      <h2 class="tg-title">Estructura de Talkgroups y Circuitos Regionales</h2>
+      <p class="tg-lead">
+        Distribución oficial de ranuras de tiempo (Slots) y grupos de conversación en BrandMeister Venezuela.
+      </p>
+    </div>
+
+    <!-- Grid Minimalista < 100vh -->
+    <div class="tg-dashboard reveal-on-scroll">
+      <!-- Columna Izquierda: Nacionales y Hotspots -->
+      <div class="tg-col-national">
+        <!-- Tarjeta Destacada TG 734 -->
+        <div class="tg-card-hero">
+          <div class="hero-card-glow"></div>
+          <div class="hero-top-row">
+            <span class="slot-badge slot-1">Slot 1</span>
+            <span class="status-pill">Canal Principal</span>
+          </div>
+          <div class="hero-tg-display">
+            <span class="hero-tg-number">TG 734</span>
+            <span class="hero-tg-label">Venezuela</span>
+          </div>
+          <p class="hero-tg-desc">
+            Punto de encuentro nacional y enlace internacional para llamada general y QSO cotidiano.
+          </p>
+        </div>
+
+        <!-- Canales Secundarios Compactos -->
+        <div class="tg-national-list">
+          {nationalTGs.map(item => (
+            <div class={`tg-compact-row ${item.isEmergency ? 'is-emergency' : ''}`}>
+              <div class="compact-left">
+                <span class="compact-tg">{item.tg}</span>
+                <span class={`slot-chip-mini ${item.slot === 'Slot 1' ? 'chip-slot1' : 'chip-slot2'}`}>
+                  {item.slot}
+                </span>
+              </div>
+              <div class="compact-center">
+                <span class="compact-name">{item.name}</span>
+                <span class="compact-desc">{item.desc}</span>
+              </div>
+              <span class="compact-tag">{item.badge}</span>
+            </div>
+          ))}
+        </div>
+
+        <!-- Píldora Rápida de Hotspots -->
+        <div class="hotspot-quick-strip">
+          <div class="hotspot-badge-title">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.93 19.07a10 10 0 0 1 0-14.14"></path>
+              <path d="M7.76 16.24a6 6 0 0 1 0-8.48"></path>
+              <circle cx="12" cy="12" r="2"></circle>
+            </svg>
+            <span>Frecuencias Hotspots (Slot 2 · CC1)</span>
+          </div>
+          <div class="hotspot-freqs">
+            <span class="freq-tag">VHF <strong>146.550 MHz</strong></span>
+            <span class="freq-sep">·</span>
+            <span class="freq-tag">UHF <strong>436.550 MHz</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Circuitos Regionales (Slot 2) -->
+      <div class="tg-col-circuits">
+        <div class="circuits-topbar">
+          <div class="circuits-title-group">
+            <span class="slot-badge slot-2">Slot 2</span>
+            <h3 class="circuits-title">9 Circuitos Regionales</h3>
+          </div>
+          <span class="circuits-hint">Activación dinámica PTT (1s)</span>
+        </div>
+
+        <div class="circuits-grid-clean">
+          {circuits.map(c => (
+            <div class="circuit-card-clean">
+              <span class="circuit-tg-num">TG {c.tg}</span>
+              <span class="circuit-name">{c.name}</span>
+              <p class="circuit-states-text">{c.states}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* TALKGROUPS SECTION WITH MATCHING HERO OPACITY BACKGROUND */
+  .tg-section {
+    position: relative;
+    overflow: hidden;
+    scroll-margin-top: 85px;
+    background-color: #FFFFFF;
+    background-image:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 42%, rgba(255, 255, 255, 0.70) 75%, rgba(255, 255, 255, 0.25) 100%),
+      linear-gradient(0deg, #FFFFFF 0%, rgba(255, 255, 255, 0.85) 12%, transparent 35%),
+      url('/assets/tg-background-landscape.jpg');
+    background-size: cover;
+    background-position: right center;
+    background-repeat: no-repeat;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: clamp(2.5rem, 5vh, 3.75rem) 0;
+  }
+
+  /* Mobile view background matching hero */
+  @media (max-width: 768px) {
+    .tg-section {
+      background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.93) 50%, rgba(255, 255, 255, 0.72) 80%, rgba(255, 255, 255, 0.35) 100%),
+        url('/assets/tg-background-portrait.jpg');
+      background-position: center top;
+      background-size: cover;
+    }
+  }
+
+  .tg-ambient-glow {
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(242, 169, 59, 0.08) 0%, rgba(238, 108, 31, 0.03) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .tg-container {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Header */
+  .tg-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto clamp(1.8rem, 3.5vh, 2.5rem);
+  }
+
+  .tg-tag {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--bm-red);
+    display: block;
+    margin-bottom: 0.35rem;
+    letter-spacing: 0 !important;
+  }
+
+  .tg-title {
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    font-weight: 800 !important;
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    color: var(--text-main);
+    line-height: 1.25;
+    margin-bottom: 0.45rem;
+    letter-spacing: 0 !important;
+  }
+
+  .tg-lead {
+    font-size: clamp(0.88rem, 1.1vw, 0.98rem);
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  /* Dashboard 2 Columnas */
+  .tg-dashboard {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+
+  @media (min-width: 980px) {
+    .tg-dashboard {
+      grid-template-columns: 1fr 1.32fr;
+      gap: 1.75rem;
+    }
+  }
+
+  /* Columna Nacional */
+  .tg-col-national {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Hero Card TG 734 */
+  .tg-card-hero {
+    position: relative;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(238, 108, 31, 0.35);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 4px 20px -4px rgba(238, 108, 31, 0.12);
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .tg-card-hero:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -4px rgba(238, 108, 31, 0.2);
+  }
+
+  .hero-card-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #F2A93B 0%, #EE6C1F 50%, #E8261C 100%);
+  }
+
+  .hero-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+  }
+
+  .status-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--bm-orange);
+    background: #FFF7ED;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(238, 108, 31, 0.25);
+  }
+
+  .hero-tg-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .hero-tg-number {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-size: clamp(1.8rem, 2.8vw, 2.3rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0 !important;
+    background: linear-gradient(135deg, var(--bm-red) 0%, var(--bm-orange) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-tg-label {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-main);
+    letter-spacing: 0 !important;
+  }
+
+  .hero-tg-desc {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  /* Lista Compacta de Nacionales */
+  .tg-national-list {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);
+  }
+
+  .tg-compact-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background-color 0.15s ease;
+  }
+
+  .tg-compact-row:last-child {
+    border-bottom: none;
+  }
+
+  .tg-compact-row:hover {
+    background: #FFFDF9;
+  }
+
+  .tg-compact-row.is-emergency {
+    background: rgba(232, 38, 28, 0.025);
+  }
+
+  .tg-compact-row.is-emergency .compact-tg {
+    color: var(--bm-red);
+  }
+
+  .compact-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    min-width: 78px;
+  }
+
+  .compact-tg {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: 0 !important;
+  }
+
+  .compact-center {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .compact-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .compact-desc {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Compact Tags strictly in BrandMeister Palette */
+  .compact-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-pill);
+    background: #FFF7ED;
+    color: var(--bm-orange);
+    border: 1px solid rgba(238, 108, 31, 0.2);
+    flex-shrink: 0;
+    letter-spacing: 0 !important;
+  }
+
+  .is-emergency .compact-tag {
+    background: #FEE2E2;
+    color: var(--bm-red);
+    border-color: rgba(232, 38, 28, 0.25);
+  }
+
+  /* Hotspots Strip */
+  .hotspot-quick-strip {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 0.75rem 1.1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .hotspot-badge-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .hotspot-badge-title svg {
+    stroke: var(--bm-orange);
+  }
+
+  .hotspot-freqs {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .freq-tag strong {
+    color: var(--bm-orange);
+    font-weight: 800;
+  }
+
+  .freq-sep {
+    color: var(--border-subtle);
+  }
+
+  /* Columna Derecha: Circuitos */
+  .tg-col-circuits {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 1.25rem 1.4rem;
+    box-shadow: 0 4px 18px -4px rgba(15, 23, 42, 0.04);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .circuits-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 0.9rem;
+  }
+
+  .circuits-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .circuits-title {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-size: 1.12rem;
+    font-weight: 800 !important;
+    color: var(--text-main);
+    letter-spacing: 0 !important;
+    margin: 0;
+  }
+
+  .circuits-hint {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  /* Grid 3x3 Circuitos */
+  .circuits-grid-clean {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    flex: 1;
+  }
+
+  @media (min-width: 580px) {
+    .circuits-grid-clean {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .circuit-card-clean {
+    background: rgba(248, 250, 252, 0.8);
+    border: 1px solid rgba(238, 108, 31, 0.14);
+    border-radius: 10px;
+    padding: 0.8rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0.18rem;
+    transition: all 0.18s ease;
+  }
+
+  .circuit-card-clean:hover {
+    background: #FFFFFF;
+    border-color: var(--bm-orange);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px -2px rgba(238, 108, 31, 0.2);
+  }
+
+  .circuit-tg-num {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--bm-orange);
+    letter-spacing: 0 !important;
+    line-height: 1.2;
+    display: block;
+  }
+
+  .circuit-name {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    font-weight: 800 !important;
+    font-size: 0.84rem;
+    color: #0F172A !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap;
+    line-height: 1.25;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+
+  .circuit-states-text {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  /* Slot Badges strictly in BrandMeister Palette (Red & Orange) - No Polychrome */
+  .slot-badge {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0 !important;
+  }
+
+  .slot-badge.slot-1 {
+    background: #FEE2E2;
+    color: var(--bm-red);
+    border: 1px solid rgba(232, 38, 28, 0.25);
+  }
+
+  .slot-badge.slot-2 {
+    background: #FFEDD5;
+    color: var(--bm-orange);
+    border: 1px solid rgba(238, 108, 31, 0.3);
+  }
+
+  .slot-chip-mini {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    letter-spacing: 0 !important;
+  }
+
+  .chip-slot1 {
+    background: #FEE2E2;
+    color: var(--bm-red);
+  }
+
+  .chip-slot2 {
+    background: #FFEDD5;
+    color: var(--bm-orange);
+  }
+</style>

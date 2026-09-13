@@ -1,0 +1,369 @@
+---
+---
+
+<!-- Floating Hoseline Live Audio Dock (Appears when user activates Hoseline) -->
+<div id="hoseline-dock" class="hoseline-dock" aria-live="polite">
+  <div class="dock-container">
+    <!-- Left: Status & Live Indicator -->
+    <div class="dock-left">
+      <div class="dock-pulse-badge">
+        <span id="dock-status-label" class="dock-status-label">Sintonizando TG 734...</span>
+      </div>
+
+      <div class="dock-call-meta">
+        <span id="dock-callsign" class="dock-callsign">TG 734 - Venezuela</span>
+        <span id="dock-alias" class="dock-alias">Esperando portadora digital DMR...</span>
+      </div>
+    </div>
+
+    <!-- Center: Dynamic Equalizer Wave -->
+    <div class="dock-center">
+      <div id="dock-wave" class="dock-wave is-idle">
+        <span class="bar bar-1"></span>
+        <span class="bar bar-2"></span>
+        <span class="bar bar-3"></span>
+        <span class="bar bar-4"></span>
+        <span class="bar bar-5"></span>
+        <span class="bar bar-6"></span>
+        <span class="bar bar-7"></span>
+        <span class="bar bar-8"></span>
+      </div>
+    </div>
+
+    <!-- Right: Volume Slider & Close Button -->
+    <div class="dock-right">
+      <div class="dock-vol-group">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        </svg>
+        <input
+          type="range"
+          id="dock-volume"
+          min="0"
+          max="100"
+          value="90"
+          class="dock-vol-slider"
+          aria-label="Volumen de Hoseline"
+        />
+      </div>
+
+      <button id="dock-stop-btn" class="dock-btn-stop" title="Desconectar y silenciar audio">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+        <span>Desconectar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { hoseline } from "../scripts/hoseline";
+
+  const dock = document.getElementById("hoseline-dock");
+  const statusLabel = document.getElementById("dock-status-label");
+  const callsignEl = document.getElementById("dock-callsign");
+  const aliasEl = document.getElementById("dock-alias");
+  const wave = document.getElementById("dock-wave");
+  const volSlider = document.getElementById("dock-volume") as HTMLInputElement;
+  const stopBtn = document.getElementById("dock-stop-btn");
+
+  // Wire volume
+  volSlider?.addEventListener("input", (e) => {
+    const val = Number((e.target as HTMLInputElement).value) / 100;
+    hoseline.setVolume(val);
+  });
+
+  // Wire stop
+  stopBtn?.addEventListener("click", () => {
+    hoseline.disconnect();
+  });
+
+  // State Handler
+  window.addEventListener("hoseline:stateChange", (e: any) => {
+    const state = e.detail?.state;
+    updateAllButtons(state);
+
+    if (state === "idle" || state === "error") {
+      dock?.classList.remove("is-visible");
+      wave?.classList.add("is-idle");
+      if (aliasEl) aliasEl.textContent = "Esperando portadora digital DMR...";
+    } else {
+      dock?.classList.add("is-visible");
+      if (state === "connecting") {
+        if (statusLabel) statusLabel.textContent = "Sintonizando TG 734...";
+        if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
+        if (aliasEl) aliasEl.textContent = "Estableciendo enlace WebSocket...";
+        wave?.classList.add("is-idle");
+      } else if (state === "listening") {
+        if (statusLabel) statusLabel.textContent = "DMR EN LÍNEA";
+        if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
+        if (aliasEl) aliasEl.textContent = "En silencio digital (esperando modulación PTT)...";
+        wave?.classList.add("is-idle");
+      } else if (state === "transmitting") {
+        if (statusLabel) statusLabel.textContent = "TRANSMITIENDO";
+        wave?.classList.remove("is-idle");
+      }
+    }
+  });
+
+  // Call Start Handler
+  window.addEventListener("hoseline:callStart", (e: any) => {
+    const call = e.detail;
+    if (statusLabel) statusLabel.textContent = "EN TRANSMISIÓN";
+    if (callsignEl) callsignEl.textContent = call.callsign ? `Operador: ${call.callsign}` : "Operador Activo";
+    if (aliasEl) aliasEl.textContent = call.alias || `Transmitiendo en TG ${call.talkgroup || 734}`;
+    wave?.classList.remove("is-idle");
+  });
+
+  // Call Alias Handler
+  window.addEventListener("hoseline:callAlias", (e: any) => {
+    if (aliasEl && e.detail?.alias) {
+      aliasEl.textContent = e.detail.alias;
+    }
+  });
+
+  // Call End Handler
+  window.addEventListener("hoseline:callEnd", () => {
+    if (statusLabel) statusLabel.textContent = "DMR EN LÍNEA";
+    if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
+    if (aliasEl) aliasEl.textContent = "Portadora liberada · En espera de modulación";
+    wave?.classList.add("is-idle");
+  });
+
+  // Disconnect immediately upon page exit or browser close
+  window.addEventListener("beforeunload", () => {
+    hoseline.disconnect();
+  });
+  window.addEventListener("pagehide", () => {
+    hoseline.disconnect();
+  });
+
+  // Helper to update buttons across Header, Hero, and Navigation
+  function updateAllButtons(state: string) {
+    // Header Hoseline Button
+    const headerBtn = document.querySelectorAll(".btn-hoseline-native");
+    headerBtn.forEach((btn) => {
+      const textSpan = btn.querySelector(".btn-label");
+      if (state === "idle") {
+        btn.classList.remove("is-active", "is-transmitting");
+        if (textSpan) textSpan.textContent = "Audio en Vivo";
+      } else if (state === "connecting") {
+        btn.classList.add("is-active");
+        btn.classList.remove("is-transmitting");
+        if (textSpan) textSpan.textContent = "Sintonizando...";
+      } else if (state === "listening") {
+        btn.classList.add("is-active");
+        btn.classList.remove("is-transmitting");
+        if (textSpan) textSpan.textContent = "Escuchando TG 734";
+      } else if (state === "transmitting") {
+        btn.classList.add("is-active", "is-transmitting");
+        const call = hoseline.getActiveCall();
+        if (textSpan) textSpan.textContent = call?.callsign ? `Escuchando: ${call.callsign}` : "Escuchando TG 734";
+      }
+    });
+
+    // Hero Hoseline Button
+    const heroBtn = document.querySelectorAll(".btn-hero-primary-hoseline");
+    heroBtn.forEach((btn) => {
+      const textSpan = btn.querySelector(".btn-hero-text");
+      if (state === "idle") {
+        btn.classList.remove("is-active");
+        if (textSpan) textSpan.textContent = "Audio en Vivo";
+      } else if (state === "connecting") {
+        btn.classList.add("is-active");
+        if (textSpan) textSpan.textContent = "Sintonizando...";
+      } else if (state === "listening") {
+        btn.classList.add("is-active");
+        if (textSpan) textSpan.textContent = "Escuchando TG 734";
+      } else if (state === "transmitting") {
+        btn.classList.add("is-active");
+        const call = hoseline.getActiveCall();
+        if (textSpan) textSpan.textContent = call?.callsign ? `Escuchando: ${call.callsign}` : "Escuchando TG 734";
+      }
+    });
+  }
+
+  // Hook global click events for any button with class .js-toggle-hoseline
+  document.addEventListener("click", (e) => {
+    const target = (e.target as HTMLElement).closest(".js-toggle-hoseline");
+    if (target) {
+      e.preventDefault();
+      hoseline.toggle(734);
+    }
+  });
+</script>
+
+<style>
+  .hoseline-dock {
+    position: fixed;
+    bottom: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    width: min(92vw, 760px);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1.5px solid rgba(238, 108, 31, 0.35);
+    border-radius: 20px;
+    box-shadow: 0 20px 45px -10px rgba(15, 23, 42, 0.18),
+                0 4px 16px -2px rgba(238, 108, 31, 0.15);
+    transition: bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    font-family: var(--font-sans);
+  }
+
+  .hoseline-dock.is-visible {
+    bottom: 1.5rem;
+  }
+
+  .dock-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 0.85rem 1.35rem;
+  }
+
+  @media (max-width: 680px) {
+    .dock-container {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.85rem;
+      padding: 1rem;
+    }
+  }
+
+  .dock-left {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .dock-pulse-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .dock-status-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--bm-red);
+    text-transform: uppercase;
+    letter-spacing: 0 !important;
+  }
+
+  .dock-call-meta {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dock-callsign {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: 0 !important;
+  }
+
+  .dock-alias {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .dock-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dock-wave {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 22px;
+  }
+
+  .dock-wave .bar {
+    width: 3.5px;
+    background: var(--bm-gradient);
+    border-radius: 2px;
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+
+  .dock-wave.is-idle .bar {
+    animation: none;
+    height: 3px !important;
+    background: #CBD5E1;
+  }
+
+  .bar-1 { height: 35%; animation-delay: 0.1s; }
+  .bar-2 { height: 75%; animation-delay: 0.3s; }
+  .bar-3 { height: 100%; animation-delay: 0.2s; }
+  .bar-4 { height: 50%; animation-delay: 0.4s; }
+  .bar-5 { height: 85%; animation-delay: 0.15s; }
+  .bar-6 { height: 60%; animation-delay: 0.35s; }
+  .bar-7 { height: 95%; animation-delay: 0.25s; }
+  .bar-8 { height: 45%; animation-delay: 0.5s; }
+
+  @keyframes bounce {
+    0%, 100% { transform: scaleY(0.25); }
+    50% { transform: scaleY(1); }
+  }
+
+  .dock-right {
+    display: flex;
+    align-items: center;
+    gap: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 680px) {
+    .dock-right {
+      justify-content: space-between;
+    }
+  }
+
+  .dock-vol-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+  }
+
+  .dock-vol-slider {
+    width: 80px;
+    accent-color: var(--bm-orange);
+    cursor: pointer;
+  }
+
+  .dock-btn-stop {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.95rem;
+    background: #FFF1F0;
+    color: var(--bm-red);
+    border: 1px solid rgba(232, 38, 28, 0.25);
+    border-radius: var(--radius-pill);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0 !important;
+  }
+
+  .dock-btn-stop:hover {
+    background: var(--bm-red);
+    color: #FFFFFF;
+  }
+</style>

@@ -1,0 +1,759 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const repeaters = [
+  {
+    id: "734500",
+    callsign: "YV5DMR",
+    location: "Caracas, Distrito Capital",
+    region: "Capital",
+    band: "VHF",
+    freqRx: "145.000 MHz",
+    freqTx: "145.600 MHz",
+    offset: "+0.600 MHz",
+    colorCode: "CC1",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Pionero en Venezuela desde 2010. Emplazamiento de gran altura con cobertura en la Gran Caracas y valles del Tuy."
+  },
+  {
+    id: "734014",
+    callsign: "YV5VE",
+    location: "Caracas, Distrito Capital",
+    region: "Capital",
+    band: "UHF",
+    freqRx: "434.200 MHz",
+    freqTx: "439.200 MHz",
+    offset: "+5.000 MHz",
+    colorCode: "CC1",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Enlace en banda UHF de alta penetración estructural y urbana en todo el valle metropolitano."
+  },
+  {
+    id: "734016",
+    callsign: "YV5CBO",
+    location: "La Guaira",
+    region: "Litoral Central",
+    band: "VHF",
+    freqRx: "145.025 MHz",
+    freqTx: "145.625 MHz",
+    offset: "+0.600 MHz",
+    colorCode: "CC1",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Cobertura en el eje costero de La Guaira, puerto de La Guaira y accesos viales hacia la capital."
+  },
+  {
+    id: "734013",
+    callsign: "YV4EGG",
+    location: "Valencia, Carabobo",
+    region: "Central",
+    band: "VHF",
+    freqRx: "145.150 MHz",
+    freqTx: "145.750 MHz",
+    offset: "+0.600 MHz",
+    colorCode: "CC1",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Cobertura regional en el estado Carabobo, eje industrial de Valencia y zonas circunvecinas."
+  },
+  {
+    id: "734009",
+    callsign: "YV5VE",
+    location: "San Juan de los Morros, Guárico",
+    region: "Llanos Centrales",
+    band: "VHF",
+    freqRx: "145.050 MHz",
+    freqTx: "145.650 MHz",
+    offset: "+0.600 MHz",
+    colorCode: "CC1",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Enlace estratégico en la puerta de entrada a los llanos centrales venezolanos."
+  },
+  {
+    id: "734012",
+    callsign: "YV5VE",
+    location: "Guárico",
+    region: "Llanos Centrales",
+    band: "VHF",
+    freqRx: "145.100 MHz",
+    freqTx: "145.700 MHz",
+    offset: "+0.600 MHz",
+    colorCode: "CC1",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Expansión de la huella digital DMR en la vasta llanura guariqueña."
+  },
+  {
+    id: "734004",
+    callsign: "YV4KWT",
+    location: "Guárico",
+    region: "Llanos Centrales",
+    band: "VHF",
+    freqRx: "145.075 MHz",
+    freqTx: "145.675 MHz",
+    offset: "+0.600 MHz",
+    colorCode: "CC1",
+    status: "Local",
+    type: "Repetidor Local",
+    notes: "Enlace operativo para tráfico y experimentos comunitarios locales."
+  },
+  {
+    id: "734015",
+    callsign: "YV1GDQ",
+    location: "Ciudad Ojeda, Zulia",
+    region: "Occidente",
+    band: "UHF",
+    freqRx: "434.100 MHz",
+    freqTx: "439.100 MHz",
+    offset: "+5.000 MHz",
+    colorCode: "CC1",
+    status: "Activo",
+    type: "Repetidor Oficial",
+    notes: "Cobertura sólida en la Costa Oriental del Lago y enlace hacia la cuenca del Lago de Maracaibo."
+  },
+  {
+    id: "734026401",
+    callsign: "YV3ARO",
+    location: "Araure, Portuguesa",
+    region: "Centroccidente",
+    band: "VHF",
+    freqRx: "146.550 MHz",
+    freqTx: "146.550 MHz",
+    offset: "Simplex",
+    colorCode: "CC1",
+    status: "Activo",
+    type: "Hotspot Alta Potencia",
+    notes: "Punto de acceso comunitario de alta potencia que cubre la zona metropolitana de Acarigua-Araure."
+  }
+];
+
+---
+
+<Layout
+  title="Repetidores y Puntos de Acceso · BrandMeister Venezuela"
+  description="Red nacional de repetidores DMR y puntos de acceso en Venezuela. Consulta frecuencias de entrada y salida, desplazamientos, códigos de color y telemetría en tiempo real."
+>
+  <main class="repeaters-page">
+    <!-- Hero 50vh con fotografía real de trabajo de campo -->
+    <section class="repeaters-hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span>Infraestructura de Transmisión Nacional</span>
+          </div>
+          <h1 class="hero-title">Repetidores y Puntos de Acceso</h1>
+          <p class="hero-subtitle">
+            Sistemas repetidores físicos y puntos de acceso de alta potencia interconectados a la red BrandMeister DMR. Conoce las frecuencias de entrada y salida, desplazamientos, zonas de cobertura y el estado operativo en tiempo real.
+          </p>
+          <div class="hero-meta">
+            <span>9 Sistemas Registrados</span> · <span>Bandas VHF y UHF</span> · <span>Slot 1 (Nacional)</span> · <span>Slot 2 (Local)</span> · <span>CC1 Estándar</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Franja divisoria con degradado de 3 colores BrandMeister -->
+    <div class="bm-stripe"></div>
+
+    <!-- Contenido Principal -->
+    <section class="repeaters-body section-padding">
+      <div class="container">
+        <!-- Barra de Filtros y Leyenda -->
+        <div class="filter-toolbar">
+          <div class="filter-buttons" id="repeater-filter-group">
+            <button class="filter-btn is-active" data-filter="all">
+              Todos ({repeaters.length})
+            </button>
+            <button class="filter-btn" data-filter="VHF">
+              Banda VHF
+            </button>
+            <button class="filter-btn" data-filter="UHF">
+              Banda UHF
+            </button>
+            <button class="filter-btn" data-filter="Hotspot">
+              Hotspots Alta Potencia
+            </button>
+          </div>
+
+          <div class="filter-legend">
+            <span class="legend-item active-legend">
+              <span class="legend-dot dot-active"></span>
+              Enlace Activo
+            </span>
+            <span class="legend-item local-legend">
+              <span class="legend-dot dot-local"></span>
+              Operación Local
+            </span>
+          </div>
+        </div>
+
+        <!-- Tabla Técnica Interactiva -->
+        <div class="table-card">
+          <div class="table-responsive">
+            <table class="rep-table" id="repeaters-table">
+              <thead>
+                <tr>
+                  <th>ID DMR</th>
+                  <th>Indicativo</th>
+                  <th>Ubicación y Cobertura</th>
+                  <th>Banda</th>
+                  <th>RX / TX (Shift)</th>
+                  <th>Ranuras y CC</th>
+                  <th>Estado</th>
+                  <th>Telemetría</th>
+                </tr>
+              </thead>
+              <tbody>
+                {repeaters.map((r) => (
+                  <tr
+                    class="rep-row"
+                    data-band={r.band}
+                    data-type={r.type.includes('Hotspot') ? 'Hotspot' : 'Repeater'}
+                  >
+                    <td class="col-id">
+                      <span class="id-code">{r.id}</span>
+                    </td>
+                    <td class="col-call">
+                      <strong class="callsign-text">{r.callsign}</strong>
+                    </td>
+                    <td class="col-location">
+                      <div class="loc-name">{r.location}</div>
+                      <div class="loc-notes">{r.notes}</div>
+                    </td>
+                    <td class="col-band">
+                      <span class="std-pill">{r.band}</span>
+                    </td>
+                    <td class="col-freqs">
+                      <div class="freq-line"><strong>RX:</strong> {r.freqRx}</div>
+                      <div class="freq-line"><strong>TX:</strong> {r.freqTx}</div>
+                      <span class="offset-pill">{r.offset}</span>
+                    </td>
+                    <td class="col-slots">
+                      <div class="slot-line">Slot 1 &amp; Slot 2</div>
+                      <span class="cc-pill">{r.colorCode}</span>
+                    </td>
+                    <td class="col-status">
+                      <span class={`status-tag ${r.status === 'Activo' ? 'is-active' : 'is-local'}`}>
+                        {r.status}
+                      </span>
+                    </td>
+                    <td class="col-telemetry">
+                      <a
+                        href={`https://brandmeister.network/#/device/${r.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="btn-telemetry"
+                        title={`Consultar telemetría oficial de ${r.callsign} (${r.id})`}
+                      >
+                        <span>Ver en BM</span>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                          <polyline points="15 3 21 3 21 9"></polyline>
+                          <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- 4. Homenaje a los Custodios de Cerro y Equipos de Campo -->
+        <div class="fieldwork-tribute-card">
+          <div class="tribute-badge">
+            <span>Vocación de Servicio y Montaña</span>
+          </div>
+          <h2 class="tribute-h2">Custodia, Mantenimiento y Trabajo de Campo</h2>
+          <div class="tribute-content">
+            <p>
+              Detrás de cada contacto claro que escuchas en tu radio portátil hay un grupo de colegas que desafía la geografía, el clima y la logística venezolana para mantener encendidos los repetidores de la red.
+            </p>
+            <p>
+              Subir a las cimas de nuestras montañas, transportar baterías de respaldo, instalar generadores eléctricos, trepar torres de telecomunicaciones para cambiar antenas azotadas por vientos y rayos, y calibrar filtros de cavidad (duplexores) milimétricamente con analizadores de radiofrecuencia en mano, es una labor enteramente voluntaria impulsada por la pasión hacia la radioafición.
+            </p>
+            <p class="tribute-highlight">
+              A todos los custodios de repetidor, técnicos de sitio y sysops que hacen posible la cobertura nacional de BrandMeister Venezuela: <strong>¡nuestro más sincero reconocimiento y agradecimiento 73!</strong>
+            </p>
+          </div>
+        </div>
+
+        <!-- Botones de Navegación CTA -->
+        <div class="repeaters-footer-cta">
+          <a href="/talkgroups" class="btn btn-secondary">
+            <span>Ver Directorio de Talkgroups →</span>
+          </a>
+          <a href="/comunidad" class="btn btn-primary">
+            <span>Conoce la Historia de Nuestra Comunidad →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  // Filtro interactivo de repetidores por banda y modalidad
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll('#repeater-filter-group .filter-btn');
+    const rows = document.querySelectorAll('#repeaters-table tbody tr');
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach((b) => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+
+        const filter = btn.getAttribute('data-filter');
+
+        rows.forEach((row) => {
+          const rowBand = row.getAttribute('data-band');
+          const rowType = row.getAttribute('data-type');
+
+          if (filter === 'all') {
+            (row as HTMLElement).style.display = '';
+          } else if (filter === 'VHF' && rowBand === 'VHF') {
+            (row as HTMLElement).style.display = '';
+          } else if (filter === 'UHF' && rowBand === 'UHF') {
+            (row as HTMLElement).style.display = '';
+          } else if (filter === 'Hotspot' && rowType === 'Hotspot') {
+            (row as HTMLElement).style.display = '';
+          } else {
+            (row as HTMLElement).style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>
+
+<style>
+  .repeaters-page {
+    background-color: var(--bg-page);
+    min-height: 100vh;
+  }
+
+  /* Hero 50vh con fotografía real de trabajo de campo */
+  .repeaters-hero {
+    position: relative;
+    min-height: 50vh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    background-image:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.93) 45%, rgba(255, 255, 255, 0.65) 75%, rgba(255, 255, 255, 0.2) 100%),
+      linear-gradient(0deg, #FAFAFA 0%, rgba(255, 255, 255, 0.8) 12%, transparent 35%),
+      url('/assets/repeaters-fieldwork.jpg');
+    background-size: cover;
+    background-position: right center;
+    background-repeat: no-repeat;
+    padding: 3.5rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .repeaters-hero {
+      min-height: 50vh;
+      background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 50%, rgba(255, 255, 255, 0.65) 80%, rgba(255, 255, 255, 0.35) 100%),
+        url('/assets/repeaters-fieldwork.jpg');
+      background-position: center top;
+      background-size: cover;
+      padding: 2.5rem 0;
+    }
+  }
+
+  .hero-content {
+    max-width: 820px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--bm-red);
+    border: 1px solid rgba(232, 38, 28, 0.45);
+    background: rgba(232, 38, 28, 0.04);
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 1.1rem;
+  }
+
+  .hero-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.3rem, 4.8vw, 3.5rem);
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.15;
+    margin-bottom: 0.85rem;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.02rem, 1.8vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-meta {
+    font-size: 0.95rem;
+    color: var(--text-faint);
+    line-height: 1.5;
+  }
+
+  /* Línea tricolor BrandMeister */
+  .bm-stripe {
+    height: 3px;
+    background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
+    width: 100%;
+  }
+
+  /* Sección de contenido */
+  .section-padding {
+    padding: 4rem 0;
+  }
+
+  .container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Barra de filtros */
+  .filter-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .filter-btn {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.55rem 1.15rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    background: #FFFFFF;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover {
+    border-color: rgba(238, 108, 31, 0.4);
+    color: var(--text-main);
+  }
+
+  .filter-btn.is-active {
+    background: var(--bm-orange);
+    color: #FFFFFF;
+    border-color: var(--bm-orange);
+    box-shadow: 0 2px 8px rgba(238, 108, 31, 0.25);
+  }
+
+  .filter-legend {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .dot-active {
+    background: #16A34A;
+  }
+
+  .dot-local {
+    background: var(--bm-orange);
+  }
+
+  /* Tabla Técnica de Repetidores */
+  .table-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 4rem;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .rep-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.92rem;
+  }
+
+  .rep-table thead tr {
+    background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
+  }
+
+  .rep-table th {
+    background: transparent;
+    color: #FFFFFF;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    padding: 1rem 1.15rem;
+    white-space: nowrap;
+    border: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+  }
+
+  .rep-table td {
+    padding: 1rem 1.15rem;
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: middle;
+    background: #FFFFFF;
+  }
+
+  .rep-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .rep-table tr:hover td {
+    background: #FFFDF9;
+  }
+
+  .id-code {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--text-main);
+  }
+
+  .callsign-text {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--bm-red);
+  }
+
+  .loc-name {
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.2rem;
+  }
+
+  .loc-notes {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    max-width: 300px;
+  }
+
+  /* Píldora estandarizada BrandMeister */
+  .std-pill {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #FFEDD5;
+    color: var(--bm-orange);
+    border: 1px solid rgba(238, 108, 31, 0.25);
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+  }
+
+  .freq-line {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+
+  .freq-line strong {
+    color: var(--text-main);
+  }
+
+  .offset-pill {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #F1F5F9;
+    color: #475569;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    margin-top: 0.3rem;
+  }
+
+  .slot-line {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .cc-pill {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #FFEDD5;
+    color: var(--bm-orange);
+    border: 1px solid rgba(238, 108, 31, 0.25);
+    padding: 0.1rem 0.45rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .status-tag {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .status-tag.is-active {
+    background: #DCFCE7;
+    color: #15803D;
+    border: 1px solid rgba(22, 163, 74, 0.2);
+  }
+
+  .status-tag.is-local {
+    background: #FFEDD5;
+    color: var(--bm-orange);
+    border: 1px solid rgba(238, 108, 31, 0.25);
+  }
+
+  .btn-telemetry {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+    background: #FFF7ED;
+    border: 1px solid rgba(238, 108, 31, 0.3);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .btn-telemetry:hover {
+    background: var(--bm-orange);
+    color: #FFFFFF;
+    border-color: var(--bm-orange);
+  }
+  /* Tarjeta Homenaje a Equipos de Campo */
+  .fieldwork-tribute-card {
+    background: #FFFDF9;
+    border: 1px solid rgba(238, 108, 31, 0.25);
+    border-radius: var(--radius-lg);
+    padding: clamp(2rem, 4vw, 3rem);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 4rem;
+  }
+
+  .tribute-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+    background: #FFEDD5;
+    border: 1px solid rgba(238, 108, 31, 0.25);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 1rem;
+  }
+
+  .tribute-h2 {
+    font-family: var(--font-heading);
+    font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 1.25rem;
+  }
+
+  .tribute-content p {
+    font-size: 1.02rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin-bottom: 1.1rem;
+  }
+
+  .tribute-highlight {
+    color: var(--text-main) !important;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(238, 108, 31, 0.2);
+    font-style: italic;
+    margin-bottom: 0 !important;
+  }
+
+  /* Footer CTAs */
+  .repeaters-footer-cta {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.85rem 1.6rem;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary {
+    background: var(--bm-orange);
+    color: #FFFFFF;
+    box-shadow: 0 4px 14px rgba(238, 108, 31, 0.25);
+  }
+
+  .btn-primary:hover {
+    background: var(--bm-orange-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(238, 108, 31, 0.35);
+  }
+
+  .btn-secondary {
+    background: #FFFFFF;
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .btn-secondary:hover {
+    background: #FAFAFA;
+    border-color: rgba(238, 108, 31, 0.4);
+    transform: translateY(-2px);
+  }
+</style>

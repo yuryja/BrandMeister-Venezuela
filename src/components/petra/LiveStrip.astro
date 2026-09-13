@@ -1,0 +1,328 @@
+---
+import type { PetraLive } from '../../lib/petra';
+import { formatDuration, formatRelativeTime } from '../../lib/petra';
+import CallsignFlag from './CallsignFlag.astro';
+
+interface Props {
+  live: PetraLive;
+}
+
+const { live } = Astro.props;
+const last = live.last_heard;
+const isUp = live.link.state === 'up';
+---
+
+<div class="petra-live-strip">
+  <div class="live-strip-header">
+    <div class="live-strip-title-group">
+      <div class="live-indicator">
+        <span id="petra-status-dot" class={`status-dot ${isUp ? 'status-dot--ok' : 'status-dot--err'}`}></span>
+        <span id="petra-status-text" class="live-status-text">{isUp ? 'Enlace Activo' : 'Enlace Inactivo'}</span>
+      </div>
+      <div class="master-host" title="Servidor Máster BrandMeister">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+          <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+          <line x1="6" y1="6" x2="6.01" y2="6"></line>
+          <line x1="6" y1="18" x2="6.01" y2="18"></line>
+        </svg>
+        <span>{live.link.host || '7301.master.brandmeister.network'}</span>
+      </div>
+    </div>
+
+    <div class="live-strip-uptime">
+      <span class="uptime-badge">Uptime 24h: <strong id="petra-uptime">{live.link.uptime_24h}%</strong></span>
+      <span id="petra-drops-badge" class={`drops-badge ${live.link.drops_24h > 0 ? 'drops-badge--warn' : ''}`}>{live.link.drops_24h} caídas</span>
+    </div>
+  </div>
+
+  <!-- Último escuchado -->
+  <div class="last-heard-card">
+    <div class="last-heard-label">
+      <span class="lh-tag">Último escuchado en TG 734</span>
+      {last && (
+        <span id="petra-lh-time" class="lh-time" data-timestamp={last.at}>
+          {formatRelativeTime(last.at)}
+        </span>
+      )}
+    </div>
+
+    {last ? (
+      <div class="last-heard-body">
+        <div class="lh-operator">
+          <div class="lh-callsign-row">
+            <a
+              id="petra-lh-callsign"
+              href={`https://www.qrz.com/db/${last.callsign}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="lh-callsign"
+              title={`Ver ficha de ${last.callsign} en QRZ.com`}
+            >
+              <CallsignFlag callsign={last.callsign} size="md" />{last.callsign}
+            </a>
+            <span id="petra-carrier" class={`carrier-badge animate-pulse${last.open ? '' : ' hidden'}`}>
+              <span class="carrier-dot"></span>
+              TRANSMITIENDO
+            </span>
+          </div>
+          <div class="lh-details">
+            <span id="petra-lh-name" class="lh-name">{last.name || 'Operador DMR'}</span>
+            <span class="lh-separator">·</span>
+            <span id="petra-lh-id" class="lh-id" title="RadioID DMR">ID {last.src_id}</span>
+          </div>
+        </div>
+
+        <div class="lh-meta">
+          <div class="lh-duration-box">
+            <span class="dur-label">Duración</span>
+            <span id="petra-lh-dur" class="dur-val">{formatDuration(last.dur_ms)}</span>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div class="lh-empty">
+        <span>Sin transmisiones registradas en esta sesión</span>
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+  .petra-live-strip {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 2rem;
+  }
+
+  .live-strip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 1.1rem;
+  }
+
+  .live-strip-title-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .status-dot--ok {
+    background-color: #10B981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  }
+
+  .status-dot--err {
+    background-color: var(--bm-red);
+    box-shadow: 0 0 0 3px rgba(232, 38, 28, 0.2);
+  }
+
+  .master-host {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: var(--bg-card-subtle);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .live-strip-uptime {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .uptime-badge {
+    color: var(--text-muted);
+  }
+
+  .uptime-badge strong {
+    color: var(--text-main);
+  }
+
+  .drops-badge {
+    color: #10B981;
+    font-weight: 600;
+  }
+
+  .drops-badge--warn {
+    color: #F59E0B;
+  }
+
+  /* Último Escuchado */
+  .last-heard-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .last-heard-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    font-family: var(--font-mono, monospace);
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .lh-time {
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: none;
+  }
+
+  .last-heard-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: linear-gradient(135deg, rgba(238, 108, 31, 0.04) 0%, rgba(232, 38, 28, 0.02) 100%);
+    border: 1px solid rgba(238, 108, 31, 0.15);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+  }
+
+  .lh-callsign-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .lh-callsign {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--bm-red);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: color 0.15s ease;
+  }
+
+  .lh-callsign:hover {
+    color: var(--bm-orange);
+    text-decoration: underline;
+  }
+
+  .carrier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #FFFFFF;
+    background: var(--bm-red);
+    padding: 0.2rem 0.55rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .carrier-badge.hidden {
+    display: none;
+  }
+
+
+  .carrier-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #FFFFFF;
+  }
+
+  .lh-details {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.95rem;
+    color: var(--text-main);
+  }
+
+  .lh-name {
+    font-weight: 600;
+  }
+
+  .lh-separator {
+    color: var(--text-faint);
+  }
+
+  .lh-id {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .lh-meta {
+    display: flex;
+    align-items: center;
+  }
+
+  .lh-duration-box {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .dur-label {
+    font-size: 0.72rem;
+    font-family: var(--font-mono, monospace);
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+
+  .dur-val {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .lh-empty {
+    padding: 1rem;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.75; transform: scale(1.03); }
+  }
+
+  .animate-pulse {
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+</style>

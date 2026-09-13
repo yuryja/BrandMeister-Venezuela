@@ -1,0 +1,382 @@
+---
+---
+
+<section class="hero-section">
+  <!-- Decorative ambient glow -->
+  <div class="hero-ambient-glow"></div>
+
+  <div class="container hero-container">
+    <div class="hero-layout">
+      <!-- Left / Main Editorial Content Column -->
+      <div class="hero-content reveal-on-scroll">
+        <!-- SOMOS BRANDMEISTER VENEZUELA Headline Kicker -->
+        <div class="hero-brand-kicker">
+          <span class="brand-kicker-text">SOMOS BRANDMEISTER VENEZUELA</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="hero-title">
+          La voz digital que une a los <span class="gradient-text">radioaficionados</span> de Venezuela y el mundo.
+        </h1>
+
+        <!-- Subtitle / Description -->
+        <p class="hero-description">
+          Infraestructura abierta y 100% digital basada en el estándar DMR. Conectamos repetidores, puntos de acceso de alta potencia y operadores en todo el territorio nacional con acceso directo a la red global BrandMeister.
+        </p>
+
+        <!-- Reorganized Action Buttons -->
+        <div class="hero-actions">
+          <button
+            type="button"
+            class="btn-hero btn-hero-primary btn-hero-primary-hoseline js-toggle-hoseline"
+            title="Escuchar audio en vivo de BrandMeister TG 734"
+          >
+            <!-- Play icon (shown when idle) -->
+            <svg class="btn-hero-icon icon-play" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <polygon points="6 4 20 12 6 20 6 4"></polygon>
+            </svg>
+            <!-- Pause icon (shown when active) -->
+            <svg class="btn-hero-icon icon-pause" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+              <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+              <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+            </svg>
+            <span class="btn-hero-text">Audio en Vivo</span>
+          </button>
+
+          <a href="/petra" class="btn-hero btn-hero-secondary">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--bm-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <span>Petra</span>
+          </a>
+
+          <a href="#talkgroups" class="btn-hero btn-hero-outline">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--bm-red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+            <span>Talkgroups</span>
+          </a>
+        </div>
+
+        <!-- Metrics Strip with Self-Incrementing Animated Numbers -->
+        <div class="hero-metrics">
+          <div class="metric-item">
+            <div class="metric-value">
+              <span>TG </span><span class="hero-counter" data-target="734">0</span>
+            </div>
+            <div class="metric-label">Talkgroup Nacional Oficial</div>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <div class="metric-value">
+              <span class="hero-counter" data-target="100">0</span><span>%</span>
+            </div>
+            <div class="metric-label">Arquitectura Digital DMR</div>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <div class="metric-value">
+              <span class="hero-counter" data-target="9">0</span><span> Circuitos</span>
+            </div>
+            <div class="metric-label">Cobertura Regional Slot 2</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Self-incrementing Numbers Animation Script -->
+<script>
+  function runHeroCounters() {
+    const counters = document.querySelectorAll<HTMLElement>('.hero-counter');
+    counters.forEach(counter => {
+      const targetStr = counter.getAttribute('data-target');
+      if (!targetStr) return;
+      const target = parseInt(targetStr, 10);
+      const duration = 1600; // ms
+      const startTime = performance.now();
+
+      function update(now: number) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Exponential ease-out curve
+        const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        const current = Math.floor(easeOut * target);
+        counter.textContent = current.toString();
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          counter.textContent = target.toString();
+        }
+      }
+      requestAnimationFrame(update);
+    });
+  }
+
+  // Trigger when document is ready or visible
+  if (typeof window !== 'undefined') {
+    const metricsElem = document.querySelector('.hero-metrics');
+    if (metricsElem && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            runHeroCounters();
+            observer.disconnect();
+          }
+        });
+      }, { threshold: 0.15 });
+      observer.observe(metricsElem);
+    } else {
+      window.addEventListener('DOMContentLoaded', runHeroCounters);
+      setTimeout(runHeroCounters, 200);
+    }
+  }
+</script>
+
+<style>
+  /* HERO SECTION WITH VENEZUELA DMR BACKGROUND PHOTO */
+  .hero-section {
+    position: relative;
+    /* Together with navbar (78px header + 3px stripe = 81px), navbar + hero = 100vh */
+    min-height: calc(100vh - 81px);
+    min-height: calc(100dvh - 81px);
+    display: flex;
+    align-items: center;
+    padding-top: clamp(1.5rem, 3.5vh, 2.75rem);
+    padding-bottom: clamp(1.5rem, 3.5vh, 2.75rem);
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    background-image:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 38%, rgba(255, 255, 255, 0.65) 65%, rgba(255, 255, 255, 0.15) 100%),
+      linear-gradient(0deg, #FFFFFF 0%, rgba(255, 255, 255, 0.8) 12%, transparent 35%),
+      url('/assets/hero-dmr-venezuela-landscape.jpg');
+    background-size: cover;
+    background-position: right center;
+    background-repeat: no-repeat;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  /* Mobile view */
+  @media (max-width: 768px) {
+    .hero-section {
+      min-height: calc(100vh - 81px);
+      min-height: calc(100dvh - 81px);
+      background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 50%, rgba(255, 255, 255, 0.65) 80%, rgba(255, 255, 255, 0.35) 100%),
+        url('/assets/hero-dmr-venezuela-portrait.jpg');
+      background-position: center top;
+      background-size: cover;
+      padding-top: 2rem;
+      padding-bottom: 2.5rem;
+    }
+  }
+
+  .hero-ambient-glow {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(242, 169, 59, 0.12) 0%, rgba(238, 108, 31, 0.05) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .hero-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+  }
+
+  .hero-layout {
+    display: block;
+  }
+
+  .hero-content {
+    max-width: 740px;
+  }
+
+  /* SOMOS BRANDMEISTER VENEZUELA KICKER */
+  .hero-brand-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.4rem 1.1rem;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid rgba(238, 108, 31, 0.35);
+    border-radius: var(--radius-pill);
+    box-shadow: 0 4px 16px -2px rgba(238, 108, 31, 0.16);
+    margin-bottom: clamp(0.75rem, 1.8vh, 1.25rem);
+  }
+
+  .brand-kicker-text {
+    font-size: 0.84rem;
+    font-weight: 800;
+    color: var(--bm-red);
+    letter-spacing: 0 !important;
+    text-transform: uppercase;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 3.2vw, 3.1rem);
+    margin-bottom: clamp(0.75rem, 1.8vh, 1.2rem);
+    line-height: 1.15;
+  }
+
+  .gradient-text {
+    background: var(--bm-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+
+  .hero-description {
+    font-size: clamp(1.02rem, 1.15vw, 1.14rem);
+    line-height: 1.65;
+    color: var(--text-muted);
+    margin-bottom: clamp(1.1rem, 2.2vh, 1.75rem);
+    max-width: 640px;
+  }
+
+  /* Reorganized Action Buttons */
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: clamp(1.3rem, 2.5vh, 2rem);
+  }
+
+  .btn-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.5rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.22s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+
+  /* Primary Button: Gradient BrandMeister with Red / Orange */
+  .btn-hero-primary {
+    background: var(--bm-gradient);
+    color: #FFFFFF;
+    border: 1px solid rgba(232, 38, 28, 0.4);
+    box-shadow: 0 8px 24px -6px rgba(232, 38, 28, 0.45);
+  }
+
+  .btn-hero-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -6px rgba(232, 38, 28, 0.6);
+    color: #FFFFFF;
+  }
+
+  .btn-hero-primary-hoseline .icon-pause {
+    display: none;
+  }
+
+  .btn-hero-primary-hoseline.is-active .icon-play {
+    display: none;
+  }
+
+  .btn-hero-primary-hoseline.is-active .icon-pause {
+    display: inline-block;
+  }
+
+  /* Secondary Button: Clean Light with Warm Accent & Live Dot */
+  .btn-hero-secondary {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text-main);
+    border: 1.5px solid rgba(238, 108, 31, 0.35);
+    box-shadow: 0 4px 14px -3px rgba(238, 108, 31, 0.12);
+  }
+
+  .btn-hero-secondary:hover {
+    border-color: var(--bm-orange);
+    color: var(--bm-orange);
+    background: #FFFFFF;
+    transform: translateY(-2px);
+  }
+
+  /* Outline Button: Clean Neutral with Red Accent */
+  .btn-hero-outline {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text-main);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .btn-hero-outline:hover {
+    border-color: var(--bm-red);
+    color: var(--bm-red);
+    background: #FFFFFF;
+    transform: translateY(-2px);
+  }
+
+  /* Linear Metrics Strip with 3 balanced incrementing items */
+  .hero-metrics {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.35rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  @media (min-width: 640px) {
+    .hero-metrics {
+      grid-template-columns: auto auto auto auto auto;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .metric-divider {
+      width: 1px;
+      height: 38px;
+      background: rgba(15, 23, 42, 0.1);
+      display: block;
+    }
+  }
+
+  .metric-divider {
+    display: none;
+  }
+
+  .metric-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .metric-value {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+    letter-spacing: 0 !important;
+  }
+
+  .hero-counter {
+    display: inline-block;
+    color: var(--text-main);
+  }
+
+  .metric-label {
+    font-size: 0.84rem;
+    color: var(--text-faint);
+    font-weight: 600;
+    letter-spacing: 0 !important;
+  }
+</style>

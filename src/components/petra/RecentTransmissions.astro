@@ -1,0 +1,243 @@
+---
+import type { PetraLive } from '../../lib/petra';
+import { formatDuration, formatRelativeTime } from '../../lib/petra';
+import CallsignFlag from './CallsignFlag.astro';
+
+interface Props {
+  recent: PetraLive['recent'];
+}
+
+const { recent = [] } = Astro.props;
+---
+
+<div class="petra-panel-card recent-transmissions-card">
+  <div class="panel-header">
+    <div class="panel-title-group">
+      <h3 class="panel-title">Últimas Intervenciones</h3>
+      <span class="panel-subtitle">Registro cronológico reciente de QSOs en el TG 734</span>
+    </div>
+    <div class="live-tag">
+      <span class="pulse-dot"></span>
+      <span>En Vivo</span>
+    </div>
+  </div>
+
+  <div class="recent-list">
+    {recent.length > 0 ? (
+      recent.map((item) => (
+        <div class="recent-item">
+          <div class="item-left">
+            <div class="item-callsign-line">
+              <a
+                href={`https://www.qrz.com/db/${item.callsign}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="item-callsign"
+                title={`Ver perfil de ${item.callsign} en QRZ.com`}
+              >
+                <CallsignFlag callsign={item.callsign} />{item.callsign}
+              </a>
+              {item.open && (
+                <span class="carrier-pill">AL AIRE</span>
+              )}
+            </div>
+            <div class="item-sub">
+              <span class="item-name">{item.name || 'Operador'}</span>
+              <span class="item-sep">·</span>
+              <span class="item-id">ID {item.src_id}</span>
+            </div>
+          </div>
+
+          <div class="item-right">
+            <span class="item-duration">{formatDuration(item.dur_ms)}</span>
+            <span class="item-time" data-timestamp={item.at}>
+              {formatRelativeTime(item.at)}
+            </span>
+          </div>
+        </div>
+      ))
+    ) : (
+      <div class="empty-recent">
+        <span>Sin transmisiones recientes registradas</span>
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+  .recent-transmissions-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-sm);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .panel-title {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.2rem;
+  }
+
+  .panel-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .live-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #10B981;
+    background: rgba(16, 185, 129, 0.08);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10B981;
+    animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes ping {
+    75%, 100% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+
+  .recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    overflow-y: auto;
+    max-height: 520px;
+    padding-right: 0.25rem;
+  }
+
+  .recent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--border-subtle);
+    background: var(--bg-card-subtle);
+    transition: all 0.15s ease;
+  }
+
+  .recent-item:hover {
+    border-left-color: var(--bm-red);
+    background: #FFFFFF;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .item-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .item-callsign-line {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .item-callsign {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .item-callsign:hover {
+    color: var(--bm-red);
+    text-decoration: underline;
+  }
+
+  .carrier-pill {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    background: var(--bm-red);
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.04em;
+  }
+
+  .item-sub {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .item-name {
+    font-weight: 500;
+  }
+
+  .item-sep {
+    color: var(--text-faint);
+  }
+
+  .item-id {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+  }
+
+  .item-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .item-duration {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .item-time {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    color: var(--text-faint);
+  }
+
+  .empty-recent {
+    padding: 2.5rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+</style>
