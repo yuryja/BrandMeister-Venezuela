@@ -155,7 +155,7 @@ const initialPosts = seedPosts;
                     </span>
                   </div>
                   <p class="overlay-caption">
-                    {post.caption?.substring(0, 110)}...
+                    {post.caption?.replace(/#experienciadmr/gi, '').trim().substring(0, 110)}...
                   </p>
                   <span class="overlay-cta">Ver en detalle →</span>
                 </div>
@@ -317,8 +317,9 @@ const initialPosts = seedPosts;
       modalLikes.textContent = post.likes_count || 0;
       modalComments.textContent = post.comments_count || 0;
 
-      // Resaltar hashtags y menciones en el caption
-      const formattedCaption = (post.caption || '')
+      // Resaltar hashtags y menciones en el caption (excluyendo #experienciadmr de la vista)
+      const rawCaption = (post.caption || '').replace(/#experienciadmr\s*/gi, '').trim();
+      const formattedCaption = rawCaption
         .replace(/(#\w+)/g, '<span class="hl-hashtag">$1</span>')
         .replace(/(@\w+)/g, '<span class="hl-mention">$1</span>');
       modalCaption.innerHTML = formattedCaption;
