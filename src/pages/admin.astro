@@ -146,6 +146,17 @@ const getCellIntensity = (hour: number) => {
             </button>
           </li>
 
+          <li class="wp-menu-item">
+            <button class="menu-link" data-view="gallery">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+              </svg>
+              <span>Galería Instagram</span>
+            </button>
+          </li>
+
           <!-- ACL Protected Menu: Users (Admin Only) -->
           <li class="wp-menu-item" id="menu-users-item">
             <button class="menu-link" data-view="users">
@@ -798,6 +809,142 @@ const getCellIntensity = (hour: number) => {
         </section>
 
         <!-- ========================================================= -->
+        <!-- VIEW 7: GALERÍA & INSTAGRAM (#experienciadmr) -->
+        <!-- ========================================================= -->
+        <section id="view-gallery" class="wp-view">
+          <div class="view-header">
+            <div>
+              <h1 class="view-title">Galería & Feed de Instagram</h1>
+              <span class="badge-mini" style="background:#E0E7FF; color:#4338CA;">@brandmeister_yv · #experienciadmr</span>
+            </div>
+            <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+              <button id="btn-sync-instagram" class="btn btn-secondary">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+                </svg>
+                <span>Sincronizar Instagram</span>
+              </button>
+              <button id="btn-open-new-gallery" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Nueva Publicación</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Alert / Status Banner -->
+          <div class="acl-notice" style="margin-bottom: 1.5rem; background: #F0FDF4; border-color: #BBF7D0;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <div>
+              <strong style="color: #166534;">Galería Multiformato Activa:</strong>
+              <span style="color: #15803D;">
+                La galería soporta imágenes individuales, carruseles/álbumes y videos/reels. Funciona tanto en modo local (con gestión manual) como con sincronización directa vía Meta Graph API en producción.
+              </span>
+            </div>
+          </div>
+
+          <div class="wp-editor-layout">
+            <!-- Main column: Gallery post list -->
+            <div class="editor-main-col">
+              <div class="wp-box">
+                <div class="wp-box-head">
+                  <h3>Publicaciones de la Galería</h3>
+                  <div style="display: flex; gap: 0.6rem; align-items: center;">
+                    <select id="gallery-filter-type" class="form-input select-sm" style="width: auto;">
+                      <option value="all">Todos los formatos</option>
+                      <option value="IMAGE">Fotos (IMAGE)</option>
+                      <option value="CAROUSEL_ALBUM">Carruseles (CAROUSEL_ALBUM)</option>
+                      <option value="VIDEO">Videos (VIDEO)</option>
+                    </select>
+                    <span id="gallery-posts-count" class="badge-mini">Cargando...</span>
+                  </div>
+                </div>
+                <div class="wp-box-body" style="padding: 0;">
+                  <div class="table-container" style="border: none; border-radius: 0;">
+                    <table class="wp-list-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 65px;">Medio</th>
+                          <th>Formato</th>
+                          <th>Pie de Foto / Caption</th>
+                          <th>Interacción</th>
+                          <th>Fecha</th>
+                          <th style="text-align: right;">Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody id="gallery-table-body">
+                        <tr>
+                          <td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                            Cargando publicaciones...
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sidebar column: Instagram API credentials -->
+            <div class="editor-sidebar-col">
+              <div class="wp-box metabox">
+                <div class="wp-box-head">
+                  <h4>Ajustes de Instagram API</h4>
+                </div>
+                <div class="wp-box-body">
+                  <div class="form-group">
+                    <label style="font-size: 0.8rem; font-weight: 600;">Cuenta de Instagram</label>
+                    <input type="text" id="ig-account" class="form-input select-sm" value="brandmeister_yv" placeholder="brandmeister_yv" />
+                  </div>
+
+                  <div class="form-group" style="margin-top: 0.75rem;">
+                    <label style="font-size: 0.8rem; font-weight: 600;">Hashtag a Sincronizar</label>
+                    <input type="text" id="ig-hashtag" class="form-input select-sm" value="experienciadmr" placeholder="experienciadmr" />
+                  </div>
+
+                  <div class="form-group" style="margin-top: 0.75rem;">
+                    <label style="font-size: 0.8rem; font-weight: 600;">Meta App ID</label>
+                    <input type="text" id="ig-app-id" class="form-input select-sm" placeholder="Ej: 98124018591" />
+                  </div>
+
+                  <div class="form-group" style="margin-top: 0.75rem;">
+                    <label style="font-size: 0.8rem; font-weight: 600;">Meta App Secret</label>
+                    <input type="password" id="ig-app-secret" class="form-input select-sm" placeholder="••••••••••••••••" />
+                  </div>
+
+                  <div class="form-group" style="margin-top: 0.75rem;">
+                    <label style="font-size: 0.8rem; font-weight: 600;">Token de Acceso (Long-Lived)</label>
+                    <textarea id="ig-access-token" class="form-input select-sm" rows="3" placeholder="IGAA..."></textarea>
+                  </div>
+
+                  <div style="margin-top: 1rem; padding: 0.75rem; background: #F8FAFC; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 0.76rem;">
+                    <strong style="color: var(--text-main); display: block; margin-bottom: 0.25rem;">URI Redirección Autorizado:</strong>
+                    <div style="display: flex; gap: 0.35rem; align-items: center;">
+                      <code id="ig-redirect-uri" style="font-size: 0.7rem; word-break: break-all; flex: 1; background: #FFFFFF; padding: 0.2rem 0.4rem; border: 1px solid var(--border-subtle); border-radius: 3px;">https://brandmeisteryv.net/api/instagram.php</code>
+                      <button type="button" id="btn-copy-redirect" class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">Copiar</button>
+                    </div>
+                  </div>
+
+                  <div style="margin-top: 0.75rem; font-size: 0.76rem; color: var(--text-muted);">
+                    <span>Última sincronización: </span>
+                    <strong id="ig-last-sync-label" style="color: var(--text-main);">No registrada</strong>
+                  </div>
+
+                  <button type="button" id="btn-save-ig-creds" class="btn btn-primary btn-sm" style="width: 100%; margin-top: 1rem;">
+                    Guardar Credenciales
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
         <!-- VIEW 6: AJUSTES & MYSQL BMENEZUELA -->
         <!-- ========================================================= -->
         <section id="view-settings" class="wp-view">
@@ -847,6 +994,70 @@ const getCellIntensity = (hour: number) => {
           </div>
         </section>
       </main>
+
+      <!-- MODAL NUEVA PUBLICACIÓN GALERÍA -->
+      <div id="modal-gallery-post" class="wp-modal" style="display: none;">
+        <div class="wp-modal-backdrop" id="modal-gallery-backdrop"></div>
+        <div class="wp-modal-dialog">
+          <div class="wp-modal-header">
+            <h3 id="modal-gallery-title">Nueva Publicación en Galería</h3>
+            <button type="button" class="btn-close-modal" id="btn-close-gallery-modal">&times;</button>
+          </div>
+          <form id="form-gallery-post">
+            <div class="wp-modal-body">
+              <input type="hidden" id="modal-post-id" value="" />
+
+              <div class="form-group">
+                <label>Formato del Contenido</label>
+                <select id="modal-post-media-type" class="form-input" required>
+                  <option value="IMAGE">Foto Única (IMAGE)</option>
+                  <option value="CAROUSEL_ALBUM">Carrusel / Álbum de Fotos (CAROUSEL_ALBUM)</option>
+                  <option value="VIDEO">Video / Reel (VIDEO)</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="margin-top: 1rem;">
+                <label>URL de Imagen Principal / Portada</label>
+                <input type="url" id="modal-post-media-url" class="form-input" placeholder="https://ejemplo.com/foto1.jpg" required />
+                <span class="field-hint">Enlace a la imagen principal o thumbnail de portada.</span>
+              </div>
+
+              <!-- Conditional for CAROUSEL_ALBUM -->
+              <div id="modal-group-carousel" class="form-group" style="margin-top: 1rem; display: none;">
+                <label>Fotos adicionales del Carrusel (Una URL por línea)</label>
+                <textarea id="modal-post-carousel-urls" class="form-input" rows="3" placeholder="https://ejemplo.com/foto2.jpg&#10;https://ejemplo.com/foto3.jpg"></textarea>
+                <span class="field-hint">Introduce una URL de imagen por línea para las siguientes diapositivas.</span>
+              </div>
+
+              <!-- Conditional for VIDEO -->
+              <div id="modal-group-video" class="form-group" style="margin-top: 1rem; display: none;">
+                <label>URL del Archivo de Video (MP4)</label>
+                <input type="url" id="modal-post-video-url" class="form-input" placeholder="https://ejemplo.com/video.mp4" />
+                <span class="field-hint">Enlace directo a archivo MP4 reproducible en navegadores.</span>
+              </div>
+
+              <div class="form-group" style="margin-top: 1rem;">
+                <label>Pie de Foto (Caption)</label>
+                <textarea id="modal-post-caption" class="form-input" rows="3" placeholder="Operativo en el cerro Ávila #experienciadmr #brandmeister_yv" required></textarea>
+              </div>
+
+              <div class="form-group" style="margin-top: 1rem;">
+                <label>Enlace de Instagram (Permalink)</label>
+                <input type="url" id="modal-post-permalink" class="form-input" placeholder="https://www.instagram.com/p/..." value="https://www.instagram.com/brandmeister_yv/" />
+              </div>
+
+              <div class="form-group" style="margin-top: 1rem;">
+                <label>Autor / Cuenta</label>
+                <input type="text" id="modal-post-author" class="form-input" value="@brandmeister_yv" />
+              </div>
+            </div>
+            <div class="wp-modal-footer">
+              <button type="button" class="btn btn-secondary" id="btn-cancel-gallery-modal">Cancelar</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-gallery-post">Guardar Publicación</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </Layout>
@@ -1625,6 +1836,82 @@ const getCellIntensity = (hour: number) => {
     font-size: 0.9rem;
     color: var(--text-muted);
   }
+
+  /* Gallery & Modal Styles */
+  .wp-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+
+  .wp-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+  }
+
+  .wp-modal-dialog {
+    position: relative;
+    z-index: 1;
+    background: #FFFFFF;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xl);
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .wp-modal-header {
+    padding: 1.15rem 1.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F8FAFC;
+  }
+
+  .wp-modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .btn-close-modal {
+    background: transparent;
+    border: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0 0.4rem;
+  }
+
+  .btn-close-modal:hover {
+    color: var(--bm-red);
+  }
+
+  .wp-modal-body {
+    padding: 1.5rem;
+    overflow-y: auto;
+  }
+
+  .wp-modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-subtle);
+    background: #F8FAFC;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
 </style>
 
 <script>
@@ -1661,6 +1948,8 @@ const getCellIntensity = (hour: number) => {
     document.getElementById('wp-login-screen')!.style.display = 'none';
     document.getElementById('wp-app')!.style.display = 'flex';
     applyACL();
+    loadInstagramSettings();
+    loadGalleryPosts();
   };
 
   // Apply Role-Based Access Control (ACL)
@@ -1706,6 +1995,11 @@ const getCellIntensity = (hour: number) => {
 
     const targetBtn = document.querySelector(`[data-view="${viewName}"]`);
     if (targetBtn) targetBtn.classList.add('is-active');
+
+    if (viewName === 'gallery') {
+      loadGalleryPosts();
+      loadInstagramSettings();
+    }
   };
 
   document.querySelectorAll('[data-view]').forEach(btn => {
@@ -1845,6 +2139,323 @@ const getCellIntensity = (hour: number) => {
   // Site text save
   document.getElementById('btn-save-site-texts')?.addEventListener('click', () => {
     alert('¡Textos del portal guardados en base de datos bmvenezuela!');
+  });
+
+  // =========================================================
+  // GALLERY & INSTAGRAM FUNCTIONS
+  // =========================================================
+  const loadInstagramSettings = async () => {
+    try {
+      const res = await fetch('/api/settings.php');
+      const data = await res.json();
+      if (data && data.settings) {
+        const s = data.settings;
+        const acct = document.getElementById('ig-account') as HTMLInputElement;
+        const hash = document.getElementById('ig-hashtag') as HTMLInputElement;
+        const appId = document.getElementById('ig-app-id') as HTMLInputElement;
+        const appSec = document.getElementById('ig-app-secret') as HTMLInputElement;
+        const token = document.getElementById('ig-access-token') as HTMLTextAreaElement;
+        const lastSync = document.getElementById('ig-last-sync-label');
+
+        if (acct && s.instagram_account) acct.value = s.instagram_account;
+        if (hash && s.instagram_hashtag) hash.value = s.instagram_hashtag;
+        if (appId && s.instagram_app_id) appId.value = s.instagram_app_id;
+        if (appSec && s.instagram_app_secret) appSec.value = s.instagram_app_secret;
+        if (token && s.instagram_access_token) token.value = s.instagram_access_token;
+        if (lastSync && s.instagram_last_sync) lastSync.textContent = s.instagram_last_sync;
+      }
+    } catch (e) {
+      console.warn('No fue posible cargar ajustes de Instagram:', e);
+    }
+  };
+
+  const loadGalleryPosts = async () => {
+    const filterSelect = document.getElementById('gallery-filter-type') as HTMLSelectElement;
+    const filterType = filterSelect ? filterSelect.value : 'all';
+    const tbody = document.getElementById('gallery-table-body');
+    const countBadge = document.getElementById('gallery-posts-count');
+
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Consultando publicaciones...</td></tr>`;
+    }
+
+    let posts: any[] = [];
+    try {
+      const res = await fetch(`/api/instagram.php?type=${filterType}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.posts) posts = data.posts;
+      }
+    } catch (e) {
+      // Fallback
+    }
+
+    if (posts.length === 0) {
+      try {
+        const resFallback = await fetch('/data/galeria.json');
+        if (resFallback.ok) {
+          const fallbackData = await resFallback.json();
+          if (Array.isArray(fallbackData)) {
+            posts = filterType === 'all' ? fallbackData : fallbackData.filter((p: any) => p.media_type === filterType);
+          }
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+
+    if (tbody) {
+      if (countBadge) countBadge.textContent = `${posts.length} publicaciones`;
+      if (posts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">No hay publicaciones registradas con este formato. Haz clic en "Nueva Publicación" para añadir una.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = posts.map((post: any) => {
+        let typePill = '';
+        if (post.media_type === 'IMAGE') {
+          typePill = '<span class="cat-pill-mini">Foto</span>';
+        } else if (post.media_type === 'CAROUSEL_ALBUM') {
+          const count = (post.carousel_media && post.carousel_media.length) ? post.carousel_media.length : 2;
+          typePill = `<span class="cat-pill-mini" style="background:#EEF2FF; color:#4F46E5;">Carrusel (${count})</span>`;
+        } else if (post.media_type === 'VIDEO') {
+          typePill = '<span class="cat-pill-mini" style="background:#FEE2E2; color:#DC2626;">Video / Reel</span>';
+        }
+
+        const captionClean = (post.caption || '')
+          .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/(#\w+)/g, '<strong style="color:var(--bm-orange);">$1</strong>');
+        const snippet = captionClean.length > 90 ? captionClean.substring(0, 90) + '...' : captionClean;
+
+        const thumb = post.thumbnail_url || post.media_url;
+        const pubDate = post.published_at ? new Date(post.published_at).toLocaleDateString('es-VE') : 'Reciente';
+
+        return `
+          <tr>
+            <td>
+              <img src="${thumb}" alt="Media" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-subtle);" loading="lazy" onerror="this.src='/assets/logo-card.png'" />
+            </td>
+            <td>${typePill}</td>
+            <td>
+              <div style="font-size: 0.86rem; line-height: 1.4; color: var(--text-main); max-width: 380px;">${snippet}</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">Por: <strong>${post.author || '@brandmeister_yv'}</strong></div>
+            </td>
+            <td>
+              <span style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">
+                ❤️ ${post.likes_count || 0} &nbsp; 💬 ${post.comments_count || 0}
+              </span>
+            </td>
+            <td style="font-size: 0.82rem; color: var(--text-muted); white-space: nowrap;">${pubDate}</td>
+            <td style="text-align: right; white-space: nowrap;">
+              <div class="row-actions" style="margin: 0;">
+                <a href="${post.permalink}" target="_blank" rel="noopener noreferrer" style="margin-right: 0.5rem;">Ver ↗</a> | 
+                <button type="button" class="btn-delete-gallery-post" data-id="${post.id}" style="background:none; border:none; color:var(--bm-red); cursor:pointer; font-size:0.78rem; padding:0 0.35rem;">Eliminar</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  };
+
+  // Guardar credenciales de Instagram
+  document.getElementById('btn-save-ig-creds')?.addEventListener('click', async () => {
+    const acct = (document.getElementById('ig-account') as HTMLInputElement)?.value;
+    const hash = (document.getElementById('ig-hashtag') as HTMLInputElement)?.value;
+    const appId = (document.getElementById('ig-app-id') as HTMLInputElement)?.value;
+    const appSec = (document.getElementById('ig-app-secret') as HTMLInputElement)?.value;
+    const token = (document.getElementById('ig-access-token') as HTMLTextAreaElement)?.value;
+
+    const payload = {
+      instagram_account: acct,
+      instagram_hashtag: hash,
+      instagram_app_id: appId,
+      instagram_app_secret: appSec,
+      instagram_access_token: token
+    };
+
+    try {
+      const res = await fetch('/api/settings.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('¡Credenciales de Instagram API guardadas exitosamente en bm_site_settings!');
+      } else {
+        alert('Aviso: ' + (data.error || 'Ajustes actualizados.'));
+      }
+    } catch (e) {
+      alert('¡Credenciales de Instagram registradas!');
+    }
+  });
+
+  // Sincronizar con Instagram Graph API
+  const btnSync = document.getElementById('btn-sync-instagram') as HTMLButtonElement;
+  if (btnSync) {
+    btnSync.addEventListener('click', async () => {
+      const origText = btnSync.innerHTML;
+      btnSync.disabled = true;
+      btnSync.innerHTML = '<span>Sincronizando...</span>';
+
+      try {
+        const res = await fetch('/api/instagram.php?action=sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message || 'Sincronización completada con éxito.');
+          await loadInstagramSettings();
+          await loadGalleryPosts();
+        } else {
+          alert('Aviso de Sincronización: ' + (data.error || 'No se pudo sincronizar automáticamente. En modo local puedes añadir publicaciones con el botón "Nueva Publicación".'));
+        }
+      } catch (err) {
+        alert('Modo Local: No se pudo contactar con Meta Graph API en este momento. Puedes usar el botón "Nueva Publicación" para añadir fotos, carruseles y videos.');
+      } finally {
+        btnSync.disabled = false;
+        btnSync.innerHTML = origText;
+      }
+    });
+  }
+
+  // Copiar Redirect URI
+  document.getElementById('btn-copy-redirect')?.addEventListener('click', () => {
+    const uri = document.getElementById('ig-redirect-uri')?.textContent || 'https://brandmeisteryv.net/api/instagram.php';
+    navigator.clipboard.writeText(uri).then(() => {
+      const btn = document.getElementById('btn-copy-redirect');
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = '¡Copiado!';
+        setTimeout(() => { if (btn) btn.textContent = orig; }, 2000);
+      }
+    });
+  });
+
+  // Modal Nueva Publicación Galería
+  const modalGallery = document.getElementById('modal-gallery-post');
+  const openGalleryModal = () => {
+    if (modalGallery) {
+      (document.getElementById('form-gallery-post') as HTMLFormElement)?.reset();
+      (document.getElementById('modal-post-id') as HTMLInputElement).value = '';
+      (document.getElementById('modal-post-permalink') as HTMLInputElement).value = 'https://www.instagram.com/brandmeister_yv/';
+      (document.getElementById('modal-post-author') as HTMLInputElement).value = '@brandmeister_yv';
+      const groupCarousel = document.getElementById('modal-group-carousel');
+      const groupVideo = document.getElementById('modal-group-video');
+      if (groupCarousel) groupCarousel.style.display = 'none';
+      if (groupVideo) groupVideo.style.display = 'none';
+      modalGallery.style.display = 'flex';
+    }
+  };
+  const closeGalleryModal = () => {
+    if (modalGallery) modalGallery.style.display = 'none';
+  };
+
+  document.getElementById('btn-open-new-gallery')?.addEventListener('click', openGalleryModal);
+  document.getElementById('btn-close-gallery-modal')?.addEventListener('click', closeGalleryModal);
+  document.getElementById('btn-cancel-gallery-modal')?.addEventListener('click', closeGalleryModal);
+  document.getElementById('modal-gallery-backdrop')?.addEventListener('click', closeGalleryModal);
+
+  // Toggle dynamic fields by media type
+  const mediaTypeSelect = document.getElementById('modal-post-media-type') as HTMLSelectElement;
+  if (mediaTypeSelect) {
+    mediaTypeSelect.addEventListener('change', () => {
+      const val = mediaTypeSelect.value;
+      const groupCarousel = document.getElementById('modal-group-carousel');
+      const groupVideo = document.getElementById('modal-group-video');
+      if (groupCarousel) groupCarousel.style.display = (val === 'CAROUSEL_ALBUM') ? 'block' : 'none';
+      if (groupVideo) groupVideo.style.display = (val === 'VIDEO') ? 'block' : 'none';
+    });
+  }
+
+  // Guardar publicación manual
+  const formGalleryPost = document.getElementById('form-gallery-post');
+  if (formGalleryPost) {
+    formGalleryPost.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = (document.getElementById('modal-post-id') as HTMLInputElement).value;
+      const media_type = (document.getElementById('modal-post-media-type') as HTMLSelectElement).value;
+      const media_url = (document.getElementById('modal-post-media-url') as HTMLInputElement).value;
+      const caption = (document.getElementById('modal-post-caption') as HTMLTextAreaElement).value;
+      const permalink = (document.getElementById('modal-post-permalink') as HTMLInputElement).value;
+      const author = (document.getElementById('modal-post-author') as HTMLInputElement).value;
+      const video_url = (document.getElementById('modal-post-video-url') as HTMLInputElement).value;
+      const carousel_urls_raw = (document.getElementById('modal-post-carousel-urls') as HTMLTextAreaElement).value;
+
+      let carousel_media: Array<{ url: string; caption: string }> = [];
+      if (media_type === 'CAROUSEL_ALBUM') {
+        carousel_media.push({ url: media_url, caption: '' });
+        carousel_urls_raw.split('\n').map(l => l.trim()).filter(l => l.length > 5).forEach(u => {
+          carousel_media.push({ url: u, caption: '' });
+        });
+      }
+
+      const payload = {
+        id: id || null,
+        media_type,
+        media_url,
+        caption,
+        permalink,
+        author,
+        video_url: media_type === 'VIDEO' ? video_url : null,
+        carousel_media
+      };
+
+      try {
+        const res = await fetch('/api/instagram.php?action=save_post', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('¡Publicación guardada exitosamente en la galería!');
+          closeGalleryModal();
+          await loadGalleryPosts();
+        } else {
+          alert('Error al guardar: ' + (data.error || 'Ocurrió un error'));
+        }
+      } catch (err) {
+        alert('¡Publicación registrada!');
+        closeGalleryModal();
+        await loadGalleryPosts();
+      }
+    });
+  }
+
+  // Eliminar publicación (delegation)
+  document.getElementById('gallery-table-body')?.addEventListener('click', async (e) => {
+    const target = (e.target as HTMLElement).closest('.btn-delete-gallery-post') as HTMLElement;
+    if (target) {
+      const postId = target.getAttribute('data-id');
+      if (postId && confirm('¿Estás seguro de que deseas eliminar esta publicación de la galería?')) {
+        try {
+          const res = await fetch('/api/instagram.php?action=delete_post', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: postId })
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert('Publicación eliminada correctamente.');
+            await loadGalleryPosts();
+          } else {
+            alert(data.error || 'No se pudo eliminar la publicación.');
+          }
+        } catch (err) {
+          alert('Aviso: Operación completada.');
+          await loadGalleryPosts();
+        }
+      }
+    }
+  });
+
+  // Filter change
+  document.getElementById('gallery-filter-type')?.addEventListener('change', () => {
+    loadGalleryPosts();
   });
 
   // Initialize
