@@ -15,7 +15,7 @@ const data = await getPetraData();
 
 <Layout
   title="Conoce a Petra · Plataforma Informativa y Telemetría del TG 734 · BrandMeister Venezuela"
-  description="Conoce a Petra, plataforma informativa y de telemetría en la red BrandMeister Venezuela. Emite al TG 734 reportes meteorológicos, alertas sísmicas y balizas horarias en telegrafía. Desarrollado por YY3BIG · Yury Jajitzky."
+  description="Conoce a Petra, plataforma informativa y de telemetría en la red BrandMeister Venezuela. Emite al TG 734 reportes meteorológicos, alertas sísmicas y balizas horarias en telegrafía. Con el apoyo de la comunidad DMR de Venezuela."
 >
   <main class="petra-page">
     <!-- Hero 50vh con degradado lateral estilo Hero Principal -->
@@ -30,7 +30,7 @@ const data = await getPetraData();
             Plataforma informativa y de telemetría integrada en la red BrandMeister Venezuela. Conectada a servicios de monitoreo nacional, genera y emite al <strong>TG 734</strong> reportes meteorológicos y alertas sísmicas en tiempo real, transmitiendo a su vez una baliza horaria que evoca la nostalgia de los repetidores analógicos mediante telegrafía.
           </p>
           <div class="petra-meta-author">
-            Desarrollado y mantenido con dedicación para la comunidad por <strong>YY3BIG · Yury Jajitzky</strong>
+            Con el apoyo de la comunidad DMR de Venezuela
           </div>
         </div>
       </div>
@@ -120,7 +120,7 @@ const data = await getPetraData();
     .petra-hero {
       min-height: 50vh;
       background-image:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 50%, rgba(255, 255, 255, 0.65) 80%, rgba(255, 255, 255, 0.35) 100%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 60%, rgba(255, 255, 255, 0.88) 100%),
         url('/assets/petra-hero-bg.jpg');
       background-position: center top;
       background-size: cover;
@@ -165,12 +165,9 @@ const data = await getPetraData();
 
   .petra-meta-author {
     font-size: 0.95rem;
-    color: var(--text-faint);
+    color: var(--text-muted);
+    font-weight: 500;
     line-height: 1.5;
-  }
-
-  .petra-meta-author strong {
-    color: var(--text-main);
   }
 
   .petra-telemetry-body {
