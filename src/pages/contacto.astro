@@ -1,0 +1,1602 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Clave pública de reCAPTCHA: permite usar variable de entorno o fallback a clave de prueba de Google
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+
+const statesVenezuela = [
+  "Distrito Capital (Caracas)",
+  "Miranda",
+  "Carabobo",
+  "Aragua",
+  "Lara",
+  "Zulia",
+  "Táchira",
+  "Mérida",
+  "Trujillo",
+  "Bolívar",
+  "Anzoátegui",
+  "Monagas",
+  "Nueva Esparta (Margarita)",
+  "Falcón",
+  "Guárico",
+  "Portuguesa",
+  "Barinas",
+  "Sucre",
+  "Yaracuy",
+  "Cojedes",
+  "Apure",
+  "Delta Amacuro",
+  "Amazonas",
+  "La Guaira (Vargas)",
+  "Fuera de Venezuela (Internacional)"
+];
+
+const categories = [
+  { value: "Consulta General", label: "Consulta General sobre la Red" },
+  { value: "Soporte Hotspot", label: "Soporte de Hotspot (Pi-Star / WPSD / MMDVM)" },
+  { value: "Nuevo Repetidor", label: "Integración de Nuevo Repetidor a BrandMeister" },
+  { value: "Reporte de Falla", label: "Reporte Técnico de Falla o Interferencia" },
+  { value: "Consulta Talkgroup", label: "Consulta / Asignación de Talkgroup Regional" },
+  { value: "Rueda o Boletin", label: "Coordinación de Rueda Radial o Boletín" },
+  { value: "Voluntariado Tecnico", label: "Colaboración y Voluntariado Técnico" }
+];
+---
+
+<Layout
+  title="Contacto y Soporte Técnico · BrandMeister Venezuela"
+  description="Canal oficial de contacto de BrandMeister Venezuela (TG 734). Envía consultas, solicitudes de soporte para hotspots MMDVM, integración de repetidores o dudas al equipo de sysops."
+>
+  <main class="contact-page">
+    <!-- Hero 50vh con fotografía real del transceptor Motorola EM200 y Hotspot MMDVM -->
+    <section class="contact-hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="badge-dot"></span>
+            <span>Mesa Técnica y Coordinación Nacional</span>
+          </div>
+          <h1 class="hero-title">Contacto y Soporte Técnico</h1>
+          <p class="hero-subtitle">
+            Canal directo con los sysops, custodios de repetidor y administradores de red de BrandMeister Venezuela. Estamos a tu disposición para ayudarte con la puesta a punto de tu estación DMR, integración de sistemas y consultas comunitarias.
+          </p>
+          <div class="hero-meta">
+            <span>Atención Voluntaria 73</span> · <span>TG Nacional 734</span> · <span>Soporte Hotspots MMDVM</span> · <span>Sysops YV</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Franja divisoria con degradado de 3 colores BrandMeister -->
+    <div class="bm-stripe"></div>
+
+    <!-- Contenedor Principal de Contacto -->
+    <section class="contact-body section-padding">
+      <div class="container">
+        <div class="contact-layout-grid">
+          
+          <!-- COLUMNA PRINCIPAL: FORMULARIO ROBUSTO -->
+          <div class="contact-form-column">
+            <div class="form-card">
+              <div class="form-header">
+                <div class="header-icon-wrap">
+                  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h2 class="form-title">Envía un Mensaje a los Sysops</h2>
+                  <p class="form-subtitle">
+                    Completa los campos detallados. Tu mensaje generará un código de ticket para seguimiento técnico.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Banner de Estado de Respuesta (Éxito / Error) -->
+              <div id="form-alert" class="form-alert is-hidden" role="alert">
+                <div class="alert-icon" id="alert-icon"></div>
+                <div class="alert-content">
+                  <div class="alert-title" id="alert-title"></div>
+                  <div class="alert-desc" id="alert-desc"></div>
+                  <div class="alert-ticket is-hidden" id="alert-ticket-wrap">
+                    <span class="ticket-label">Código de Ticket:</span>
+                    <strong class="ticket-code" id="alert-ticket-code"></strong>
+                    <button type="button" class="btn-copy-ticket" id="btn-copy-ticket" title="Copiar código de ticket">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      <span>Copiar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Formulario de Contacto -->
+              <form id="contact-form" class="contact-form" novalidate>
+                <!-- Campo Honeypot Anti-Spam (Invisible para humanos, visible para robots) -->
+                <div class="form-honeypot" aria-hidden="true">
+                  <label for="form-website">Sitio web (no llenar):</label>
+                  <input type="text" id="form-website" name="website" tabindex="-1" autocomplete="off" />
+                </div>
+
+                <!-- Grid Fila 1: Nombre e Indicativo -->
+                <div class="form-grid-2">
+                  <div class="form-group" id="group-name">
+                    <label for="input-name" class="form-label">
+                      Nombre y Apellido <span class="req">*</span>
+                    </label>
+                    <div class="input-wrap">
+                      <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      <input
+                        type="text"
+                        id="input-name"
+                        name="name"
+                        class="form-input"
+                        placeholder="Ej. Carlos Mendoza"
+                        required
+                        minlength="2"
+                        maxlength="100"
+                      />
+                    </div>
+                    <span class="field-error" id="error-name"></span>
+                  </div>
+
+                  <div class="form-group" id="group-callsign">
+                    <label for="input-callsign" class="form-label">
+                      Indicativo (Callsign) <span class="opt">(Opcional)</span>
+                    </label>
+                    <div class="input-wrap">
+                      <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path>
+                        <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path>
+                        <circle cx="12" cy="12" r="2"></circle>
+                        <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path>
+                        <path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path>
+                      </svg>
+                      <input
+                        type="text"
+                        id="input-callsign"
+                        name="callsign"
+                        class="form-input form-callsign"
+                        placeholder="Ej. YV5XXX / YY4YYY"
+                        maxlength="12"
+                        autocomplete="off"
+                        autocapitalize="characters"
+                      />
+                    </div>
+                    <span class="field-error" id="error-callsign"></span>
+                  </div>
+                </div>
+
+                <!-- Grid Fila 2: Correo y DMR ID -->
+                <div class="form-grid-2">
+                  <div class="form-group" id="group-email">
+                    <label for="input-email" class="form-label">
+                      Correo Electrónico <span class="req">*</span>
+                    </label>
+                    <div class="input-wrap">
+                      <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                      </svg>
+                      <input
+                        type="email"
+                        id="input-email"
+                        name="email"
+                        class="form-input"
+                        placeholder="tunombre@ejemplo.com"
+                        required
+                      />
+                    </div>
+                    <span class="field-error" id="error-email"></span>
+                  </div>
+
+                  <div class="form-group" id="group-dmrid">
+                    <label for="input-dmrid" class="form-label">
+                      DMR ID (RadioID) <span class="opt">(Opcional)</span>
+                    </label>
+                    <div class="input-wrap">
+                      <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+                        <line x1="7" y1="2" x2="7" y2="22"></line>
+                        <line x1="17" y1="2" x2="17" y2="22"></line>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <line x1="2" y1="7" x2="7" y2="7"></line>
+                        <line x1="2" y1="17" x2="7" y2="17"></line>
+                        <line x1="17" y1="17" x2="22" y2="17"></line>
+                        <line x1="17" y1="7" x2="22" y2="7"></line>
+                      </svg>
+                      <input
+                        type="text"
+                        id="input-dmrid"
+                        name="dmr_id"
+                        class="form-input"
+                        placeholder="Ej. 7340001"
+                        maxlength="8"
+                        inputmode="numeric"
+                      />
+                    </div>
+                    <span class="field-error" id="error-dmrid"></span>
+                  </div>
+                </div>
+
+                <!-- Grid Fila 3: Categoría y Ubicación -->
+                <div class="form-grid-2">
+                  <div class="form-group" id="group-category">
+                    <label for="input-category" class="form-label">
+                      Motivo de Contacto <span class="req">*</span>
+                    </label>
+                    <div class="input-wrap select-wrap">
+                      <select id="input-category" name="category" class="form-select" required>
+                        {categories.map(c => (
+                          <option value={c.value}>{c.label}</option>
+                        ))}
+                      </select>
+                      <svg class="select-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div class="form-group" id="group-state">
+                    <label for="input-state" class="form-label">
+                      Estado / Ubicación <span class="opt">(Opcional)</span>
+                    </label>
+                    <div class="input-wrap select-wrap">
+                      <select id="input-state" name="state_region" class="form-select">
+                        <option value="">Selecciona tu estado...</option>
+                        {statesVenezuela.map(st => (
+                          <option value={st}>{st}</option>
+                        ))}
+                      </select>
+                      <svg class="select-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fila 4: Asunto Breve -->
+                <div class="form-group" id="group-subject">
+                  <label for="input-subject" class="form-label">
+                    Asunto de la Solicitud <span class="req">*</span>
+                  </label>
+                  <div class="input-wrap">
+                    <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="4" y1="9" x2="20" y2="9"></line>
+                      <line x1="4" y1="15" x2="20" y2="15"></line>
+                      <line x1="10" y1="3" x2="8" y2="21"></line>
+                      <line x1="16" y1="3" x2="14" y2="21"></line>
+                    </svg>
+                    <input
+                      type="text"
+                      id="input-subject"
+                      name="subject"
+                      class="form-input"
+                      placeholder="Ej. Problema de conexión MMDVM a servidor 3341"
+                      required
+                      minlength="3"
+                      maxlength="150"
+                    />
+                  </div>
+                  <span class="field-error" id="error-subject"></span>
+                </div>
+
+                <!-- Fila 5: Mensaje Detallado con Contador de Caracteres -->
+                <div class="form-group" id="group-message">
+                  <div class="label-with-counter">
+                    <label for="input-message" class="form-label">
+                      Detalle del Mensaje <span class="req">*</span>
+                    </label>
+                    <span class="char-counter" id="char-counter">0 / 2500</span>
+                  </div>
+                  <textarea
+                    id="input-message"
+                    name="message"
+                    class="form-textarea"
+                    rows="6"
+                    placeholder="Describe con precisión tu consulta, modelo de radio o hotspot, software utilizado (Pi-Star/WPSD), repetidor involucrado o cualquier detalle técnico relevante..."
+                    required
+                    minlength="15"
+                    maxlength="2500"
+                  ></textarea>
+                  <span class="field-error" id="error-message"></span>
+                </div>
+
+                <!-- Fila 6: Google reCAPTCHA y Política Anti-Spam -->
+                <div class="recaptcha-section">
+                  <div class="recaptcha-wrapper">
+                    <!-- Widget Google reCAPTCHA v2 -->
+                    <div
+                      class="g-recaptcha"
+                      data-sitekey={recaptchaSiteKey}
+                      data-callback="onRecaptchaSuccess"
+                      data-expired-callback="onRecaptchaExpired"
+                    ></div>
+                    <input type="hidden" name="recaptcha_token" id="recaptcha_token" />
+                  </div>
+                  <span class="field-error" id="error-recaptcha"></span>
+                  <p class="recaptcha-notice">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    Este formulario cuenta con protección anti-spam Google reCAPTCHA y filtro de seguridad.
+                  </p>
+                </div>
+
+                <!-- Botón de Envío con Estado de Carga -->
+                <div class="form-actions">
+                  <button type="submit" class="btn-submit-contact" id="btn-submit">
+                    <span class="btn-spinner" id="btn-spinner"></span>
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    <span class="btn-text" id="btn-text">Transmitir Mensaje</span>
+                  </button>
+                  <span class="form-terms">
+                    Al enviar este formulario autorizas al equipo sysop de BrandMeister Venezuela a contactarte por correo para la resolución técnica de tu consulta.
+                  </span>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- COLUMNA LATERAL: CANALES DIRECTOS, TELEGRAM, EMERGENCIAS Y AYUDA -->
+          <aside class="contact-sidebar">
+            
+            <!-- TARJETA 1: CANALES DIRECTOS DE COMUNIDAD -->
+            <div class="sidebar-card">
+              <div class="card-badge">Vía Inmediata</div>
+              <h3 class="card-title">Canales Directos</h3>
+              <p class="card-description">
+                ¿Prefieres conversar en tiempo real con la comunidad y los administradores? Utiliza nuestros canales oficiales:
+              </p>
+
+              <div class="channels-list">
+                <!-- Telegram -->
+                <a
+                  href="https://t.me/BrandMeisterVenezuela"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="channel-item channel-telegram"
+                >
+                  <div class="channel-icon tg-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                    </svg>
+                  </div>
+                  <div class="channel-info">
+                    <span class="channel-name">Telegram Comunitario</span>
+                    <span class="channel-meta">Grupo Oficial BrandMeister Venezuela</span>
+                  </div>
+                  <svg class="channel-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                    <polyline points="7 7 17 7 17 17"></polyline>
+                  </svg>
+                </a>
+
+                <!-- Correo Sysop Directo con 1-Click Copy -->
+                <div class="email-copy-box">
+                  <div class="email-box-top">
+                    <div class="email-icon">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                      </svg>
+                    </div>
+                    <div>
+                      <span class="email-box-label">Correo Oficial Sysop:</span>
+                      <code class="email-address" id="sysop-email-text">sysop@brandmeisteryv.net</code>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-copy-email" id="btn-copy-email" title="Copiar correo">
+                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    <span id="copy-email-label">Copiar Dirección</span>
+                  </button>
+                </div>
+
+                <!-- Instagram -->
+                <a
+                  href="https://www.instagram.com/brandmeister_yv/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="channel-item channel-instagram"
+                >
+                  <div class="channel-icon ig-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                  </div>
+                  <div class="channel-info">
+                    <span class="channel-name">Instagram</span>
+                    <span class="channel-meta">@brandmeister_yv</span>
+                  </div>
+                  <svg class="channel-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                    <polyline points="7 7 17 7 17 17"></polyline>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <!-- TARJETA 2: ADVERTENCIA DE EMERGENCIAS (EMCOM) -->
+            <div class="sidebar-card card-emergency">
+              <div class="emergency-badge">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M12 2L1 21h22L12 2zm0 3.45l8.28 14.55H3.72L12 5.45zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
+                </svg>
+                <span>Tráfico de Emergencia</span>
+              </div>
+              <h3 class="emergency-title">No usar para auxilios inmediatos</h3>
+              <p class="emergency-text">
+                Este formulario web se procesa por correo electrónico voluntario. <strong>NO está diseñado para emergencias médicas, desastres o tráfico de socorro en tiempo real.</strong>
+              </p>
+              <div class="emergency-callout">
+                <span>Canal de Emergencia Nacional:</span>
+                <strong>TG 734911 (Slot 1)</strong>
+                <span class="callout-sub">Frecuencias Simplex: 146.550 MHz / 436.550 MHz</span>
+              </div>
+            </div>
+
+            <!-- TARJETA 3: ENLACES RÁPIDOS Y RECURSOS -->
+            <div class="sidebar-card">
+              <h3 class="card-title">Preguntas Frecuentes</h3>
+              <ul class="faq-quick-list">
+                <li>
+                  <a href="https://radioid.net/" target="_blank" rel="noopener noreferrer" class="faq-link">
+                    <div class="faq-title">¿Cómo obtengo mi DMR ID de 7 dígitos?</div>
+                    <div class="faq-desc">Se solicita gratuitamente en RadioID.net adjuntando tu licencia de radioaficionado.</div>
+                  </a>
+                </li>
+                <li>
+                  <a href="/repetidores" class="faq-link">
+                    <div class="faq-title">¿Cuáles son las frecuencias de repetidores?</div>
+                    <div class="faq-desc">Revisa el mapa interactivo y listado de repetidores en Caracas, Valencia y Guárico.</div>
+                  </a>
+                </li>
+                <li>
+                  <a href="/petra" class="faq-link">
+                    <div class="faq-title">¿Cómo comprobar si el TG 734 está activo?</div>
+                    <div class="faq-desc">Consulta la telemetría comunitaria Petra y escucha el audio en vivo del Hoseline.</div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<!-- Script oficial de Google reCAPTCHA v2 -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<script is:inline>
+  // Handlers globales para reCAPTCHA
+  window.onRecaptchaSuccess = function(token) {
+    const hiddenToken = document.getElementById('recaptcha_token');
+    const errRecaptcha = document.getElementById('error-recaptcha');
+    if (hiddenToken) hiddenToken.value = token;
+    if (errRecaptcha) errRecaptcha.textContent = '';
+  };
+
+  window.onRecaptchaExpired = function() {
+    const hiddenToken = document.getElementById('recaptcha_token');
+    if (hiddenToken) hiddenToken.value = '';
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('contact-form');
+    const inputMessage = document.getElementById('input-message');
+    const charCounter = document.getElementById('char-counter');
+    const inputCallsign = document.getElementById('input-callsign');
+    const inputDmrid = document.getElementById('input-dmrid');
+    const btnSubmit = document.getElementById('btn-submit');
+    const btnSpinner = document.getElementById('btn-spinner');
+    const btnText = document.getElementById('btn-text');
+    const formAlert = document.getElementById('form-alert');
+    const alertTitle = document.getElementById('alert-title');
+    const alertDesc = document.getElementById('alert-desc');
+    const alertIcon = document.getElementById('alert-icon');
+    const alertTicketWrap = document.getElementById('alert-ticket-wrap');
+    const alertTicketCode = document.getElementById('alert-ticket-code');
+    const btnCopyTicket = document.getElementById('btn-copy-ticket');
+    const btnCopyEmail = document.getElementById('btn-copy-email');
+    const copyEmailLabel = document.getElementById('copy-email-label');
+
+    // 1. Contador de caracteres dinámico para el textarea
+    if (inputMessage && charCounter) {
+      inputMessage.addEventListener('input', () => {
+        const len = inputMessage.value.length;
+        charCounter.textContent = `${len} / 2500`;
+        if (len >= 2400) {
+          charCounter.style.color = 'var(--bm-red)';
+        } else {
+          charCounter.style.color = 'var(--text-muted)';
+        }
+      });
+    }
+
+    // 2. Auto-mayúsculas y saneamiento en el indicativo
+    if (inputCallsign) {
+      inputCallsign.addEventListener('input', (e) => {
+        e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9\/\-]/g, '');
+      });
+    }
+
+    // 3. DMR ID solo números
+    if (inputDmrid) {
+      inputDmrid.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
+      });
+    }
+
+    // 4. Copiar correo del sysop al portapapeles
+    if (btnCopyEmail) {
+      btnCopyEmail.addEventListener('click', async () => {
+        const email = 'sysop@brandmeisteryv.net';
+        try {
+          await navigator.clipboard.writeText(email);
+          if (copyEmailLabel) copyEmailLabel.textContent = '¡Copiado!';
+          btnCopyEmail.classList.add('is-copied');
+          setTimeout(() => {
+            if (copyEmailLabel) copyEmailLabel.textContent = 'Copiar Dirección';
+            btnCopyEmail.classList.remove('is-copied');
+          }, 2500);
+        } catch (err) {
+          console.warn('Clipboard write failed:', err);
+        }
+      });
+    }
+
+    // 5. Copiar ticket al portapapeles
+    if (btnCopyTicket) {
+      btnCopyTicket.addEventListener('click', async () => {
+        const code = alertTicketCode ? alertTicketCode.textContent : '';
+        if (!code) return;
+        try {
+          await navigator.clipboard.writeText(code);
+          const origText = btnCopyTicket.innerHTML;
+          btnCopyTicket.innerHTML = '<span>¡Copiado!</span>';
+          setTimeout(() => {
+            btnCopyTicket.innerHTML = origText;
+          }, 2000);
+        } catch (err) {
+          console.warn('Ticket copy failed:', err);
+        }
+      });
+    }
+
+    // 6. Limpieza de errores en foco
+    const clearError = (fieldId, errorId) => {
+      const el = document.getElementById(fieldId);
+      const err = document.getElementById(errorId);
+      if (el) el.classList.remove('is-invalid');
+      if (err) err.textContent = '';
+    };
+
+    ['input-name', 'input-email', 'input-subject', 'input-message'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          clearError(id, id.replace('input-', 'error-'));
+        });
+      }
+    });
+
+    // 7. Envío del Formulario
+    if (form) {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Ocultar alerta anterior
+        if (formAlert) formAlert.classList.add('is-hidden');
+
+        // Validaciones del lado del cliente
+        let hasErrors = false;
+
+        const nameVal = (document.getElementById('input-name')?.value || '').trim();
+        const emailVal = (document.getElementById('input-email')?.value || '').trim();
+        const callsignVal = (document.getElementById('input-callsign')?.value || '').trim();
+        const dmrVal = (document.getElementById('input-dmrid')?.value || '').trim();
+        const categoryVal = document.getElementById('input-category')?.value || 'Consulta General';
+        const stateVal = document.getElementById('input-state')?.value || '';
+        const subjectVal = (document.getElementById('input-subject')?.value || '').trim();
+        const messageVal = (document.getElementById('input-message')?.value || '').trim();
+        const websiteHoneypot = (document.getElementById('form-website')?.value || '').trim();
+
+        // Obtener respuesta de reCAPTCHA
+        let recaptchaToken = '';
+        if (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function') {
+          recaptchaToken = window.grecaptcha.getResponse();
+        }
+
+        // Validación Nombre
+        if (nameVal.length < 2) {
+          const el = document.getElementById('input-name');
+          const err = document.getElementById('error-name');
+          if (el) el.classList.add('is-invalid');
+          if (err) err.textContent = 'Por favor ingresa tu nombre y apellido.';
+          hasErrors = true;
+        }
+
+        // Validación Email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailVal)) {
+          const el = document.getElementById('input-email');
+          const err = document.getElementById('error-email');
+          if (el) el.classList.add('is-invalid');
+          if (err) err.textContent = 'Por favor ingresa un correo electrónico válido.';
+          hasErrors = true;
+        }
+
+        // Validación Asunto
+        if (subjectVal.length < 3) {
+          const el = document.getElementById('input-subject');
+          const err = document.getElementById('error-subject');
+          if (el) el.classList.add('is-invalid');
+          if (err) err.textContent = 'Por favor indica el asunto de tu consulta.';
+          hasErrors = true;
+        }
+
+        // Validación Mensaje
+        if (messageVal.length < 15) {
+          const el = document.getElementById('input-message');
+          const err = document.getElementById('error-message');
+          if (el) el.classList.add('is-invalid');
+          if (err) err.textContent = 'El mensaje debe tener al menos 15 caracteres descriptivos.';
+          hasErrors = true;
+        }
+
+        // Validación reCAPTCHA (en producción o cuando está disponible)
+        if (!recaptchaToken && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+          const err = document.getElementById('error-recaptcha');
+          if (err) err.textContent = 'Por favor marca la casilla "No soy un robot" de Google reCAPTCHA.';
+          hasErrors = true;
+        }
+
+        if (hasErrors) {
+          // Scroll suave al primer error
+          const firstErr = form.querySelector('.is-invalid, .field-error:not(:empty)');
+          if (firstErr) {
+            firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return;
+        }
+
+        // Estado de carga en botón
+        btnSubmit.disabled = true;
+        btnSubmit.classList.add('is-loading');
+        if (btnText) btnText.textContent = 'Transmitiendo paquete...';
+
+        const payload = {
+          name: nameVal,
+          callsign: callsignVal,
+          dmr_id: dmrVal,
+          email: emailVal,
+          category: categoryVal,
+          state_region: stateVal,
+          subject: subjectVal,
+          message: messageVal,
+          website: websiteHoneypot,
+          recaptcha_token: recaptchaToken
+        };
+
+        try {
+          const response = await fetch('/api/contact.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
+
+          // Manejar respuesta
+          let data;
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            data = await response.json();
+          } else {
+            // Si estamos en entorno de desarrollo local donde Vite no ejecuta PHP nativamente
+            const textResponse = await response.text();
+            if (response.status === 405 || textResponse.includes('<?php')) {
+              // Simular respuesta exitosa de prueba en dev local
+              data = {
+                success: true,
+                message: 'Mensaje transmitido correctamente (Modo Simulación de Desarrollo Local).',
+                ticket_id: 'BM-734-' + Math.random().toString(36).substring(2, 8).toUpperCase()
+              };
+            } else {
+              throw new Error('Respuesta no reconocida del servidor.');
+            }
+          }
+
+          if (data && data.success) {
+            // Mostrar mensaje de éxito
+            formAlert.className = 'form-alert alert-success';
+            if (alertIcon) {
+              alertIcon.innerHTML = `
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              `;
+            }
+            if (alertTitle) alertTitle.textContent = '¡Mensaje recibido con éxito, 73!';
+            if (alertDesc) alertDesc.textContent = data.message || 'Tu solicitud ha sido asignada a la mesa técnica de sysops de BrandMeister Venezuela.';
+            
+            if (data.ticket_id && alertTicketWrap && alertTicketCode) {
+              alertTicketCode.textContent = data.ticket_id;
+              alertTicketWrap.classList.remove('is-hidden');
+            }
+
+            formAlert.classList.remove('is-hidden');
+            formAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // Reiniciar formulario y reCAPTCHA
+            form.reset();
+            if (charCounter) charCounter.textContent = '0 / 2500';
+            if (window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
+              window.grecaptcha.reset();
+            }
+          } else {
+            // Error devuelto por la API
+            throw new Error(data?.error || 'No fue posible enviar tu mensaje en este momento.');
+          }
+        } catch (err) {
+          formAlert.className = 'form-alert alert-error';
+          if (alertIcon) {
+            alertIcon.innerHTML = `
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            `;
+          }
+          if (alertTitle) alertTitle.textContent = 'Error al enviar el mensaje';
+          if (alertDesc) alertDesc.textContent = err.message || 'Ocurrió una falla en la conexión. Por favor verifica los datos o contáctanos por Telegram.';
+          if (alertTicketWrap) alertTicketWrap.classList.add('is-hidden');
+          formAlert.classList.remove('is-hidden');
+          formAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } finally {
+          btnSubmit.disabled = false;
+          btnSubmit.classList.remove('is-loading');
+          if (btnText) btnText.textContent = 'Transmitir Mensaje';
+        }
+      });
+    }
+  });
+</script>
+
+<style>
+  .contact-page {
+    background-color: var(--bg-page);
+    min-height: 100vh;
+  }
+
+  /* ====================================================================
+     HERO SECTION (50vh) - Con imagen del Motorola EM200 y Hotspot MMDVM
+     Tratamiento idéntico al hero del home y de repetidores
+     ==================================================================== */
+  .contact-hero {
+    position: relative;
+    min-height: 50vh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    background-image:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 45%, rgba(255, 255, 255, 0.68) 75%, rgba(255, 255, 255, 0.2) 100%),
+      linear-gradient(0deg, #FAFAFA 0%, rgba(255, 255, 255, 0.8) 12%, transparent 35%),
+      url('/assets/contacto-em200-bg.jpg');
+    background-size: cover;
+    background-position: right center;
+    background-repeat: no-repeat;
+    padding: 3.5rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .contact-hero {
+      min-height: 50vh;
+      background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 50%, rgba(255, 255, 255, 0.65) 80%, rgba(255, 255, 255, 0.35) 100%),
+        url('/assets/contacto-em200-bg.jpg');
+      background-position: center top;
+      background-size: cover;
+      padding: 2.5rem 0;
+    }
+  }
+
+  .hero-content {
+    max-width: 820px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--bm-red);
+    border: 1px solid rgba(232, 38, 28, 0.45);
+    background: rgba(232, 38, 28, 0.04);
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .badge-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--bm-red);
+    box-shadow: 0 0 8px rgba(232, 38, 28, 0.6);
+  }
+
+  .hero-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.3rem, 4.8vw, 3.5rem);
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.12;
+    margin-bottom: 1.1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.05rem, 1.8vw, 1.22rem);
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+
+  .hero-meta {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    opacity: 0.85;
+  }
+
+  /* ====================================================================
+     MAIN CONTENT GRID (Formulario + Barra Lateral)
+     ==================================================================== */
+  .contact-body {
+    padding-top: 3.5rem;
+    padding-bottom: 5rem;
+  }
+
+  .contact-layout-grid {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 992px) {
+    .contact-layout-grid {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+  }
+
+  /* ====================================================================
+     FORM CARD STYLING
+     ==================================================================== */
+  .form-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  }
+
+  @media (max-width: 600px) {
+    .form-card {
+      padding: 1.5rem 1.25rem;
+    }
+  }
+
+  .form-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding-bottom: 1.75rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .header-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(232, 38, 28, 0.08);
+    color: var(--bm-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .form-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 0.35rem 0;
+  }
+
+  .form-subtitle {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Honeypot */
+  .form-honeypot {
+    position: absolute !important;
+    left: -9999px !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Form Layout */
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 650px) {
+    .form-grid-2 {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 1.35rem;
+    position: relative;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.45rem;
+  }
+
+  .form-label .req {
+    color: var(--bm-red);
+  }
+
+  .form-label .opt {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 0.2rem;
+  }
+
+  .label-with-counter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.45rem;
+  }
+
+  .label-with-counter .form-label {
+    margin-bottom: 0;
+  }
+
+  .char-counter {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-family: monospace;
+  }
+
+  /* Inputs & Wrappers */
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-muted);
+    pointer-events: none;
+    opacity: 0.7;
+    transition: color 0.2s ease;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    padding: 0.78rem 1rem 0.78rem 2.75rem;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text-main);
+    background-color: #FAFAFA;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+  }
+
+  .form-textarea {
+    padding: 0.85rem 1rem;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .form-callsign {
+    font-family: monospace;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .select-wrap {
+    position: relative;
+  }
+
+  .form-select {
+    padding-left: 1rem;
+    padding-right: 2.5rem;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 1rem;
+    pointer-events: none;
+    color: var(--text-muted);
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    background-color: #FFFFFF;
+    border-color: var(--bm-red);
+    box-shadow: 0 0 0 3px rgba(232, 38, 28, 0.12);
+  }
+
+  .form-input:focus + .input-icon,
+  .input-wrap:focus-within .input-icon {
+    color: var(--bm-red);
+    opacity: 1;
+  }
+
+  .form-input.is-invalid,
+  .form-textarea.is-invalid {
+    border-color: var(--bm-red);
+    background-color: #FFF8F8;
+  }
+
+  .field-error {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--bm-red);
+    margin-top: 0.35rem;
+    min-height: 1rem;
+  }
+
+  /* reCAPTCHA Section */
+  .recaptcha-section {
+    margin: 1.5rem 0 2rem 0;
+    padding: 1.25rem;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+  }
+
+  .recaptcha-wrapper {
+    display: flex;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .recaptcha-notice {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 0.6rem 0 0 0;
+  }
+
+  .recaptcha-notice svg {
+    color: #10B981;
+    flex-shrink: 0;
+  }
+
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .btn-submit-contact {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: var(--bm-red);
+    color: #FFFFFF;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(232, 38, 28, 0.3);
+  }
+
+  .btn-submit-contact:hover:not(:disabled) {
+    background: #D01F16;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(232, 38, 28, 0.4);
+  }
+
+  .btn-submit-contact:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-submit-contact.is-loading .btn-icon {
+    display: none;
+  }
+
+  .btn-spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #FFFFFF;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .btn-submit-contact.is-loading .btn-spinner {
+    display: inline-block;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .form-terms {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* ====================================================================
+     ALERT BOX (Success & Error States)
+     ==================================================================== */
+  .form-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .form-alert.is-hidden {
+    display: none;
+  }
+
+  .alert-success {
+    background: #ECFDF5;
+    border: 1px solid #10B981;
+    color: #065F46;
+  }
+
+  .alert-success .alert-icon {
+    color: #10B981;
+  }
+
+  .alert-error {
+    background: #FEF2F2;
+    border: 1px solid var(--bm-red);
+    color: #991B1B;
+  }
+
+  .alert-error .alert-icon {
+    color: var(--bm-red);
+  }
+
+  .alert-icon {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .alert-title {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+  }
+
+  .alert-desc {
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .alert-ticket {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
+    padding: 0.5rem 0.85rem;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+  }
+
+  .alert-ticket.is-hidden {
+    display: none;
+  }
+
+  .ticket-label {
+    font-weight: 600;
+    color: #065F46;
+  }
+
+  .ticket-code {
+    font-family: monospace;
+    font-size: 1rem;
+    color: #047857;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-copy-ticket {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: #10B981;
+    color: #FFFFFF;
+    border: none;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .btn-copy-ticket:hover {
+    background: #059669;
+  }
+
+  /* ====================================================================
+     SIDEBAR STYLING
+     ==================================================================== */
+  .contact-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  .sidebar-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    position: relative;
+  }
+
+  .card-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--bm-blue);
+    background: rgba(0, 102, 204, 0.08);
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 0.75rem;
+  }
+
+  .card-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .card-description {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0 0 1.25rem 0;
+  }
+
+  /* Channels List */
+  .channels-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .channel-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .channel-item:hover {
+    background: #FFFFFF;
+    border-color: var(--bm-blue);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .channel-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .tg-icon {
+    background: #EBF7FD;
+    color: #229ED9;
+  }
+
+  .ig-icon {
+    background: #FDF2F8;
+    color: #E1306C;
+  }
+
+  .channel-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .channel-name {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--text-main);
+  }
+
+  .channel-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .channel-arrow {
+    color: var(--text-muted);
+    transition: transform 0.2s ease;
+  }
+
+  .channel-item:hover .channel-arrow {
+    transform: translate(2px, -2px);
+    color: var(--text-main);
+  }
+
+  /* Email 1-click box */
+  .email-copy-box {
+    padding: 1rem;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .email-box-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .email-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(232, 38, 28, 0.08);
+    color: var(--bm-red);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .email-box-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .email-address {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-main);
+    word-break: break-all;
+  }
+
+  .btn-copy-email {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0.45rem 0.85rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-copy-email:hover {
+    border-color: var(--bm-red);
+    color: var(--bm-red);
+  }
+
+  .btn-copy-email.is-copied {
+    background: #ECFDF5;
+    border-color: #10B981;
+    color: #065F46;
+  }
+
+  /* Emergency Callout Card */
+  .card-emergency {
+    border-left: 4px solid var(--bm-red);
+    background: linear-gradient(135deg, #FFFFFF 0%, #FFF8F8 100%);
+  }
+
+  .emergency-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--bm-red);
+    background: rgba(232, 38, 28, 0.08);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 0.75rem;
+  }
+
+  .emergency-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .emergency-text {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0 0 1rem 0;
+  }
+
+  .emergency-callout {
+    background: #FFFFFF;
+    border: 1px solid rgba(232, 38, 28, 0.2);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .emergency-callout span {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .emergency-callout strong {
+    font-size: 1.1rem;
+    color: var(--bm-red);
+    font-family: var(--font-heading);
+    font-weight: 800;
+  }
+
+  .emergency-callout .callout-sub {
+    font-size: 0.78rem;
+    color: var(--text-main);
+    font-family: monospace;
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+
+  /* FAQ List */
+  .faq-quick-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .faq-link {
+    display: block;
+    padding: 0.85rem;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .faq-link:hover {
+    background: #FFFFFF;
+    border-color: var(--bm-blue);
+    transform: translateX(3px);
+  }
+
+  .faq-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+  }
+
+  .faq-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+</style>

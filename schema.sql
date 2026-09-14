@@ -84,6 +84,32 @@ CREATE TABLE `bm_activity_logs` (
   CONSTRAINT `fk_logs_user` FOREIGN KEY (`user_id`) REFERENCES `bm_users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------------------
+-- 5. Tabla de Mensajes de Contacto (Formulario Web con reCAPTCHA)
+-- --------------------------------------------------------------------
+DROP TABLE IF EXISTS `bm_contact_messages`;
+CREATE TABLE `bm_contact_messages` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `ticket_id` VARCHAR(30) NOT NULL UNIQUE,
+  `name` VARCHAR(120) NOT NULL,
+  `callsign` VARCHAR(20) NULL,
+  `dmr_id` VARCHAR(20) NULL,
+  `email` VARCHAR(150) NOT NULL,
+  `phone` VARCHAR(50) NULL,
+  `category` VARCHAR(80) NOT NULL,
+  `state_region` VARCHAR(80) NULL,
+  `subject` VARCHAR(200) NOT NULL,
+  `message` TEXT NOT NULL,
+  `ip_address` VARCHAR(45) NULL,
+  `user_agent` VARCHAR(255) NULL,
+  `status` ENUM('unread', 'read', 'in_progress', 'resolved') NOT NULL DEFAULT 'unread',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_ticket` (`ticket_id`),
+  INDEX `idx_callsign` (`callsign`),
+  INDEX `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ====================================================================
 -- DATOS INICIALES (SEED DATA)
 -- ====================================================================
