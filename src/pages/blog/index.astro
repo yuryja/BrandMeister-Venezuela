@@ -15,12 +15,9 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
 >
   <div class="blog-page-header">
     <div class="container">
-      <div class="header-breadcrumbs">
-        <a href="/">Inicio</a>
-        <span>/</span>
-        <span class="current">Noticias</span>
+      <div class="hero-badge">
+        <span>Archivo Oficial & Novedades</span>
       </div>
-      <div class="section-tag">Archivo Oficial</div>
       <h1 class="page-title">Noticias, Novedades y Guías Técnicas DMR</h1>
       <p class="page-subtitle">
         Documentación técnica elaborada por los Sysops y colaboradores de BrandMeister Venezuela para fortalecer el conocimiento de nuestra comunidad.
@@ -117,21 +114,20 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     display: block;
   }
 
-  .header-breadcrumbs {
-    display: flex;
+  .hero-badge {
+    display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.85rem;
-    color: var(--text-faint);
-    margin-bottom: 1.5rem;
-  }
-
-  .header-breadcrumbs a {
+    font-size: 0.78rem;
+    font-weight: 700;
     color: var(--bm-orange);
-  }
-
-  .header-breadcrumbs .current {
-    color: var(--text-muted);
+    border: 1px solid rgba(238, 108, 31, 0.4);
+    background: rgba(238, 108, 31, 0.05);
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .page-title {
