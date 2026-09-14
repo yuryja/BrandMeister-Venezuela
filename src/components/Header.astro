@@ -116,9 +116,14 @@
   }
 
   .brand-logo {
-    height: 44px;
+    height: 52px;
     width: auto;
     object-fit: contain;
+    transition: transform 0.2s ease;
+  }
+
+  .brand-logo:hover {
+    transform: scale(1.02);
   }
 
   .nav-desktop {
@@ -219,7 +224,7 @@
 
   @media (max-width: 520px) {
     .brand-logo {
-      height: 35px;
+      height: 48px;
     }
     .header-actions {
       gap: 0.5rem;
