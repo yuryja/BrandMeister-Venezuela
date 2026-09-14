@@ -84,10 +84,30 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
 
 <style>
   .blog-page-header {
+    position: relative;
+    box-sizing: border-box;
+    overflow: hidden;
     padding-top: clamp(3.5rem, 6vw, 5rem);
     padding-bottom: clamp(3rem, 5vw, 4rem);
-    background: #FFFFFF;
+    background-color: #FFFFFF;
+    background-image:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 42%, rgba(255, 255, 255, 0.65) 68%, rgba(255, 255, 255, 0.15) 100%),
+      linear-gradient(0deg, #FAFAFA 0%, rgba(255, 255, 255, 0.8) 12%, transparent 35%),
+      url('/assets/news-motorola-bg.jpg');
+    background-size: cover;
+    background-position: right center;
+    background-repeat: no-repeat;
     border-bottom: 1px solid var(--border-subtle);
+  }
+
+  @media (max-width: 768px) {
+    .blog-page-header {
+      background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.92) 50%, rgba(255, 255, 255, 0.65) 80%, rgba(255, 255, 255, 0.35) 100%),
+        url('/assets/news-motorola-bg.jpg');
+      background-position: center top;
+      background-size: cover;
+    }
   }
 
   .bm-stripe {
