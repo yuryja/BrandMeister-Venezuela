@@ -172,7 +172,7 @@ const categories = [
                   </div>
                 </div>
 
-                <!-- Grid Fila 2: Correo y DMR ID -->
+                <!-- Grid Fila 2: Correo y Estado / Ubicación -->
                 <div class="form-grid-2">
                   <div class="form-group" id="group-email">
                     <label for="input-email" class="form-label">
@@ -195,53 +195,6 @@ const categories = [
                     <span class="field-error" id="error-email"></span>
                   </div>
 
-                  <div class="form-group" id="group-dmrid">
-                    <label for="input-dmrid" class="form-label">
-                      DMR ID (RadioID) <span class="opt">(Opcional)</span>
-                    </label>
-                    <div class="input-wrap">
-                      <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-                        <line x1="7" y1="2" x2="7" y2="22"></line>
-                        <line x1="17" y1="2" x2="17" y2="22"></line>
-                        <line x1="2" y1="12" x2="22" y2="12"></line>
-                        <line x1="2" y1="7" x2="7" y2="7"></line>
-                        <line x1="2" y1="17" x2="7" y2="17"></line>
-                        <line x1="17" y1="17" x2="22" y2="17"></line>
-                        <line x1="17" y1="7" x2="22" y2="7"></line>
-                      </svg>
-                      <input
-                        type="text"
-                        id="input-dmrid"
-                        name="dmr_id"
-                        class="form-input"
-                        placeholder="Ej. 7340001"
-                        maxlength="8"
-                        inputmode="numeric"
-                      />
-                    </div>
-                    <span class="field-error" id="error-dmrid"></span>
-                  </div>
-                </div>
-
-                <!-- Grid Fila 3: Categoría y Ubicación -->
-                <div class="form-grid-2">
-                  <div class="form-group" id="group-category">
-                    <label for="input-category" class="form-label">
-                      Motivo de Contacto <span class="req">*</span>
-                    </label>
-                    <div class="input-wrap select-wrap">
-                      <select id="input-category" name="category" class="form-select" required>
-                        {categories.map(c => (
-                          <option value={c.value}>{c.label}</option>
-                        ))}
-                      </select>
-                      <svg class="select-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                      </svg>
-                    </div>
-                  </div>
-
                   <div class="form-group" id="group-state">
                     <label for="input-state" class="form-label">
                       Estado / Ubicación <span class="opt">(Opcional)</span>
@@ -257,6 +210,23 @@ const categories = [
                         <polyline points="6 9 12 15 18 9"></polyline>
                       </svg>
                     </div>
+                  </div>
+                </div>
+
+                <!-- Fila 3: Motivo de Contacto -->
+                <div class="form-group" id="group-category">
+                  <label for="input-category" class="form-label">
+                    Motivo de Contacto <span class="req">*</span>
+                  </label>
+                  <div class="input-wrap select-wrap">
+                    <select id="input-category" name="category" class="form-select" required>
+                      {categories.map(c => (
+                        <option value={c.value}>{c.label}</option>
+                      ))}
+                    </select>
+                    <svg class="select-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
                   </div>
                 </div>
 
@@ -307,7 +277,7 @@ const categories = [
                   <span class="field-error" id="error-message"></span>
                 </div>
 
-                <!-- Fila 6: Google reCAPTCHA y Política Anti-Spam -->
+                <!-- Fila 6: Google reCAPTCHA -->
                 <div class="recaptcha-section">
                   <div class="recaptcha-wrapper">
                     <!-- Widget Google reCAPTCHA v2 -->
@@ -320,12 +290,6 @@ const categories = [
                     <input type="hidden" name="recaptcha_token" id="recaptcha_token" />
                   </div>
                   <span class="field-error" id="error-recaptcha"></span>
-                  <p class="recaptcha-notice">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                    Este formulario cuenta con protección anti-spam Google reCAPTCHA y filtro de seguridad.
-                  </p>
                 </div>
 
                 <!-- Botón de Envío con Estado de Carga -->
@@ -338,20 +302,16 @@ const categories = [
                     </svg>
                     <span class="btn-text" id="btn-text">Transmitir Mensaje</span>
                   </button>
-                  <span class="form-terms">
-                    Al enviar este formulario autorizas al equipo sysop de BrandMeister Venezuela a contactarte por correo para la resolución técnica de tu consulta.
-                  </span>
                 </div>
               </form>
             </div>
           </div>
 
-          <!-- COLUMNA LATERAL: CANALES DIRECTOS, TELEGRAM, EMERGENCIAS Y AYUDA -->
+          <!-- COLUMNA LATERAL: CANALES DIRECTOS -->
           <aside class="contact-sidebar">
             
-            <!-- TARJETA 1: CANALES DIRECTOS DE COMUNIDAD -->
+            <!-- TARJETA: CANALES DIRECTOS DE COMUNIDAD -->
             <div class="sidebar-card">
-              <div class="card-badge">Vía Inmediata</div>
               <h3 class="card-title">Canales Directos</h3>
               <p class="card-description">
                 ¿Prefieres conversar en tiempo real con la comunidad y los administradores? Utiliza nuestros canales oficiales:
@@ -429,50 +389,6 @@ const categories = [
               </div>
             </div>
 
-            <!-- TARJETA 2: ADVERTENCIA DE EMERGENCIAS (EMCOM) -->
-            <div class="sidebar-card card-emergency">
-              <div class="emergency-badge">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                  <path d="M12 2L1 21h22L12 2zm0 3.45l8.28 14.55H3.72L12 5.45zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
-                </svg>
-                <span>Tráfico de Emergencia</span>
-              </div>
-              <h3 class="emergency-title">No usar para auxilios inmediatos</h3>
-              <p class="emergency-text">
-                Este formulario web se procesa por correo electrónico voluntario. <strong>NO está diseñado para emergencias médicas, desastres o tráfico de socorro en tiempo real.</strong>
-              </p>
-              <div class="emergency-callout">
-                <span>Canal de Emergencia Nacional:</span>
-                <strong>TG 734911 (Slot 1)</strong>
-                <span class="callout-sub">Frecuencias Simplex: 146.550 MHz / 436.550 MHz</span>
-              </div>
-            </div>
-
-            <!-- TARJETA 3: ENLACES RÁPIDOS Y RECURSOS -->
-            <div class="sidebar-card">
-              <h3 class="card-title">Preguntas Frecuentes</h3>
-              <ul class="faq-quick-list">
-                <li>
-                  <a href="https://radioid.net/" target="_blank" rel="noopener noreferrer" class="faq-link">
-                    <div class="faq-title">¿Cómo obtengo mi DMR ID de 7 dígitos?</div>
-                    <div class="faq-desc">Se solicita gratuitamente en RadioID.net adjuntando tu licencia de radioaficionado.</div>
-                  </a>
-                </li>
-                <li>
-                  <a href="/repetidores" class="faq-link">
-                    <div class="faq-title">¿Cuáles son las frecuencias de repetidores?</div>
-                    <div class="faq-desc">Revisa el mapa interactivo y listado de repetidores en Caracas, Valencia y Guárico.</div>
-                  </a>
-                </li>
-                <li>
-                  <a href="/petra" class="faq-link">
-                    <div class="faq-title">¿Cómo comprobar si el TG 734 está activo?</div>
-                    <div class="faq-desc">Consulta la telemetría comunitaria Petra y escucha el audio en vivo del Hoseline.</div>
-                  </a>
-                </li>
-              </ul>
-            </div>
-
           </aside>
         </div>
       </div>
@@ -502,7 +418,6 @@ const categories = [
     const inputMessage = document.getElementById('input-message');
     const charCounter = document.getElementById('char-counter');
     const inputCallsign = document.getElementById('input-callsign');
-    const inputDmrid = document.getElementById('input-dmrid');
     const btnSubmit = document.getElementById('btn-submit');
     const btnSpinner = document.getElementById('btn-spinner');
     const btnText = document.getElementById('btn-text');
@@ -536,14 +451,7 @@ const categories = [
       });
     }
 
-    // 3. DMR ID solo números
-    if (inputDmrid) {
-      inputDmrid.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
-      });
-    }
-
-    // 4. Copiar correo del sysop al portapapeles
+    // 3. Copiar correo del sysop al portapapeles
     if (btnCopyEmail) {
       btnCopyEmail.addEventListener('click', async () => {
         const email = 'sysop@brandmeisteryv.net';
@@ -610,7 +518,6 @@ const categories = [
         const nameVal = (document.getElementById('input-name')?.value || '').trim();
         const emailVal = (document.getElementById('input-email')?.value || '').trim();
         const callsignVal = (document.getElementById('input-callsign')?.value || '').trim();
-        const dmrVal = (document.getElementById('input-dmrid')?.value || '').trim();
         const categoryVal = document.getElementById('input-category')?.value || 'Consulta General';
         const stateVal = document.getElementById('input-state')?.value || '';
         const subjectVal = (document.getElementById('input-subject')?.value || '').trim();
@@ -684,7 +591,6 @@ const categories = [
         const payload = {
           name: nameVal,
           callsign: callsignVal,
-          dmr_id: dmrVal,
           email: emailVal,
           category: categoryVal,
           state_region: stateVal,
@@ -1124,20 +1030,6 @@ const categories = [
     padding-bottom: 0.5rem;
   }
 
-  .recaptcha-notice {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    margin: 0.6rem 0 0 0;
-  }
-
-  .recaptcha-notice svg {
-    color: #10B981;
-    flex-shrink: 0;
-  }
-
   /* Form Actions */
   .form-actions {
     display: flex;
@@ -1194,13 +1086,6 @@ const categories = [
 
   @keyframes spin {
     to { transform: rotate(360deg); }
-  }
-
-  .form-terms {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    text-align: center;
   }
 
   /* ====================================================================
@@ -1321,18 +1206,6 @@ const categories = [
     padding: 1.75rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
     position: relative;
-  }
-
-  .card-badge {
-    display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: var(--bm-blue);
-    background: rgba(0, 102, 204, 0.08);
-    padding: 0.2rem 0.6rem;
-    border-radius: var(--radius-pill);
-    margin-bottom: 0.75rem;
   }
 
   .card-title {
@@ -1493,110 +1366,5 @@ const categories = [
     background: #ECFDF5;
     border-color: #10B981;
     color: #065F46;
-  }
-
-  /* Emergency Callout Card */
-  .card-emergency {
-    border-left: 4px solid var(--bm-red);
-    background: linear-gradient(135deg, #FFFFFF 0%, #FFF8F8 100%);
-  }
-
-  .emergency-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: var(--bm-red);
-    background: rgba(232, 38, 28, 0.08);
-    padding: 0.25rem 0.65rem;
-    border-radius: var(--radius-pill);
-    margin-bottom: 0.75rem;
-  }
-
-  .emergency-title {
-    font-family: var(--font-heading);
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--text-main);
-    margin: 0 0 0.5rem 0;
-  }
-
-  .emergency-text {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    line-height: 1.5;
-    margin: 0 0 1rem 0;
-  }
-
-  .emergency-callout {
-    background: #FFFFFF;
-    border: 1px solid rgba(232, 38, 28, 0.2);
-    border-radius: var(--radius-md);
-    padding: 0.85rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-  }
-
-  .emergency-callout span {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    font-weight: 600;
-  }
-
-  .emergency-callout strong {
-    font-size: 1.1rem;
-    color: var(--bm-red);
-    font-family: var(--font-heading);
-    font-weight: 800;
-  }
-
-  .emergency-callout .callout-sub {
-    font-size: 0.78rem;
-    color: var(--text-main);
-    font-family: monospace;
-    font-weight: 600;
-    margin-top: 0.2rem;
-  }
-
-  /* FAQ List */
-  .faq-quick-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .faq-link {
-    display: block;
-    padding: 0.85rem;
-    background: #F8FAFC;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    transition: all 0.2s ease;
-  }
-
-  .faq-link:hover {
-    background: #FFFFFF;
-    border-color: var(--bm-blue);
-    transform: translateX(3px);
-  }
-
-  .faq-title {
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 0.25rem;
-  }
-
-  .faq-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.4;
   }
 </style>
