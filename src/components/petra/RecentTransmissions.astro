@@ -22,7 +22,7 @@ const { recent = [] } = Astro.props;
     </div>
   </div>
 
-  <div class="recent-list">
+  <div id="petra-recent-list" class="recent-list">
     {recent.length > 0 ? (
       recent.map((item) => (
         <div class="recent-item">
@@ -138,7 +138,7 @@ const { recent = [] } = Astro.props;
     padding-right: 0.25rem;
   }
 
-  .recent-item {
+  .recent-transmissions-card :global(.recent-item) {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -149,25 +149,25 @@ const { recent = [] } = Astro.props;
     transition: all 0.15s ease;
   }
 
-  .recent-item:hover {
+  .recent-transmissions-card :global(.recent-item:hover) {
     border-left-color: var(--bm-red);
     background: #FFFFFF;
     box-shadow: var(--shadow-sm);
   }
 
-  .item-left {
+  .recent-transmissions-card :global(.item-left) {
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
   }
 
-  .item-callsign-line {
+  .recent-transmissions-card :global(.item-callsign-line) {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
 
-  .item-callsign {
+  .recent-transmissions-card :global(.item-callsign) {
     font-family: var(--font-heading);
     font-size: 1rem;
     font-weight: 800;
@@ -176,12 +176,12 @@ const { recent = [] } = Astro.props;
     transition: color 0.15s ease;
   }
 
-  .item-callsign:hover {
+  .recent-transmissions-card :global(.item-callsign:hover) {
     color: var(--bm-red);
     text-decoration: underline;
   }
 
-  .carrier-pill {
+  .recent-transmissions-card :global(.carrier-pill) {
     font-size: 0.65rem;
     font-weight: 800;
     color: #FFFFFF;
@@ -191,7 +191,7 @@ const { recent = [] } = Astro.props;
     letter-spacing: 0.04em;
   }
 
-  .item-sub {
+  .recent-transmissions-card :global(.item-sub) {
     display: flex;
     align-items: center;
     gap: 0.35rem;
@@ -199,41 +199,41 @@ const { recent = [] } = Astro.props;
     color: var(--text-muted);
   }
 
-  .item-name {
+  .recent-transmissions-card :global(.item-name) {
     font-weight: 500;
   }
 
-  .item-sep {
+  .recent-transmissions-card :global(.item-sep) {
     color: var(--text-faint);
   }
 
-  .item-id {
+  .recent-transmissions-card :global(.item-id) {
     font-family: var(--font-mono, monospace);
     font-size: 0.72rem;
     color: var(--text-faint);
   }
 
-  .item-right {
+  .recent-transmissions-card :global(.item-right) {
     text-align: right;
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
   }
 
-  .item-duration {
+  .recent-transmissions-card :global(.item-duration) {
     font-family: var(--font-mono, monospace);
     font-size: 0.85rem;
     font-weight: 700;
     color: var(--text-main);
   }
 
-  .item-time {
+  .recent-transmissions-card :global(.item-time) {
     font-family: var(--font-mono, monospace);
     font-size: 0.72rem;
     color: var(--text-faint);
   }
 
-  .empty-recent {
+  .recent-transmissions-card :global(.empty-recent) {
     padding: 2.5rem 1rem;
     text-align: center;
     color: var(--text-muted);

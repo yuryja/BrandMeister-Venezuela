@@ -110,6 +110,20 @@ const longestStr = t.longest_s > 0 ? formatDuration(t.longest_s * 1000) : '—';
     margin-bottom: 2.5rem;
   }
 
+  @media (max-width: 600px) {
+    .petra-summary-tiles {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .petra-summary-tiles {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .summary-tile {
     background: #FFFFFF;
     border: 1px solid var(--border-subtle);

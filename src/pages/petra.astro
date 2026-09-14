@@ -209,10 +209,8 @@ const data = await getPetraData();
 </style>
 
 <script>
-  const PETRA_API = 'https://petra.brandmeisteryv.net/api';
-
   // ── Callsign → country code map (for flag updates during polling) ─────────────
-  const PREFIX_MAP = {"YV":"ve","YX":"ve","YY":"ve","AA":"us","AB":"us","AC":"us","AD":"us","AE":"us","AF":"us","AG":"us","AH":"us","AI":"us","AJ":"us","AK":"us","AL":"us","K":"us","N":"us","W":"us","VA":"ca","VB":"ca","VC":"ca","VD":"ca","VE":"ca","VF":"ca","VG":"ca","VY":"ca","CF":"ca","CG":"ca","CH":"ca","CI":"ca","CJ":"ca","CK":"ca","VX":"ca","XA":"mx","XB":"mx","XC":"mx","XD":"mx","XE":"mx","XF":"mx","PP":"br","PQ":"br","PR":"br","PS":"br","PT":"br","PU":"br","PV":"br","PW":"br","PX":"br","PY":"br","LO":"ar","LP":"ar","LQ":"ar","LR":"ar","LS":"ar","LT":"ar","LU":"ar","LV":"ar","LW":"ar","HJ":"co","HK":"co","CA":"cl","CB":"cl","CC":"cl","CD":"cl","CE":"cl","XQ":"cl","XR":"cl","OA":"pe","OB":"pe","OC":"pe","CP":"bo","HC":"ec","HD":"ec","ZP":"py","CV":"uy","CX":"uy","CL":"cu","CM":"cu","CN":"cu","CO":"cu","T4":"cu","HI":"do","HP":"pa","TE":"cr","TI":"cr","TG":"gt","HR":"hn","YS":"sv","YN":"ni","V3":"bz","HH":"ht","EA":"es","EB":"es","EC":"es","ED":"es","EE":"es","EF":"es","EG":"es","EH":"es","AM":"es","AN":"es","AO":"es","CR":"pt","CS":"pt","CT":"pt","CU":"pt","F":"fr","DA":"de","DB":"de","DC":"de","DD":"de","DE":"de","DF":"de","DG":"de","DH":"de","DI":"de","DJ":"de","DK":"de","DL":"de","DM":"de","DN":"de","DO":"de","DP":"de","DQ":"de","DR":"de","G":"gb","M":"gb","I":"it","PA":"nl","PB":"nl","PC":"nl","PD":"nl","PE":"nl","PF":"nl","PG":"nl","PH":"nl","PI":"nl","ON":"be","OO":"be","HB":"ch","HE":"ch","OE":"at","SA":"se","SB":"se","SC":"se","SD":"se","SE":"se","SF":"se","SG":"se","SH":"se","SI":"se","SJ":"se","SK":"se","SL":"se","SM":"se","LA":"no","LB":"no","LC":"no","LD":"no","LE":"no","LF":"no","LG":"no","LH":"no","LI":"no","LJ":"no","LK":"no","LL":"no","LM":"no","LN":"no","OZ":"dk","OU":"dk","OV":"dk","OW":"dk","OF":"fi","OG":"fi","OH":"fi","OI":"fi","OJ":"fi","RA":"ru","RB":"ru","RC":"ru","RD":"ru","RE":"ru","RF":"ru","RG":"ru","RH":"ru","RI":"ru","RJ":"ru","RK":"ru","RL":"ru","RM":"ru","RN":"ru","RO":"ru","RP":"ru","RQ":"ru","RR":"ru","RS":"ru","RT":"ru","RU":"ru","RV":"ru","RW":"ru","RX":"ru","RY":"ru","RZ":"ru","UA":"ru","UB":"ru","UC":"ru","UD":"ru","UE":"ru","UF":"ru","UG":"ru","UH":"ru","UI":"ru","JA":"jp","JB":"jp","JC":"jp","JD":"jp","JE":"jp","JF":"jp","JG":"jp","JH":"jp","JI":"jp","JJ":"jp","JK":"jp","JL":"jp","JM":"jp","JN":"jp","JO":"jp","JP":"jp","JQ":"jp","JR":"jp","JS":"jp","BA":"cn","BB":"cn","BC":"cn","BD":"cn","BE":"cn","BF":"cn","BG":"cn","BH":"cn","BI":"cn","BJ":"cn","BK":"cn","BL":"cn","BM":"cn","BN":"cn","BO":"cn","BP":"cn","BQ":"cn","BR":"cn","BS":"cn","BT":"cn","BU":"cn","BV":"tw","DS":"kr","DT":"kr","HL":"kr","VH":"au","VI":"au","VJ":"au","VK":"au","VL":"au","VM":"au","VN":"au","AX":"au","ZK":"nz","ZL":"nz","ZM":"nz","ZR":"za","ZS":"za","ZT":"za","ZU":"za","AT":"in","AU":"in","AV":"in","AW":"in","VU":"in","VV":"in","VW":"in"};
+  const PREFIX_MAP = {"YV":"ve","YX":"ve","YY":"ve","AA":"us","AB":"us","AC":"us","AD":"us","AE":"us","AF":"us","AG":"us","AH":"us","AI":"us","AJ":"us","AK":"us","AL":"us","K":"us","N":"us","W":"us","VA":"ca","VB":"ca","VC":"ca","VD":"ca","VE":"ca","VF":"ca","VG":"ca","VY":"ca","CF":"ca","CG":"ca","CH":"ca","CI":"ca","CJ":"ca","CK":"ca","VX":"ca","XA":"mx","XB":"mx","XC":"mx","XD":"mx","XE":"mx","XF":"mx","PP":"br","PQ":"br","PR":"br","PS":"br","PT":"br","PU":"br","PV":"br","PW":"br","PX":"br","PY":"br","LO":"ar","LP":"ar","LQ":"ar","LR":"ar","LS":"ar","LT":"ar","LU":"ar","LV":"ar","LW":"ar","HJ":"co","HK":"co","CA":"cl","CB":"cl","CC":"cl","CD":"cl","CE":"cl","XQ":"cl","XR":"cl","OA":"pe","OB":"pe","OC":"pe","CP":"bo","HC":"ec","HD":"ec","ZP":"py","CV":"uy","CX":"uy","CL":"cu","CM":"cu","CN":"cu","CO":"cu","T4":"cu","HI":"do","HP":"pa","TE":"cr","TI":"cr","TG":"gt","HR":"hn","YS":"sv","YN":"ni","V3":"bz","HH":"ht","EA":"es","EB":"es","EC":"es","ED":"es","EE":"es","EF":"es","EG":"es","EH":"es","AM":"es","AN":"es","AO":"es","CR":"pt","CS":"pt","CT":"pt","CU":"pt","F":"fr","DA":"de","DB":"de","DC":"de","DD":"de","DE":"de","DF":"de","DG":"de","DH":"de","DI":"de","DJ":"de","DK":"de","DL":"de","DM":"de","DN":"de","DO":"de","DP":"de","DQ":"de","DR":"de","G":"gb","M":"gb","I":"it","PA":"nl","PB":"nl","PC":"nl","PD":"nl","PE":"nl","PF":"nl","PG":"nl","PH":"nl","PI":"nl","ON":"be","OO":"be","HB":"ch","HE":"ch","OE":"at","SA":"se","SB":"se","SC":"se","SD":"se","SE":"se","SF":"se","SG":"se","SH":"se","SI":"se","SJ":"se","SK":"se","SL":"se","SM":"se","LA":"no","LB":"no","LC":"no","LD":"no","LE":"no","LF":"no","LG":"no","LH":"no","LI":"no","LJ":"no","LK":"no","LL":"no","LM":"no","LN":"no","OZ":"dk","OU":"dk","OV":"dk","OW":"dk","OF":"fi","OG":"fi","OH":"fi","OI":"fi","OJ":"fi","RA":"ru","RB":"ru","RC":"ru","RD":"ru","RE":"ru","RF":"ru","RG":"ru","RH":"ru","RI":"ru","RJ":"ru","RK":"ru","RL":"ru","RM":"ru","RN":"ru","RO":"ru","RP":"ru","RQ":"ru","RR":"ru","RS":"ru","RT":"ru","RU":"ru","RV":"ru","RW":"ru","RX":"ru","RY":"ru","RZ":"ru","UA":"ru","UB":"ru","UC":"ru","UD":"ru","UE":"ru","UF":"ru","UG":"ru","UH":"ru","UI":"ru","JA":"jp","JB":"jp","JC":"jp","JD":"jp","JE":"jp","JF":"jp","JG":"jp","JH":"jp","JI":"jp","JJ":"jp","JK":"jp","JL":"jp","JM":"jp","JN":"jp","JO":"jp","JP":"jp","JQ":"jp","JR":"jp","JS":"jp","BA":"cn","BB":"cn","BC":"cn","BD":"cn","BE":"cn","BF":"cn","BG":"cn","BH":"cn","BI":"cn","BK":"cn","BL":"cn","BM":"cn","BN":"cn","BO":"cn","BP":"cn","BQ":"cn","BR":"cn","BS":"cn","BT":"cn","BU":"cn","BV":"tw","DS":"kr","DT":"kr","HL":"kr","VH":"au","VI":"au","VJ":"au","VK":"au","VL":"au","VM":"au","VN":"au","AX":"au","ZK":"nz","ZL":"nz","ZM":"nz","ZR":"za","ZS":"za","ZT":"za","ZU":"za","AT":"in","AU":"in","AV":"in","AW":"in","VU":"in","VV":"in","VW":"in"};
 
   function callsignToCountry(cs) {
     if (!cs) return null;
@@ -224,15 +222,37 @@ const data = await getPetraData();
     return null;
   }
 
-  function setFlag(flagEl, callsign) {
-    if (!flagEl) return;
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, (m) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    }[m]));
+  }
+
+  function updateCallsignWithFlag(containerEl, callsign, size = 'md') {
+    if (!containerEl || !callsign) return;
     const country = callsignToCountry(callsign);
+    let flagEl = containerEl.querySelector('.fi');
     if (country) {
-      flagEl.className = `fi fi-${country} cs-flag cs-flag--md`;
+      if (!flagEl) {
+        flagEl = document.createElement('span');
+        containerEl.prepend(flagEl);
+      }
+      flagEl.className = `fi fi-${country} cs-flag cs-flag--${size}`;
       flagEl.title = country.toUpperCase();
       flagEl.style.display = '';
-    } else {
+    } else if (flagEl) {
       flagEl.style.display = 'none';
+    }
+
+    const textNodes = [...containerEl.childNodes].filter(n => n.nodeType === 3);
+    if (textNodes.length > 0) {
+      textNodes[textNodes.length - 1].textContent = callsign;
+    } else {
+      containerEl.appendChild(document.createTextNode(callsign));
     }
   }
 
@@ -270,6 +290,29 @@ const data = await getPetraData();
     if (el) el.textContent = text;
   }
 
+  // ── Multi-environment API fetcher (supports proxy & direct fallback) ────────
+  async function fetchPetra(endpoint) {
+    // 1. Try local / hosting proxy
+    try {
+      const res = await fetch(`/api/petra/${endpoint}`, {
+        headers: { accept: 'application/json' },
+        cache: 'no-cache'
+      });
+      if (res.ok) return await res.json();
+    } catch (_) {}
+
+    // 2. Direct fallback
+    try {
+      const res = await fetch(`https://petra.brandmeisteryv.net/api/${endpoint}`, {
+        headers: { accept: 'application/json' },
+        cache: 'no-cache'
+      });
+      if (res.ok) return await res.json();
+    } catch (_) {}
+
+    return null;
+  }
+
   // ── Tick: update all [data-timestamp] elements ───────────────────────────────
 
   function tickRelativeTimes() {
@@ -279,107 +322,133 @@ const data = await getPetraData();
     });
   }
 
-  // ── Fetch /live and update LiveStrip + tiles that depend on live ─────────────
+  // ── Render recent transmissions dynamically ──────────────────────────────────
+  function updateRecentList(recent) {
+    const listEl = document.getElementById('petra-recent-list');
+    if (!listEl || !Array.isArray(recent) || recent.length === 0) return;
+
+    listEl.innerHTML = recent.map((item) => {
+      const country = callsignToCountry(item.callsign);
+      const flagHtml = country ? `<span class="fi fi-${country} cs-flag cs-flag--sm" title="${country.toUpperCase()}"></span>` : '';
+      const carrierHtml = item.open ? `<span class="carrier-pill">AL AIRE</span>` : '';
+      const dur = fmtDuration(item.dur_ms);
+      const relTime = fmtRelative(item.at);
+
+      return `
+        <div class="recent-item">
+          <div class="item-left">
+            <div class="item-callsign-line">
+              <a
+                href="https://www.qrz.com/db/${escapeHtml(item.callsign)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="item-callsign"
+                title="Ver perfil de ${escapeHtml(item.callsign)} en QRZ.com"
+              >
+                ${flagHtml}${escapeHtml(item.callsign)}
+              </a>
+              ${carrierHtml}
+            </div>
+            <div class="item-sub">
+              <span class="item-name">${escapeHtml(item.name || 'Operador')}</span>
+              <span class="item-sep">·</span>
+              <span class="item-id">ID ${item.src_id}</span>
+            </div>
+          </div>
+          <div class="item-right">
+            <span class="item-duration">${dur}</span>
+            <span class="item-time" data-timestamp="${item.at}">${relTime}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── Fetch /live and update LiveStrip + RecentTransmissions ────────────────────
 
   async function pollLive() {
-    try {
-      const res = await fetch(`${PETRA_API}/live?limit=10&tg=734`, {
-        headers: { accept: 'application/json' },
-        cache: 'no-cache'
-      });
-      if (!res.ok) return;
-      const data = await res.json();
-      const link = data.link ?? {};
-      const last = data.last_heard;
+    const data = await fetchPetra('live?limit=10&tg=734');
+    if (!data) return;
 
-      // Link state
-      const isUp = link.state === 'up';
-      const dot = document.getElementById('petra-status-dot');
-      const txt = document.getElementById('petra-status-text');
-      if (dot) {
-        dot.className = `status-dot ${isUp ? 'status-dot--ok' : 'status-dot--err'}`;
+    const link = data.link ?? {};
+    const last = data.last_heard;
+
+    // Link state
+    const isUp = link.state === 'up';
+    const dot = document.getElementById('petra-status-dot');
+    const txt = document.getElementById('petra-status-text');
+    if (dot) {
+      dot.className = `status-dot ${isUp ? 'status-dot--ok' : 'status-dot--err'}`;
+    }
+    if (txt) txt.textContent = isUp ? 'Enlace Activo' : 'Enlace Inactivo';
+
+    // Uptime & drops
+    const uptime = document.getElementById('petra-uptime');
+    if (uptime) uptime.textContent = `${link.uptime_24h ?? 0}%`;
+    const drops = document.getElementById('petra-drops-badge');
+    if (drops) {
+      drops.textContent = `${link.drops_24h ?? 0} caídas`;
+      drops.className = `drops-badge${(link.drops_24h ?? 0) > 0 ? ' drops-badge--warn' : ''}`;
+    }
+
+    // Last heard
+    if (last) {
+      const callsignEl = document.getElementById('petra-lh-callsign');
+      if (callsignEl) {
+        updateCallsignWithFlag(callsignEl, last.callsign, 'md');
+        callsignEl.href = `https://www.qrz.com/db/${last.callsign}`;
+        callsignEl.title = `Ver ficha de ${last.callsign} en QRZ.com`;
       }
-      if (txt) txt.textContent = isUp ? 'Enlace Activo' : 'Enlace Inactivo';
+      setText('petra-lh-name', last.name || 'Operador DMR');
+      setText('petra-lh-id', `ID ${last.src_id}`);
+      setText('petra-lh-dur', fmtDuration(last.dur_ms));
 
-      // Uptime & drops
-      const uptime = document.getElementById('petra-uptime');
-      if (uptime) uptime.textContent = `${link.uptime_24h ?? 0}%`;
-      const drops = document.getElementById('petra-drops-badge');
-      if (drops) {
-        drops.textContent = `${link.drops_24h ?? 0} caídas`;
-        drops.className = `drops-badge${(link.drops_24h ?? 0) > 0 ? ' drops-badge--warn' : ''}`;
+      const timeEl = document.getElementById('petra-lh-time');
+      if (timeEl) {
+        timeEl.setAttribute('data-timestamp', String(last.at));
+        timeEl.textContent = fmtRelative(last.at);
       }
 
-      // Last heard
-      if (last) {
-        const callsignEl = document.getElementById('petra-lh-callsign');
-        if (callsignEl) {
-          // Update flag sprite (first child if it's a span.fi, else nothing)
-          const flagEl = callsignEl.querySelector('.fi');
-          if (flagEl) {
-            setFlag(flagEl, last.callsign);
-          }
-          // Update text node (last child text)
-          const textNode = [...callsignEl.childNodes].find(n => n.nodeType === 3);
-          if (textNode) {
-            textNode.textContent = last.callsign;
-          } else {
-            callsignEl.appendChild(document.createTextNode(last.callsign));
-          }
-          callsignEl.href = `https://www.qrz.com/db/${last.callsign}`;
-          callsignEl.title = `Ver ficha de ${last.callsign} en QRZ.com`;
-        }
-        setText('petra-lh-name', last.name || 'Operador DMR');
-        setText('petra-lh-id', `ID ${last.src_id}`);
-        setText('petra-lh-dur', fmtDuration(last.dur_ms));
-
-        const timeEl = document.getElementById('petra-lh-time');
-        if (timeEl) {
-          timeEl.setAttribute('data-timestamp', String(last.at));
-          timeEl.textContent = fmtRelative(last.at);
-        }
-
-        const carrier = document.getElementById('petra-carrier');
-        if (carrier) {
-          carrier.classList.toggle('hidden', !last.open);
-        }
+      const carrier = document.getElementById('petra-carrier');
+      if (carrier) {
+        carrier.classList.toggle('hidden', !last.open);
       }
-    } catch (_) { /* silent fail */ }
+    }
+
+    // Recent transmissions list
+    if (Array.isArray(data.recent)) {
+      updateRecentList(data.recent);
+    }
   }
 
   // ── Fetch /summary and update SummaryTiles ────────────────────────────────────
 
   async function pollSummary() {
-    try {
-      const res = await fetch(`${PETRA_API}/summary?tg=734`, {
-        headers: { accept: 'application/json' },
-        cache: 'no-cache'
-      });
-      if (!res.ok) return;
-      const { today: t } = await res.json();
+    const data = await fetchPetra('summary?tg=734');
+    if (!data || !data.today) return;
+    const t = data.today;
 
-      setText('petra-tile-count', (t.count ?? 0).toLocaleString('es-VE'));
+    setText('petra-tile-count', (t.count ?? 0).toLocaleString('es-VE'));
 
-      const air = fmtAirTimeSplit(t.air_ms ?? 0);
-      setText('petra-tile-air-value', air.value);
-      setText('petra-tile-air-unit', air.unit);
+    const air = fmtAirTimeSplit(t.air_ms ?? 0);
+    setText('petra-tile-air-value', air.value);
+    setText('petra-tile-air-unit', air.unit);
 
-      setText('petra-tile-ops', String(t.uniq_ops ?? 0));
-      setText('petra-tile-longest', t.longest_s > 0 ? fmtDuration(t.longest_s * 1000) : '—');
-    } catch (_) { /* silent fail */ }
+    setText('petra-tile-ops', String(t.uniq_ops ?? 0));
+    setText('petra-tile-longest', t.longest_s > 0 ? fmtDuration(t.longest_s * 1000) : '—');
   }
 
   // ── Bootstrap ─────────────────────────────────────────────────────────────────
 
-  // Relative times: every 20 s
+  // Relative times ticker: every 20 s
   setInterval(tickRelativeTimes, 20_000);
 
-  // Live data: every 20 s
+  // Live data: every 15 s
   pollLive();
-  setInterval(pollLive, 20_000);
+  setInterval(pollLive, 15_000);
 
-  // Summary tiles: every 60 s
+  // Summary tiles: every 45 s
   pollSummary();
-  setInterval(pollSummary, 60_000);
+  setInterval(pollSummary, 45_000);
 </script>
 

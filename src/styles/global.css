@@ -79,6 +79,8 @@ html {
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -88,6 +90,9 @@ body {
   background: var(--bg-page);
   color: var(--text-main);
   line-height: 1.6;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 img, svg {
@@ -298,4 +303,25 @@ p {
 .reveal-on-scroll.is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Callsign Flag Styles (Available globally for SSR and dynamic JS updates) */
+.cs-flag {
+  display: inline-block;
+  border-radius: 2px;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  vertical-align: middle;
+}
+.cs-flag--sm {
+  width: 1.1em;
+  height: 0.82em;
+  font-size: 1em;
+  margin-right: 0.3em;
+}
+.cs-flag--md {
+  width: 1.4em;
+  height: 1.05em;
+  font-size: 1em;
+  margin-right: 0.4em;
 }

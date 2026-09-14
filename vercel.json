@@ -1,4 +1,10 @@
 {
   "framework": "astro",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/api/petra/:path*",
+      "destination": "https://petra.brandmeisteryv.net/api/:path*"
+    }
+  ]
 }

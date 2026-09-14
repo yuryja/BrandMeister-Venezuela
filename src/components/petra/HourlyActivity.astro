@@ -119,6 +119,16 @@ const totalTodayMs = hourly.reduce((acc, curr) => acc + curr, 0);
     border-bottom: 1px solid var(--border-subtle);
   }
 
+  @media (max-width: 600px) {
+    .petra-chart-card {
+      padding: 1.25rem 1rem;
+    }
+    .hourly-bars {
+      gap: 2px;
+      height: 130px;
+    }
+  }
+
   .bar-col-wrapper {
     flex: 1;
     height: 100%;
