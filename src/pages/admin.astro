@@ -32,37 +32,23 @@ const getCellIntensity = (hour: number) => {
       <form id="login-form" class="wp-login-form">
         <div class="form-group">
           <label for="login-username">Usuario o Indicativo</label>
-          <input type="text" id="login-username" class="form-input" placeholder="ej: YV5OF o yy3big" required />
+          <input type="text" id="login-username" class="form-input" placeholder="ej: YV5OF o yy3big" autocomplete="username" required />
         </div>
 
         <div class="form-group">
           <label for="login-password">Contraseña</label>
-          <input type="password" id="login-password" class="form-input" placeholder="••••••••" value="bm734venezuela" required />
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" autocomplete="current-password" required />
         </div>
 
-        <button type="submit" class="btn btn-primary wp-login-btn">
+        <p id="login-error" class="wp-login-error" role="alert" hidden></p>
+
+        <button type="submit" id="login-submit" class="btn btn-primary wp-login-btn">
           <span>Acceder al Escritorio</span>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </button>
       </form>
-
-      <!-- Quick Roles Demo Switcher -->
-      <div class="wp-login-demo">
-        <span class="demo-label">Acceso rápido con roles (ACL):</span>
-        <div class="demo-roles-btns">
-          <button type="button" class="btn-demo-role" data-user="yv5of" data-role="admin">
-            <strong>YV5OF</strong> (Admin Sysop)
-          </button>
-          <button type="button" class="btn-demo-role" data-user="yv5adm" data-role="editor">
-            <strong>YV5ADM</strong> (Editor)
-          </button>
-          <button type="button" class="btn-demo-role" data-user="autor_demo" data-role="author">
-            <strong>YV5DEMO</strong> (Autor)
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1128,44 +1114,14 @@ const getCellIntensity = (hour: number) => {
     margin-top: 0.5rem;
   }
 
-  .wp-login-demo {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-subtle);
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .demo-label {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--text-faint);
-    text-transform: uppercase;
-  }
-
-  .demo-roles-btns {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  .btn-demo-role {
-    padding: 0.55rem 0.85rem;
-    background: var(--bg-page);
-    border: 1px solid var(--border-medium);
+  .wp-login-error {
+    margin: 0;
+    padding: 0.65rem 0.85rem;
     border-radius: var(--radius-sm);
-    font-size: 0.82rem;
-    color: var(--text-main);
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.18s ease;
-  }
-
-  .btn-demo-role:hover {
-    border-color: var(--bm-orange);
-    background: var(--bm-orange-light);
-    color: var(--bm-orange);
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #B91C1C;
+    font-size: 0.85rem;
   }
 
   /* WP Admin Bar (Top Bar) */
@@ -1915,33 +1871,68 @@ const getCellIntensity = (hour: number) => {
 </style>
 
 <script>
-  // State variables
-  let currentUser = {
-    username: 'yv5of',
-    callsign: 'YV5OF',
-    name: 'Severino Mastracci',
-    role: 'admin'
+  type SessionUser = {
+    id: number;
+    username: string;
+    callsign: string;
+    full_name: string;
+    role: 'admin' | 'editor' | 'author';
   };
 
-  const checkAuth = () => {
-    const saved = localStorage.getItem('bm_wp_user');
-    if (saved) {
-      try {
-        currentUser = JSON.parse(saved);
-        showApp();
-      } catch (e) {
-        showLogin();
-      }
-    } else {
-      // Default to logged in as Sysop Admin for smooth pair programming experience
-      localStorage.setItem('bm_wp_user', JSON.stringify(currentUser));
-      showApp();
+  // Usuario autenticado según la sesión PHP (nunca desde localStorage)
+  let currentUser: SessionUser = { id: 0, username: '', callsign: '', full_name: '', role: 'author' };
+
+  const escapeHtml = (value: unknown): string =>
+    String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  // Solo permite URLs http(s); cualquier otra cosa (javascript:, data:...) se sustituye
+  const safeUrl = (value: unknown, fallback = '#'): string => {
+    try {
+      const url = new URL(String(value ?? ''), window.location.origin);
+      return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : fallback;
+    } catch {
+      return fallback;
     }
   };
 
-  const showLogin = () => {
+  // Si el servidor responde 401 la sesión expiró: volver al login
+  const handleUnauthorized = (res: Response): boolean => {
+    if (res.status === 401) {
+      showLogin('Tu sesión expiró. Inicia sesión nuevamente.');
+      return true;
+    }
+    return false;
+  };
+
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('/api/auth.php?action=status', { credentials: 'same-origin' });
+      const data = await res.json();
+      if (data?.logged_in && data.user) {
+        currentUser = data.user;
+        showApp();
+        return;
+      }
+    } catch (e) {
+      showLogin('No fue posible contactar al servidor de autenticación.');
+      return;
+    }
+    showLogin();
+  };
+
+  const showLogin = (message = '') => {
     document.getElementById('wp-login-screen')!.style.display = 'flex';
     document.getElementById('wp-app')!.style.display = 'none';
+    const errorEl = document.getElementById('login-error');
+    if (errorEl) {
+      errorEl.textContent = message;
+      errorEl.hidden = !message;
+    }
   };
 
   const showApp = () => {
@@ -2009,45 +2000,46 @@ const getCellIntensity = (hour: number) => {
     });
   });
 
-  // Login Handlers
-  document.querySelectorAll('.btn-demo-role').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const user = btn.getAttribute('data-user');
-      const role = btn.getAttribute('data-role') || 'admin';
-      const callsigns: Record<string, string> = { yv5of: 'YV5OF', yv5adm: 'YV5ADM', autor_demo: 'YV5DEMO' };
-      const names: Record<string, string> = { yv5of: 'Severino Mastracci', yv5adm: 'Arnaldo', autor_demo: 'Colaborador Autor' };
-
-      currentUser = {
-        username: user || 'yv5of',
-        callsign: callsigns[user || 'yv5of'] || 'YV5OF',
-        name: names[user || 'yv5of'] || 'Usuario',
-        role: role
-      };
-
-      localStorage.setItem('bm_wp_user', JSON.stringify(currentUser));
-      showApp();
-    });
-  });
-
+  // Login Handler
   const loginForm = document.getElementById('login-form');
   if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const u = (document.getElementById('login-username') as HTMLInputElement).value;
-      currentUser = {
-        username: u.toLowerCase(),
-        callsign: u.toUpperCase(),
-        name: u.toUpperCase(),
-        role: 'admin'
-      };
-      localStorage.setItem('bm_wp_user', JSON.stringify(currentUser));
-      showApp();
+      const usernameInput = document.getElementById('login-username') as HTMLInputElement;
+      const passwordInput = document.getElementById('login-password') as HTMLInputElement;
+      const submitBtn = document.getElementById('login-submit') as HTMLButtonElement | null;
+      if (submitBtn) submitBtn.disabled = true;
+
+      try {
+        const res = await fetch('/api/auth.php?action=login', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value })
+        });
+        const data = await res.json().catch(() => null);
+        if (res.ok && data?.success && data.user) {
+          currentUser = data.user;
+          passwordInput.value = '';
+          showApp();
+        } else {
+          showLogin(data?.error || 'No fue posible iniciar sesión.');
+        }
+      } catch (err) {
+        showLogin('No fue posible contactar al servidor de autenticación.');
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
     });
   }
 
   // Logout Handler
-  document.getElementById('btn-logout')?.addEventListener('click', () => {
-    localStorage.removeItem('bm_wp_user');
+  document.getElementById('btn-logout')?.addEventListener('click', async () => {
+    try {
+      await fetch('/api/auth.php?action=logout', { method: 'POST', credentials: 'same-origin' });
+    } catch (e) {
+      // Aunque falle la red, se oculta el panel
+    }
     showLogin();
   });
 
@@ -2065,6 +2057,26 @@ const getCellIntensity = (hour: number) => {
       const tags = (document.getElementById('wp-post-tags') as HTMLInputElement).value;
       const featured = (document.getElementById('wp-post-featured') as HTMLInputElement).checked;
 
+      let data: any = null;
+      try {
+        const res = await fetch('/api/posts.php', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, slug, content, description: desc, status, category: cat, tags, featured })
+        });
+        if (handleUnauthorized(res)) return;
+        data = await res.json().catch(() => null);
+      } catch (err) {
+        alert('No fue posible contactar al servidor. La noticia no se guardó.');
+        return;
+      }
+
+      if (!data?.success) {
+        alert('Error al guardar: ' + (data?.error || 'Ocurrió un error'));
+        return;
+      }
+
       // Add row to table
       const tbody = document.getElementById('posts-table-body');
       if (tbody) {
@@ -2072,34 +2084,23 @@ const getCellIntensity = (hour: number) => {
         tr.innerHTML = `
           <td><input type="checkbox" /></td>
           <td class="cell-title">
-            <strong>${title}</strong>
+            <strong>${escapeHtml(title)}</strong>
             <div class="row-actions">
               <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
               <span class="trash"><a href="#">Papelera</a> | </span>
               <span class="view"><a href="#">Ver</a></span>
             </div>
           </td>
-          <td>${currentUser.name} (${currentUser.callsign})</td>
-          <td><span class="cat-pill-mini">${cat}</span></td>
-          <td>${tags}</td>
+          <td>${escapeHtml(currentUser.full_name)} (${escapeHtml(currentUser.callsign)})</td>
+          <td><span class="cat-pill-mini">${escapeHtml(cat)}</span></td>
+          <td>${escapeHtml(tags)}</td>
           <td><span class="status-badge-pub">${status === 'published' ? 'Publicada' : 'Borrador'}</span></td>
           <td>${new Date().toLocaleDateString('es-VE')}</td>
         `;
         tbody.insertBefore(tr, tbody.firstChild);
       }
 
-      // Try sending to PHP backend if active
-      try {
-        await fetch('/api/posts.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, slug, content, description: desc, status, category: cat, tags, featured })
-        });
-      } catch (err) {
-        // Fallback local
-      }
-
-      alert('¡Noticia publicada exitosamente y guardada en base de datos!');
+      alert(data.message || '¡Noticia guardada exitosamente!');
       window.switchView('posts');
     });
   }
@@ -2118,7 +2119,7 @@ const getCellIntensity = (hour: number) => {
     const area = document.getElementById('wp-post-content') as HTMLTextAreaElement;
     if (box && area) {
       if (box.style.display === 'none') {
-        box.innerHTML = `<h4>Vista previa:</h4><p>${area.value.replace(/\n\n/g, '</p><p>')}</p>`;
+        box.innerHTML = `<h4>Vista previa:</h4><p>${escapeHtml(area.value).replace(/\n\n/g, '</p><p>')}</p>`;
         box.style.display = 'block';
       } else {
         box.style.display = 'none';
@@ -2146,7 +2147,7 @@ const getCellIntensity = (hour: number) => {
   // =========================================================
   const loadInstagramSettings = async () => {
     try {
-      const res = await fetch('/api/settings.php');
+      const res = await fetch('/api/settings.php', { credentials: 'same-origin' });
       const data = await res.json();
       if (data && data.settings) {
         const s = data.settings;
@@ -2160,8 +2161,15 @@ const getCellIntensity = (hour: number) => {
         if (acct && s.instagram_account) acct.value = s.instagram_account;
         if (hash && s.instagram_hashtag) hash.value = s.instagram_hashtag;
         if (appId && s.instagram_app_id) appId.value = s.instagram_app_id;
-        if (appSec && s.instagram_app_secret) appSec.value = s.instagram_app_secret;
-        if (token && s.instagram_access_token) token.value = s.instagram_access_token;
+        // Los secretos nunca se devuelven: solo se indica si están configurados
+        if (appSec) {
+          appSec.value = '';
+          appSec.placeholder = s.instagram_app_secret_set ? 'Configurado · deja vacío para conservar' : '••••••••••••••••';
+        }
+        if (token) {
+          token.value = '';
+          token.placeholder = s.instagram_access_token_set ? 'Token configurado · deja vacío para conservar' : 'IGAA...';
+        }
         if (lastSync && s.instagram_last_sync) lastSync.textContent = s.instagram_last_sync;
       }
     } catch (e) {
@@ -2222,34 +2230,34 @@ const getCellIntensity = (hour: number) => {
           typePill = '<span class="cat-pill-mini" style="background:#FEE2E2; color:#DC2626;">Video / Reel</span>';
         }
 
-        const captionClean = (post.caption || '')
-          .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const captionRaw = String(post.caption || '');
+        const captionShort = captionRaw.length > 90 ? captionRaw.substring(0, 90) + '...' : captionRaw;
+        const snippet = escapeHtml(captionShort)
           .replace(/(#\w+)/g, '<strong style="color:var(--bm-orange);">$1</strong>');
-        const snippet = captionClean.length > 90 ? captionClean.substring(0, 90) + '...' : captionClean;
 
-        const thumb = post.thumbnail_url || post.media_url;
+        const thumb = escapeHtml(safeUrl(post.thumbnail_url || post.media_url, '/assets/logo.webp'));
         const pubDate = post.published_at ? new Date(post.published_at).toLocaleDateString('es-VE') : 'Reciente';
 
         return `
           <tr>
             <td>
-              <img src="${thumb}" alt="Media" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-subtle);" loading="lazy" onerror="this.src='/assets/logo-card.png'" />
+              <img src="${thumb}" alt="Media" style="width: 48px; height: 48px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-subtle);" loading="lazy" onerror="this.onerror=null;this.src='/assets/logo.webp'" />
             </td>
             <td>${typePill}</td>
             <td>
               <div style="font-size: 0.86rem; line-height: 1.4; color: var(--text-main); max-width: 380px;">${snippet}</div>
-              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">Por: <strong>${post.author || '@brandmeister_yv'}</strong></div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">Por: <strong>${escapeHtml(post.author || '@brandmeister_yv')}</strong></div>
             </td>
             <td>
               <span style="font-size: 0.8rem; color: var(--text-muted); white-space: nowrap;">
-                ❤️ ${post.likes_count || 0} &nbsp; 💬 ${post.comments_count || 0}
+                ❤️ ${Number(post.likes_count) || 0} &nbsp; 💬 ${Number(post.comments_count) || 0}
               </span>
             </td>
             <td style="font-size: 0.82rem; color: var(--text-muted); white-space: nowrap;">${pubDate}</td>
             <td style="text-align: right; white-space: nowrap;">
               <div class="row-actions" style="margin: 0;">
-                <a href="${post.permalink}" target="_blank" rel="noopener noreferrer" style="margin-right: 0.5rem;">Ver ↗</a> | 
-                <button type="button" class="btn-delete-gallery-post" data-id="${post.id}" style="background:none; border:none; color:var(--bm-red); cursor:pointer; font-size:0.78rem; padding:0 0.35rem;">Eliminar</button>
+                <a href="${escapeHtml(safeUrl(post.permalink))}" target="_blank" rel="noopener noreferrer" style="margin-right: 0.5rem;">Ver ↗</a> | 
+                <button type="button" class="btn-delete-gallery-post" data-id="${escapeHtml(post.id)}" style="background:none; border:none; color:var(--bm-red); cursor:pointer; font-size:0.78rem; padding:0 0.35rem;">Eliminar</button>
               </div>
             </td>
           </tr>
@@ -2277,17 +2285,20 @@ const getCellIntensity = (hour: number) => {
     try {
       const res = await fetch('/api/settings.php', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+      if (handleUnauthorized(res)) return;
       const data = await res.json();
       if (data.success) {
-        alert('¡Credenciales de Instagram API guardadas exitosamente en bm_site_settings!');
+        alert('¡Credenciales de Instagram API guardadas exitosamente!');
+        await loadInstagramSettings();
       } else {
-        alert('Aviso: ' + (data.error || 'Ajustes actualizados.'));
+        alert('Error: ' + (data.error || 'No se pudieron guardar los ajustes.'));
       }
     } catch (e) {
-      alert('¡Credenciales de Instagram registradas!');
+      alert('No fue posible contactar al servidor. Los ajustes no se guardaron.');
     }
   });
 
@@ -2302,9 +2313,11 @@ const getCellIntensity = (hour: number) => {
       try {
         const res = await fetch('/api/instagram.php?action=sync', {
           method: 'POST',
+          credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({})
         });
+        if (handleUnauthorized(res)) return;
         const data = await res.json();
         if (data.success) {
           alert(data.message || 'Sincronización completada con éxito.');
@@ -2407,9 +2420,11 @@ const getCellIntensity = (hour: number) => {
       try {
         const res = await fetch('/api/instagram.php?action=save_post', {
           method: 'POST',
+          credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+        if (handleUnauthorized(res)) return;
         const data = await res.json();
         if (data.success) {
           alert('¡Publicación guardada exitosamente en la galería!');
@@ -2419,9 +2434,7 @@ const getCellIntensity = (hour: number) => {
           alert('Error al guardar: ' + (data.error || 'Ocurrió un error'));
         }
       } catch (err) {
-        alert('¡Publicación registrada!');
-        closeGalleryModal();
-        await loadGalleryPosts();
+        alert('No fue posible contactar al servidor. La publicación no se guardó.');
       }
     });
   }
@@ -2435,9 +2448,11 @@ const getCellIntensity = (hour: number) => {
         try {
           const res = await fetch('/api/instagram.php?action=delete_post', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: postId })
           });
+          if (handleUnauthorized(res)) return;
           const data = await res.json();
           if (data.success) {
             alert('Publicación eliminada correctamente.');
@@ -2446,8 +2461,7 @@ const getCellIntensity = (hour: number) => {
             alert(data.error || 'No se pudo eliminar la publicación.');
           }
         } catch (err) {
-          alert('Aviso: Operación completada.');
-          await loadGalleryPosts();
+          alert('No fue posible contactar al servidor. La publicación no se eliminó.');
         }
       }
     }
