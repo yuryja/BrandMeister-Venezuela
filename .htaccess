@@ -1,4 +1,7 @@
 # Apache configuration for BrandMeister Venezuela static Astro site
+
+# Nunca listar el contenido de carpetas (/api/, /_astro/...)
+Options -Indexes
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
