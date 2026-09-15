@@ -1,112 +1,65 @@
-// Panel · Galería de Instagram: conexión OAuth, sincronización y moderación de publicaciones
-import { api, escapeHtml, notice, timeAgo, openModal, closeModal, withBusy, type SessionUser } from './api';
+// Panel · Galería: listado, subida optimizada (WebP / video comprimido) y edición de publicaciones
+import { api, escapeHtml, notice, showFieldErrors, withBusy, type SessionUser } from './api';
+import { processImage, processVideo, uploadInChunks, formatBytes, type ProcessedImage, type ProcessedVideo } from './media';
 
 type GalleryPost = {
   id: string;
-  source: 'instagram' | 'manual';
-  permalink: string;
   media_type: 'IMAGE' | 'VIDEO' | 'CAROUSEL_ALBUM';
   media_url: string;
   thumbnail_url: string;
-  carousel_media: { url: string; caption: string }[];
+  carousel_media: { url: string }[];
   video_url: string | null;
   caption: string;
   author: string;
-  likes_count: number;
-  comments_count: number;
+  permalink: string | null;
   published_ts: number;
   status: 'published' | 'hidden';
 };
 
-type InstagramStatus = {
-  app_configured: boolean;
-  app_id: string;
-  connected: boolean;
-  expired: boolean;
-  username: string;
-  token_expires_at: number | null;
-  hashtag: string;
-  last_sync: number | null;
-  last_sync_result: { matched: number; added: number; updated: number; hidden: number; failed_media: number } | null;
-  redirect_uri: string;
-  cron_command: string;
-  posts_published: number;
-  posts_hidden: number;
+type MediaItem = {
+  key: string;
+  kind: 'image' | 'video';
+  file: File;
+  state: 'processing' | 'ready' | 'error';
+  progress: number;
+  error?: string;
+  previewUrl?: string;
+  image?: ProcessedImage;
+  video?: ProcessedVideo;
 };
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;
-
 const TYPE_LABELS: Record<GalleryPost['media_type'], string> = { IMAGE: 'Foto', VIDEO: 'Video', CAROUSEL_ALBUM: 'Carrusel' };
-
-// Mensajes al volver de Instagram (?instagram=...)
-const RETURN_MESSAGES: Record<string, ['success' | 'error' | 'warning', string]> = {
-  connected: ['success', 'Instagram conectado y primera sincronización hecha.'],
-  denied: ['warning', 'Se canceló la autorización en Instagram.'],
-  invalid_state: ['error', 'La autorización caducó o no se inició desde este panel. Vuelve a pulsar "Conectar con Instagram".'],
-  missing_app: ['warning', 'Antes de conectar, guarda el ID y la clave secreta de la app de Instagram en "Ajustes de la app de Meta".'],
-  forbidden: ['error', 'Solo un Administrador puede conectar Instagram.'],
-  error: ['error', 'No se pudo completar la conexión con Instagram.'],
-};
 
 let session: SessionUser | null = null;
 let posts: GalleryPost[] = [];
 let filter: 'all' | 'published' | 'hidden' = 'all';
-let pendingReturn: { result: string; detail: string } | null = null;
+let editing: GalleryPost | null = null;
+let pendingEdit: GalleryPost | null = null;
+let items: MediaItem[] = [];
+let videoAbort: AbortController | null = null;
+let saving = false;
 
-const fmtDate = (ts: number | null) =>
-  ts ? new Date(ts * 1000).toLocaleDateString('es-VE', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
+const fmtDate = (ts: number) => new Date(ts * 1000).toLocaleDateString('es-VE', { year: 'numeric', month: 'short', day: 'numeric' });
+const todayIso = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
-async function loadStatus() {
-  const res = await api<{ instagram: InstagramStatus }>('/api/instagram.php?action=status');
-  if (!res.ok) return;
-  const s = res.data.instagram;
-  const isAdmin = session?.role === 'admin';
-
-  $('ig-state-connected')!.hidden = !s.connected;
-  $('ig-state-disconnected')!.hidden = s.connected;
-  $('ig-connect-editor-hint')!.hidden = isAdmin;
-  document.querySelectorAll<HTMLElement>('#view-gallery [data-admin-only]').forEach((el) => (el.hidden = !isAdmin));
-
-  if (s.connected) {
-    const link = $('ig-username') as HTMLAnchorElement;
-    link.textContent = `@${s.username}`;
-    link.href = `https://www.instagram.com/${encodeURIComponent(s.username)}/`;
-    $('ig-hashtag-label')!.textContent = `#${s.hashtag}`;
-    $('ig-last-sync')!.textContent = s.last_sync ? timeAgo(s.last_sync) : 'Nunca';
-    $('ig-expires')!.textContent = fmtDate(s.token_expires_at);
-    const r = s.last_sync_result;
-    $('ig-last-result')!.textContent = r
-      ? `Última: ${r.matched} con el hashtag · ${r.added} nuevas · ${r.updated} actualizadas${r.hidden ? ` · ${r.hidden} ocultadas` : ''}${r.failed_media ? ` · ${r.failed_media} medios fallidos` : ''}.`
-      : '';
-  } else {
-    $('ig-disconnected-text')!.innerHTML = s.expired
-      ? '<strong>La conexión con Instagram venció.</strong> Vuelve a conectar la cuenta para seguir sincronizando.'
-      : `Conecta la cuenta de Instagram para que las publicaciones con <strong>#${escapeHtml(s.hashtag)}</strong> aparezcan solas en la galería del sitio.`;
-    const connect = $('ig-connect') as HTMLAnchorElement;
-    connect.classList.toggle('is-disabled', !s.app_configured);
-    connect.setAttribute('aria-disabled', String(!s.app_configured));
-    // Si falta la app, abrir directamente sus ajustes
-    if (isAdmin && !s.app_configured) ($('ig-app-settings') as HTMLDetailsElement).open = true;
-  }
-
-  $('ig-redirect-uri')!.textContent = s.redirect_uri;
-  $('ig-cron-command')!.textContent = s.cron_command;
-  ($('ig-hashtag') as HTMLInputElement).value = s.hashtag;
-  ($('ig-app-id') as HTMLInputElement).value = s.app_id;
-  ($('ig-app-secret') as HTMLInputElement).placeholder = s.app_configured ? 'Guardada · deja vacío para conservarla' : '';
-}
-
+// ---------------------------------------------------------------------------
+// Listado
+// ---------------------------------------------------------------------------
 async function loadPosts() {
-  const res = await api<{ posts: GalleryPost[] }>('/api/instagram.php?scope=admin');
+  const res = await api<{ posts: GalleryPost[] }>('/api/gallery.php?scope=admin');
   if (!res.ok) {
     if (res.status !== 401) notice($('gallery-notice'), 'error', res.data.error || 'No se pudieron cargar las publicaciones.');
     return;
   }
   posts = res.data.posts;
-  render();
+  renderList();
 }
 
-function render() {
+function renderList() {
   const counts = { all: posts.length, published: 0, hidden: 0 };
   posts.forEach((p) => counts[p.status]++);
   document.querySelectorAll<HTMLElement>('#gallery-status-filter [data-count]').forEach((el) => {
@@ -119,143 +72,342 @@ function render() {
   const rows = posts.filter((p) => filter === 'all' || p.status === filter);
   const tbody = $('gallery-table-body')!;
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="4" class="table-empty">${posts.length ? 'No hay publicaciones en este filtro.' : 'Aún no hay publicaciones. Conecta Instagram y sincroniza.'}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" class="table-empty">${posts.length ? 'No hay publicaciones en este filtro.' : 'Aún no hay publicaciones. Pulsa "Añadir publicación".'}</td></tr>`;
     return;
   }
 
   tbody.innerHTML = rows.map((p) => {
-    const caption = (p.caption || '').trim();
-    const actions = [
-      p.permalink ? `<span><a href="${escapeHtml(p.permalink)}" target="_blank" rel="noopener noreferrer">Ver en Instagram</a></span>` : '',
-      `<span><a href="#" data-action="toggle">${p.status === 'published' ? 'Ocultar' : 'Mostrar'}</a></span>`,
-      p.source === 'manual' ? `<span><a href="#" data-action="edit">Editar</a></span>` : '',
-      `<span class="trash"><a href="#" data-action="delete">Eliminar</a></span>`,
-    ].filter(Boolean).join(' | ');
-
+    const caption = p.caption.trim();
+    const count = p.media_type === 'CAROUSEL_ALBUM' ? ` · ${p.carousel_media.length}` : '';
     return `
       <tr data-post-id="${escapeHtml(p.id)}" class="${p.status === 'hidden' ? 'is-inactive' : ''}">
-        <td class="col-thumb"><img src="${escapeHtml(p.thumbnail_url)}" alt="" loading="lazy" class="gallery-thumb" /></td>
+        <td class="col-thumb">
+          <a href="#" data-action="edit" aria-label="Editar publicación"><img src="${escapeHtml(p.thumbnail_url)}" alt="" loading="lazy" class="gallery-thumb" /></a>
+        </td>
         <td class="cell-title">
           <div>
-            <span class="state-badge state-type">${TYPE_LABELS[p.media_type]}${p.media_type === 'CAROUSEL_ALBUM' ? ` · ${p.carousel_media.length}` : ''}</span>
-            ${p.source === 'manual' ? '<span class="state-badge state-pending">Manual</span>' : ''}
+            <span class="state-badge state-type">${TYPE_LABELS[p.media_type]}${count}</span>
             ${p.status === 'hidden' ? '<span class="state-badge state-inactive">Oculta</span>' : ''}
           </div>
-          <p class="gallery-caption">${escapeHtml(caption.length > 160 ? caption.slice(0, 160) + '…' : caption) || '<span class="text-faint">Sin texto</span>'}</p>
-          <div class="row-actions">${actions}</div>
+          <p class="gallery-caption"><a href="#" data-action="edit">${escapeHtml(caption.length > 140 ? caption.slice(0, 140) + '…' : caption) || '<span class="text-faint">(sin descripción)</span>'}</a></p>
+          <div class="row-actions">
+            <span><a href="#" data-action="edit">Editar</a></span> |
+            <span><a href="#" data-action="toggle">${p.status === 'published' ? 'Ocultar' : 'Mostrar'}</a></span> |
+            <span class="trash"><a href="#" data-action="delete">Eliminar</a></span>
+          </div>
         </td>
-        <td class="col-num">♥ ${p.likes_count}<br><span class="text-faint">💬 ${p.comments_count}</span></td>
+        <td>${escapeHtml(p.author)}</td>
         <td>${fmtDate(p.published_ts)}</td>
       </tr>`;
   }).join('');
 }
 
 async function rowAction(action: string, post: GalleryPost) {
+  if (action === 'edit') {
+    pendingEdit = post;
+    window.switchView('gallery-edit');
+  }
   if (action === 'toggle') {
-    const status = post.status === 'published' ? 'hidden' : 'published';
-    const res = await api('/api/instagram.php?action=visibility', { id: post.id, status });
+    const res = await api('/api/gallery.php?action=visibility', { id: post.id, status: post.status === 'published' ? 'hidden' : 'published' });
     notice($('gallery-notice'), res.ok ? 'success' : 'error', res.data.message || res.data.error || 'No se pudo cambiar.');
     if (res.ok) loadPosts();
   }
   if (action === 'delete') {
-    const hint = post.source === 'instagram' ? '\n\nSi sigue en Instagram con el hashtag volverá al sincronizar: mejor usa "Ocultar".' : '';
-    if (!confirm(`¿Eliminar esta publicación de la galería?${hint}`)) return;
-    const res = await api('/api/instagram.php?action=delete_post', { id: post.id });
+    if (!confirm('¿Eliminar esta publicación y sus archivos? No se puede deshacer.')) return;
+    const res = await api('/api/gallery.php?action=delete', { id: post.id });
     notice($('gallery-notice'), res.ok ? 'success' : 'error', res.data.message || res.data.error || 'No se pudo eliminar.');
     if (res.ok) loadPosts();
   }
-  if (action === 'edit') openManual(post);
 }
 
-function openManual(post: GalleryPost | null) {
-  const form = $('gallery-post-form') as HTMLFormElement;
+// ---------------------------------------------------------------------------
+// Editor
+// ---------------------------------------------------------------------------
+function resetItems() {
+  videoAbort?.abort();
+  videoAbort = null;
+  items.forEach((i) => i.previewUrl && URL.revokeObjectURL(i.previewUrl));
+  items = [];
+}
+
+function prepareEditor() {
+  editing = pendingEdit;
+  pendingEdit = null;
+  resetItems();
+
+  const form = $('gallery-form') as HTMLFormElement;
   form.reset();
-  $('gallery-post-notice')!.innerHTML = '';
+  showFieldErrors(form);
+  $('gallery-edit-notice')!.innerHTML = '';
+  setProgress(null);
+
   const set = (name: string, value: string) => ((form.elements.namedItem(name) as HTMLInputElement).value = value);
-  set('id', post?.id ?? '');
-  set('media_type', post?.media_type ?? 'IMAGE');
-  set('media_url', post?.media_url ?? '');
-  set('carousel', (post?.carousel_media ?? []).map((c) => c.url).join('\n'));
-  set('video_url', post?.video_url ?? '');
-  set('caption', post?.caption ?? '');
-  set('permalink', post?.permalink ?? '');
-  set('author', post?.author ?? '@brandmeister_yv');
-  $('modal-gallery-title')!.textContent = post ? 'Editar publicación manual' : 'Añadir publicación manual';
-  syncManualType();
-  openModal($('modal-gallery-post')!);
+  set('id', editing?.id ?? '');
+  set('caption', editing?.caption ?? '');
+  set('status', editing?.status ?? 'published');
+  set('author', editing?.author ?? '@brandmeister_yv');
+  set('permalink', editing?.permalink ?? '');
+  if (editing) {
+    const d = new Date(editing.published_ts * 1000);
+    set('published_date', `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
+  } else {
+    set('published_date', todayIso());
+  }
+
+  $('gallery-edit-title')!.textContent = editing ? 'Editar publicación' : 'Añadir publicación';
+  $('gallery-submit')!.textContent = editing ? 'Actualizar' : 'Publicar';
+  $('gallery-current-media-hint')!.hidden = !editing;
+  updateCaptionCount();
+  renderMedia();
 }
 
-function syncManualType() {
-  const type = ($('gp-type') as HTMLSelectElement).value;
-  $('gp-carousel-group')!.hidden = type !== 'CAROUSEL_ALBUM';
-  $('gp-video-group')!.hidden = type !== 'VIDEO';
+function renderMedia() {
+  const list = $('gallery-media-list')!;
+  const imageItems = items.filter((i) => i.kind === 'image');
+
+  let html = '';
+  // Medios actuales (solo en edición y si no se han añadido nuevos)
+  if (editing && !items.length) {
+    const current = editing.media_type === 'CAROUSEL_ALBUM' ? editing.carousel_media.map((c) => c.url) : [editing.thumbnail_url];
+    html = current.map((url, i) => `
+      <li class="media-tile is-current">
+        <img src="${escapeHtml(url)}" alt="" />
+        ${editing!.media_type === 'VIDEO' ? '<span class="media-tile-badge">▶ Video</span>' : `<span class="media-tile-badge">${i + 1}</span>`}
+      </li>`).join('');
+  }
+
+  html += items.map((item) => {
+    const index = imageItems.indexOf(item);
+    const size = item.image
+      ? `${item.image.width}×${item.image.height} · ${formatBytes(item.image.blob.size)}`
+      : item.video
+        ? `${item.video.width}×${item.video.height} · ${formatBytes(item.video.blob.size)}${item.video.compressed ? '' : ' (original)'}`
+        : '';
+    const saved = item.image || item.video
+      ? Math.max(0, Math.round((1 - (item.image?.blob.size ?? item.video!.blob.size) / item.file.size) * 100))
+      : 0;
+    const status = item.state === 'processing'
+      ? `<span class="media-tile-status">${item.kind === 'video' ? `Comprimiendo ${Math.round(item.progress * 100)}%` : 'Optimizando…'}</span>`
+      : item.state === 'error'
+        ? `<span class="media-tile-status is-error">${escapeHtml(item.error || 'Error')}</span>`
+        : `<span class="media-tile-status is-ready">${size}${saved > 0 ? ` · −${saved}%` : ''}</span>`;
+
+    return `
+      <li class="media-tile ${item.state === 'error' ? 'has-error' : ''}" data-key="${item.key}">
+        ${item.previewUrl ? (item.kind === 'video' && !item.video ? '<div class="media-tile-placeholder">▶</div>' : `<img src="${item.previewUrl}" alt="" />`) : '<div class="media-tile-placeholder">…</div>'}
+        ${item.kind === 'video' ? '<span class="media-tile-badge">▶ Video</span>' : `<span class="media-tile-badge">${index + 1}</span>`}
+        ${item.state === 'processing' ? `<div class="media-tile-meter"><span style="width:${Math.round(item.progress * 100)}%"></span></div>` : ''}
+        <div class="media-tile-tools">
+          ${item.kind === 'image' && imageItems.length > 1 ? `
+            <button type="button" data-media-action="left" aria-label="Mover antes" ${index === 0 ? 'disabled' : ''}>←</button>
+            <button type="button" data-media-action="right" aria-label="Mover después" ${index === imageItems.length - 1 ? 'disabled' : ''}>→</button>` : ''}
+          <button type="button" data-media-action="remove" aria-label="Quitar">✕</button>
+        </div>
+        ${status}
+      </li>`;
+  }).join('');
+
+  list.innerHTML = html;
+
+  const ready = items.filter((i) => i.state === 'ready');
+  const processing = items.some((i) => i.state === 'processing');
+  const before = ready.reduce((sum, i) => sum + i.file.size, 0);
+  const after = ready.reduce((sum, i) => sum + (i.image?.blob.size ?? i.video?.blob.size ?? 0), 0);
+  $('gallery-media-summary')!.textContent = ready.length
+    ? `${ready.length} listo(s) · ${formatBytes(before)} → ${formatBytes(after)}${processing ? ' · procesando…' : ''}`
+    : processing ? 'Procesando…' : '';
 }
 
-async function submitManual(e: Event) {
-  e.preventDefault();
-  const fd = new FormData(e.currentTarget as HTMLFormElement);
-  const type = String(fd.get('media_type'));
-  const payload = {
-    id: fd.get('id') || undefined,
-    media_type: type,
-    media_url: fd.get('media_url'),
-    carousel_media: type === 'CAROUSEL_ALBUM'
-      ? String(fd.get('carousel') || '').split('\n').map((url) => url.trim()).filter(Boolean).map((url) => ({ url, caption: '' }))
-      : [],
-    video_url: type === 'VIDEO' ? fd.get('video_url') : '',
-    caption: fd.get('caption'),
-    permalink: fd.get('permalink'),
-    author: fd.get('author'),
-  };
-  const res = await withBusy($('gallery-post-submit') as HTMLButtonElement, () => api('/api/instagram.php?action=save_post', payload));
-  if (!res.ok) {
-    notice($('gallery-post-notice'), 'error', res.data.error || 'No se pudo guardar.');
+async function addFiles(fileList: FileList | File[]) {
+  const files = Array.from(fileList);
+  const videos = files.filter((f) => f.type.startsWith('video/') || /\.(mp4|mov|m4v|webm)$/i.test(f.name));
+  const images = files.filter((f) => !videos.includes(f) && (f.type.startsWith('image/') || /\.(jpe?g|png|webp|heic|heif|gif|avif)$/i.test(f.name)));
+  const ignored = files.length - videos.length - images.length;
+  const noticeEl = $('gallery-edit-notice');
+
+  const hasVideo = items.some((i) => i.kind === 'video');
+  const hasImages = items.some((i) => i.kind === 'image');
+  if (videos.length > 1 || (videos.length && (images.length || hasImages || hasVideo)) || (images.length && hasVideo)) {
+    notice(noticeEl, 'warning', 'Cada publicación lleva varias fotos o un solo video, no ambos. Crea otra publicación para el resto.');
     return;
   }
-  closeModal($('modal-gallery-post')!);
-  notice($('gallery-notice'), 'success', res.data.message || 'Publicación guardada.');
-  loadPosts();
-}
+  if (items.length + images.length > 20) {
+    notice(noticeEl, 'warning', 'Máximo 20 fotos por publicación.');
+    return;
+  }
+  if (ignored) {
+    notice(noticeEl, 'info', `${ignored} archivo(s) no son fotos ni videos y se ignoraron.`);
+  }
 
-function copyText(sourceId: string, button: HTMLElement) {
-  const text = $(sourceId)?.textContent || '';
-  navigator.clipboard?.writeText(text).then(() => {
-    const original = button.textContent;
-    button.textContent = 'Copiado';
-    setTimeout(() => (button.textContent = original), 1500);
+  const newItems: MediaItem[] = [...images, ...videos].map((file) => ({
+    key: Math.random().toString(36).slice(2),
+    kind: videos.includes(file) ? 'video' : 'image',
+    file,
+    state: 'processing',
+    progress: 0,
+  }));
+  items.push(...newItems);
+  renderMedia();
+
+  // Fotos de dos en dos para no saturar la memoria del móvil
+  const queue = newItems.filter((i) => i.kind === 'image');
+  const workers = Array.from({ length: Math.min(2, queue.length) }, async () => {
+    while (queue.length) {
+      const item = queue.shift()!;
+      try {
+        item.image = await processImage(item.file);
+        item.previewUrl = URL.createObjectURL(item.image.blob);
+        item.state = 'ready';
+      } catch {
+        item.state = 'error';
+        item.error = /hei[cf]$/i.test(item.file.name) ? 'HEIC solo se puede leer en Safari: conviértela a JPG' : 'No se pudo leer esta imagen';
+      }
+      if (items.includes(item)) renderMedia();
+    }
   });
+
+  const videoItem = newItems.find((i) => i.kind === 'video');
+  if (videoItem) {
+    videoAbort = new AbortController();
+    let lastPaint = 0;
+    try {
+      videoItem.video = await processVideo(videoItem.file, (ratio) => {
+        videoItem.progress = ratio;
+        if (Date.now() - lastPaint > 500) {
+          lastPaint = Date.now();
+          renderMedia();
+        }
+      }, videoAbort.signal);
+      videoItem.previewUrl = URL.createObjectURL(videoItem.video.poster.blob);
+      videoItem.state = 'ready';
+    } catch (err) {
+      if ((err as DOMException).name === 'AbortError') return;
+      videoItem.state = 'error';
+      videoItem.error = (err as Error).message || 'No se pudo procesar el video';
+    }
+    if (items.includes(videoItem)) renderMedia();
+  }
+  await Promise.all(workers);
 }
 
-function showReturnMessage() {
-  if (!pendingReturn) return;
-  const [type, message] = RETURN_MESSAGES[pendingReturn.result] ?? RETURN_MESSAGES.error;
-  notice($('gallery-notice'), type, pendingReturn.detail ? `${message} (${pendingReturn.detail})` : message);
-  pendingReturn = null;
+function mediaAction(action: string, key: string) {
+  const item = items.find((i) => i.key === key);
+  if (!item) return;
+  if (action === 'remove') {
+    if (item.kind === 'video') videoAbort?.abort();
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl);
+    items = items.filter((i) => i !== item);
+  } else {
+    const images = items.filter((i) => i.kind === 'image');
+    const from = images.indexOf(item);
+    const to = action === 'left' ? from - 1 : from + 1;
+    if (to < 0 || to >= images.length) return;
+    [images[from], images[to]] = [images[to], images[from]];
+    items = [...images, ...items.filter((i) => i.kind === 'video')];
+  }
+  renderMedia();
+}
+
+function setProgress(ratio: number | null, label = '') {
+  $('gallery-progress')!.hidden = ratio === null;
+  if (ratio !== null) {
+    $('gallery-progress-bar')!.style.width = `${Math.round(ratio * 100)}%`;
+    $('gallery-progress-label')!.textContent = label;
+  }
+}
+
+async function submit(e: Event) {
+  e.preventDefault();
+  if (saving) return;
+  const form = e.currentTarget as HTMLFormElement;
+  const noticeEl = $('gallery-edit-notice');
+
+  if (items.some((i) => i.state === 'processing')) {
+    notice(noticeEl, 'info', 'Espera a que terminen de optimizarse los archivos.');
+    return;
+  }
+  const ready = items.filter((i) => i.state === 'ready');
+  if (items.some((i) => i.state === 'error')) {
+    notice(noticeEl, 'warning', 'Quita los archivos con error antes de guardar.');
+    return;
+  }
+  if (!editing && !ready.length) {
+    notice(noticeEl, 'warning', 'Añade al menos una foto o un video.');
+    return;
+  }
+
+  const fd = new FormData(form);
+  const payload: Record<string, unknown> = {
+    id: editing?.id,
+    caption: fd.get('caption'),
+    status: fd.get('status'),
+    published_date: fd.get('published_date'),
+    author: fd.get('author'),
+    permalink: fd.get('permalink'),
+  };
+
+  saving = true;
+  const button = $('gallery-submit') as HTMLButtonElement;
+  try {
+    await withBusy(button, async () => {
+      if (ready.length) {
+        // Subida secuencial con progreso total por bytes
+        type UploadJob = { blob: Blob; kind: 'image' | 'poster' | 'video' };
+        const jobs: UploadJob[] = ready.flatMap((i): UploadJob[] => i.kind === 'video'
+          ? [{ blob: i.video!.blob, kind: 'video' }, { blob: i.video!.poster.blob, kind: 'poster' }]
+          : [{ blob: i.image!.blob, kind: 'image' }]);
+        const totalBytes = jobs.reduce((s, j) => s + j.blob.size, 0);
+        let doneBytes = 0;
+        const images: string[] = [];
+
+        for (const job of jobs) {
+          const id = await uploadInChunks(job.blob, job.kind, (r) => {
+            setProgress((doneBytes + job.blob.size * r) / totalBytes, `Subiendo ${formatBytes(doneBytes + job.blob.size * r)} de ${formatBytes(totalBytes)}`);
+          });
+          doneBytes += job.blob.size;
+          if (job.kind === 'image') images.push(id);
+          if (job.kind === 'video') payload.video = id;
+          if (job.kind === 'poster') payload.poster = id;
+        }
+        if (images.length) payload.images = images;
+      }
+
+      setProgress(1, 'Guardando…');
+      const res = await api<{ post: GalleryPost }>('/api/gallery.php?action=save', payload);
+      if (!res.ok) {
+        showFieldErrors(form, res.data.validation_errors);
+        throw new Error(res.data.error || 'No se pudo guardar la publicación.');
+      }
+
+      const message = res.data.message || 'Publicación guardada.';
+      resetItems();
+      await loadPosts();
+      window.switchView('gallery');
+      notice($('gallery-notice'), 'success', message);
+    });
+  } catch (err) {
+    setProgress(null);
+    notice(noticeEl, 'error', (err as Error).message);
+  } finally {
+    saving = false;
+  }
+}
+
+function updateCaptionCount() {
+  $('gf-caption-count')!.textContent = String(($('gf-caption') as HTMLTextAreaElement).value.length);
 }
 
 export function initGallery() {
   if (!$('view-gallery')) return;
 
-  // Resultado de la vuelta desde Instagram: se lee y se limpia la URL
-  const params = new URLSearchParams(location.search);
-  if (params.has('instagram')) {
-    pendingReturn = { result: params.get('instagram') || 'error', detail: params.get('detalle') || '' };
-    history.replaceState(null, '', location.pathname);
-  }
-
-  document.addEventListener('bm:session', (e) => {
-    session = (e as CustomEvent<SessionUser>).detail;
-    if (pendingReturn) {
-      // Esperar a que el panel termine de mostrarse
-      setTimeout(() => window.switchView('gallery'), 0);
-    }
-  });
-
+  document.addEventListener('bm:session', (e) => (session = (e as CustomEvent<SessionUser>).detail));
   document.addEventListener('bm:view', (e) => {
-    if ((e as CustomEvent<string>).detail !== 'gallery') return;
-    loadStatus();
-    loadPosts();
-    showReturnMessage();
+    const view = (e as CustomEvent<string>).detail;
+    if (view === 'gallery') {
+      if (!saving) resetItems();
+      loadPosts();
+    }
+    if (view === 'gallery-edit') prepareEditor();
   });
 
   $('gallery-status-filter')!.addEventListener('click', (e) => {
@@ -263,64 +415,50 @@ export function initGallery() {
     if (!link) return;
     e.preventDefault();
     filter = link.dataset.galleryFilter as typeof filter;
-    render();
+    renderList();
   });
 
   $('gallery-table-body')!.addEventListener('click', (e) => {
     const link = (e.target as HTMLElement).closest<HTMLElement>('[data-action]');
     if (!link) return;
     e.preventDefault();
-    const id = link.closest<HTMLElement>('tr')?.dataset.postId;
-    const post = posts.find((p) => p.id === id);
+    const post = posts.find((p) => p.id === link.closest<HTMLElement>('tr')?.dataset.postId);
     if (post) rowAction(link.dataset.action!, post);
   });
 
-  $('ig-sync')!.addEventListener('click', async (e) => {
-    const button = e.currentTarget as HTMLButtonElement;
-    const original = button.textContent;
-    button.textContent = 'Sincronizando…';
-    const res = await withBusy(button, () => api('/api/instagram.php?action=sync', {}));
-    button.textContent = original;
-    notice($('gallery-notice'), res.ok ? 'success' : 'error', res.data.message || res.data.error || 'No se pudo sincronizar.');
-    loadStatus();
-    if (res.ok) loadPosts();
+  const input = $('gallery-file-input') as HTMLInputElement;
+  input.addEventListener('change', () => {
+    if (input.files?.length) addFiles(input.files);
+    input.value = '';
   });
 
-  $('ig-connect')!.addEventListener('click', (e) => {
-    if ((e.currentTarget as HTMLElement).classList.contains('is-disabled')) {
-      e.preventDefault();
-      notice($('gallery-notice'), 'warning', RETURN_MESSAGES.missing_app[1]);
-      ($('ig-app-settings') as HTMLDetailsElement).open = true;
-    }
-  });
-
-  $('ig-disconnect')!.addEventListener('click', async () => {
-    if (!confirm('¿Desconectar Instagram? La galería conserva lo ya sincronizado, pero dejará de actualizarse.')) return;
-    const res = await api('/api/instagram.php?action=disconnect', {});
-    notice($('gallery-notice'), res.ok ? 'success' : 'error', res.data.message || res.data.error || 'No se pudo desconectar.');
-    loadStatus();
-  });
-
-  $('ig-app-form')!.addEventListener('submit', async (e) => {
+  const zone = $('gallery-drop-zone')!;
+  ['dragenter', 'dragover'].forEach((type) => zone.addEventListener(type, (e) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget as HTMLFormElement);
-    const payload: Record<string, string> = {
-      instagram_app_id: String(fd.get('instagram_app_id') || '').trim(),
-      instagram_hashtag: String(fd.get('instagram_hashtag') || '').trim().replace(/^#/, ''),
-    };
-    const secret = String(fd.get('instagram_app_secret') || '').trim();
-    if (secret) payload.instagram_app_secret = secret;
-    const res = await withBusy($('ig-app-save') as HTMLButtonElement, () => api('/api/settings.php', payload));
-    notice($('gallery-notice'), res.ok ? 'success' : 'error', res.ok ? 'Ajustes de Instagram guardados.' : res.data.error || 'No se pudieron guardar.');
-    if (res.ok) {
-      ($('ig-app-secret') as HTMLInputElement).value = '';
-      loadStatus();
-    }
+    zone.classList.add('is-dragging');
+  }));
+  ['dragleave', 'drop'].forEach((type) => zone.addEventListener(type, () => zone.classList.remove('is-dragging')));
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if ((e as DragEvent).dataTransfer?.files.length) addFiles((e as DragEvent).dataTransfer!.files);
   });
 
-  $('ig-copy-redirect')!.addEventListener('click', (e) => copyText('ig-redirect-uri', e.currentTarget as HTMLElement));
-  $('ig-copy-cron')!.addEventListener('click', (e) => copyText('ig-cron-command', e.currentTarget as HTMLElement));
-  $('gallery-add-manual')!.addEventListener('click', () => openManual(null));
-  $('gp-type')!.addEventListener('change', syncManualType);
-  $('gallery-post-form')!.addEventListener('submit', submitManual);
+  $('gallery-media-list')!.addEventListener('click', (e) => {
+    const button = (e.target as HTMLElement).closest<HTMLElement>('[data-media-action]');
+    const key = button?.closest<HTMLElement>('[data-key]')?.dataset.key;
+    if (button && key) mediaAction(button.dataset.mediaAction!, key);
+  });
+
+  $('gf-caption')!.addEventListener('input', updateCaptionCount);
+  $('gallery-form')!.addEventListener('submit', submit);
+  $('gallery-cancel')!.addEventListener('click', () => {
+    if (items.length && !confirm('¿Descartar los archivos añadidos?')) return;
+    resetItems();
+    window.switchView('gallery');
+  });
+
+  // Aviso al cerrar la pestaña con una subida o compresión en curso
+  window.addEventListener('beforeunload', (e) => {
+    if (saving || items.some((i) => i.state === 'processing')) e.preventDefault();
+  });
 }

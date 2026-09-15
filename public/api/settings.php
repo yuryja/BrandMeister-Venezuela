@@ -6,30 +6,20 @@ start_secure_session();
 $method = $_SERVER['REQUEST_METHOD'];
 $pdo = get_db_connection();
 
-// Ajustes visibles para cualquier visitante
+// Ajustes del portal: los ve cualquier visitante y los editan admin/editor
 const PUBLIC_SETTINGS = [
     'hero_title', 'hero_description', 'emergency_alert', 'freq_vhf', 'freq_uhf',
-    'master_servers', 'contact_email', 'instagram_account', 'instagram_hashtag'
+    'master_servers', 'contact_email'
 ];
-// Ajustes que solo ven y editan admin/editor
-const PRIVATE_SETTINGS = ['instagram_app_id'];
-// Secretos: solo el admin puede escribirlos y nunca se devuelven, solo se indica si existen.
-// El token de Instagram no está aquí: solo lo escribe la conexión OAuth (instagram-lib.php)
-const SECRET_SETTINGS = ['instagram_app_secret'];
 
 if ($method === 'GET') {
-    $user = current_user();
-    $isStaff = $user !== null && in_array($user['role'], ['admin', 'editor'], true);
-
     if ($pdo) {
         $rows = $pdo->query("SELECT setting_key, setting_value FROM bm_site_settings")->fetchAll();
         $settings = [];
         foreach ($rows as $r) {
             $key = $r['setting_key'];
-            if (in_array($key, PUBLIC_SETTINGS, true) || ($isStaff && in_array($key, PRIVATE_SETTINGS, true))) {
+            if (in_array($key, PUBLIC_SETTINGS, true)) {
                 $settings[$key] = $r['setting_value'];
-            } elseif ($isStaff && in_array($key, SECRET_SETTINGS, true)) {
-                $settings[$key . '_set'] = trim((string)$r['setting_value']) !== '';
             }
         }
         send_json(['success' => true, 'settings' => $settings, 'source' => 'mysql']);
@@ -56,7 +46,6 @@ if ($method === 'POST') {
         send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento'], 503);
     }
 
-    $allowed = array_merge(PUBLIC_SETTINGS, PRIVATE_SETTINGS);
     $toSave = [];
     $rejected = [];
 
@@ -67,15 +56,7 @@ if ($method === 'POST') {
         }
         $value = trim((string)$v);
 
-        if (in_array($k, SECRET_SETTINGS, true)) {
-            // Campo vacío = conservar el secreto actual
-            if ($value === '') continue;
-            if ($user['role'] !== 'admin') {
-                $rejected[] = $k;
-                continue;
-            }
-            $toSave[$k] = $value;
-        } elseif (in_array($k, $allowed, true)) {
+        if (in_array($k, PUBLIC_SETTINGS, true)) {
             $toSave[$k] = $value;
         } else {
             $rejected[] = $k;
