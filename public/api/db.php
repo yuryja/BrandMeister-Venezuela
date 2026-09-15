@@ -3,6 +3,8 @@
  * Conector Singleton PDO para MySQL `bmvenezuela`
  */
 
+require_once __DIR__ . '/env.php';
+
 function get_db_connection() {
     static $pdo = null;
     if ($pdo !== null) {

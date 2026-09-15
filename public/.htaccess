@@ -32,6 +32,11 @@
   ExpiresByType application/javascript "access plus 1 year"
 </IfModule>
 
+# Archivos internos del API: solo se incluyen desde PHP, nunca se sirven directamente
+<FilesMatch "^(config|env|db)\.php$">
+  Require all denied
+</FilesMatch>
+
 # Security Headers
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
