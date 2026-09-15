@@ -204,7 +204,7 @@
 
   // Helper to update buttons across Header, Hero, and Navigation
   function updateAllButtons(state: string) {
-    const isActive = state !== "idle";
+    const isActive = state !== "idle" && state !== "error";
 
     // Header Hoseline Button
     const headerBtn = document.querySelectorAll(".btn-hoseline-native");
