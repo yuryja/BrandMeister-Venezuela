@@ -132,14 +132,14 @@ CREATE TABLE `bm_contact_messages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------------
--- 6. Tabla de Publicaciones de Galería Instagram (#experienciadmr)
+-- 6. Tabla de Publicaciones de la Galería (fotos WebP y videos subidos desde el panel)
 -- --------------------------------------------------------------------
 DROP TABLE IF EXISTS `bm_gallery_posts`;
 CREATE TABLE `bm_gallery_posts` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `instagram_id` VARCHAR(100) NULL UNIQUE,
   `shortcode` VARCHAR(50) NULL,
-  `permalink` VARCHAR(255) NOT NULL,
+  `permalink` VARCHAR(255) NOT NULL DEFAULT '',
   `media_type` ENUM('IMAGE', 'CAROUSEL_ALBUM', 'VIDEO') NOT NULL DEFAULT 'IMAGE',
   `media_url` TEXT NOT NULL,
   `thumbnail_url` TEXT NULL,
@@ -190,12 +190,7 @@ INSERT INTO `bm_site_settings` (`setting_key`, `setting_value`) VALUES
 ('freq_vhf', '146.550 MHz (Alterna: 146.490 MHz)'),
 ('freq_uhf', '436.550 MHz (Alterna: 436.490 MHz)'),
 ('master_servers', '3341 México / 7301 Chile'),
-('contact_email', 'sysop@brandmeisteryv.net'),
-('instagram_app_id', ''),
-('instagram_app_secret', ''),
-('instagram_access_token', ''),
-('instagram_hashtag', 'experienciadmr'),
-('instagram_account', 'brandmeister_yv'),
-('instagram_last_sync', '');
+('contact_email', 'sysop@brandmeisteryv.net');
+
 
 SET FOREIGN_KEY_CHECKS = 1;

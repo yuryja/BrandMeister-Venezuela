@@ -14,13 +14,16 @@ interface Props {
   image?: string;
   /** Imagen de cabecera (fondo CSS) a precargar; en móvil (≤768px) puede ser otra */
   heroImage?: string | { desktop: string; mobile: string };
+  /** false para páginas como el panel: sin menú del sitio, pie, dock de audio ni "volver arriba" */
+  chrome?: boolean;
 }
 
 const {
   title = "BrandMeister Venezuela · Red Digital DMR TG 734",
   description = "Comunidad oficial de radioaficionados en la red BrandMeister DMR en Venezuela. Talkgroups nacionales, circuitos, repetidores, Petra y voz digital.",
   image = "/assets/logo.webp",
-  heroImage
+  heroImage,
+  chrome = true
 } = Astro.props;
 
 const heroPreload = typeof heroImage === 'string' ? { desktop: heroImage, mobile: heroImage } : heroImage;
@@ -88,13 +91,17 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://brandmei
     <slot name="head" />
   </head>
   <body>
-    <Header />
+    {chrome && <Header />}
     <main id="main-content">
       <slot />
     </main>
-    <Footer />
-    <HoselineDock />
-    <BackToTop />
+    {chrome && (
+      <>
+        <Footer />
+        <HoselineDock />
+        <BackToTop />
+      </>
+    )}
 
     <!-- Script de Animaciones por Scroll sin dependencias externas -->
     <script>

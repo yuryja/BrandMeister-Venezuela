@@ -20,7 +20,8 @@ const getCellIntensity = (hour: number) => {
 
 <Layout
   title="Escritorio ‹ BrandMeister Venezuela"
-  description="Panel de administración estilo WordPress para BrandMeister Venezuela con control de acceso ACL y base de datos MySQL bmvenezuela."
+  description="Panel de administración de BrandMeister Venezuela: noticias, galería y usuarios."
+  chrome={false}
 >
   <!-- WP LOGIN SCREEN (Shown if not authenticated) -->
   <div id="wp-login-screen" class="wp-login-wrapper">
@@ -116,11 +117,6 @@ const getCellIntensity = (hour: number) => {
           <span class="site-name">BrandMeister Venezuela</span>
           <span class="visit-label">↗</span>
         </a>
-
-        <div class="db-status-badge" title="Base de datos MySQL bmvenezuela configurada">
-          <span class="db-dot"></span>
-          <span>MySQL: <strong>bmvenezuela</strong></span>
-        </div>
       </div>
 
       <div class="adminbar-right">
@@ -173,7 +169,7 @@ const getCellIntensity = (hour: number) => {
             </ul>
           </li>
 
-          <li class="wp-menu-item">
+          <li class="wp-menu-item" id="menu-site-content-item">
             <button class="menu-link" data-view="site-content">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -183,15 +179,19 @@ const getCellIntensity = (hour: number) => {
             </button>
           </li>
 
-          <li class="wp-menu-item">
+          <li class="wp-menu-item has-submenu" id="menu-gallery-item">
             <button class="menu-link" data-view="gallery">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                 <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
               </svg>
-              <span>Galería Instagram</span>
+              <span>Galería</span>
             </button>
+            <ul class="wp-submenu">
+              <li><button class="submenu-link" data-view="gallery">Todas</button></li>
+              <li><button class="submenu-link" data-view="gallery-edit">Añadir publicación</button></li>
+            </ul>
           </li>
 
           <!-- Usuarios (solo Administrador) -->
@@ -223,16 +223,6 @@ const getCellIntensity = (hour: number) => {
             </button>
           </li>
 
-          <!-- Settings (Admin Only) -->
-          <li class="wp-menu-item" id="menu-settings-item">
-            <button class="menu-link" data-view="settings">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-              </svg>
-              <span>Ajustes & BD</span>
-            </button>
-          </li>
         </ul>
       </aside>
 
@@ -295,9 +285,6 @@ const getCellIntensity = (hour: number) => {
                     <span>Pico diario: <strong>19:00 - 21:30 VET</strong></span>
                   </li>
                 </ul>
-                <div class="db-info-line">
-                  <span>Conectado a MySQL <strong>bmvenezuela</strong> (DBngin / Local)</span>
-                </div>
               </div>
             </div>
 
@@ -695,55 +682,6 @@ const getCellIntensity = (hour: number) => {
         <!-- ========================================================= -->
         <GalleryView />
 
-        <!-- ========================================================= -->
-        <!-- VIEW 6: AJUSTES & MYSQL BMENEZUELA -->
-        <!-- ========================================================= -->
-        <section id="view-settings" class="wp-view">
-          <div class="view-header">
-            <h1 class="view-title">Ajustes & Base de Datos MySQL</h1>
-            <span class="badge-mini">DBngin / DBng / cPanel</span>
-          </div>
-
-          <div class="wp-box">
-            <div class="wp-box-head">
-              <h3>Conexión con Base de Datos MySQL</h3>
-            </div>
-            <div class="wp-box-body">
-              <div class="db-params-grid">
-                <div class="param-row">
-                  <span class="param-label">Base de Datos:</span>
-                  <code>bmvenezuela</code>
-                </div>
-                <div class="param-row">
-                  <span class="param-label">Servidor / Host:</span>
-                  <code>127.0.0.1 (o localhost)</code>
-                </div>
-                <div class="param-row">
-                  <span class="param-label">Puerto:</span>
-                  <code>3306</code>
-                </div>
-                <div class="param-row">
-                  <span class="param-label">Codificación:</span>
-                  <code>utf8mb4_unicode_ci</code>
-                </div>
-                <div class="param-row">
-                  <span class="param-label">Esquema SQL:</span>
-                  <span><a href="/schema.sql" download class="btn btn-secondary btn-sm">Descargar schema.sql ↗</a></span>
-                </div>
-              </div>
-
-              <div class="db-instructions">
-                <h4>Instrucciones para importar en DBngin / DBng:</h4>
-                <ol>
-                  <li>Abre tu cliente de base de datos preferido (<strong>DBngin</strong>, <strong>DBng</strong>, TablePlus, DBeaver o phpMyAdmin).</li>
-                  <li>Crea una nueva base de datos llamada <code>bmvenezuela</code> (o importa directamente el archivo <code>schema.sql</code> que se encuentra en la raíz del proyecto).</li>
-                  <li>Las tablas <code>bm_users</code>, <code>bm_posts</code>, <code>bm_site_settings</code> y <code>bm_activity_logs</code> se crearán automáticamente con los datos iniciales de BrandMeister Venezuela.</li>
-                  <li>El conector PHP en <code>public/api/config.php</code> se conectará de manera inmediata y transparente.</li>
-                </ol>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
     </div>
@@ -1650,7 +1588,9 @@ const getCellIntensity = (hour: number) => {
   const VIEW_ROLES: Record<string, SessionUser['role'][]> = {
     users: ['admin'],
     'user-new': ['admin'],
-    settings: ['admin', 'editor'],
+    'site-content': ['admin', 'editor'],
+    gallery: ['admin', 'editor'],
+    'gallery-edit': ['admin', 'editor'],
   };
 
   const setSession = (user: SessionUser) => {
@@ -1736,7 +1676,8 @@ const getCellIntensity = (hour: number) => {
     };
     show('menu-users-item', currentUser.role === 'admin');
     show('menu-profile-item', currentUser.role !== 'admin');
-    show('menu-settings-item', currentUser.role !== 'author');
+    show('menu-site-content-item', currentUser.role !== 'author');
+    show('menu-gallery-item', currentUser.role !== 'author');
   };
 
   document.addEventListener('bm:session', applyACL);
@@ -1901,7 +1842,7 @@ const getCellIntensity = (hour: number) => {
 
   // Site text save
   document.getElementById('btn-save-site-texts')?.addEventListener('click', () => {
-    alert('¡Textos del portal guardados en base de datos bmvenezuela!');
+    alert('Los textos del portal todavía no se guardan: pendiente en la siguiente fase.');
   });
 
   // Initialize
