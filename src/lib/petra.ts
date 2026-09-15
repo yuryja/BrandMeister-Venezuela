@@ -1,23 +1,22 @@
+/**
+ * Tipos, configuración por talkgroup y formatos de la API de Petra
+ * (https://petra.brandmeisteryv.net/api). Compartido por las páginas y el cliente.
+ */
+
+export interface PetraTransmission {
+  at: number;
+  src_id: number;
+  callsign: string;
+  name: string;
+  dst_id: number;
+  dur_ms: number;
+  open: boolean;
+}
+
 export interface PetraLive {
-  last_heard?: {
-    at: number;
-    src_id: number;
-    callsign: string;
-    name: string;
-    dst_id: number;
-    dur_ms: number;
-    open: boolean;
-  };
-  recent: Array<{
-    at: number;
-    src_id: number;
-    callsign: string;
-    name: string;
-    dst_id: number;
-    dur_ms: number;
-    open: boolean;
-  }>;
-  link: {
+  last_heard?: PetraTransmission | null;
+  recent: PetraTransmission[];
+  link?: {
     state: string;
     host: string;
     since: number;
@@ -27,33 +26,32 @@ export interface PetraLive {
   server_now: number;
 }
 
+export interface PetraDaySummary {
+  count: number;
+  air_ms: number;
+  uniq_ops: number;
+  avg_ms: number;
+  beacons: number;
+  alerts: number;
+  skipped: number;
+  longest_s: number;
+}
+
 export interface PetraSummary {
-  today: {
-    count: number;
-    air_ms: number;
-    uniq_ops: number;
-    avg_ms: number;
-    beacons: number;
-    alerts: number;
-    skipped: number;
-    longest_s: number;
-  };
-  yesterday: {
-    count: number;
-    air_ms: number;
-    uniq_ops: number;
-    avg_ms: number;
-    beacons: number;
-    alerts: number;
-    skipped: number;
-    longest_s: number;
-  };
+  today: PetraDaySummary;
+  yesterday: PetraDaySummary;
   ops_7d: number;
 }
 
+export interface PetraBucket {
+  label: string;
+  air_s: number;
+  n: number;
+}
+
 export interface PetraCalendar {
-  days: Array<{ label: string; air_s: number; n: number }>;
-  months: Array<{ label: string; air_s: number; n: number }>;
+  days: PetraBucket[];
+  months: PetraBucket[];
 }
 
 export interface PetraOperator {
@@ -72,7 +70,8 @@ export interface PetraHeatmapDay {
 
 export interface PetraHealth {
   beacons_sent: number;
-  beacons_skipped: { busy: number };
+  /** Balizas omitidas por motivo: activity, busy, missing… */
+  beacons_skipped: Record<string, number>;
   alerts_sent: number;
   alerts_seismic: number;
   alerts_meteo: number;
@@ -86,6 +85,7 @@ export interface PetraAlert {
   kind: string;
   file: string;
   dur_ms: number;
+  error?: string;
 }
 
 export interface PetraRneStat {
@@ -104,139 +104,129 @@ export interface PetraRneReport {
   }>;
 }
 
-const BASE_URL = 'https://petra.brandmeisteryv.net/api';
+// ── Talkgroups ───────────────────────────────────────────────────────────────
 
-async function safeFetch<T>(endpoint: string, fallback: T): Promise<T> {
-  try {
-    const res = await fetch(`${BASE_URL}${endpoint}`, {
-      headers: { accept: 'application/json' },
-      cache: 'no-cache'
-    });
-    if (!res.ok) return fallback;
-    return (await res.json()) as T;
-  } catch (err) {
-    console.warn(`[Petra API] Failed to fetch ${endpoint}:`, err);
-    return fallback;
+export type PetraModule =
+  | 'live'
+  | 'summary'
+  | 'hourly'
+  | 'calendar'
+  | 'top'
+  | 'recent'
+  | 'heatmap'
+  | 'health'
+  | 'alerts'
+  | 'rne-stats'
+  | 'rne-report';
+
+export interface PetraTalkgroup {
+  id: string;
+  name: string;
+  short: string;
+  description: string;
+  modules: PetraModule[];
+}
+
+const BASE_MODULES: PetraModule[] = ['live', 'summary', 'hourly', 'calendar', 'top', 'recent', 'heatmap'];
+
+/** Mismos módulos que muestra petra.brandmeisteryv.net/{tg} */
+export const PETRA_TALKGROUPS: PetraTalkgroup[] = [
+  {
+    id: '734',
+    name: 'Venezuela · Canal Nacional',
+    short: 'Nacional',
+    description: 'Talkgroup nacional de BrandMeister Venezuela, con balizas horarias y boletines sísmicos y meteorológicos emitidos por Petra.',
+    modules: [...BASE_MODULES, 'health', 'alerts']
+  },
+  {
+    id: '73452',
+    name: 'Emisiones Técnicas YV5RNE',
+    short: 'YV5RNE',
+    description: 'Comunicados técnicos y ruedas operativas de la Red Nacional de Emergencia, con estadística de la emisión de las 19:30.',
+    modules: [...BASE_MODULES, 'rne-stats', 'rne-report']
+  },
+  {
+    id: '73473',
+    name: 'Radio Club Venezolano',
+    short: 'RCV',
+    description: 'Frecuencia institucional del Radio Club Venezolano para ruedas temáticas, eventos y enlaces.',
+    modules: [...BASE_MODULES]
   }
+];
+
+export const DEFAULT_PETRA_TG = '734';
+
+export function getPetraTalkgroup(id: string): PetraTalkgroup | undefined {
+  return PETRA_TALKGROUPS.find((tg) => tg.id === id);
 }
 
-export async function getPetraData(tg: string = '734') {
-  const [
-    live,
-    summary,
-    hourly,
-    calendar,
-    top7d,
-    top1d,
-    top30d,
-    heatmap,
-    health,
-    alerts,
-    rneStats,
-    rneReport
-  ] = await Promise.all([
-    safeFetch<PetraLive>(`/live?limit=10&tg=${tg}`, {
-      link: { state: 'up', host: '7301.master.brandmeister.network', since: Date.now() - 86400000, uptime_24h: 100, drops_24h: 0 },
-      recent: [],
-      server_now: Date.now()
-    }),
-    safeFetch<PetraSummary>(`/summary?tg=${tg}`, {
-      today: { count: 0, air_ms: 0, uniq_ops: 0, avg_ms: 0, beacons: 0, alerts: 0, skipped: 0, longest_s: 0 },
-      yesterday: { count: 0, air_ms: 0, uniq_ops: 0, avg_ms: 0, beacons: 0, alerts: 0, skipped: 0, longest_s: 0 },
-      ops_7d: 0
-    }),
-    safeFetch<number[]>(`/hourly?tg=${tg}`, new Array(24).fill(0)),
-    safeFetch<PetraCalendar>(`/calendar?days=30&tg=${tg}`, { days: [], months: [] }),
-    safeFetch<PetraOperator[]>(`/top?days=7&tg=${tg}`, []),
-    safeFetch<PetraOperator[]>(`/top?days=1&tg=${tg}`, []),
-    safeFetch<PetraOperator[]>(`/top?days=30&tg=${tg}`, []),
-    safeFetch<PetraHeatmapDay[]>(`/heatmap?days=7&tg=${tg}`, []),
-    safeFetch<PetraHealth>(`/health?hours=24&tg=${tg}`, {
-      beacons_sent: 0,
-      beacons_skipped: { busy: 0 },
-      alerts_sent: 0,
-      alerts_seismic: 0,
-      alerts_meteo: 0,
-      errors: 0,
-      window_hours: 24,
-      last_beacon_at: Date.now()
-    }),
-    safeFetch<PetraAlert[]>(`/alerts?limit=15&tg=${tg}`, []),
-    safeFetch<PetraRneStat[]>('/rne-stats', []),
-    safeFetch<PetraRneReport>('/rne-last-report', { day: '', stations: [] })
-  ]);
-
-  return {
-    live,
-    summary,
-    hourly,
-    calendar,
-    top: {
-      '1': top1d,
-      '7': top7d,
-      '30': top30d
-    },
-    heatmap,
-    health,
-    alerts,
-    rneStats,
-    rneReport
-  };
+/** Agrega ?tg= igual que el cliente original */
+export function withTg(endpoint: string, tg: string): string {
+  return `${endpoint}${endpoint.includes('?') ? '&' : '?'}tg=${encodeURIComponent(tg)}`;
 }
+
+// ── Formatos ─────────────────────────────────────────────────────────────────
 
 export function formatDuration(ms: number): string {
   const sec = Math.round(ms / 1000);
   if (sec < 60) return `${sec} s`;
   const min = Math.floor(sec / 60);
-  const remainingSec = sec % 60;
-  if (min < 60) return `${min} m ${remainingSec} s`;
-  const hr = Math.floor(min / 60);
-  const remainingMin = min % 60;
-  return `${hr} h ${remainingMin} m`;
+  if (min < 60) return `${min} min ${String(sec % 60).padStart(2, '0')} s`;
+  return `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')} min`;
 }
 
 export function formatAirTimeSplit(ms: number): { value: string; unit: string } {
   const min = Math.round(ms / 60000);
-  if (min < 1) {
-    return { value: String(Math.round(ms / 1000)), unit: 's' };
-  }
-  if (min < 60) {
-    return { value: String(min), unit: 'min' };
-  }
-  const hr = Math.floor(min / 60);
-  const remainingMin = min % 60;
-  return { value: `${hr} h ${String(remainingMin).padStart(2, '0')}`, unit: 'm' };
+  if (min < 1) return { value: String(Math.round(ms / 1000)), unit: 's' };
+  if (min < 60) return { value: String(min), unit: 'min' };
+  return { value: `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`, unit: 'h' };
+}
+
+export function formatClock(timestamp: number): string {
+  const d = new Date(timestamp);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 export function formatRelativeTime(timestamp: number, now = Date.now()): string {
   const diffSec = Math.max(0, Math.round((now - timestamp) / 1000));
-  if (diffSec < 45) return 'hace unos segundos';
-  if (diffSec < 90) return 'hace 1 min';
+  if (diffSec < 60) return `hace ${diffSec} s`;
   const diffMin = Math.floor(diffSec / 60);
   if (diffMin < 60) return `hace ${diffMin} min`;
   const diffHr = Math.floor(diffMin / 60);
   if (diffHr < 24) return `hace ${diffHr} h`;
-  const diffDays = Math.floor(diffHr / 24);
-  return `hace ${diffDays} d`;
+  return `hace ${Math.floor(diffHr / 24)} d`;
 }
 
-export function formatAlertTitle(alert: PetraAlert): { title: string; category: 'sismo' | 'meteo' | 'baliza' | 'aviso' } {
+export type AlertCategory = 'sismo' | 'meteo' | 'baliza' | 'aviso';
+
+export function formatAlertTitle(alert: PetraAlert): { title: string; category: AlertCategory } {
   if (alert.kind === 'beacon') {
     const time = alert.file.replace('.wav', '');
     return {
-      title: time.length === 4 ? `Baliza horaria · ${time.slice(0, 2)}:${time.slice(2)} h` : 'Baliza horaria',
+      title: time.length === 4 ? `Baliza horaria · ${time.slice(0, 2)}:${time.slice(2)}` : 'Baliza horaria',
       category: 'baliza'
     };
   }
   const clean = alert.file.replace(/\.wav$/, '').toLowerCase();
-  if (clean.startsWith('sismo')) {
-    return { title: 'Boletín de Reporte Sísmico', category: 'sismo' };
+  if (clean.startsWith('sismo')) return { title: 'Reporte sísmico', category: 'sismo' };
+  if (clean.startsWith('inameh') || clean.startsWith('clima')) {
+    return { title: 'Boletín meteorológico', category: 'meteo' };
   }
-  if (clean.startsWith('inameh') || clean.startsWith('clima') || clean.startsWith('meteo')) {
-    return { title: 'Boletín Meteorológico INAMEH', category: 'meteo' };
-  }
-  return {
-    title: clean.replace(/_\d+$/, '').replace(/[_-]+/g, ' ') || 'Aviso Especial',
-    category: 'aviso'
-  };
+  return { title: clean.replace(/_\d+$/, '').replace(/[_-]+/g, ' ') || 'Aviso', category: 'aviso' };
 }
+
+/** Nivel 0-4 de la escala "de silencio a saturado" */
+export function heatLevel(value: number, max: number): number {
+  if (value <= 0 || max <= 0) return 0;
+  const ratio = value / max;
+  if (ratio < 0.25) return 1;
+  if (ratio < 0.5) return 2;
+  if (ratio < 0.8) return 3;
+  return 4;
+}
+
+export const BEACON_SKIP_REASONS: Record<string, string> = {
+  activity: 'Había conversación',
+  busy: 'TG ocupado toda la ventana',
+  missing: 'Falta el audio de esa hora'
+};
