@@ -87,8 +87,11 @@ class HoselineService {
 
   private initAudio() {
     if (!this.audioCtx) {
+      // Reutiliza el contexto desbloqueado durante el toque del usuario (ver HoselineDock):
+      // en móviles un AudioContext creado fuera del gesto queda suspendido y no suena.
+      const shared = (window as any).__bmAudioCtx as AudioContext | undefined;
       const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
-      this.audioCtx = new AudioCtxClass();
+      this.audioCtx = shared ?? new AudioCtxClass();
       this.gainNode = this.audioCtx.createGain();
       this.gainNode.gain.setValueAtTime(this.volume, this.audioCtx.currentTime);
       this.gainNode.connect(this.audioCtx.destination);
@@ -299,8 +302,7 @@ class HoselineService {
     }
 
     // DMR audio is 8000 Hz mono
-    const buffer = this.audioCtx.createBuffer(1, numSamples, 8000);
-    buffer.copyToChannel(pcm8k, 0);
+    const buffer = this.createPcmBuffer(pcm8k);
 
     const sourceNode = this.audioCtx.createBufferSource();
     sourceNode.buffer = buffer;
@@ -318,6 +320,34 @@ class HoselineService {
 
     sourceNode.start(this.nextStartTime);
     this.nextStartTime += buffer.duration;
+  }
+
+  private supports8k: boolean | null = null;
+
+  /** Buffer a 8 kHz; si el navegador no admite esa frecuencia, remuestrea a la del contexto */
+  private createPcmBuffer(pcm8k: Float32Array): AudioBuffer {
+    const ctx = this.audioCtx!;
+    if (this.supports8k !== false) {
+      try {
+        const buffer = ctx.createBuffer(1, pcm8k.length, 8000);
+        buffer.getChannelData(0).set(pcm8k);
+        this.supports8k = true;
+        return buffer;
+      } catch {
+        this.supports8k = false;
+      }
+    }
+    const ratio = ctx.sampleRate / 8000;
+    const outLength = Math.round(pcm8k.length * ratio);
+    const buffer = ctx.createBuffer(1, outLength, ctx.sampleRate);
+    const out = buffer.getChannelData(0);
+    for (let i = 0; i < outLength; i++) {
+      const pos = i / ratio;
+      const i0 = Math.floor(pos);
+      const i1 = Math.min(i0 + 1, pcm8k.length - 1);
+      out[i] = pcm8k[i0] + (pcm8k[i1] - pcm8k[i0]) * (pos - i0);
+    }
+    return buffer;
   }
 
   private setState(newState: PlayerState) {

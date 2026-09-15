@@ -79,6 +79,57 @@
     return hoselineLoading;
   }
 
+  // ── Desbloqueo de audio en móviles ────────────────────────────────────────
+  // iOS/Android solo permiten iniciar audio dentro del mismo toque. Como el reproductor se
+  // carga de forma diferida, el AudioContext se crea y reanuda aquí, de forma síncrona.
+  let silentLoop: HTMLAudioElement | null = null;
+
+  function silentWavUrl(): string {
+    const samples = 800; // 0,1 s a 8 kHz, 8 bits, silencio (valor 128)
+    const buf = new ArrayBuffer(44 + samples);
+    const v = new DataView(buf);
+    const str = (o: number, s: string) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+    str(0, "RIFF"); v.setUint32(4, 36 + samples, true); str(8, "WAVE"); str(12, "fmt ");
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+    str(36, "data"); v.setUint32(40, samples, true);
+    new Uint8Array(buf, 44).fill(128);
+    return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+  }
+
+  function unlockAudio() {
+    const w = window as any;
+    try {
+      // iOS 17+: que el audio suene aunque el interruptor de silencio esté activado
+      if (w.navigator?.audioSession) w.navigator.audioSession.type = "playback";
+
+      const AudioCtxClass = window.AudioContext || w.webkitAudioContext;
+      if (!AudioCtxClass) return;
+      if (!w.__bmAudioCtx) w.__bmAudioCtx = new AudioCtxClass();
+      const ctx: AudioContext = w.__bmAudioCtx;
+      if (ctx.state !== "running") ctx.resume().catch(() => {});
+
+      // Un buffer silencioso reproducido dentro del gesto termina de desbloquear WebKit
+      const source = ctx.createBufferSource();
+      source.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      source.connect(ctx.destination);
+      source.start(0);
+
+      // iOS < 17: un <audio> en bucle pasa la sesión a "reproducción" e ignora el modo silencio
+      if (!w.navigator?.audioSession) {
+        silentLoop ??= Object.assign(new Audio(silentWavUrl()), { loop: true });
+        silentLoop.setAttribute("playsinline", "");
+        silentLoop.play().catch(() => {});
+      }
+    } catch (err) {
+      console.warn("[Hoseline] No se pudo desbloquear el audio:", err);
+    }
+  }
+
+  function releaseSilentLoop() {
+    silentLoop?.pause();
+  }
+
   const dock = document.getElementById("hoseline-dock");
   const statusLabel = document.getElementById("dock-status-label");
   const callsignEl = document.getElementById("dock-callsign");
@@ -162,6 +213,7 @@
     updateAllButtons(state);
 
     if (state === "idle" || state === "error") {
+      releaseSilentLoop();
       dock?.classList.remove("is-visible");
       wave?.classList.add("is-idle");
       if (statusLabel) statusLabel.textContent = "DMR EN LÍNEA";
@@ -173,7 +225,8 @@
       if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
 
       if (state === "connecting" || state === "listening") {
-        if (aliasEl) aliasEl.textContent = "Escuchando...";
+        // Distinguir conexión de escucha ayuda a diagnosticar redes que bloquean el WebSocket
+        if (aliasEl) aliasEl.textContent = state === "connecting" ? "Conectando con BrandMeister…" : "Escuchando...";
         wave?.classList.add("is-idle");
       } else if (state === "transmitting") {
         const call = hoseline?.getActiveCall();
@@ -254,6 +307,8 @@
     const target = (e.target as HTMLElement).closest(".js-toggle-hoseline");
     if (target) {
       e.preventDefault();
+      const willStart = !hoseline || hoseline.getState() === "idle" || hoseline.getState() === "error";
+      if (willStart) unlockAudio();
       loadHoseline().then((player) => player.toggle(734));
     }
   });
