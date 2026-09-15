@@ -1,11 +1,21 @@
 <?php
 /**
- * API Backend para Galería de Instagram (#experienciadmr) - BrandMeister Venezuela
- * Compatible con cPanel / Shared Hosting Apache + PHP y MySQL
- * Soporta consulta, sincronización vía Graph API y gestión manual desde el Backoffice
+ * Galería de Instagram (#ExperienciaDMR) - BrandMeister Venezuela
+ *
+ * Público
+ *   GET                              publicaciones visibles (?type=IMAGE|VIDEO|CAROUSEL_ALBUM)
+ * Admin / Editor
+ *   GET  ?scope=admin                todas, incluidas las ocultas
+ *   GET  ?action=status              estado de la conexión con Instagram
+ *   GET  ?action=connect             redirige a Instagram para autorizar (solo Administrador)
+ *   POST ?action=disconnect          olvida el token (solo Administrador)
+ *   POST ?action=sync                sincroniza ahora
+ *   POST ?action=visibility          {id, status: published|hidden}
+ *   POST ?action=save_post           crear / editar una publicación manual
+ *   POST ?action=delete_post         eliminar una publicación
  */
 
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/instagram-lib.php';
 
 start_secure_session();
 
@@ -13,323 +23,232 @@ $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? 'list';
 $pdo = get_db_connection();
 
-// Asegurar que la tabla bm_gallery_posts exista
-if ($pdo) {
-    try {
-        $pdo->exec("CREATE TABLE IF NOT EXISTS `bm_gallery_posts` (
-            `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-            `instagram_id` VARCHAR(100) NULL UNIQUE,
-            `shortcode` VARCHAR(50) NULL,
-            `permalink` VARCHAR(255) NOT NULL,
-            `media_type` ENUM('IMAGE', 'CAROUSEL_ALBUM', 'VIDEO') NOT NULL DEFAULT 'IMAGE',
-            `media_url` TEXT NOT NULL,
-            `thumbnail_url` TEXT NULL,
-            `carousel_json` LONGTEXT NULL,
-            `video_url` TEXT NULL,
-            `caption` TEXT NULL,
-            `author` VARCHAR(80) NOT NULL DEFAULT '@brandmeister_yv',
-            `likes_count` INT UNSIGNED NOT NULL DEFAULT 0,
-            `comments_count` INT UNSIGNED NOT NULL DEFAULT 0,
-            `published_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            `status` ENUM('published', 'hidden') NOT NULL DEFAULT 'published',
-            `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            INDEX `idx_ig_id` (`instagram_id`),
-            INDEX `idx_media_type` (`media_type`),
-            INDEX `idx_status` (`status`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-    } catch (Exception $e) {
-        error_log("Error creando tabla bm_gallery_posts: " . $e->getMessage());
-    }
+function gallery_row_payload(array $r) {
+    $carousel = !empty($r['carousel_json']) ? json_decode($r['carousel_json'], true) : [];
+    return [
+        'id' => (string)$r['id'],
+        'instagram_id' => $r['instagram_id'],
+        'source' => (strpos((string)$r['instagram_id'], 'manual_') === 0 || $r['instagram_id'] === null) ? 'manual' : 'instagram',
+        'shortcode' => $r['shortcode'],
+        'permalink' => $r['permalink'],
+        'media_type' => $r['media_type'],
+        'media_url' => $r['media_url'],
+        'thumbnail_url' => $r['thumbnail_url'] ?: $r['media_url'],
+        'carousel_media' => is_array($carousel) ? $carousel : [],
+        'video_url' => $r['video_url'],
+        'caption' => $r['caption'],
+        'author' => $r['author'],
+        'likes_count' => (int)$r['likes_count'],
+        'comments_count' => (int)$r['comments_count'],
+        'published_ts' => (int)$r['published_ts'],
+        'status' => $r['status'],
+    ];
 }
 
 // --------------------------------------------------------------------
-// 1. GET: Listado de publicaciones de la galería
+// Conexión OAuth (navegación del navegador, no JSON)
 // --------------------------------------------------------------------
+if ($action === 'connect') {
+    $user = current_user();
+    if (!$user || $user['role'] !== 'admin') {
+        header('Location: /admin/?instagram=forbidden', true, 302);
+        exit;
+    }
+    $creds = ig_get_settings(['instagram_app_id', 'instagram_app_secret']);
+    if ($creds['instagram_app_id'] === '' || $creds['instagram_app_secret'] === '') {
+        header('Location: /admin/?instagram=missing_app#gallery', true, 302);
+        exit;
+    }
+    header('Location: ' . ig_authorize_url($creds['instagram_app_id']), true, 302);
+    exit;
+}
+
+if (!$pdo) {
+    send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento.'], 503);
+}
+
+// --------------------------------------------------------------------
+// GET
+// --------------------------------------------------------------------
+if ($method === 'GET' && $action === 'status') {
+    require_role(['admin', 'editor']);
+    $status = ig_status();
+    $counts = $pdo->query("SELECT status, COUNT(*) AS n FROM bm_gallery_posts GROUP BY status")->fetchAll(PDO::FETCH_KEY_PAIR);
+    $status['posts_published'] = (int)($counts['published'] ?? 0);
+    $status['posts_hidden'] = (int)($counts['hidden'] ?? 0);
+    $status['cron_command'] = 'php ' . __DIR__ . '/instagram-cron.php';
+    send_json(['success' => true, 'instagram' => $status]);
+}
+
 if ($method === 'GET') {
-    $filterType = $_GET['type'] ?? 'all';
-    $posts = [];
-    $rows = [];
-
-    if ($pdo) {
-        try {
-            $sql = "SELECT * FROM `bm_gallery_posts` WHERE `status` = 'published'";
-            $params = [];
-
-            if ($filterType !== 'all') {
-                $sql .= " AND `media_type` = :type";
-                $params[':type'] = strtoupper($filterType);
-            }
-
-            $sql .= " ORDER BY `published_at` DESC LIMIT 60";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-            $rows = $stmt->fetchAll();
-
-            foreach ($rows as $r) {
-                $carousel = !empty($r['carousel_json']) ? json_decode($r['carousel_json'], true) : [];
-                $posts[] = [
-                    'id' => (string)$r['id'],
-                    'instagram_id' => $r['instagram_id'],
-                    'shortcode' => $r['shortcode'],
-                    'permalink' => $r['permalink'],
-                    'media_type' => $r['media_type'],
-                    'media_url' => $r['media_url'],
-                    'thumbnail_url' => $r['thumbnail_url'] ?: $r['media_url'],
-                    'carousel_media' => is_array($carousel) ? $carousel : [],
-                    'video_url' => $r['video_url'],
-                    'caption' => $r['caption'],
-                    'author' => $r['author'],
-                    'likes_count' => (int)$r['likes_count'],
-                    'comments_count' => (int)$r['comments_count'],
-                    'published_at' => $r['published_at']
-                ];
-            }
-        } catch (Exception $e) {
-            error_log("Error leyendo bm_gallery_posts: " . $e->getMessage());
-        }
+    $adminScope = ($_GET['scope'] ?? '') === 'admin';
+    if ($adminScope) {
+        require_role(['admin', 'editor']);
     }
+    $filterType = strtoupper((string)($_GET['type'] ?? 'all'));
 
-    // Fallback a src/data/galeria.json si MySQL no tiene registros aún o no hay conexión
-    if (empty($posts)) {
-        $jsonPath = dirname(__DIR__, 2) . '/src/data/galeria.json';
-        if (file_exists($jsonPath)) {
-            $raw = file_get_contents($jsonPath);
-            $fallback = json_decode($raw, true);
-            if (is_array($fallback)) {
-                if ($filterType !== 'all') {
-                    $posts = array_values(array_filter($fallback, function($p) use ($filterType) {
-                        return strtolower($p['media_type']) === strtolower($filterType);
-                    }));
-                } else {
-                    $posts = $fallback;
-                }
-            }
-        }
+    $sql = "SELECT *, UNIX_TIMESTAMP(published_at) AS published_ts FROM bm_gallery_posts";
+    $where = [];
+    $params = [];
+    if (!$adminScope) {
+        $where[] = "status = 'published'";
     }
+    if (in_array($filterType, ['IMAGE', 'VIDEO', 'CAROUSEL_ALBUM'], true)) {
+        $where[] = 'media_type = :type';
+        $params[':type'] = $filterType;
+    }
+    if ($where) {
+        $sql .= ' WHERE ' . implode(' AND ', $where);
+    }
+    $sql .= ' ORDER BY published_at DESC LIMIT ' . ($adminScope ? 300 : 120);
 
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    $posts = array_map('gallery_row_payload', $stmt->fetchAll());
+
+    if (!$adminScope) {
+        // Solo lo necesario para la galería pública
+        $posts = array_map(function ($p) {
+            unset($p['status'], $p['instagram_id'], $p['source']);
+            return $p;
+        }, $posts);
+        header('Cache-Control: public, max-age=120');
+    }
+    $s = ig_get_settings(['instagram_hashtag', 'instagram_username']);
     send_json([
         'success' => true,
         'count' => count($posts),
         'posts' => $posts,
-        'source' => (!empty($rows) ? 'mysql' : 'json_seed')
+        'hashtag' => ig_display_hashtag($s['instagram_hashtag']),
+        'account' => $s['instagram_username'] ?: 'brandmeister_yv',
     ]);
 }
 
-// --------------------------------------------------------------------
-// 2. POST: Operaciones administrativas (Guardar manual, Eliminar, Sync)
-// --------------------------------------------------------------------
-if ($method === 'POST') {
-    // Todas las operaciones de escritura requieren sesión de admin o editor
-    require_role(['admin', 'editor']);
-
-    $rawInput = file_get_contents('php://input');
-    $input = json_decode($rawInput, true) ?: $_POST;
-
-    // A. Sincronización automática con Instagram Graph API
-    if ($action === 'sync') {
-        $accessToken = '';
-        $hashtag = 'experienciadmr';
-
-        if ($pdo) {
-            $stmt = $pdo->query("SELECT setting_key, setting_value FROM bm_site_settings WHERE setting_key IN ('instagram_access_token', 'instagram_hashtag')");
-            while ($row = $stmt->fetch()) {
-                if ($row['setting_key'] === 'instagram_access_token') $accessToken = trim($row['setting_value']);
-                if ($row['setting_key'] === 'instagram_hashtag') $hashtag = trim($row['setting_value']) ?: 'experienciadmr';
-            }
-        }
-
-        if (empty($accessToken)) {
-            send_json([
-                'success' => false,
-                'error' => 'Aún no se ha configurado el Token de Acceso de Instagram en el Backoffice. Puedes agregar publicaciones manualmente o configurar tus credenciales de Meta for Developers.'
-            ], 400);
-        }
-
-        // Consultar Instagram Graph API
-        $url = "https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp,children{id,media_type,media_url}&access_token=" . urlencode($accessToken);
-        
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 12);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-        $res = curl_exec($ch);
-        $err = curl_error($ch);
-        curl_close($ch);
-
-        if ($res === false) {
-            send_json(['success' => false, 'error' => "Error de conexión con Instagram API: $err"], 500);
-        }
-
-        $apiData = json_decode($res, true);
-        if (isset($apiData['error'])) {
-            send_json(['success' => false, 'error' => $apiData['error']['message'] ?? 'Error desconocido de Instagram API'], 400);
-        }
-
-        $items = $apiData['data'] ?? [];
-        $syncedCount = 0;
-        $hashtagClean = ltrim(strtolower($hashtag), '#');
-
-        if ($pdo && is_array($items)) {
-            $stmtInsert = $pdo->prepare("INSERT INTO `bm_gallery_posts` 
-                (`instagram_id`, `permalink`, `media_type`, `media_url`, `thumbnail_url`, `carousel_json`, `video_url`, `caption`, `published_at`, `status`)
-                VALUES (:ig_id, :permalink, :mtype, :murl, :thumb, :carousel, :vurl, :caption, :pub_at, 'published')
-                ON DUPLICATE KEY UPDATE 
-                `media_url` = VALUES(`media_url`),
-                `carousel_json` = VALUES(`carousel_json`),
-                `caption` = VALUES(`caption`)");
-
-            foreach ($items as $item) {
-                $caption = $item['caption'] ?? '';
-                // Filtrar por hashtag si se especificó
-                if (!empty($hashtagClean) && stripos($caption, $hashtagClean) === false) {
-                    continue;
-                }
-
-                $mediaType = $item['media_type'] ?? 'IMAGE';
-                $carouselList = [];
-                $videoUrl = null;
-
-                if ($mediaType === 'CAROUSEL_ALBUM' && isset($item['children']['data'])) {
-                    foreach ($item['children']['data'] as $child) {
-                        $carouselList[] = [
-                            'url' => $child['media_url'],
-                            'caption' => ''
-                        ];
-                    }
-                }
-
-                if ($mediaType === 'VIDEO') {
-                    $videoUrl = $item['media_url'] ?? null;
-                }
-
-                $stmtInsert->execute([
-                    ':ig_id'     => $item['id'],
-                    ':permalink' => $item['permalink'] ?? ('https://instagram.com/p/' . $item['id']),
-                    ':mtype'     => $mediaType,
-                    ':murl'      => $item['media_url'] ?? '',
-                    ':thumb'     => $item['thumbnail_url'] ?? ($item['media_url'] ?? ''),
-                    ':carousel'  => !empty($carouselList) ? json_encode($carouselList) : null,
-                    ':vurl'      => $videoUrl,
-                    ':caption'   => $caption,
-                    ':pub_at'    => !empty($item['timestamp']) ? date('Y-m-d H:i:s', strtotime($item['timestamp'])) : date('Y-m-d H:i:s')
-                ]);
-
-                $syncedCount++;
-            }
-
-            // Actualizar fecha de última sincronización
-            $stmtSync = $pdo->prepare("INSERT INTO bm_site_settings (setting_key, setting_value) VALUES ('instagram_last_sync', :v) ON DUPLICATE KEY UPDATE setting_value = :v2");
-            $now = date('d/m/Y H:i');
-            $stmtSync->execute([':v' => $now, ':v2' => $now]);
-        }
-
-        send_json([
-            'success' => true,
-            'message' => "Sincronización completada. Se procesaron $syncedCount publicaciones con el hashtag #$hashtagClean.",
-            'synced_count' => $syncedCount,
-            'sync_time' => date('d/m/Y H:i')
-        ]);
-    }
-
-    // B. Guardar o editar publicación manualmente
-    if ($action === 'save_post') {
-        $id          = !empty($input['id']) ? (int)$input['id'] : null;
-        $permalink   = trim((string)($input['permalink'] ?? '')) ?: 'https://www.instagram.com/brandmeister_yv/';
-        $mediaType   = in_array($input['media_type'] ?? '', ['IMAGE', 'CAROUSEL_ALBUM', 'VIDEO']) ? $input['media_type'] : 'IMAGE';
-        $mediaUrl    = trim($input['media_url'] ?? '');
-        $thumbnail   = trim($input['thumbnail_url'] ?? '') ?: $mediaUrl;
-        $videoUrl    = trim($input['video_url'] ?? '');
-        $caption     = trim($input['caption'] ?? '');
-        $author      = trim($input['author'] ?? '@brandmeister_yv');
-        $carouselRaw = $input['carousel_media'] ?? [];
-        $carouselJson= is_array($carouselRaw) && !empty($carouselRaw) ? json_encode($carouselRaw, JSON_UNESCAPED_SLASHES) : null;
-
-        if (empty($mediaUrl)) {
-            send_json(['success' => false, 'error' => 'La URL de la imagen principal es requerida.'], 422);
-        }
-
-        // Solo se aceptan URLs http(s) para evitar esquemas como javascript: o data:
-        $isHttpUrl = function ($url) {
-            return is_string($url) && $url !== '' && filter_var($url, FILTER_VALIDATE_URL) && preg_match('#^https?://#i', $url);
-        };
-        foreach (['media_url' => $mediaUrl, 'thumbnail_url' => $thumbnail, 'permalink' => $permalink] as $field => $url) {
-            if (!$isHttpUrl($url)) {
-                send_json(['success' => false, 'error' => "La URL de $field no es válida (debe comenzar por http:// o https://)."], 422);
-            }
-        }
-        if ($videoUrl !== '' && !$isHttpUrl($videoUrl)) {
-            send_json(['success' => false, 'error' => 'La URL del video no es válida.'], 422);
-        }
-        if (is_array($carouselRaw)) {
-            $carouselRaw = array_values(array_filter(array_map(function ($item) use ($isHttpUrl) {
-                $url = is_array($item) ? trim((string)($item['url'] ?? '')) : '';
-                if (!$isHttpUrl($url)) return null;
-                return ['url' => $url, 'caption' => is_array($item) ? trim((string)($item['caption'] ?? '')) : ''];
-            }, $carouselRaw)));
-            $carouselJson = !empty($carouselRaw) ? json_encode($carouselRaw, JSON_UNESCAPED_SLASHES) : null;
-        }
-
-        if ($pdo) {
-            if ($id) {
-                $stmt = $pdo->prepare("UPDATE `bm_gallery_posts` SET 
-                    `permalink` = :permalink,
-                    `media_type` = :mtype,
-                    `media_url` = :murl,
-                    `thumbnail_url` = :thumb,
-                    `carousel_json` = :carousel,
-                    `video_url` = :vurl,
-                    `caption` = :caption,
-                    `author` = :author
-                    WHERE `id` = :id");
-                $stmt->execute([
-                    ':permalink' => $permalink,
-                    ':mtype'     => $mediaType,
-                    ':murl'      => $mediaUrl,
-                    ':thumb'     => $thumbnail,
-                    ':carousel'  => $carouselJson,
-                    ':vurl'      => $videoUrl ?: null,
-                    ':caption'   => $caption,
-                    ':author'    => $author,
-                    ':id'        => $id
-                ]);
-            } else {
-                $stmt = $pdo->prepare("INSERT INTO `bm_gallery_posts` 
-                    (`instagram_id`, `permalink`, `media_type`, `media_url`, `thumbnail_url`, `carousel_json`, `video_url`, `caption`, `author`, `likes_count`, `comments_count`, `status`)
-                    VALUES (:ig_id, :permalink, :mtype, :murl, :thumb, :carousel, :vurl, :caption, :author, :likes, :comments, 'published')");
-                $stmt->execute([
-                    ':ig_id'     => 'manual_' . time(),
-                    ':permalink' => $permalink,
-                    ':mtype'     => $mediaType,
-                    ':murl'      => $mediaUrl,
-                    ':thumb'     => $thumbnail,
-                    ':carousel'  => $carouselJson,
-                    ':vurl'      => $videoUrl ?: null,
-                    ':caption'   => $caption,
-                    ':author'    => $author,
-                    ':likes'     => rand(80, 250),
-                    ':comments'  => rand(10, 35)
-                ]);
-            }
-            send_json(['success' => true, 'message' => 'Publicación guardada exitosamente.']);
-        } else {
-            send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento.'], 503);
-        }
-    }
-
-    // C. Eliminar publicación
-    if ($action === 'delete_post') {
-        $id = (int)($input['id'] ?? 0);
-        if ($pdo && $id > 0) {
-            $stmt = $pdo->prepare("DELETE FROM `bm_gallery_posts` WHERE `id` = :id");
-            $stmt->execute([':id' => $id]);
-            send_json(['success' => true, 'message' => 'Publicación eliminada correctamente.']);
-        }
-        send_json(['success' => false, 'error' => 'No fue posible eliminar la publicación.'], 400);
-    }
-
-    send_json(['success' => false, 'error' => 'Acción no válida'], 400);
+if ($method !== 'POST') {
+    send_json(['success' => false, 'error' => 'Método no permitido'], 405);
 }
 
-send_json(['success' => false, 'error' => 'Método no permitido'], 405);
+// --------------------------------------------------------------------
+// POST (panel)
+// --------------------------------------------------------------------
+$user = require_role(['admin', 'editor']);
+$input = json_input();
+
+if ($action === 'disconnect') {
+    if ($user['role'] !== 'admin') {
+        send_json(['success' => false, 'error' => 'Solo un Administrador puede desconectar Instagram.'], 403);
+    }
+    ig_disconnect();
+    log_activity($user['id'], 'instagram_disconnected');
+    send_json(['success' => true, 'message' => 'Instagram desconectado. Las publicaciones ya sincronizadas se conservan.']);
+}
+
+if ($action === 'sync') {
+    // Evita dos sincronizaciones simultáneas (botón + cron)
+    $lock = fopen(sys_get_temp_dir() . '/bmyv-instagram-sync.lock', 'c');
+    if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
+        send_json(['success' => false, 'error' => 'Ya hay una sincronización en curso. Espera un momento.'], 409);
+    }
+    @set_time_limit(300);
+    try {
+        ig_refresh_token_if_needed();
+        $result = ig_sync();
+    } catch (Exception $e) {
+        log_activity($user['id'], 'instagram_sync_failed', $e->getMessage());
+        send_json(['success' => false, 'error' => $e->getMessage()], 502);
+    } finally {
+        flock($lock, LOCK_UN);
+    }
+    log_activity($user['id'], 'instagram_sync', $result);
+
+    $parts = ["{$result['matched']} publicaciones con #{$result['hashtag']}"];
+    if ($result['added']) $parts[] = "{$result['added']} nuevas";
+    if ($result['updated']) $parts[] = "{$result['updated']} actualizadas";
+    if ($result['hidden']) $parts[] = "{$result['hidden']} ocultadas (ya no están en Instagram o sin hashtag)";
+    if ($result['failed_media']) $parts[] = "{$result['failed_media']} medios no se pudieron descargar";
+    send_json(['success' => true, 'message' => 'Sincronización completada: ' . implode(', ', $parts) . '.', 'result' => $result]);
+}
+
+if ($action === 'visibility') {
+    $id = (int)($input['id'] ?? 0);
+    $status = ($input['status'] ?? '') === 'hidden' ? 'hidden' : 'published';
+    $stmt = $pdo->prepare("UPDATE bm_gallery_posts SET status = :s WHERE id = :id");
+    $stmt->execute([':s' => $status, ':id' => $id]);
+    if ($stmt->rowCount() === 0) {
+        send_json(['success' => false, 'error' => 'Publicación no encontrada o sin cambios.'], 404);
+    }
+    send_json(['success' => true, 'message' => $status === 'hidden' ? 'Publicación oculta en la galería.' : 'Publicación visible en la galería.']);
+}
+
+if ($action === 'save_post') {
+    $id = !empty($input['id']) ? (int)$input['id'] : null;
+    $isHttpUrl = function ($url) {
+        return is_string($url) && $url !== '' && filter_var($url, FILTER_VALIDATE_URL) && preg_match('#^https?://#i', $url);
+    };
+
+    if ($id) {
+        $existing = $pdo->prepare("SELECT instagram_id FROM bm_gallery_posts WHERE id = :id");
+        $existing->execute([':id' => $id]);
+        $row = $existing->fetch();
+        if (!$row) {
+            send_json(['success' => false, 'error' => 'Publicación no encontrada.'], 404);
+        }
+        if ($row['instagram_id'] !== null && strpos($row['instagram_id'], 'manual_') !== 0) {
+            send_json(['success' => false, 'error' => 'Las publicaciones sincronizadas se editan en Instagram; aquí solo puedes ocultarlas.'], 400);
+        }
+    }
+
+    $permalink = trim((string)($input['permalink'] ?? '')) ?: 'https://www.instagram.com/brandmeister_yv/';
+    $mediaType = in_array($input['media_type'] ?? '', ['IMAGE', 'CAROUSEL_ALBUM', 'VIDEO'], true) ? $input['media_type'] : 'IMAGE';
+    $mediaUrl = trim((string)($input['media_url'] ?? ''));
+    $thumbnail = trim((string)($input['thumbnail_url'] ?? '')) ?: $mediaUrl;
+    $videoUrl = trim((string)($input['video_url'] ?? ''));
+    $caption = trim((string)($input['caption'] ?? ''));
+    $author = trim((string)($input['author'] ?? '')) ?: '@brandmeister_yv';
+
+    if ($mediaUrl === '') {
+        send_json(['success' => false, 'error' => 'La URL de la imagen principal es requerida.'], 422);
+    }
+    foreach (['media_url' => $mediaUrl, 'thumbnail_url' => $thumbnail, 'permalink' => $permalink] as $field => $url) {
+        if (!$isHttpUrl($url)) {
+            send_json(['success' => false, 'error' => "La URL de $field no es válida (debe comenzar por http:// o https://)."], 422);
+        }
+    }
+    if ($videoUrl !== '' && !$isHttpUrl($videoUrl)) {
+        send_json(['success' => false, 'error' => 'La URL del video no es válida.'], 422);
+    }
+    $carousel = [];
+    foreach ((array)($input['carousel_media'] ?? []) as $item) {
+        $url = is_array($item) ? trim((string)($item['url'] ?? '')) : '';
+        if ($isHttpUrl($url)) {
+            $carousel[] = ['url' => $url, 'caption' => trim((string)($item['caption'] ?? ''))];
+        }
+    }
+
+    $values = [
+        ':permalink' => $permalink, ':mtype' => $mediaType, ':murl' => $mediaUrl, ':thumb' => $thumbnail,
+        ':carousel' => $carousel ? json_encode($carousel, JSON_UNESCAPED_SLASHES) : null,
+        ':vurl' => $videoUrl ?: null, ':caption' => $caption, ':author' => $author,
+    ];
+    if ($id) {
+        $pdo->prepare("UPDATE bm_gallery_posts SET permalink = :permalink, media_type = :mtype, media_url = :murl, thumbnail_url = :thumb,
+            carousel_json = :carousel, video_url = :vurl, caption = :caption, author = :author WHERE id = :id")->execute($values + [':id' => $id]);
+    } else {
+        $pdo->prepare("INSERT INTO bm_gallery_posts (instagram_id, permalink, media_type, media_url, thumbnail_url, carousel_json, video_url, caption, author, status)
+            VALUES (:ig_id, :permalink, :mtype, :murl, :thumb, :carousel, :vurl, :caption, :author, 'published')")
+            ->execute($values + [':ig_id' => 'manual_' . bin2hex(random_bytes(6))]);
+    }
+    send_json(['success' => true, 'message' => 'Publicación guardada.']);
+}
+
+if ($action === 'delete_post') {
+    $id = (int)($input['id'] ?? 0);
+    $stmt = $pdo->prepare("DELETE FROM bm_gallery_posts WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+    if ($stmt->rowCount() === 0) {
+        send_json(['success' => false, 'error' => 'No fue posible eliminar la publicación.'], 404);
+    }
+    send_json(['success' => true, 'message' => 'Publicación eliminada. Si sigue en Instagram con el hashtag, volverá en la próxima sincronización (mejor ocúltala).']);
+}
+
+send_json(['success' => false, 'error' => 'Acción no válida'], 400);
