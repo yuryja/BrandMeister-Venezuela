@@ -15,6 +15,7 @@ const { talkgroup } = Astro.props;
 ---
 
 <Layout
+  heroImage={{ desktop: '/assets/petra-hero-bg.webp', mobile: '/assets/petra-hero-bg-m.webp' }}
   title={`Petra · TG ${talkgroup.id} ${talkgroup.name} · BrandMeister Venezuela`}
   description={`Actividad en vivo del TG ${talkgroup.id} (${talkgroup.name}) en BrandMeister Venezuela: último escuchado, transmisiones, operadores y estadísticas de Petra.`}
 >

@@ -73,7 +73,7 @@
   .pt-hero {
     background-image:
       linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(255, 255, 255, 0.9) 100%),
-      url('/assets/petra-hero-bg.webp');
+      url('/assets/petra-hero-bg-m.webp');
     background-position: center top;
   }
 }
@@ -961,3 +961,59 @@ a.pt-call:hover {
     animation: none;
   }
 }
+
+/* ── Banderas: subconjunto de flag-icons (MIT) rasterizado a WebP 64x48, solo países de callsign-country.ts ── */
+
+.fi {
+  display: inline-block;
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.fi-ar { background-image: url('/flags/ar.webp'); }
+.fi-at { background-image: url('/flags/at.webp'); }
+.fi-au { background-image: url('/flags/au.webp'); }
+.fi-be { background-image: url('/flags/be.webp'); }
+.fi-bo { background-image: url('/flags/bo.webp'); }
+.fi-br { background-image: url('/flags/br.webp'); }
+.fi-bz { background-image: url('/flags/bz.webp'); }
+.fi-ca { background-image: url('/flags/ca.webp'); }
+.fi-ch { background-image: url('/flags/ch.webp'); }
+.fi-cl { background-image: url('/flags/cl.webp'); }
+.fi-cn { background-image: url('/flags/cn.webp'); }
+.fi-co { background-image: url('/flags/co.webp'); }
+.fi-cr { background-image: url('/flags/cr.webp'); }
+.fi-cu { background-image: url('/flags/cu.webp'); }
+.fi-de { background-image: url('/flags/de.webp'); }
+.fi-dk { background-image: url('/flags/dk.webp'); }
+.fi-do { background-image: url('/flags/do.webp'); }
+.fi-ec { background-image: url('/flags/ec.webp'); }
+.fi-es { background-image: url('/flags/es.webp'); }
+.fi-fi { background-image: url('/flags/fi.webp'); }
+.fi-fr { background-image: url('/flags/fr.webp'); }
+.fi-gb { background-image: url('/flags/gb.webp'); }
+.fi-gt { background-image: url('/flags/gt.webp'); }
+.fi-hn { background-image: url('/flags/hn.webp'); }
+.fi-ht { background-image: url('/flags/ht.webp'); }
+.fi-in { background-image: url('/flags/in.webp'); }
+.fi-it { background-image: url('/flags/it.webp'); }
+.fi-jp { background-image: url('/flags/jp.webp'); }
+.fi-kr { background-image: url('/flags/kr.webp'); }
+.fi-mx { background-image: url('/flags/mx.webp'); }
+.fi-ni { background-image: url('/flags/ni.webp'); }
+.fi-nl { background-image: url('/flags/nl.webp'); }
+.fi-no { background-image: url('/flags/no.webp'); }
+.fi-nz { background-image: url('/flags/nz.webp'); }
+.fi-pa { background-image: url('/flags/pa.webp'); }
+.fi-pe { background-image: url('/flags/pe.webp'); }
+.fi-pt { background-image: url('/flags/pt.webp'); }
+.fi-py { background-image: url('/flags/py.webp'); }
+.fi-ru { background-image: url('/flags/ru.webp'); }
+.fi-se { background-image: url('/flags/se.webp'); }
+.fi-sv { background-image: url('/flags/sv.webp'); }
+.fi-tw { background-image: url('/flags/tw.webp'); }
+.fi-us { background-image: url('/flags/us.webp'); }
+.fi-uy { background-image: url('/flags/uy.webp'); }
+.fi-ve { background-image: url('/flags/ve.webp'); }
+.fi-za { background-image: url('/flags/za.webp'); }

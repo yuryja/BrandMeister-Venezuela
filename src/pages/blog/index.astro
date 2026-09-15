@@ -10,6 +10,7 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
 ---
 
 <Layout
+  heroImage={{ desktop: '/assets/news-motorola-bg.webp', mobile: '/assets/news-motorola-bg-m.webp' }}
   title="Noticias & Comunicados Técnicos · BrandMeister Venezuela"
   description="Noticias, guías de configuración de hotspots, protocolos de emergencia y novedades de la comunidad BrandMeister Venezuela DMR."
 >
@@ -101,7 +102,7 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     .blog-page-header {
       background-image:
         linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 60%, rgba(255, 255, 255, 0.88) 100%),
-        url('/assets/news-motorola-bg.webp');
+        url('/assets/news-motorola-bg-m.webp');
       background-position: center top;
       background-size: cover;
     }
