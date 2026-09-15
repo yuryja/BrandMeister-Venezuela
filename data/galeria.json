@@ -1,0 +1,128 @@
+[
+  {
+    "id": "post_01",
+    "instagram_id": "18029384910283011",
+    "shortcode": "C9xKmLPxY1a",
+    "permalink": "https://www.instagram.com/p/C9xKmLPxY1a/",
+    "media_type": "CAROUSEL_ALBUM",
+    "media_url": "/assets/repeaters-fieldwork.jpg",
+    "thumbnail_url": "/assets/repeaters-fieldwork.jpg",
+    "carousel_media": [
+      {
+        "url": "/assets/repeaters-fieldwork.jpg",
+        "caption": "Alineación de antenas y verificación de línea de transmisión en torre"
+      },
+      {
+        "url": "/assets/news-motorola-bg.jpg",
+        "caption": "Revisión de transceptores Motorola DGM en el rack de repetición"
+      },
+      {
+        "url": "/assets/contacto-em200-bg.jpg",
+        "caption": "Montaje del controlador MMDVM sobre radio base para enlace digital"
+      },
+      {
+        "url": "/assets/hero-dmr-venezuela-landscape.jpg",
+        "caption": "Verificación final de potencia y ROE con analizador de radiofrecuencia"
+      }
+    ],
+    "video_url": null,
+    "caption": "Jornada de mantenimiento técnico y optimización en las alturas. Conectando a toda Venezuela a través de la red digital BrandMeister DMR. #experienciadmr #brandmeister_yv #radioaficionados #dmr #yv5dmr #venezuela #hamradio",
+    "author": "@brandmeister_yv",
+    "likes_count": 142,
+    "comments_count": 19,
+    "published_at": "2026-08-20T14:30:00Z"
+  },
+  {
+    "id": "post_02",
+    "instagram_id": "18039485720194822",
+    "shortcode": "C9yZ1pQqA2b",
+    "permalink": "https://www.instagram.com/p/C9yZ1pQqA2b/",
+    "media_type": "VIDEO",
+    "media_url": "/assets/news-motorola-bg.jpg",
+    "thumbnail_url": "/assets/news-motorola-bg.jpg",
+    "carousel_media": [],
+    "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "caption": "Prueba de audio y modulación en el Talkgroup Nacional 734. Claridad digital impecable y confirmación instantánea a través del sistema Petra. ¡La radioafición venezolana en constante evolución tecnológica! #experienciadmr #tg734 #dmrvenezuela #petra #hamradio #brandmeister",
+    "author": "@brandmeister_yv",
+    "likes_count": 218,
+    "comments_count": 34,
+    "published_at": "2026-08-25T18:15:00Z"
+  },
+  {
+    "id": "post_03",
+    "instagram_id": "18049586730295833",
+    "shortcode": "C9za2mRrB3c",
+    "permalink": "https://www.instagram.com/p/C9za2mRrB3c/",
+    "media_type": "IMAGE",
+    "media_url": "/assets/contacto-em200-bg.jpg",
+    "thumbnail_url": "/assets/contacto-em200-bg.jpg",
+    "carousel_media": [],
+    "video_url": null,
+    "caption": "Configuración de punto de acceso comunitario con Motorola EM200 y placa MMDVM conectada al servidor máster de BrandMeister. Una solución compacta y de máxima confiabilidad para cobertura local. #experienciadmr #mmdvm #motorolaradio #hotspot #brandmeister_yv",
+    "author": "@brandmeister_yv",
+    "likes_count": 185,
+    "comments_count": 22,
+    "published_at": "2026-08-28T10:00:00Z"
+  },
+  {
+    "id": "post_04",
+    "instagram_id": "18059687740396844",
+    "shortcode": "C90b3nSsC4d",
+    "permalink": "https://www.instagram.com/p/C90b3nSsC4d/",
+    "media_type": "CAROUSEL_ALBUM",
+    "media_url": "/assets/hero-dmr-venezuela-landscape.jpg",
+    "thumbnail_url": "/assets/hero-dmr-venezuela-landscape.jpg",
+    "carousel_media": [
+      {
+        "url": "/assets/hero-dmr-venezuela-landscape.jpg",
+        "caption": "Radio portátil digital DMR operando en el Slot 1 hacia repetidor de Caracas"
+      },
+      {
+        "url": "/assets/services-dmr-composition.jpg",
+        "caption": "Panel de control del Hoseline y monitoreo de tráfico en tiempo real"
+      },
+      {
+        "url": "/assets/repeaters-fieldwork.jpg",
+        "caption": "Panorámica desde la caseta de transmisión en la cordillera central"
+      }
+    ],
+    "video_url": null,
+    "caption": "Rueda nacional de los jueves en el TG 734. Más de 65 estaciones reportadas desde todas las regiones del país y colegas venezolanos en el exterior. ¡Gracias por mantener viva la frecuencia! #experienciadmr #ruedadmr #venezueladmr #redbrandmeister #radioaficion",
+    "author": "@brandmeister_yv",
+    "likes_count": 310,
+    "comments_count": 48,
+    "published_at": "2026-09-02T21:45:00Z"
+  },
+  {
+    "id": "post_05",
+    "instagram_id": "18069788750497855",
+    "shortcode": "C91c4oTtD5e",
+    "permalink": "https://www.instagram.com/p/C91c4oTtD5e/",
+    "media_type": "VIDEO",
+    "media_url": "/assets/petra-hero-bg.jpg",
+    "thumbnail_url": "/assets/petra-hero-bg.jpg",
+    "carousel_media": [],
+    "video_url": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "caption": "¿Cómo funciona el mapa de calor espectral de Petra? En este video te mostramos cómo interpretar las horas pico de transmisión en el TG 734 y planificar tus contactos. #experienciadmr #petratelemetria #telemetriadmr #innovacion #brandmeister_yv",
+    "author": "@brandmeister_yv",
+    "likes_count": 195,
+    "comments_count": 27,
+    "published_at": "2026-09-06T15:20:00Z"
+  },
+  {
+    "id": "post_06",
+    "instagram_id": "18079889760598866",
+    "shortcode": "C92d5pUuE6f",
+    "permalink": "https://www.instagram.com/p/C92d5pUuE6f/",
+    "media_type": "IMAGE",
+    "media_url": "/assets/services-dmr-composition.jpg",
+    "thumbnail_url": "/assets/services-dmr-composition.jpg",
+    "carousel_media": [],
+    "video_url": null,
+    "caption": "Estación base digital lista para operaciones de emergencia y tráfico rutinario. La interoperabilidad entre repetidores físicos y puntos de acceso MMDVM es la fuerza de BrandMeister Venezuela. #experienciadmr #emcom #radioaficionadosyv #dmr #73",
+    "author": "@brandmeister_yv",
+    "likes_count": 167,
+    "comments_count": 15,
+    "published_at": "2026-09-10T12:00:00Z"
+  }
+]
