@@ -7,12 +7,12 @@
     <!-- Left: Status & Live Indicator -->
     <div class="dock-left">
       <div class="dock-pulse-badge">
-        <span id="dock-status-label" class="dock-status-label">Sintonizando TG 734...</span>
+        <span id="dock-status-label" class="dock-status-label">DMR EN LÍNEA</span>
       </div>
 
       <div class="dock-call-meta">
         <span id="dock-callsign" class="dock-callsign">TG 734 - Venezuela</span>
-        <span id="dock-alias" class="dock-alias">Esperando portadora digital DMR...</span>
+        <span id="dock-alias" class="dock-alias">Escuchando...</span>
       </div>
     </div>
 
@@ -82,6 +82,63 @@
     hoseline.disconnect();
   });
 
+  // In-memory cache for resolved radio operator names
+  const operatorCache = new Map<string, string>();
+
+  function formatOperatorText(call: any): string {
+    if (!call) return "Escuchando...";
+    const callsign = (call.callsign || "").trim().toUpperCase();
+    let name = (call.name || "").trim();
+    const alias = (call.alias || "").trim();
+
+    // Check cache if name is not present
+    if (!name && callsign && operatorCache.has(callsign)) {
+      name = operatorCache.get(callsign)!;
+    }
+
+    // Attempt to extract name from alias
+    if (!name && alias) {
+      let cleanAlias = alias;
+      if (callsign && cleanAlias.toUpperCase().startsWith(callsign)) {
+        cleanAlias = cleanAlias.slice(callsign.length).replace(/^[\s\-_/:]+/, "").trim();
+      }
+      if (cleanAlias && cleanAlias.toUpperCase() !== callsign) {
+        name = cleanAlias;
+      }
+    }
+
+    // If still no name and sourceId or callsign exists, fetch in background from RadioID
+    if (!name && (call.sourceId || callsign)) {
+      const queryId = call.sourceId || callsign;
+      fetch(`https://database.radioid.net/api/dmr/user/?id=${queryId}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          const resObj = data?.results?.[0];
+          const resolvedName = resObj?.fname || resObj?.name || "";
+          if (resolvedName && callsign) {
+            operatorCache.set(callsign, resolvedName);
+            const active = hoseline.getActiveCall();
+            if (active && active.callsign?.toUpperCase() === callsign) {
+              active.name = resolvedName;
+              if (aliasEl) aliasEl.textContent = `${callsign} - ${resolvedName}`;
+            }
+          }
+        })
+        .catch(() => {});
+    }
+
+    if (callsign && name) {
+      return `${callsign} - ${name}`;
+    }
+    if (callsign) {
+      return callsign;
+    }
+    if (name) {
+      return name;
+    }
+    return "Escuchando...";
+  }
+
   // State Handler
   window.addEventListener("hoseline:stateChange", (e: any) => {
     const state = e.detail?.state;
@@ -90,21 +147,20 @@
     if (state === "idle" || state === "error") {
       dock?.classList.remove("is-visible");
       wave?.classList.add("is-idle");
-      if (aliasEl) aliasEl.textContent = "Esperando portadora digital DMR...";
+      if (statusLabel) statusLabel.textContent = "DMR EN LÍNEA";
+      if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
+      if (aliasEl) aliasEl.textContent = "Escuchando...";
     } else {
       dock?.classList.add("is-visible");
-      if (state === "connecting") {
-        if (statusLabel) statusLabel.textContent = "Sintonizando TG 734...";
-        if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
-        if (aliasEl) aliasEl.textContent = "Estableciendo enlace WebSocket...";
-        wave?.classList.add("is-idle");
-      } else if (state === "listening") {
-        if (statusLabel) statusLabel.textContent = "DMR EN LÍNEA";
-        if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
-        if (aliasEl) aliasEl.textContent = "En silencio digital (esperando modulación PTT)...";
+      if (statusLabel) statusLabel.textContent = "DMR EN LÍNEA";
+      if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
+
+      if (state === "connecting" || state === "listening") {
+        if (aliasEl) aliasEl.textContent = "Escuchando...";
         wave?.classList.add("is-idle");
       } else if (state === "transmitting") {
-        if (statusLabel) statusLabel.textContent = "TRANSMITIENDO";
+        const call = hoseline.getActiveCall();
+        if (aliasEl) aliasEl.textContent = formatOperatorText(call);
         wave?.classList.remove("is-idle");
       }
     }
@@ -113,16 +169,20 @@
   // Call Start Handler
   window.addEventListener("hoseline:callStart", (e: any) => {
     const call = e.detail;
-    if (statusLabel) statusLabel.textContent = "EN TRANSMISIÓN";
-    if (callsignEl) callsignEl.textContent = call.callsign ? `Operador: ${call.callsign}` : "Operador Activo";
-    if (aliasEl) aliasEl.textContent = call.alias || `Transmitiendo en TG ${call.talkgroup || 734}`;
+    if (statusLabel) statusLabel.textContent = "DMR EN LÍNEA";
+    if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
+    if (aliasEl) aliasEl.textContent = formatOperatorText(call);
     wave?.classList.remove("is-idle");
   });
 
   // Call Alias Handler
   window.addEventListener("hoseline:callAlias", (e: any) => {
-    if (aliasEl && e.detail?.alias) {
-      aliasEl.textContent = e.detail.alias;
+    const call = hoseline.getActiveCall();
+    if (call && aliasEl) {
+      if (e.detail?.alias) {
+        call.alias = e.detail.alias;
+      }
+      aliasEl.textContent = formatOperatorText(call);
     }
   });
 
@@ -130,7 +190,7 @@
   window.addEventListener("hoseline:callEnd", () => {
     if (statusLabel) statusLabel.textContent = "DMR EN LÍNEA";
     if (callsignEl) callsignEl.textContent = "TG 734 - Venezuela";
-    if (aliasEl) aliasEl.textContent = "Portadora liberada · En espera de modulación";
+    if (aliasEl) aliasEl.textContent = "Escuchando...";
     wave?.classList.add("is-idle");
   });
 
@@ -144,25 +204,23 @@
 
   // Helper to update buttons across Header, Hero, and Navigation
   function updateAllButtons(state: string) {
+    const isActive = state !== "idle";
+
     // Header Hoseline Button
     const headerBtn = document.querySelectorAll(".btn-hoseline-native");
     headerBtn.forEach((btn) => {
       const textSpan = btn.querySelector(".btn-label");
-      if (state === "idle") {
+      if (!isActive) {
         btn.classList.remove("is-active", "is-transmitting");
         if (textSpan) textSpan.textContent = "Audio en Vivo";
-      } else if (state === "connecting") {
+      } else {
         btn.classList.add("is-active");
-        btn.classList.remove("is-transmitting");
-        if (textSpan) textSpan.textContent = "Sintonizando...";
-      } else if (state === "listening") {
-        btn.classList.add("is-active");
-        btn.classList.remove("is-transmitting");
+        if (state === "transmitting") {
+          btn.classList.add("is-transmitting");
+        } else {
+          btn.classList.remove("is-transmitting");
+        }
         if (textSpan) textSpan.textContent = "Escuchando TG 734";
-      } else if (state === "transmitting") {
-        btn.classList.add("is-active", "is-transmitting");
-        const call = hoseline.getActiveCall();
-        if (textSpan) textSpan.textContent = call?.callsign ? `Escuchando: ${call.callsign}` : "Escuchando TG 734";
       }
     });
 
@@ -170,19 +228,12 @@
     const heroBtn = document.querySelectorAll(".btn-hero-primary-hoseline");
     heroBtn.forEach((btn) => {
       const textSpan = btn.querySelector(".btn-hero-text");
-      if (state === "idle") {
+      if (!isActive) {
         btn.classList.remove("is-active");
         if (textSpan) textSpan.textContent = "Audio en Vivo";
-      } else if (state === "connecting") {
-        btn.classList.add("is-active");
-        if (textSpan) textSpan.textContent = "Sintonizando...";
-      } else if (state === "listening") {
+      } else {
         btn.classList.add("is-active");
         if (textSpan) textSpan.textContent = "Escuchando TG 734";
-      } else if (state === "transmitting") {
-        btn.classList.add("is-active");
-        const call = hoseline.getActiveCall();
-        if (textSpan) textSpan.textContent = call?.callsign ? `Escuchando: ${call.callsign}` : "Escuchando TG 734";
       }
     });
   }

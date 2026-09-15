@@ -34,6 +34,7 @@ export type PlayerState = "idle" | "connecting" | "listening" | "transmitting" |
 export interface ActiveCall {
   sourceId?: number;
   callsign?: string;
+  name?: string;
   talkgroup?: number;
   alias?: string;
   startTime?: number;
@@ -195,7 +196,8 @@ class HoselineService {
         const callInfo = data[1] || {};
         this.activeCall = {
           sourceId: callInfo.SourceID || callInfo.source || 0,
-          callsign: callInfo.Callsign || callInfo.callsign || `ID:${callInfo.SourceID || ""}`,
+          callsign: callInfo.Callsign || callInfo.callsign || (callInfo.SourceID ? `ID:${callInfo.SourceID}` : ""),
+          name: callInfo.Name || callInfo.name || callInfo.UserName || "",
           talkgroup: callInfo.DestinationID || this.currentTg,
           alias: callInfo.TalkerAlias || callInfo.alias || "",
           startTime: Date.now()
