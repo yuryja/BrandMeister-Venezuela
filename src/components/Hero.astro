@@ -40,7 +40,10 @@
               <rect x="6" y="4" width="4" height="16" rx="1"></rect>
               <rect x="14" y="4" width="4" height="16" rx="1"></rect>
             </svg>
-            <span class="btn-hero-text">Audio en Vivo</span>
+            <span class="btn-hero-text">
+              <span class="hero-audio-idle">Audio en Vivo</span>
+              <span class="hero-audio-active">Escuchando<span class="hero-audio-tg"> TG 734</span></span>
+            </span>
           </button>
 
           <a href="/petra" class="btn-hero btn-hero-secondary">
@@ -335,6 +338,25 @@
 
   .btn-hero-primary-hoseline.is-active .icon-pause {
     display: inline-block;
+  }
+
+  /* Texto según estado: "Audio en Vivo" / "Escuchando TG 734" ("Escuchando" en móviles) */
+  .hero-audio-active {
+    display: none;
+  }
+
+  .btn-hero-primary-hoseline.is-active .hero-audio-idle {
+    display: none;
+  }
+
+  .btn-hero-primary-hoseline.is-active .hero-audio-active {
+    display: inline;
+  }
+
+  @media (max-width: 768px) {
+    .hero-audio-tg {
+      display: none;
+    }
   }
 
   /* Secondary Button: Clean Light with Warm Accent & Live Dot */

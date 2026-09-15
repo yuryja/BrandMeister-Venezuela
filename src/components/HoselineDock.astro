@@ -243,15 +243,9 @@
 
     // Hero Hoseline Button
     const heroBtn = document.querySelectorAll(".btn-hero-primary-hoseline");
+    // El texto lo resuelve el CSS del Hero según .is-active y el ancho de pantalla
     heroBtn.forEach((btn) => {
-      const textSpan = btn.querySelector(".btn-hero-text");
-      if (!isActive) {
-        btn.classList.remove("is-active");
-        if (textSpan) textSpan.textContent = "Audio en Vivo";
-      } else {
-        btn.classList.add("is-active");
-        if (textSpan) textSpan.textContent = "Escuchando TG 734";
-      }
+      btn.classList.toggle("is-active", isActive);
     });
   }
 
