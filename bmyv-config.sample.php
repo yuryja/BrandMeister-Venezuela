@@ -20,6 +20,8 @@ return [
     'RECAPTCHA_SECRET_KEY' => '',
     // Puntuación mínima 0.0-1.0 para aceptar un envío (0.5 recomendado por Google)
     'RECAPTCHA_MIN_SCORE' => '0.5',
+    // Solo si NO usas reCAPTCHA: '1' acepta envíos sin verificar (sin clave y sin esto, el formulario rechaza todo)
+    'RECAPTCHA_DISABLED' => '0',
 
     // Correo que recibe los mensajes del formulario de contacto
     'SYSOP_ALERT_EMAIL' => 'sysop@brandmeisteryv.net',

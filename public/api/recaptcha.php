@@ -22,8 +22,14 @@ if (!function_exists('bm_verify_recaptcha')) {
     function bm_verify_recaptcha($token, $expectedAction) {
         $secret = trim((string)getenv('RECAPTCHA_SECRET_KEY'));
         if ($secret === '') {
-            error_log('[BM-YV] reCAPTCHA sin configurar (RECAPTCHA_SECRET_KEY vacío): se omite la verificación');
-            return ['ok' => true, 'skipped' => true];
+            // Sin clave se rechaza, salvo en localhost o si se desactiva explícitamente con RECAPTCHA_DISABLED=1
+            $isLocalhost = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', '::1'], true);
+            if ($isLocalhost || getenv('RECAPTCHA_DISABLED') === '1') {
+                error_log('[BM-YV] reCAPTCHA sin configurar: se omite la verificación');
+                return ['ok' => true, 'skipped' => true];
+            }
+            error_log('[BM-YV] reCAPTCHA sin configurar (RECAPTCHA_SECRET_KEY vacío): envío rechazado');
+            return ['ok' => false, 'reason' => 'not-configured'];
         }
 
         $token = trim((string)$token);
