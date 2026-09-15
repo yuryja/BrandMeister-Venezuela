@@ -36,55 +36,84 @@ const isUp = live.link.state === 'up';
     </div>
   </div>
 
+  <!-- Selector de Talkgroup activo (encima de Último escuchado) -->
+  <div class="petra-tg-selector-box">
+    <div class="tg-selector-header">
+      <div class="tg-selector-title-wrap">
+        <span class="tg-selector-dot"></span>
+        <label for="petra-tg-select" class="tg-selector-title">Talkgroup en Monitoreo:</label>
+      </div>
+      <span id="petra-tg-badge" class="tg-active-badge">TG 734 · Canal Nacional</span>
+    </div>
+    
+    <div class="tg-selector-row">
+      <div class="tg-select-wrapper">
+        <select id="petra-tg-select" class="petra-tg-select" aria-label="Seleccionar Talkgroup para telemetría">
+          <option value="734" selected>TG 734 · Venezuela Nacional (Oficial)</option>
+          <option value="73452">TG 73452 · Emisiones Técnicas YV5RNE (Rueda 19:30-20:30)</option>
+          <option value="73473">TG 73473 · Radio Club Venezolano (RCV)</option>
+        </select>
+        <svg class="tg-select-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </div>
+
+      <div class="tg-quick-buttons" role="group" aria-label="Accesos rápidos de Talkgroup">
+        <button type="button" class="tg-quick-btn active" data-tg="734" title="Canal Nacional Principal">TG 734</button>
+        <button type="button" class="tg-quick-btn" data-tg="73452" title="Emisiones Técnicas YV5RNE · Rueda 19:30 a 20:30">TG 73452</button>
+        <button type="button" class="tg-quick-btn" data-tg="73473" title="Radio Club Venezolano">TG 73473</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Último escuchado -->
   <div class="last-heard-card">
     <div class="last-heard-label">
-      <span class="lh-tag">Último escuchado en TG 734</span>
-      {last && (
-        <span id="petra-lh-time" class="lh-time" data-timestamp={last.at}>
-          {formatRelativeTime(last.at)}
-        </span>
-      )}
+      <span class="lh-tag" id="petra-lh-tag">Último escuchado en TG 734</span>
+      <span id="petra-lh-time" class="lh-time" data-timestamp={last?.at || ''}>
+        {last ? formatRelativeTime(last.at) : ''}
+      </span>
     </div>
 
-    {last ? (
-      <div class="last-heard-body">
-        <div class="lh-operator">
-          <div class="lh-callsign-row">
-            <a
-              id="petra-lh-callsign"
-              href={`https://www.qrz.com/db/${last.callsign}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="lh-callsign"
-              title={`Ver ficha de ${last.callsign} en QRZ.com`}
-            >
-              <CallsignFlag callsign={last.callsign} size="md" />{last.callsign}
-            </a>
-            <span id="petra-carrier" class={`carrier-badge animate-pulse${last.open ? '' : ' hidden'}`}>
-              <span class="carrier-dot"></span>
-              TRANSMITIENDO
+    <div class="last-heard-body" id="petra-lh-body" style={last ? '' : 'display: none;'}>
+      <div class="lh-operator">
+        <div class="lh-callsign-row">
+          <a
+            id="petra-lh-callsign"
+            href={last ? `https://www.qrz.com/db/${last.callsign}` : '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="lh-callsign"
+            title={last ? `Ver ficha de ${last.callsign} en QRZ.com` : ''}
+          >
+            <span id="petra-lh-flag-container">
+              {last && <CallsignFlag callsign={last.callsign} size="md" />}
             </span>
-          </div>
-          <div class="lh-details">
-            <span id="petra-lh-name" class="lh-name">{last.name || 'Operador DMR'}</span>
-            <span class="lh-separator">·</span>
-            <span id="petra-lh-id" class="lh-id" title="RadioID DMR">ID {last.src_id}</span>
-          </div>
+            <span id="petra-lh-callsign-text">{last ? last.callsign : ''}</span>
+          </a>
+          <span id="petra-carrier" class={`carrier-badge animate-pulse${last?.open ? '' : ' hidden'}`}>
+            <span class="carrier-dot"></span>
+            TRANSMITIENDO
+          </span>
         </div>
+        <div class="lh-details">
+          <span id="petra-lh-name" class="lh-name">{last?.name || 'Operador DMR'}</span>
+          <span class="lh-separator">·</span>
+          <span id="petra-lh-id" class="lh-id" title="RadioID DMR">ID {last?.src_id || ''}</span>
+        </div>
+      </div>
 
-        <div class="lh-meta">
-          <div class="lh-duration-box">
-            <span class="dur-label">Duración</span>
-            <span id="petra-lh-dur" class="dur-val">{formatDuration(last.dur_ms)}</span>
-          </div>
+      <div class="lh-meta">
+        <div class="lh-duration-box">
+          <span class="dur-label">Duración</span>
+          <span id="petra-lh-dur" class="dur-val">{last ? formatDuration(last.dur_ms) : '0 s'}</span>
         </div>
       </div>
-    ) : (
-      <div class="lh-empty">
-        <span>Sin transmisiones registradas en esta sesión</span>
-      </div>
-    )}
+    </div>
+
+    <div class="lh-empty" id="petra-lh-empty" style={last ? 'display: none;' : ''}>
+      <span id="petra-lh-empty-text">Sin transmisiones registradas en esta sesión</span>
+    </div>
   </div>
 </div>
 
@@ -324,5 +353,152 @@ const isUp = live.link.state === 'up';
 
   .animate-pulse {
     animation: pulse 1.8s ease-in-out infinite;
+  }
+
+  /* Selector de Talkgroup (encima de Último escuchado) */
+  .petra-tg-selector-box {
+    background: #FFFBF7;
+    border: 1.5px solid rgba(238, 108, 31, 0.25);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1.15rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .petra-tg-selector-box:focus-within {
+    border-color: var(--bm-orange);
+    box-shadow: 0 0 0 3px rgba(238, 108, 31, 0.12);
+  }
+
+  .tg-selector-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tg-selector-title-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tg-selector-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bm-gradient);
+    display: inline-block;
+  }
+
+  .tg-selector-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+
+  .tg-active-badge {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--bm-red);
+    background: rgba(232, 38, 28, 0.08);
+    border: 1px solid rgba(232, 38, 28, 0.2);
+    padding: 0.18rem 0.6rem;
+    border-radius: var(--radius-pill);
+    transition: all 0.2s ease;
+  }
+
+  .tg-selector-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+  }
+
+  .tg-select-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 260px;
+    max-width: 480px;
+  }
+
+  .petra-tg-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: #FFFFFF;
+    border: 1.5px solid rgba(238, 108, 31, 0.35);
+    border-radius: 10px;
+    padding: 0.6rem 2.4rem 0.6rem 0.95rem;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease;
+  }
+
+  .petra-tg-select:hover {
+    border-color: var(--bm-orange);
+    box-shadow: 0 4px 12px rgba(238, 108, 31, 0.1);
+  }
+
+  .petra-tg-select:focus {
+    outline: none;
+    border-color: var(--bm-red);
+    box-shadow: 0 0 0 3px rgba(232, 38, 28, 0.15);
+  }
+
+  .tg-select-arrow {
+    position: absolute;
+    right: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--bm-orange);
+  }
+
+  .tg-quick-buttons {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #FFFFFF;
+    padding: 0.25rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .tg-quick-btn {
+    background: none;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .tg-quick-btn:hover {
+    color: var(--bm-red);
+    background: rgba(238, 108, 31, 0.08);
+  }
+
+  .tg-quick-btn.active {
+    background: var(--bm-gradient);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(232, 38, 28, 0.25);
   }
 </style>

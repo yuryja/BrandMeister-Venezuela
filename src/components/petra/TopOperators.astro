@@ -23,7 +23,7 @@ const ranges = [
   <div class="panel-header">
     <div class="panel-title-group">
       <h3 class="panel-title">Más Escuchados</h3>
-      <span class="panel-subtitle">Estaciones con mayor tiempo de modulación en TG 734</span>
+      <span class="panel-subtitle" id="petra-top-subtitle">Estaciones con mayor tiempo de modulación en TG 734</span>
     </div>
 
     <div class="range-tabs" role="tablist">
@@ -185,13 +185,13 @@ const ranges = [
     display: block;
   }
 
-  .operators-table {
+  .top-lists-container :global(.operators-table) {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
   }
 
-  .operator-row {
+  .top-lists-container :global(.operator-row) {
     display: flex;
     align-items: center;
     gap: 0.85rem;
@@ -200,17 +200,17 @@ const ranges = [
     transition: background 0.15s ease;
   }
 
-  .operator-row:hover {
+  .top-lists-container :global(.operator-row:hover) {
     background: var(--bg-card-subtle);
   }
 
-  .op-rank-col {
+  .top-lists-container :global(.op-rank-col) {
     flex: none;
     width: 24px;
     text-align: center;
   }
 
-  .rank-badge {
+  .top-lists-container :global(.rank-badge) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -223,28 +223,28 @@ const ranges = [
     background: #F1F5F9;
   }
 
-  .rank-badge--podium {
+  .top-lists-container :global(.rank-badge--podium) {
     color: #FFFFFF;
   }
 
-  .rank-badge--1 {
+  .top-lists-container :global(.rank-badge--1) {
     background: var(--bm-red);
   }
 
-  .rank-badge--2 {
+  .top-lists-container :global(.rank-badge--2) {
     background: var(--bm-orange);
   }
 
-  .rank-badge--3 {
+  .top-lists-container :global(.rank-badge--3) {
     background: var(--bm-yellow);
   }
 
-  .op-info-col {
+  .top-lists-container :global(.op-info-col) {
     flex: 1;
     min-width: 0;
   }
 
-  .op-main-line {
+  .top-lists-container :global(.op-main-line) {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
@@ -252,21 +252,24 @@ const ranges = [
     flex-wrap: wrap;
   }
 
-  .op-callsign {
+  .top-lists-container :global(.op-callsign) {
     font-family: var(--font-heading);
     font-size: 1rem;
     font-weight: 800;
     color: var(--text-main);
     text-decoration: none;
     transition: color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
   }
 
-  .op-callsign:hover {
+  .top-lists-container :global(.op-callsign:hover) {
     color: var(--bm-red);
     text-decoration: underline;
   }
 
-  .op-name {
+  .top-lists-container :global(.op-name) {
     font-size: 0.85rem;
     color: var(--text-muted);
     overflow: hidden;
@@ -274,31 +277,31 @@ const ranges = [
     white-space: nowrap;
   }
 
-  .op-id {
+  .top-lists-container :global(.op-id) {
     font-family: var(--font-mono, monospace);
     font-size: 0.72rem;
     color: var(--text-faint);
   }
 
-  .op-bar-track {
+  .top-lists-container :global(.op-bar-track) {
     height: 5px;
     background: #EDEFF2;
     border-radius: var(--radius-pill);
     overflow: hidden;
   }
 
-  .op-bar-fill {
+  .top-lists-container :global(.op-bar-fill) {
     height: 100%;
     background: var(--bm-orange);
     border-radius: var(--radius-pill);
     transition: width 0.3s ease;
   }
 
-  .op-bar-fill--top {
+  .top-lists-container :global(.op-bar-fill--top) {
     background: linear-gradient(90deg, var(--bm-orange) 0%, var(--bm-red) 100%);
   }
 
-  .op-stats-col {
+  .top-lists-container :global(.op-stats-col) {
     flex: none;
     text-align: right;
     display: flex;
@@ -306,14 +309,14 @@ const ranges = [
     gap: 0.1rem;
   }
 
-  .op-airtime {
+  .top-lists-container :global(.op-airtime) {
     font-family: var(--font-mono, monospace);
     font-size: 0.88rem;
     font-weight: 700;
     color: var(--text-main);
   }
 
-  .op-count {
+  .top-lists-container :global(.op-count) {
     font-family: var(--font-mono, monospace);
     font-size: 0.72rem;
     color: var(--text-faint);

@@ -1,0 +1,340 @@
+---
+import type { PetraRneStat, PetraRneReport } from '../../lib/petra';
+import { formatDuration, formatRelativeTime } from '../../lib/petra';
+import CallsignFlag from './CallsignFlag.astro';
+
+interface Props {
+  rneStats?: PetraRneStat[];
+  rneReport?: PetraRneReport;
+}
+
+const { rneStats = [], rneReport = { day: '', stations: [] } } = Astro.props;
+---
+
+<div class="petra-rne-wrapper" id="petra-rne-container">
+  <!-- Card 1: Promedio de estaciones por día entre las 19:30 y las 20:15 -->
+  <div class="petra-panel-card rne-stats-card">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <div class="rne-badge-row">
+          <span class="rne-badge">Rueda Operativa YV5RNE</span>
+          <span class="slot-badge">TG 73452 · Slot 2</span>
+        </div>
+        <h3 class="panel-title">Promedio de estaciones por día entre las 19:30 y las 20:15</h3>
+        <span class="panel-subtitle">Métrica histórica de participación en la rueda nocturna oficial</span>
+      </div>
+    </div>
+
+    <div class="rne-grid" id="petra-rne-stats-grid">
+      {rneStats.length > 0 ? (
+        rneStats.map((item) => (
+          <div class="rne-card">
+            <span class="rne-label">{item.label}</span>
+            <span class="rne-value">{item.avg}</span>
+          </div>
+        ))
+      ) : (
+        <div class="rne-empty">Consultando estadísticas RNE...</div>
+      )}
+    </div>
+  </div>
+
+  <!-- Card 2: Estaciones reportadas durante la última emisión -->
+  <div class="petra-panel-card rne-report-card">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <h3 class="panel-title">Estaciones reportadas durante la última emisión</h3>
+        <span class="panel-subtitle">Participantes registrados en el horario de 19:30 a 20:30 HLV</span>
+      </div>
+      <div class="rne-day-badge" id="petra-rne-day-badge" style={rneReport.day ? '' : 'display: none;'}>
+        <span class="pulse-dot"></span>
+        <span id="petra-rne-day-label">{rneReport.day}</span>
+      </div>
+    </div>
+
+    <div class="rne-stations-list" id="petra-rne-stations-list">
+      {rneReport.stations && rneReport.stations.length > 0 ? (
+        rneReport.stations.map((st) => (
+          <div class="rne-station-item">
+            <div class="station-left">
+              <a
+                href={`https://www.qrz.com/db/${st.callsign}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="station-callsign"
+                title={`Ver ficha de ${st.callsign} en QRZ.com`}
+              >
+                <CallsignFlag callsign={st.callsign} size="sm" />
+                <span>{st.callsign}</span>
+              </a>
+              <span class="station-name">{st.name || 'Operador'}</span>
+              <span class="station-id">ID {st.id}</span>
+            </div>
+            <div class="station-right">
+              <span class="station-dur">{formatDuration(st.air_ms)}</span>
+              <span class="station-time" data-timestamp={st.at}>{formatRelativeTime(st.at)}</span>
+            </div>
+          </div>
+        ))
+      ) : (
+        <div class="empty-stations" id="petra-rne-empty">
+          <span>Sin estaciones registradas en la última emisión</span>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+<style>
+  .petra-rne-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.75rem;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 960px) {
+    .petra-rne-wrapper {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .petra-panel-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .panel-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .rne-badge-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .rne-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--bm-red);
+    background: rgba(232, 38, 28, 0.08);
+    border: 1px solid rgba(232, 38, 28, 0.2);
+    padding: 0.15rem 0.55rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .slot-badge {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--border-subtle);
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .panel-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.25;
+  }
+
+  .panel-subtitle {
+    font-size: 0.83rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .rne-day-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #10B981;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+    display: inline-block;
+  }
+
+  /* 5 Metric Cards */
+  .rne-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.65rem;
+  }
+
+  @media (max-width: 640px) {
+    .rne-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .rne-stats-card :global(.rne-card) {
+    background: #FFFBF7;
+    border: 1px solid rgba(238, 108, 31, 0.2);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 0.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    transition: transform 0.18s ease, border-color 0.18s ease;
+  }
+
+  .rne-stats-card :global(.rne-card:hover) {
+    transform: translateY(-2px);
+    border-color: var(--bm-orange);
+    box-shadow: 0 4px 12px rgba(238, 108, 31, 0.1);
+  }
+
+  .rne-stats-card :global(.rne-label) {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .rne-stats-card :global(.rne-value) {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--bm-red);
+    line-height: 1.1;
+  }
+
+  .rne-stats-card :global(.rne-empty) {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    padding: 1.5rem 0;
+  }
+
+  /* Stations list */
+  .rne-stations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+  }
+
+  .rne-report-card :global(.rne-station-item) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 0.85rem;
+    background: #FAFAFA;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    transition: all 0.18s ease;
+  }
+
+  .rne-report-card :global(.rne-station-item:hover) {
+    background: #FFF7ED;
+    border-color: rgba(238, 108, 31, 0.3);
+    transform: translateX(2px);
+  }
+
+  .rne-report-card :global(.station-left) {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+
+  .rne-report-card :global(.station-callsign) {
+    font-family: var(--font-mono, monospace);
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--bm-red);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .rne-report-card :global(.station-callsign:hover) {
+    text-decoration: underline;
+  }
+
+  .rne-report-card :global(.station-name) {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .rne-report-card :global(.station-id) {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    background: var(--bg-card-subtle);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .rne-report-card :global(.station-right) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    text-align: right;
+  }
+
+  .rne-report-card :global(.station-dur) {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+  }
+
+  .rne-report-card :global(.station-time) {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+
+  .rne-report-card :global(.empty-stations) {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+</style>

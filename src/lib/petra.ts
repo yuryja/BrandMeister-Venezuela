@@ -88,6 +88,22 @@ export interface PetraAlert {
   dur_ms: number;
 }
 
+export interface PetraRneStat {
+  label: string;
+  avg: number;
+}
+
+export interface PetraRneReport {
+  day: string;
+  stations: Array<{
+    id: number;
+    callsign: string;
+    name: string;
+    at: number;
+    air_ms: number;
+  }>;
+}
+
 const BASE_URL = 'https://petra.brandmeisteryv.net/api';
 
 async function safeFetch<T>(endpoint: string, fallback: T): Promise<T> {
@@ -104,7 +120,7 @@ async function safeFetch<T>(endpoint: string, fallback: T): Promise<T> {
   }
 }
 
-export async function getPetraData() {
+export async function getPetraData(tg: string = '734') {
   const [
     live,
     summary,
@@ -115,25 +131,27 @@ export async function getPetraData() {
     top30d,
     heatmap,
     health,
-    alerts
+    alerts,
+    rneStats,
+    rneReport
   ] = await Promise.all([
-    safeFetch<PetraLive>('/live?limit=10&tg=734', {
+    safeFetch<PetraLive>(`/live?limit=10&tg=${tg}`, {
       link: { state: 'up', host: '7301.master.brandmeister.network', since: Date.now() - 86400000, uptime_24h: 100, drops_24h: 0 },
       recent: [],
       server_now: Date.now()
     }),
-    safeFetch<PetraSummary>('/summary?tg=734', {
+    safeFetch<PetraSummary>(`/summary?tg=${tg}`, {
       today: { count: 0, air_ms: 0, uniq_ops: 0, avg_ms: 0, beacons: 0, alerts: 0, skipped: 0, longest_s: 0 },
       yesterday: { count: 0, air_ms: 0, uniq_ops: 0, avg_ms: 0, beacons: 0, alerts: 0, skipped: 0, longest_s: 0 },
       ops_7d: 0
     }),
-    safeFetch<number[]>('/hourly?tg=734', new Array(24).fill(0)),
-    safeFetch<PetraCalendar>('/calendar?days=30&tg=734', { days: [], months: [] }),
-    safeFetch<PetraOperator[]>('/top?days=7&tg=734', []),
-    safeFetch<PetraOperator[]>('/top?days=1&tg=734', []),
-    safeFetch<PetraOperator[]>('/top?days=30&tg=734', []),
-    safeFetch<PetraHeatmapDay[]>('/heatmap?days=7&tg=734', []),
-    safeFetch<PetraHealth>('/health?hours=24&tg=734', {
+    safeFetch<number[]>(`/hourly?tg=${tg}`, new Array(24).fill(0)),
+    safeFetch<PetraCalendar>(`/calendar?days=30&tg=${tg}`, { days: [], months: [] }),
+    safeFetch<PetraOperator[]>(`/top?days=7&tg=${tg}`, []),
+    safeFetch<PetraOperator[]>(`/top?days=1&tg=${tg}`, []),
+    safeFetch<PetraOperator[]>(`/top?days=30&tg=${tg}`, []),
+    safeFetch<PetraHeatmapDay[]>(`/heatmap?days=7&tg=${tg}`, []),
+    safeFetch<PetraHealth>(`/health?hours=24&tg=${tg}`, {
       beacons_sent: 0,
       beacons_skipped: { busy: 0 },
       alerts_sent: 0,
@@ -143,7 +161,9 @@ export async function getPetraData() {
       window_hours: 24,
       last_beacon_at: Date.now()
     }),
-    safeFetch<PetraAlert[]>('/alerts?limit=15&tg=734', [])
+    safeFetch<PetraAlert[]>(`/alerts?limit=15&tg=${tg}`, []),
+    safeFetch<PetraRneStat[]>('/rne-stats', []),
+    safeFetch<PetraRneReport>('/rne-last-report', { day: '', stations: [] })
   ]);
 
   return {
@@ -158,7 +178,9 @@ export async function getPetraData() {
     },
     heatmap,
     health,
-    alerts
+    alerts,
+    rneStats,
+    rneReport
   };
 }
 
