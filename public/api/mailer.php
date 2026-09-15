@@ -198,16 +198,22 @@ if (!function_exists('bm_send_mail')) {
             $buttonHtml = '<p style="margin:28px 0;text-align:center"><a href="' . $url . '" style="display:inline-block;background:#E8452C;color:#ffffff;text-decoration:none;font-weight:700;padding:13px 26px;border-radius:8px">' . $label . '</a></p>'
                 . '<p style="font-size:12px;color:#64748B;word-break:break-all">Si el botón no funciona, copia este enlace en tu navegador:<br>' . $url . '</p>';
         }
+        // El logo se carga desde el sitio público (PNG: los clientes de correo no siempre muestran WebP)
+        $siteUrl = rtrim(trim((string)getenv('SITE_URL')), '/') ?: 'https://brandmeisteryv.net';
+        $logoUrl = htmlspecialchars($siteUrl . '/assets/email/logo-white.png', ENT_QUOTES, 'UTF-8');
+        $siteHref = htmlspecialchars($siteUrl, ENT_QUOTES, 'UTF-8');
+        $siteHost = htmlspecialchars(parse_url($siteUrl, PHP_URL_HOST) ?: 'brandmeisteryv.net', ENT_QUOTES, 'UTF-8');
+
         return '<!doctype html><html lang="es"><head><meta charset="utf-8"><title>' . $titleEsc . '</title></head>'
             . '<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,Helvetica,sans-serif;color:#0F172A">'
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:24px 12px"><tr><td align="center">'
             . '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden">'
-            . '<tr><td style="background:#0F172A;padding:18px 28px;color:#ffffff;font-weight:700;font-size:16px">BrandMeister Venezuela <span style="color:#F59E0B">· TG 734</span></td></tr>'
+            . '<tr><td style="background:#0F172A;padding:18px 28px"><a href="' . $siteHref . '"><img src="' . $logoUrl . '" width="180" height="51" alt="BrandMeister Venezuela" style="display:block;border:0;width:180px;height:auto;color:#ffffff;font-weight:700;font-size:16px"></a></td></tr>'
             . '<tr><td style="padding:28px;font-size:15px;line-height:1.6">'
             . '<h1 style="font-size:20px;margin:0 0 16px">' . $titleEsc . '</h1>'
             . $bodyHtml . $buttonHtml
             . '</td></tr>'
-            . '<tr><td style="padding:16px 28px;background:#F8FAFC;font-size:12px;color:#64748B">Enviado desde el Backoffice de <a href="https://brandmeisteryv.net" style="color:#E8452C">brandmeisteryv.net</a></td></tr>'
+            . '<tr><td style="padding:16px 28px;background:#F8FAFC;font-size:12px;color:#64748B">Enviado desde <a href="' . $siteHref . '" style="color:#E8452C">' . $siteHost . '</a></td></tr>'
             . '</table></td></tr></table></body></html>';
     }
 }

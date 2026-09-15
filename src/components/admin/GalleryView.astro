@@ -1,0 +1,179 @@
+---
+// Galería de Instagram en el panel: conexión OAuth, sincronización y moderación.
+// Lógica en src/scripts/admin/gallery.ts
+---
+
+<section id="view-gallery" class="wp-view">
+  <div class="view-header">
+    <h1 class="view-title">
+      Galería de Instagram
+      <button type="button" class="btn btn-secondary btn-sm page-title-action" id="gallery-add-manual">Añadir manual</button>
+    </h1>
+  </div>
+
+  <div id="gallery-notice"></div>
+
+  <div class="gallery-admin-layout">
+    <!-- Columna principal: publicaciones -->
+    <div>
+      <ul class="wp-subsubsub" id="gallery-status-filter">
+        <li><a href="#" data-gallery-filter="all" class="is-current">Todas <span class="count" data-count="all">(0)</span></a></li>
+        <li><a href="#" data-gallery-filter="published">Visibles <span class="count" data-count="published">(0)</span></a></li>
+        <li><a href="#" data-gallery-filter="hidden">Ocultas <span class="count" data-count="hidden">(0)</span></a></li>
+      </ul>
+
+      <div class="table-container">
+        <table class="wp-list-table gallery-table">
+          <thead>
+            <tr>
+              <th class="col-thumb">Medio</th>
+              <th>Publicación</th>
+              <th class="col-num">Interacción</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="gallery-table-body">
+            <tr><td colspan="4" class="table-empty">Cargando publicaciones…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Barra lateral: conexión con Instagram -->
+    <aside class="gallery-admin-side">
+      <div class="wp-box ig-connection" id="ig-connection">
+        <div class="wp-box-head">
+          <h3>Conexión con Instagram</h3>
+        </div>
+        <div class="wp-box-body">
+          <!-- Estado: conectado -->
+          <div id="ig-state-connected" hidden>
+            <div class="ig-account">
+              <span class="ig-account-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"></circle></svg>
+              </span>
+              <div>
+                <a id="ig-username" href="#" target="_blank" rel="noopener noreferrer"></a>
+                <span class="ig-status-dot">Conectada</span>
+              </div>
+            </div>
+            <dl class="ig-facts">
+              <dt>Hashtag</dt><dd id="ig-hashtag-label"></dd>
+              <dt>Última sincronización</dt><dd id="ig-last-sync"></dd>
+              <dt>Conexión válida hasta</dt><dd id="ig-expires"></dd>
+            </dl>
+            <p class="field-hint" id="ig-last-result"></p>
+            <button type="button" class="btn btn-primary ig-block-btn" id="ig-sync">Sincronizar ahora</button>
+            <button type="button" class="btn-link-danger" id="ig-disconnect" data-admin-only>Desconectar cuenta</button>
+          </div>
+
+          <!-- Estado: sin conectar / vencida -->
+          <div id="ig-state-disconnected" hidden>
+            <p id="ig-disconnected-text">Conecta la cuenta <strong>@brandmeister_yv</strong> para que las publicaciones con el hashtag aparezcan solas en la galería del sitio.</p>
+            <a href="/api/instagram.php?action=connect" class="btn ig-connect-btn ig-block-btn" id="ig-connect" data-admin-only>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="0.6" fill="currentColor"></circle></svg>
+              Conectar con Instagram
+            </a>
+            <p class="field-hint" id="ig-connect-editor-hint" hidden>Solo un Administrador puede conectar la cuenta.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ajustes de la app de Meta (Administrador) -->
+      <details class="wp-box ig-app-settings" id="ig-app-settings" data-admin-only>
+        <summary class="wp-box-head"><h3>Ajustes de la app de Meta</h3></summary>
+        <form class="wp-box-body" id="ig-app-form" novalidate>
+          <ol class="ig-steps">
+            <li>En <a href="https://developers.facebook.com/apps/" target="_blank" rel="noopener noreferrer">developers.facebook.com</a> crea una app tipo <em>Empresa</em> y añade el producto <strong>Instagram</strong> → <em>Configuración de la API con inicio de sesión de Instagram</em>.</li>
+            <li>La cuenta @brandmeister_yv debe ser <strong>profesional</strong> (Empresa o Creador) y figurar como <em>evaluadora de Instagram</em> en la app.</li>
+            <li>En <em>Configurar el inicio de sesión para empresas</em>, pega esta URL de redirección:
+              <span class="copy-field">
+                <code id="ig-redirect-uri">…</code>
+                <button type="button" class="btn btn-secondary btn-sm" id="ig-copy-redirect">Copiar</button>
+              </span>
+            </li>
+            <li>Copia aquí el <strong>ID</strong> y la <strong>clave secreta de la app de Instagram</strong> (no los de Facebook).</li>
+          </ol>
+
+          <div class="form-group">
+            <label for="ig-app-id">ID de la app de Instagram</label>
+            <input type="text" id="ig-app-id" name="instagram_app_id" class="form-input" inputmode="numeric" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="ig-app-secret">Clave secreta de la app de Instagram</label>
+            <input type="password" id="ig-app-secret" name="instagram_app_secret" class="form-input" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="ig-hashtag">Hashtag a mostrar</label>
+            <input type="text" id="ig-hashtag" name="instagram_hashtag" class="form-input" autocomplete="off" />
+            <span class="field-hint">Sin distinguir mayúsculas: #ExperienciaDMR y #experienciadmr cuentan igual.</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm" id="ig-app-save">Guardar ajustes</button>
+
+          <div class="ig-cron-help">
+            <strong>Sincronización automática</strong>
+            <p>En cPanel → <em>Trabajos de cron</em>, añade uno cada hora con este comando. También renueva la conexión antes de que venza.</p>
+            <span class="copy-field">
+              <code id="ig-cron-command">…</code>
+              <button type="button" class="btn btn-secondary btn-sm" id="ig-copy-cron">Copiar</button>
+            </span>
+          </div>
+        </form>
+      </details>
+    </aside>
+  </div>
+</section>
+
+<!-- Modal: publicación manual -->
+<div id="modal-gallery-post" class="wp-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-gallery-title">
+  <div class="wp-modal-backdrop" data-close-modal></div>
+  <div class="wp-modal-dialog">
+    <div class="wp-modal-header">
+      <h3 id="modal-gallery-title">Añadir publicación manual</h3>
+      <button type="button" class="btn-close-modal" data-close-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form id="gallery-post-form" novalidate>
+      <div class="wp-modal-body">
+        <div id="gallery-post-notice"></div>
+        <p class="field-hint">Para contenido que no está en Instagram. Lo publicado en @brandmeister_yv con el hashtag llega solo al sincronizar.</p>
+        <input type="hidden" name="id" />
+        <div class="form-group">
+          <label for="gp-type">Formato</label>
+          <select id="gp-type" name="media_type" class="form-input">
+            <option value="IMAGE">Foto</option>
+            <option value="CAROUSEL_ALBUM">Carrusel de fotos</option>
+            <option value="VIDEO">Video</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="gp-media">URL de la imagen principal</label>
+          <input type="url" id="gp-media" name="media_url" class="form-input" placeholder="https://…" required />
+        </div>
+        <div class="form-group" id="gp-carousel-group" hidden>
+          <label for="gp-carousel">Fotos del carrusel (una URL por línea)</label>
+          <textarea id="gp-carousel" name="carousel" class="form-input" rows="3"></textarea>
+        </div>
+        <div class="form-group" id="gp-video-group" hidden>
+          <label for="gp-video">URL del video (MP4)</label>
+          <input type="url" id="gp-video" name="video_url" class="form-input" placeholder="https://…/video.mp4" />
+        </div>
+        <div class="form-group">
+          <label for="gp-caption">Texto</label>
+          <textarea id="gp-caption" name="caption" class="form-input" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="gp-permalink">Enlace (opcional)</label>
+          <input type="url" id="gp-permalink" name="permalink" class="form-input" placeholder="https://www.instagram.com/p/…" />
+        </div>
+        <div class="form-group">
+          <label for="gp-author">Autor</label>
+          <input type="text" id="gp-author" name="author" class="form-input" value="@brandmeister_yv" />
+        </div>
+      </div>
+      <div class="wp-modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="gallery-post-submit">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>

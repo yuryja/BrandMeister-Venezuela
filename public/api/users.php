@@ -1,6 +1,6 @@
 <?php
 /**
- * Gestión de usuarios del Backoffice (solo administradores).
+ * Gestión de usuarios del panel (solo administradores).
  *
  * GET                      listado con recuento de noticias, último acceso e invitación pendiente
  * POST {action: create}    crear usuario (opcionalmente enviar invitación por correo)

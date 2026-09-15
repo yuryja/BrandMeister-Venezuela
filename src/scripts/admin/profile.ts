@@ -1,4 +1,4 @@
-// Backoffice · Perfil del usuario autenticado
+// Panel · Perfil del usuario autenticado
 import { api, notice, showFieldErrors, withBusy, bindPasswordTools, ROLE_LABELS, type SessionUser } from './api';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;

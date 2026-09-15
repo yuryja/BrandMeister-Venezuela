@@ -1,6 +1,6 @@
 <?php
 /**
- * Cuentas del Backoffice: tokens de invitación / restablecimiento, política de contraseñas
+ * Cuentas del panel de administración: tokens de invitación / restablecimiento, política de contraseñas
  * y correos de cuenta. Solo se incluye desde otros endpoints (bloqueado en .htaccess).
  */
 
@@ -77,18 +77,18 @@ function bm_send_invite(array $user, array $invitedBy) {
     $role = BM_ROLE_LABELS[$user['role']] ?? $user['role'];
 
     $html = bm_mail_layout(
-        'Te damos la bienvenida al Backoffice',
+        'Te damos la bienvenida',
         '<p>Hola ' . $e($user['full_name']) . ' (' . $e($user['callsign']) . '),</p>'
-        . '<p>' . $e($invitedBy['full_name']) . ' (' . $e($invitedBy['callsign']) . ') te ha dado acceso al Backoffice de BrandMeister Venezuela con el rol de <strong>' . $e($role) . '</strong>.</p>'
+        . '<p>' . $e($invitedBy['full_name']) . ' (' . $e($invitedBy['callsign']) . ') te ha dado acceso al panel de administración de BrandMeister Venezuela con el rol de <strong>' . $e($role) . '</strong>.</p>'
         . '<p>Tu usuario es <strong>' . $e($user['username']) . '</strong> (también puedes entrar con tu indicativo). Crea tu contraseña con el siguiente botón; el enlace vence en 7 días.</p>',
         ['label' => 'Crear mi contraseña', 'url' => $link]
     );
     $text = "Hola {$user['full_name']} ({$user['callsign']}),\n\n"
-        . "{$invitedBy['full_name']} ({$invitedBy['callsign']}) te ha dado acceso al Backoffice de BrandMeister Venezuela con el rol de $role.\n\n"
+        . "{$invitedBy['full_name']} ({$invitedBy['callsign']}) te ha dado acceso al panel de administración de BrandMeister Venezuela con el rol de $role.\n\n"
         . "Usuario: {$user['username']}\n"
         . "Crea tu contraseña (el enlace vence en 7 días):\n$link\n";
 
-    return bm_send_mail($user['email'], 'Tu acceso al Backoffice de BrandMeister Venezuela', $html, $text, [
+    return bm_send_mail($user['email'], 'Tu acceso a BrandMeister Venezuela', $html, $text, [
         'reply_to' => $invitedBy['email'] ?? '',
         'reply_to_name' => $invitedBy['full_name'] ?? '',
     ]);
