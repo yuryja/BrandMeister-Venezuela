@@ -1053,6 +1053,69 @@ const getCellIntensity = (hour: number) => {
      WORDPRESS ADMIN THEME STYLES - 100% LIGHT (NO BLACK)
      ========================================================= */
 
+  /* Campos de formulario base (los modificadores como .select-sm van más abajo) */
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .form-group + .form-group {
+    margin-top: 0.85rem;
+  }
+
+  /* En el login la separación la da el gap del formulario */
+  .wp-login-form .form-group + .form-group {
+    margin-top: 0;
+  }
+
+  .form-group > label {
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-sm);
+    background: #FFFFFF;
+    color: var(--text-main);
+    font-size: 0.92rem;
+    line-height: 1.4;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .form-input::placeholder {
+    color: var(--text-faint);
+  }
+
+  .form-input:hover {
+    border-color: rgba(15, 23, 42, 0.28);
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--bm-orange);
+    box-shadow: 0 0 0 3px rgba(238, 108, 31, 0.18);
+  }
+
+  .form-input:disabled {
+    background: var(--bg-subtle);
+    color: var(--text-faint);
+    cursor: not-allowed;
+  }
+
+  textarea.form-input {
+    resize: vertical;
+    min-height: 5rem;
+  }
+
+  select.form-input {
+    cursor: pointer;
+  }
+
   /* WP Login Card Screen */
   .wp-login-wrapper {
     min-height: calc(100vh - 80px);
