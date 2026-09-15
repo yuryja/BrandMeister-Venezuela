@@ -6,6 +6,7 @@ import jakartaFont from '@fontsource-variable/plus-jakarta-sans/files/plus-jakar
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import HoselineDock from '../components/HoselineDock.astro';
+import BackToTop from '../components/BackToTop.astro';
 
 interface Props {
   title?: string;
@@ -93,6 +94,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://brandmei
     </main>
     <Footer />
     <HoselineDock />
+    <BackToTop />
 
     <!-- Script de Animaciones por Scroll sin dependencias externas -->
     <script>

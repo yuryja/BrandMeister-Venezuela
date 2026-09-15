@@ -1,0 +1,118 @@
+<button type="button" id="back-to-top" class="back-to-top" aria-label="Volver arriba" title="Volver arriba">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+</button>
+
+<script>
+  const button = document.getElementById('back-to-top') as HTMLButtonElement | null;
+  const dock = document.getElementById('hoseline-dock');
+
+  if (button) {
+    const GAP = 12;
+    let ticking = false;
+
+    // Aparece tras bajar algo más de media pantalla
+    const updateVisibility = () => {
+      ticking = false;
+      button.classList.toggle('is-visible', window.scrollY > window.innerHeight * 0.6);
+    };
+
+    // Si el reproductor de audio está abierto y ocupa la misma zona, el botón se coloca encima
+    const updateOffset = () => {
+      let lift = 0;
+      if (dock && dock.classList.contains('is-visible')) {
+        const dockWidth = dock.offsetWidth;
+        const dockRight = (window.innerWidth + dockWidth) / 2;
+        const buttonLeft = window.innerWidth - parseFloat(getComputedStyle(button).right) - button.offsetWidth;
+        if (buttonLeft < dockRight + GAP) {
+          const dockBottom = parseFloat(getComputedStyle(dock).bottom) || 0;
+          lift = dockBottom + dock.offsetHeight + GAP;
+        }
+      }
+      button.style.setProperty('--back-to-top-lift', `${lift}px`);
+    };
+
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(updateVisibility);
+      }
+    }, { passive: true });
+    window.addEventListener('resize', () => { updateVisibility(); updateOffset(); }, { passive: true });
+    window.addEventListener('hoseline:stateChange', () => requestAnimationFrame(updateOffset));
+
+    button.addEventListener('click', () => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+      // Devolver el foco al inicio para quien navega con teclado o lector de pantalla
+      document.querySelector<HTMLElement>('.brand-link')?.focus({ preventScroll: true });
+    });
+
+    updateVisibility();
+    updateOffset();
+  }
+</script>
+
+<style>
+  .back-to-top {
+    --back-to-top-lift: 0px;
+    position: fixed;
+    right: clamp(1rem, 2.5vw, 1.75rem);
+    bottom: calc(clamp(1rem, 2.5vw, 1.75rem) + var(--back-to-top-lift));
+    z-index: 998;
+    display: inline-flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: var(--bm-gradient);
+    color: #FFFFFF;
+    box-shadow: 0 10px 24px -6px rgba(232, 38, 28, 0.45);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px) scale(0.9);
+    transition:
+      opacity 0.22s ease,
+      transform 0.22s ease,
+      visibility 0.22s,
+      bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.18s ease;
+  }
+
+  .back-to-top.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+  }
+
+  .back-to-top:hover {
+    box-shadow: 0 14px 28px -6px rgba(232, 38, 28, 0.55);
+    transform: translateY(-2px) scale(1);
+  }
+
+  .back-to-top:active {
+    transform: translateY(0) scale(0.95);
+  }
+
+  .back-to-top:focus-visible {
+    outline: 3px solid rgba(238, 108, 31, 0.45);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 640px) {
+    .back-to-top {
+      width: 44px;
+      height: 44px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-to-top {
+      transition: opacity 0.01s, visibility 0.01s;
+    }
+  }
+</style>
