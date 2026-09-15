@@ -1,10 +1,12 @@
 ---
 # Despliegue en cPanel (Git Version Control → "Deploy HEAD Commit").
 # Este archivo vive en la rama `deploy`, generada por GitHub Actions con el sitio ya compilado.
-# Copia los archivos a public_html SIN borrar lo que ya existe allí
+# Copia los archivos a public_html SIN borrar lo que ya existe allí ni cambiar sus permisos
 # (la configuración privada está fuera, en ~/bmyv-config.php).
 deployment:
   tasks:
     - export DEPLOYPATH="$HOME/public_html/"
-    - mkdir -p "$DEPLOYPATH"
-    - tar --exclude='./.git' --exclude='./.cpanel.yml' --exclude='./DEPLOY.md' -cf - . | tar -xf - -C "$DEPLOYPATH"
+    # cp sin -p: nunca modifica permisos ni dueño de public_html ni de carpetas existentes
+    # (un tar de "." copiaba los permisos privados del repositorio a public_html → 403)
+    - /bin/cp -R -- * .htaccess "$DEPLOYPATH"
+    - /bin/rm -f "${DEPLOYPATH}DEPLOY.md"
