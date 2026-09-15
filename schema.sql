@@ -6,6 +6,7 @@
 
 CREATE DATABASE IF NOT EXISTS `bmvenezuela` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE `bmvenezuela`;
+SET FOREIGN_KEY_CHECKS = 0;
 
 -- --------------------------------------------------------------------
 -- 1. Tabla de Usuarios y Control de Acceso (ACL)
@@ -21,11 +22,30 @@ CREATE TABLE `bm_users` (
   `role` ENUM('admin', 'editor', 'author') NOT NULL DEFAULT 'author',
   `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
   `avatar_url` VARCHAR(255) NULL,
+  `last_login_at` DATETIME NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `idx_role` (`role`),
   INDEX `idx_callsign` (`callsign`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------------------
+-- 1b. Tokens de invitación y restablecimiento de contraseña (solo se guarda el SHA-256)
+-- --------------------------------------------------------------------
+DROP TABLE IF EXISTS `bm_user_tokens`;
+CREATE TABLE `bm_user_tokens` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `type` ENUM('invite', 'reset') NOT NULL,
+  `token_hash` CHAR(64) NOT NULL,
+  `expires_at` DATETIME NOT NULL,
+  `used_at` DATETIME NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_token_hash` (`token_hash`),
+  INDEX `idx_token_user` (`user_id`, `type`),
+  CONSTRAINT `fk_tokens_user` FOREIGN KEY (`user_id`) REFERENCES `bm_users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------------------
@@ -81,6 +101,7 @@ CREATE TABLE `bm_activity_logs` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   INDEX `idx_log_user` (`user_id`),
+  INDEX `idx_log_action_ip` (`action`, `ip_address`, `created_at`),
   CONSTRAINT `fk_logs_user` FOREIGN KEY (`user_id`) REFERENCES `bm_users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -176,3 +197,5 @@ INSERT INTO `bm_site_settings` (`setting_key`, `setting_value`) VALUES
 ('instagram_hashtag', 'experienciadmr'),
 ('instagram_account', 'brandmeister_yv'),
 ('instagram_last_sync', '');
+
+SET FOREIGN_KEY_CHECKS = 1;
