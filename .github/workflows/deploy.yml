@@ -36,7 +36,7 @@ jobs:
 
       - name: Compilar
         env:
-          # Clave de sitio pública de reCAPTCHA: GitHub → Settings → Secrets and variables → Actions → Variables
+          # Clave de sitio pública de reCAPTCHA v3: GitHub → Settings → Secrets and variables → Actions → Variables
           PUBLIC_RECAPTCHA_SITE_KEY: ${{ vars.PUBLIC_RECAPTCHA_SITE_KEY }}
         run: npm run build
 

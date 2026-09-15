@@ -16,8 +16,10 @@ return [
     'DB_USER' => 'usuario_bmyv',
     'DB_PASS' => '',
 
-    // Google reCAPTCHA v2 (clave secreta; la clave de sitio va en GitHub → Variables)
+    // Google reCAPTCHA v3 (clave secreta; la clave de sitio va en GitHub → Variables → PUBLIC_RECAPTCHA_SITE_KEY)
     'RECAPTCHA_SECRET_KEY' => '',
+    // Puntuación mínima 0.0-1.0 para aceptar un envío (0.5 recomendado por Google)
+    'RECAPTCHA_MIN_SCORE' => '0.5',
 
     // Correo que recibe los mensajes del formulario de contacto
     'SYSOP_ALERT_EMAIL' => 'sysop@brandmeisteryv.net',

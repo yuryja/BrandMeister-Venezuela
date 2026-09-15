@@ -2,10 +2,11 @@
 /**
  * Endpoint de Recepción y Procesamiento de Contacto - BrandMeister Venezuela
  * Compatible con cPanel / Shared Hosting Apache + PHP y MySQL
- * Integrado con Google reCAPTCHA, protección Honeypot y generación de Ticket
+ * Integrado con Google reCAPTCHA v3, protección Honeypot y generación de Ticket
  */
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/recaptcha.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     send_json(['status' => 'ok']);
@@ -80,60 +81,14 @@ if (!empty($errors)) {
     ], 422);
 }
 
-// 4. Verificación de Google reCAPTCHA
-$recaptchaSecret = getenv('RECAPTCHA_SECRET_KEY') ?: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'; // Google test secret key by default
-$isTestKey = ($recaptchaSecret === '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe');
-
-if (!empty($recaptcha)) {
-    $verifyUrl = 'https://www.google.com/recaptcha/api/siteverify';
-    $postData = http_build_query([
-        'secret'   => $recaptchaSecret,
-        'response' => $recaptcha,
-        'remoteip' => $_SERVER['REMOTE_ADDR'] ?? ''
-    ]);
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $verifyUrl);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 8);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    $response = curl_exec($ch);
-    $curlErr = curl_error($ch);
-    curl_close($ch);
-
-    if ($response === false && function_exists('file_get_contents')) {
-        $opts = [
-            'http' => [
-                'method'  => 'POST',
-                'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-                'content' => $postData,
-                'timeout' => 8
-            ]
-        ];
-        $context = stream_context_create($opts);
-        $response = @file_get_contents($verifyUrl, false, $context);
-    }
-
-    $result = json_decode((string)$response, true);
-
-    // Si no es clave de prueba y falló la validación
-    if (!$isTestKey && (!is_array($result) || empty($result['success']))) {
-        send_json([
-            'success' => false,
-            'error' => 'La verificación de Google reCAPTCHA no se completó correctamente. Por favor vuelve a intentarlo.'
-        ], 400);
-    }
-} else {
-    // Si no se envió token y no estamos en entorno local estricto
-    $isLocalhost = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', '::1'], true);
-    if (!$isLocalhost && !$isTestKey) {
-        send_json([
-            'success' => false,
-            'error' => 'Es necesario completar la casilla de verificación Google reCAPTCHA.'
-        ], 400);
-    }
+// 4. Verificación de Google reCAPTCHA v3 (invisible, por puntuación)
+$captcha = bm_verify_recaptcha($recaptcha, 'contact');
+if (!$captcha['ok']) {
+    error_log('[BM-YV] Contacto rechazado por reCAPTCHA: ' . ($captcha['reason'] ?? '') . (isset($captcha['score']) ? ' score=' . $captcha['score'] : ''));
+    send_json([
+        'success' => false,
+        'error' => 'No pudimos verificar que el envío lo hace una persona. Recarga la página e inténtalo de nuevo.'
+    ], 400);
 }
 
 // 5. Generación de código único de Ticket
