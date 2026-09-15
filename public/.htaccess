@@ -58,7 +58,7 @@ Options -Indexes
 </IfModule>
 
 # Archivos internos del API: solo se incluyen desde PHP, nunca se sirven directamente
-<FilesMatch "^(config|env|db)\.php$">
+<FilesMatch "^(config|env|db|accounts|mailer|recaptcha)\.php$">
   Require all denied
 </FilesMatch>
 

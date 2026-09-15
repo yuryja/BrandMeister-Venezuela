@@ -70,16 +70,73 @@ function start_secure_session() {
  * Devuelve el usuario autenticado de la sesión o null.
  */
 function current_user() {
-    if (empty($_SESSION['user_id']) || empty($_SESSION['role'])) {
-        return null;
+    static $cached = false;
+    if ($cached !== false) {
+        return $cached;
     }
-    return [
-        'id' => (int)$_SESSION['user_id'],
-        'username' => $_SESSION['username'] ?? '',
-        'callsign' => $_SESSION['callsign'] ?? '',
-        'full_name' => $_SESSION['full_name'] ?? '',
-        'role' => $_SESSION['role'],
+    if (empty($_SESSION['user_id'])) {
+        return $cached = null;
+    }
+
+    // Se valida contra la BD en cada petición: un usuario desactivado, borrado, con otro rol
+    // o que cambió su contraseña pierde (o actualiza) la sesión al instante
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return $cached = null;
+    }
+    $stmt = $pdo->prepare("SELECT id, username, callsign, full_name, email, role, status, password_hash FROM bm_users WHERE id = :id LIMIT 1");
+    $stmt->execute([':id' => (int)$_SESSION['user_id']]);
+    $row = $stmt->fetch();
+
+    if (!$row || $row['status'] !== 'active' || !hash_equals($_SESSION['pw_fp'] ?? '', password_fingerprint($row['password_hash']))) {
+        $_SESSION = [];
+        return $cached = null;
+    }
+
+    return $cached = [
+        'id' => (int)$row['id'],
+        'username' => $row['username'],
+        'callsign' => $row['callsign'],
+        'full_name' => $row['full_name'],
+        'email' => $row['email'],
+        'role' => $row['role'],
     ];
+}
+
+/** Huella corta del hash de contraseña: si la contraseña cambia, las demás sesiones caducan */
+function password_fingerprint($passwordHash) {
+    return substr(hash('sha256', 'bmyv-session|' . $passwordHash), 0, 32);
+}
+
+/** Guarda en la sesión al usuario recién autenticado */
+function login_session(array $userRow) {
+    session_regenerate_id(true);
+    unset($_SESSION['login_attempts']);
+    $_SESSION['user_id'] = (int)$userRow['id'];
+    $_SESSION['pw_fp'] = password_fingerprint($userRow['password_hash']);
+}
+
+/** Registra una acción en bm_activity_logs (nunca interrumpe la petición si falla) */
+function log_activity($userId, $action, $details = '') {
+    $pdo = get_db_connection();
+    if (!$pdo) return;
+    try {
+        $stmt = $pdo->prepare("INSERT INTO bm_activity_logs (user_id, action, details, ip_address) VALUES (:u, :a, :d, :ip)");
+        $stmt->execute([
+            ':u' => $userId ?: null,
+            ':a' => substr((string)$action, 0, 80),
+            ':d' => is_string($details) ? $details : json_encode($details, JSON_UNESCAPED_UNICODE),
+            ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+        ]);
+    } catch (Exception $e) {
+        error_log('[BM-YV] log_activity: ' . $e->getMessage());
+    }
+}
+
+/** Lee el cuerpo JSON de la petición como array */
+function json_input() {
+    $input = json_decode(file_get_contents('php://input'), true);
+    return is_array($input) ? $input : [];
 }
 
 /**

@@ -1,0 +1,245 @@
+---
+// Pantallas de Usuarios del Backoffice (solo administradores): listado, alta/edición y correos.
+// La lógica vive en src/scripts/admin/users.ts
+---
+
+<!-- ========================================================= -->
+<!-- USUARIOS: LISTADO -->
+<!-- ========================================================= -->
+<section id="view-users" class="wp-view">
+  <div class="view-header">
+    <h1 class="view-title">
+      Usuarios
+      <button type="button" class="btn btn-secondary btn-sm page-title-action" data-view="user-new">Añadir nuevo</button>
+    </h1>
+  </div>
+
+  <div id="users-notice"></div>
+  <div id="users-mail-warning" hidden>
+    <div class="wp-notice wp-notice-warning">
+      <p>
+        El correo saliente todavía no está configurado (SMTP). Las invitaciones y mensajes pueden no llegar:
+        añade <code>SMTP_HOST</code>, <code>SMTP_USER</code> y <code>SMTP_PASS</code> en <code>~/bmyv-config.php</code>.
+      </p>
+    </div>
+  </div>
+
+  <ul class="wp-subsubsub" id="users-role-filter">
+    <li><a href="#" data-role-filter="" class="is-current">Todos <span class="count">(0)</span></a></li>
+  </ul>
+
+  <div class="wp-table-toolbar">
+    <div class="toolbar-left">
+      <label class="screen-reader-text" for="users-bulk-action">Acciones en lote</label>
+      <select id="users-bulk-action" class="form-input select-bulk">
+        <option value="">Acciones en lote</option>
+        <option value="email">Enviar correo</option>
+        <option value="activate">Activar</option>
+        <option value="deactivate">Desactivar</option>
+        <optgroup label="Cambiar rol a…">
+          <option value="role:admin">Administrador</option>
+          <option value="role:editor">Editor</option>
+          <option value="role:author">Autor</option>
+        </optgroup>
+      </select>
+      <button type="button" id="users-bulk-apply" class="btn btn-secondary btn-sm">Aplicar</button>
+    </div>
+    <div class="toolbar-right">
+      <label class="screen-reader-text" for="users-search">Buscar usuarios</label>
+      <input type="search" id="users-search" class="form-input select-filter" placeholder="Buscar nombre, indicativo o correo…" />
+      <span class="items-count" id="users-count">0 elementos</span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="wp-list-table users-table">
+      <thead>
+        <tr>
+          <th class="col-cb"><input type="checkbox" id="users-select-all" aria-label="Seleccionar todos" /></th>
+          <th>Usuario</th>
+          <th>Nombre</th>
+          <th>Correo electrónico</th>
+          <th>Rol</th>
+          <th class="col-num">Noticias</th>
+          <th>Último acceso</th>
+        </tr>
+      </thead>
+      <tbody id="users-table-body">
+        <tr><td colspan="7" class="table-empty">Cargando usuarios…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <details class="wp-box roles-help">
+    <summary class="wp-box-head"><h3>¿Qué puede hacer cada rol?</h3></summary>
+    <div class="wp-box-body">
+      <table class="matrix-table">
+        <thead>
+          <tr><th>Capacidad</th><th>Administrador</th><th>Editor</th><th>Autor</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Escritorio y estadísticas</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Redactar borradores</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-yes">✓</td></tr>
+          <tr><td>Publicar noticias</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-no">✕</td></tr>
+          <tr><td>Editar y borrar noticias de otros</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-no">✕</td></tr>
+          <tr><td>Textos del portal y galería</td><td class="check-yes">✓</td><td class="check-yes">✓</td><td class="check-no">✕</td></tr>
+          <tr><td>Usuarios, roles y correos</td><td class="check-yes">✓</td><td class="check-no">✕</td><td class="check-no">✕</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+</section>
+
+<!-- ========================================================= -->
+<!-- USUARIOS: AÑADIR / EDITAR -->
+<!-- ========================================================= -->
+<section id="view-user-new" class="wp-view">
+  <div class="view-header">
+    <h1 class="view-title" id="user-form-title">Añadir nuevo usuario</h1>
+  </div>
+  <p class="view-intro" id="user-form-intro">Crea una cuenta para un radioaficionado del equipo. Recibirá un correo para elegir su contraseña.</p>
+
+  <div id="user-form-notice"></div>
+
+  <form id="user-form" class="wp-form-table" novalidate>
+    <input type="hidden" name="id" value="" />
+
+    <div class="form-row">
+      <label for="uf-username">Nombre de usuario <span class="required">(obligatorio)</span></label>
+      <div>
+        <input type="text" id="uf-username" name="username" class="form-input" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="60" required />
+        <span class="field-hint">Minúsculas, números, punto o guion. Se usa para iniciar sesión.</span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="uf-callsign">Indicativo <span class="required">(obligatorio)</span></label>
+      <div>
+        <input type="text" id="uf-callsign" name="callsign" class="form-input input-callsign" autocomplete="off" maxlength="20" required />
+        <span class="field-hint">También sirve para iniciar sesión.</span>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="uf-full-name">Nombre completo <span class="required">(obligatorio)</span></label>
+      <div>
+        <input type="text" id="uf-full-name" name="full_name" class="form-input" maxlength="120" required />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="uf-email">Correo electrónico <span class="required">(obligatorio)</span></label>
+      <div>
+        <input type="email" id="uf-email" name="email" class="form-input" maxlength="120" required />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <label for="uf-role">Rol</label>
+      <div>
+        <select id="uf-role" name="role" class="form-input">
+          <option value="author">Autor</option>
+          <option value="editor">Editor</option>
+          <option value="admin">Administrador</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row" id="uf-status-row" hidden>
+      <label for="uf-status">Estado</label>
+      <div>
+        <select id="uf-status" name="status" class="form-input">
+          <option value="active">Activo</option>
+          <option value="inactive">Desactivado (no puede iniciar sesión)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-row" id="uf-invite-row">
+      <span class="form-row-label">Acceso</span>
+      <div>
+        <label class="checkbox-inline">
+          <input type="checkbox" id="uf-send-invite" name="send_invite" checked />
+          Enviar invitación por correo para que elija su contraseña
+        </label>
+      </div>
+    </div>
+
+    <div class="form-row" id="uf-password-row" hidden>
+      <label for="uf-password" id="uf-password-label">Contraseña</label>
+      <div>
+        <div class="password-field">
+          <input type="password" id="uf-password" name="password" class="form-input" autocomplete="new-password" minlength="10" maxlength="200" />
+          <button type="button" class="btn btn-secondary btn-sm" data-generate-password="uf-password">Generar</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-toggle-password="uf-password">Mostrar</button>
+        </div>
+        <span class="field-hint" id="uf-password-hint">Mínimo 10 caracteres.</span>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" id="user-form-submit">Añadir nuevo usuario</button>
+      <button type="button" class="btn btn-secondary" data-view="users">Cancelar</button>
+    </div>
+  </form>
+</section>
+
+<!-- Modal: enviar correo -->
+<div id="modal-user-email" class="wp-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-user-email-title">
+  <div class="wp-modal-backdrop" data-close-modal></div>
+  <div class="wp-modal-dialog">
+    <div class="wp-modal-header">
+      <h3 id="modal-user-email-title">Enviar correo</h3>
+      <button type="button" class="btn-close-modal" data-close-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form id="user-email-form" novalidate>
+      <div class="wp-modal-body">
+        <div id="user-email-notice"></div>
+        <p class="field-hint recipients-line">Para: <strong id="user-email-recipients"></strong></p>
+        <div class="form-group">
+          <label for="ue-subject">Asunto</label>
+          <div>
+            <input type="text" id="ue-subject" name="subject" class="form-input" maxlength="150" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ue-message">Mensaje</label>
+          <textarea id="ue-message" name="message" class="form-input" rows="8" maxlength="10000" required></textarea>
+          <span class="field-hint">Cada destinatario recibe un correo individual con su saludo. Las respuestas llegan a tu correo.</span>
+        </div>
+      </div>
+      <div class="wp-modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="user-email-submit">Enviar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: eliminar usuario -->
+<div id="modal-user-delete" class="wp-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-user-delete-title">
+  <div class="wp-modal-backdrop" data-close-modal></div>
+  <div class="wp-modal-dialog">
+    <div class="wp-modal-header">
+      <h3 id="modal-user-delete-title">Eliminar usuario</h3>
+      <button type="button" class="btn-close-modal" data-close-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form id="user-delete-form">
+      <div class="wp-modal-body">
+        <div id="user-delete-notice"></div>
+        <p>Vas a eliminar la cuenta de <strong id="user-delete-name"></strong>. Esta acción no se puede deshacer.</p>
+        <div id="user-delete-reassign" class="form-group" hidden>
+          <label for="ud-reassign">Tiene <strong id="user-delete-posts"></strong> noticia(s). ¿A quién se las asignamos?</label>
+          <div>
+            <select id="ud-reassign" name="reassign_to" class="form-input"></select>
+          </div>
+        </div>
+        <p class="field-hint">Si solo quieres quitarle el acceso temporalmente, mejor desactívalo.</p>
+      </div>
+      <div class="wp-modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+        <button type="submit" class="btn btn-danger" id="user-delete-submit">Eliminar definitivamente</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,408 @@
+/* =========================================================
+   Backoffice · Usuarios, perfil y pantallas de cuenta
+   Complementa los estilos de src/pages/admin.astro (solo se carga en /admin)
+   ========================================================= */
+
+.screen-reader-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.text-faint {
+  color: var(--text-faint);
+}
+
+.btn-danger {
+  background: var(--bm-red);
+  color: #FFFFFF;
+  border-color: var(--bm-red);
+}
+
+.btn-danger:hover {
+  background: var(--bm-red-dark);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: progress;
+  transform: none;
+}
+
+/* Avisos estilo WordPress */
+.wp-notice {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  border-left-width: 4px;
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.wp-notice p {
+  margin: 0;
+}
+
+.wp-notice code {
+  font-size: 0.82rem;
+  background: var(--bg-subtle);
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+}
+
+.wp-notice-success { border-left-color: #16A34A; }
+.wp-notice-error { border-left-color: var(--bm-red); }
+.wp-notice-warning { border-left-color: var(--bm-yellow); }
+.wp-notice-info { border-left-color: #2563EB; }
+
+.wp-notice-dismiss {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.wp-notice-dismiss:hover {
+  color: var(--bm-red);
+}
+
+/* Título con botón "Añadir nuevo" */
+.page-title-action {
+  margin-left: 0.75rem;
+  vertical-align: middle;
+}
+
+.view-intro {
+  color: var(--text-muted);
+  margin: -0.75rem 0 1.5rem;
+  font-size: 0.92rem;
+}
+
+/* Filtros por rol */
+.wp-subsubsub {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0;
+}
+
+.wp-subsubsub li + li::before {
+  content: '|';
+  margin: 0 0.45rem;
+  color: var(--text-faint);
+}
+
+.wp-subsubsub a.is-current {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.wp-subsubsub .count {
+  color: var(--text-faint);
+  font-weight: 400;
+}
+
+.wp-table-toolbar {
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#users-search {
+  min-width: 240px;
+}
+
+/* Tabla de usuarios */
+.users-table .col-num {
+  text-align: center;
+  width: 90px;
+}
+
+.table-empty {
+  text-align: center;
+  color: var(--text-faint);
+  padding: 2rem !important;
+}
+
+.user-cell {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.user-avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: var(--bm-gradient);
+}
+
+.user-cell strong a {
+  color: var(--text-main);
+}
+
+.user-cell strong a:hover {
+  color: var(--bm-orange);
+}
+
+.user-cell .callsign-badge {
+  font-size: 0.72rem;
+  margin-left: 0.35rem;
+}
+
+.state-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-pill);
+  vertical-align: middle;
+}
+
+.state-self { background: #DBEAFE; color: #1D4ED8; }
+.state-inactive { background: #E2E8F0; color: var(--text-muted); }
+.state-pending { background: var(--bm-yellow-light); color: #B45309; }
+
+.users-table tr.is-inactive td {
+  color: var(--text-faint);
+}
+
+/* Acciones de fila: visibles al pasar el ratón o con foco (siempre en pantallas táctiles) */
+.users-table .row-actions {
+  visibility: hidden;
+}
+
+.users-table tr:hover .row-actions,
+.users-table tr:focus-within .row-actions {
+  visibility: visible;
+}
+
+@media (hover: none) {
+  .users-table .row-actions {
+    visibility: visible;
+  }
+}
+
+.roles-help {
+  margin-top: 2rem;
+}
+
+.roles-help summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.roles-help summary::-webkit-details-marker {
+  display: none;
+}
+
+.roles-help summary h3::after {
+  content: ' ▾';
+  color: var(--text-faint);
+}
+
+/* Formulario en filas (form-table de WordPress) */
+.wp-form-table {
+  background: #FFFFFF;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1.5rem 1.5rem;
+  max-width: 820px;
+  margin-bottom: 2rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.form-row[hidden] {
+  display: none;
+}
+
+@media (min-width: 720px) {
+  .form-row {
+    grid-template-columns: 210px 1fr;
+    align-items: start;
+    gap: 1.5rem;
+  }
+}
+
+.form-row > label,
+.form-row-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  padding-top: 0.55rem;
+}
+
+.form-row .form-input {
+  max-width: 420px;
+}
+
+.required {
+  font-weight: 400;
+  color: var(--text-faint);
+  font-size: 0.8rem;
+}
+
+.input-callsign {
+  text-transform: uppercase;
+  max-width: 200px !important;
+}
+
+.checkbox-inline {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  padding-top: 0.55rem;
+  cursor: pointer;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+}
+
+.form-section-title {
+  font-size: 1.1rem;
+  margin: 0 0 0.75rem;
+}
+
+.password-field {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  max-width: 520px;
+}
+
+.password-field .form-input {
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.form-input.has-error {
+  border-color: var(--bm-red);
+  box-shadow: 0 0 0 3px rgba(232, 38, 28, 0.12);
+}
+
+.field-error {
+  display: block;
+  color: #B91C1C;
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+.recipients-line {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+}
+
+.profile-meta {
+  max-width: 820px;
+}
+
+/* Barra superior: saludo como enlace al perfil */
+.greeting-link {
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+}
+
+.greeting-link:hover strong {
+  color: var(--bm-orange);
+}
+
+/* Pantallas de cuenta en la tarjeta de login */
+.wp-login-links {
+  text-align: center;
+  margin: 1.25rem 0 0;
+  font-size: 0.85rem;
+}
+
+.wp-login-links a {
+  color: var(--bm-orange);
+}
+
+.wp-login-success {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radius-sm);
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  color: #15803D;
+  font-size: 0.85rem;
+}
+
+/* Móvil: el menú lateral pasa arriba (prefijo .wp-admin-app para ganar a los estilos de la página) */
+@media (max-width: 760px) {
+  .wp-admin-app .wp-admin-layout {
+    flex-direction: column;
+  }
+
+  .wp-admin-app .wp-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .wp-admin-app .wp-content-stage {
+    padding: 1.25rem 1rem;
+  }
+
+  .wp-admin-app .wp-adminbar {
+    height: auto;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .wp-admin-app .db-status-badge {
+    display: none;
+  }
+
+  #users-search {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .toolbar-right {
+    width: 100%;
+  }
+}
+
+/* Columna de usuario con espacio para las acciones de fila en una sola línea */
+.users-table td.cell-title {
+  min-width: 400px;
+}

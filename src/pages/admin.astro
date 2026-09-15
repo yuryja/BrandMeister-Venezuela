@@ -1,6 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { getCollection } from 'astro:content';
+import UsersView from '../components/admin/UsersView.astro';
+import ProfileView from '../components/admin/ProfileView.astro';
+import '../styles/admin-accounts.css';
 
 const localPosts = await getCollection('blog');
 
@@ -24,6 +27,7 @@ const getCellIntensity = (hour: number) => {
         <img src="/assets/logo.webp" alt="BrandMeister Venezuela" width="220" height="55" />
       </div>
       
+      <div data-account-panel="login" id="account-panel-login">
       <div class="wp-login-header">
         <h2>Iniciar Sesión en el Backoffice</h2>
         <p>Acceso administrativo para Sysops y colaboradores autorizados</p>
@@ -49,6 +53,51 @@ const getCellIntensity = (hour: number) => {
           </svg>
         </button>
       </form>
+      <p class="wp-login-links"><a href="#" data-show-panel="forgot">¿Olvidaste tu contraseña?</a></p>
+      </div>
+
+      <!-- ¿Olvidaste tu contraseña? -->
+      <div data-account-panel="forgot" id="account-panel-forgot" hidden>
+        <div class="wp-login-header">
+          <h2>Restablecer contraseña</h2>
+          <p>Escribe tu usuario, indicativo o correo y te enviaremos un enlace.</p>
+        </div>
+        <form id="forgot-form" class="wp-login-form">
+          <div class="form-group">
+            <label for="forgot-identifier">Usuario, indicativo o correo</label>
+            <input type="text" id="forgot-identifier" class="form-input" autocomplete="username" maxlength="120" required />
+          </div>
+          <p id="forgot-message" class="wp-login-error" role="status" hidden></p>
+          <button type="submit" id="forgot-submit" class="btn btn-primary wp-login-btn">Enviar enlace</button>
+        </form>
+        <p class="wp-login-links"><a href="#" data-show-panel="login">← Volver a iniciar sesión</a></p>
+      </div>
+
+      <!-- Crear / restablecer contraseña desde el enlace del correo (?clave=) -->
+      <div data-account-panel="set-password" id="account-panel-set-password" hidden>
+        <div class="wp-login-header">
+          <h2 id="set-password-title">Comprobando enlace…</h2>
+          <p id="set-password-intro"></p>
+        </div>
+        <form id="set-password-form" class="wp-login-form">
+          <input type="text" name="username" autocomplete="username" hidden />
+          <div class="form-group">
+            <label for="sp-password">Nueva contraseña</label>
+            <div class="password-field">
+              <input type="password" id="sp-password" class="form-input" autocomplete="new-password" minlength="10" maxlength="200" required />
+              <button type="button" class="btn btn-secondary btn-sm" data-toggle-password="sp-password">Mostrar</button>
+            </div>
+            <span class="field-hint">Mínimo 10 caracteres.</span>
+          </div>
+          <div class="form-group">
+            <label for="sp-password-confirm">Repite la contraseña</label>
+            <input type="password" id="sp-password-confirm" class="form-input" autocomplete="new-password" minlength="10" maxlength="200" required />
+          </div>
+          <p id="set-password-message" class="wp-login-error" role="alert" hidden></p>
+          <button type="submit" id="set-password-submit" class="btn btn-primary wp-login-btn">Guardar contraseña</button>
+        </form>
+        <p class="wp-login-links"><a href="#" data-show-panel="login">Ir a iniciar sesión</a></p>
+      </div>
     </div>
   </div>
 
@@ -74,8 +123,8 @@ const getCellIntensity = (hour: number) => {
 
       <div class="adminbar-right">
         <div class="user-profile-menu">
-          <span class="greeting">Hola, <strong id="bar-user-name">YV5OF</strong></span>
-          <span id="bar-user-role" class="role-badge role-admin">Administrador</span>
+          <button type="button" class="greeting greeting-link" data-view="profile" title="Editar tu perfil">Hola, <strong id="bar-user-name"></strong></button>
+          <span id="bar-user-role" class="role-badge"></span>
           <button id="btn-logout" class="btn-logout" title="Cerrar sesión">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -143,8 +192,8 @@ const getCellIntensity = (hour: number) => {
             </button>
           </li>
 
-          <!-- ACL Protected Menu: Users (Admin Only) -->
-          <li class="wp-menu-item" id="menu-users-item">
+          <!-- Usuarios (solo Administrador) -->
+          <li class="wp-menu-item has-submenu" id="menu-users-item">
             <button class="menu-link" data-view="users">
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -152,7 +201,23 @@ const getCellIntensity = (hour: number) => {
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
-              <span>Usuarios & ACL</span>
+              <span>Usuarios</span>
+            </button>
+            <ul class="wp-submenu">
+              <li><button class="submenu-link" data-view="users">Todos los usuarios</button></li>
+              <li><button class="submenu-link" data-view="user-new">Añadir nuevo</button></li>
+              <li><button class="submenu-link" data-view="profile">Perfil</button></li>
+            </ul>
+          </li>
+
+          <!-- Perfil (Editor y Autor; el Administrador lo tiene dentro de Usuarios) -->
+          <li class="wp-menu-item" id="menu-profile-item">
+            <button class="menu-link" data-view="profile">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Perfil</span>
             </button>
           </li>
 
@@ -556,181 +621,10 @@ const getCellIntensity = (hour: number) => {
         </section>
 
         <!-- ========================================================= -->
-        <!-- VIEW 4: USUARIOS & ACL (ROLES Y PERMISOS) -->
+        <!-- USUARIOS Y PERFIL -->
         <!-- ========================================================= -->
-        <section id="view-users" class="wp-view">
-          <div class="view-header">
-            <h1 class="view-title">Usuarios & Control de Acceso (ACL)</h1>
-            <span class="badge-mini">Acceso Restringido · Administrador</span>
-          </div>
-
-          <div class="acl-notice">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--bm-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-            <div>
-              <strong>Políticas de Control de Acceso (ACL):</strong>
-              <span>Gestiona los radioaficionados con acceso al Backoffice y asigna roles según su nivel de responsabilidad comunitaria.</span>
-            </div>
-          </div>
-
-          <!-- Users Table -->
-          <div class="table-container">
-            <table class="wp-list-table">
-              <thead>
-                <tr>
-                  <th>Usuario</th>
-                  <th>Indicativo</th>
-                  <th>Nombre Completo</th>
-                  <th>Correo Electrónico</th>
-                  <th>Rol Actual</th>
-                  <th>Cambiar Rol (ACL)</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody id="users-table-body">
-                <tr>
-                  <td><strong>yv5of</strong></td>
-                  <td><span class="callsign-badge">YV5OF</span></td>
-                  <td>Severino Mastracci</td>
-                  <td>yv5of@brandmeisteryv.net</td>
-                  <td><span class="role-badge role-admin">Administrador</span></td>
-                  <td>
-                    <select class="form-input select-sm user-role-select" data-user="yv5of">
-                      <option value="admin" selected>Administrador</option>
-                      <option value="editor">Editor</option>
-                      <option value="author">Autor</option>
-                    </select>
-                  </td>
-                  <td><span class="user-active-dot"></span> Activo</td>
-                </tr>
-                <tr>
-                  <td><strong>yy3big</strong></td>
-                  <td><span class="callsign-badge">YY3BIG</span></td>
-                  <td>Yury</td>
-                  <td>yy3big@brandmeisteryv.net</td>
-                  <td><span class="role-badge role-admin">Administrador</span></td>
-                  <td>
-                    <select class="form-input select-sm user-role-select" data-user="yy3big">
-                      <option value="admin" selected>Administrador</option>
-                      <option value="editor">Editor</option>
-                      <option value="author">Autor</option>
-                    </select>
-                  </td>
-                  <td><span class="user-active-dot"></span> Activo</td>
-                </tr>
-                <tr>
-                  <td><strong>yv5adm</strong></td>
-                  <td><span class="callsign-badge">YV5ADM</span></td>
-                  <td>Arnaldo</td>
-                  <td>yv5adm@brandmeisteryv.net</td>
-                  <td><span class="role-badge role-editor">Editor</span></td>
-                  <td>
-                    <select class="form-input select-sm user-role-select" data-user="yv5adm">
-                      <option value="admin">Administrador</option>
-                      <option value="editor" selected>Editor</option>
-                      <option value="author">Autor</option>
-                    </select>
-                  </td>
-                  <td><span class="user-active-dot"></span> Activo</td>
-                </tr>
-                <tr>
-                  <td><strong>yv5ve</strong></td>
-                  <td><span class="callsign-badge">YV5VE</span></td>
-                  <td>Will</td>
-                  <td>yv5ve@brandmeisteryv.net</td>
-                  <td><span class="role-badge role-editor">Editor</span></td>
-                  <td>
-                    <select class="form-input select-sm user-role-select" data-user="yv5ve">
-                      <option value="admin">Administrador</option>
-                      <option value="editor" selected>Editor</option>
-                      <option value="author">Autor</option>
-                    </select>
-                  </td>
-                  <td><span class="user-active-dot"></span> Activo</td>
-                </tr>
-                <tr>
-                  <td><strong>autor_demo</strong></td>
-                  <td><span class="callsign-badge">YV5DEMO</span></td>
-                  <td>Colaborador Radioaficionado</td>
-                  <td>colaborador@brandmeisteryv.net</td>
-                  <td><span class="role-badge role-author">Autor</span></td>
-                  <td>
-                    <select class="form-input select-sm user-role-select" data-user="autor_demo">
-                      <option value="admin">Administrador</option>
-                      <option value="editor">Editor</option>
-                      <option value="author" selected>Autor</option>
-                    </select>
-                  </td>
-                  <td><span class="user-active-dot"></span> Activo</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- ACL Permissions Matrix -->
-          <div class="wp-box" style="margin-top: 2rem;">
-            <div class="wp-box-head">
-              <h3>Matriz de Permisos por Rol</h3>
-            </div>
-            <div class="wp-box-body">
-              <table class="matrix-table">
-                <thead>
-                  <tr>
-                    <th>Capacidad / Acción</th>
-                    <th>Administrador</th>
-                    <th>Editor</th>
-                    <th>Autor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Ver Escritorio y Estadísticas de Red</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-yes">✓</td>
-                  </tr>
-                  <tr>
-                    <td>Redactar y Guardar Borradores de Noticias</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-yes">✓</td>
-                  </tr>
-                  <tr>
-                    <td>Publicar Noticias Propias</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-yes">✓</td>
-                  </tr>
-                  <tr>
-                    <td>Editar Noticias de Otros Autores</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-no">✕</td>
-                  </tr>
-                  <tr>
-                    <td>Eliminar Noticias Definitivamente</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-no">✕</td>
-                  </tr>
-                  <tr>
-                    <td>Editar Textos Globales del Portal</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-no">✕</td>
-                  </tr>
-                  <tr>
-                    <td>Gestionar Usuarios y Asignar Roles</td>
-                    <td class="check-yes">✓</td>
-                    <td class="check-no">✕</td>
-                    <td class="check-no">✕</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+        <UsersView />
+        <ProfileView />
 
         <!-- ========================================================= -->
         <!-- VIEW 5: TEXTOS DEL PORTAL -->
@@ -1048,7 +942,8 @@ const getCellIntensity = (hour: number) => {
   </div>
 </Layout>
 
-<style>
+<!-- Global: el marcado de los componentes admin y el HTML generado por JS también usa estas clases (solo se carga en /admin) -->
+<style is:global>
   /* =========================================================
      WORDPRESS ADMIN THEME STYLES - 100% LIGHT (NO BLACK)
      ========================================================= */
@@ -1934,16 +1829,25 @@ const getCellIntensity = (hour: number) => {
 </style>
 
 <script>
-  type SessionUser = {
-    id: number;
-    username: string;
-    callsign: string;
-    full_name: string;
-    role: 'admin' | 'editor' | 'author';
-  };
+  import { ROLE_LABELS, type SessionUser } from '../scripts/admin/api';
+  import { initUsers } from '../scripts/admin/users';
+  import { initProfile } from '../scripts/admin/profile';
+  import { initAccount, showAccountPanel } from '../scripts/admin/account';
 
   // Usuario autenticado según la sesión PHP (nunca desde localStorage)
-  let currentUser: SessionUser = { id: 0, username: '', callsign: '', full_name: '', role: 'author' };
+  let currentUser: SessionUser = { id: 0, username: '', callsign: '', full_name: '', email: '', role: 'author' };
+
+  // Vistas que requieren un rol concreto (el servidor también lo exige)
+  const VIEW_ROLES: Record<string, SessionUser['role'][]> = {
+    users: ['admin'],
+    'user-new': ['admin'],
+    settings: ['admin', 'editor'],
+  };
+
+  const setSession = (user: SessionUser) => {
+    currentUser = user;
+    document.dispatchEvent(new CustomEvent('bm:session', { detail: user }));
+  };
 
   const escapeHtml = (value: unknown): string =>
     String(value ?? '')
@@ -1977,7 +1881,7 @@ const getCellIntensity = (hour: number) => {
       const res = await fetch('/api/auth.php?action=status', { credentials: 'same-origin' });
       const data = await res.json();
       if (data?.logged_in && data.user) {
-        currentUser = data.user;
+        setSession(data.user);
         showApp();
         return;
       }
@@ -1991,8 +1895,10 @@ const getCellIntensity = (hour: number) => {
   const showLogin = (message = '') => {
     document.getElementById('wp-login-screen')!.style.display = 'flex';
     document.getElementById('wp-app')!.style.display = 'none';
+    showAccountPanel('login');
     const errorEl = document.getElementById('login-error');
     if (errorEl) {
+      errorEl.className = 'wp-login-error';
       errorEl.textContent = message;
       errorEl.hidden = !message;
     }
@@ -2004,41 +1910,36 @@ const getCellIntensity = (hour: number) => {
     applyACL();
     loadInstagramSettings();
     loadGalleryPosts();
+    window.switchView('dashboard');
   };
 
   // Apply Role-Based Access Control (ACL)
   const applyACL = () => {
     const barName = document.getElementById('bar-user-name');
     const barRole = document.getElementById('bar-user-role');
-    const menuUsers = document.getElementById('menu-users-item');
-    const menuSettings = document.getElementById('menu-settings-item');
-
     if (barName) barName.textContent = currentUser.callsign;
     if (barRole) {
-      barRole.textContent = currentUser.role === 'admin' ? 'Administrador' : currentUser.role === 'editor' ? 'Editor' : 'Autor';
+      barRole.textContent = ROLE_LABELS[currentUser.role];
       barRole.className = `role-badge role-${currentUser.role}`;
     }
 
-    // ACL Menu visibility
-    if (currentUser.role === 'author') {
-      if (menuUsers) menuUsers.style.display = 'none';
-      if (menuSettings) menuSettings.style.display = 'none';
-    } else if (currentUser.role === 'editor') {
-      if (menuUsers) menuUsers.style.display = 'none';
-      if (menuSettings) menuSettings.style.display = 'block';
-    } else {
-      // Admin
-      if (menuUsers) menuUsers.style.display = 'block';
-      if (menuSettings) menuSettings.style.display = 'block';
-    }
+    const show = (id: string, visible: boolean) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = visible ? 'block' : 'none';
+    };
+    show('menu-users-item', currentUser.role === 'admin');
+    show('menu-profile-item', currentUser.role !== 'admin');
+    show('menu-settings-item', currentUser.role !== 'author');
   };
 
-  // View Switching
+  document.addEventListener('bm:session', applyACL);
+  document.addEventListener('bm:unauthorized', () => showLogin('Tu sesión expiró. Inicia sesión nuevamente.'));
+
+  // View Switching: cada módulo escucha `bm:view` para cargar sus datos
   window.switchView = (viewName: string) => {
-    // Check ACL before opening restricted views
-    if ((viewName === 'users' || viewName === 'settings') && currentUser.role === 'author') {
-      alert('Acceso restringido: Se requiere rol de Administrador.');
-      return;
+    const allowed = VIEW_ROLES[viewName];
+    if (allowed && !allowed.includes(currentUser.role)) {
+      viewName = 'dashboard';
     }
 
     document.querySelectorAll('.wp-view').forEach(el => el.classList.remove('is-active'));
@@ -2047,13 +1948,18 @@ const getCellIntensity = (hour: number) => {
     const targetView = document.getElementById(`view-${viewName}`);
     if (targetView) targetView.classList.add('is-active');
 
-    const targetBtn = document.querySelector(`[data-view="${viewName}"]`);
-    if (targetBtn) targetBtn.classList.add('is-active');
+    // Resaltar el enlace del menú (y su menú padre si es un submenú)
+    document.querySelectorAll(`.wp-sidebar [data-view="${viewName}"]`).forEach(btn => {
+      btn.classList.add('is-active');
+      btn.closest('.has-submenu')?.querySelector(':scope > .menu-link')?.classList.add('is-active');
+    });
 
     if (viewName === 'gallery') {
       loadGalleryPosts();
       loadInstagramSettings();
     }
+    document.dispatchEvent(new CustomEvent('bm:view', { detail: viewName }));
+    window.scrollTo({ top: 0 });
   };
 
   document.querySelectorAll('[data-view]').forEach(btn => {
@@ -2082,7 +1988,7 @@ const getCellIntensity = (hour: number) => {
         });
         const data = await res.json().catch(() => null);
         if (res.ok && data?.success && data.user) {
-          currentUser = data.user;
+          setSession(data.user);
           passwordInput.value = '';
           showApp();
         } else {
@@ -2188,16 +2094,6 @@ const getCellIntensity = (hour: number) => {
         box.style.display = 'none';
       }
     }
-  });
-
-  // User Role Change Listener
-  document.querySelectorAll('.user-role-select').forEach(select => {
-    select.addEventListener('change', (e) => {
-      const target = e.target as HTMLSelectElement;
-      const targetUser = target.getAttribute('data-user');
-      const newRole = target.value;
-      alert(`Rol de ${targetUser} actualizado a: ${newRole} en MySQL bmvenezuela`);
-    });
   });
 
   // Site text save
@@ -2536,5 +2432,9 @@ const getCellIntensity = (hour: number) => {
   });
 
   // Initialize
-  checkAuth();
+  initUsers();
+  initProfile();
+  initAccount().then((handledToken) => {
+    if (!handledToken) checkAuth();
+  });
 </script>

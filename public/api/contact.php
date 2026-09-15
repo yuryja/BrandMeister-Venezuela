@@ -7,6 +7,7 @@
 
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/recaptcha.php';
+require_once __DIR__ . '/mailer.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     send_json(['status' => 'ok']);
@@ -172,15 +173,20 @@ $mailBody .= "=====================================================\n";
 $mailBody .= "IP de Origen: $ipAddress\n";
 $mailBody .= "Navegador:    $userAgent\n";
 
-$headers = [];
-$headers[] = "From: BrandMeister Venezuela <no-reply@brandmeisteryv.net>";
-$headers[] = "Reply-To: $name <$email>";
-$headers[] = "X-Mailer: BrandMeister-YV-Portal/2.0";
-$headers[] = "MIME-Version: 1.0";
-$headers[] = "Content-Type: text/plain; charset=UTF-8";
+$mailHtml = bm_mail_layout(
+    "Nuevo mensaje de contacto · $ticketId",
+    '<pre style="white-space:pre-wrap;font-family:Menlo,Consolas,monospace;font-size:13px;background:#F8FAFC;padding:14px;border-radius:8px">'
+    . htmlspecialchars($mailBody, ENT_QUOTES, 'UTF-8') . '</pre>'
+);
 
-// Intentar envío de correo (silenciado en caso de entorno local sin sendmail)
-@mail($sysopEmail, $mailSubject, $mailBody, implode("\r\n", $headers));
+// Por SMTP si está configurado; responder al correo contesta directamente al remitente
+$mailResult = bm_send_mail($sysopEmail, $mailSubject, $mailHtml, $mailBody, [
+    'reply_to' => $email,
+    'reply_to_name' => $name,
+]);
+if (!$mailResult['ok']) {
+    error_log("[BM-YV] No se pudo notificar el ticket $ticketId por correo");
+}
 
 // 8. Respuesta de éxito al cliente
 send_json([

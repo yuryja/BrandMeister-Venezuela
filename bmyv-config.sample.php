@@ -23,6 +23,18 @@ return [
     // Solo si NO usas reCAPTCHA: '1' acepta envíos sin verificar (sin clave y sin esto, el formulario rechaza todo)
     'RECAPTCHA_DISABLED' => '0',
 
+    // Correo saliente por SMTP (cPanel → Cuentas de correo electrónico → "Connect Devices" muestra servidor y puerto)
+    'SMTP_HOST' => 'mail.brandmeisteryv.net',
+    'SMTP_PORT' => '465',
+    'SMTP_SECURE' => 'ssl',            // ssl (465) | tls (587)
+    'SMTP_USER' => 'noreply@brandmeisteryv.net',
+    'SMTP_PASS' => '',
+    'MAIL_FROM' => 'noreply@brandmeisteryv.net',
+    'MAIL_FROM_NAME' => 'BrandMeister Venezuela',
+
+    // URL pública usada en los enlaces de invitación y restablecimiento
+    'SITE_URL' => 'https://brandmeisteryv.net',
+
     // Correo que recibe los mensajes del formulario de contacto
     'SYSOP_ALERT_EMAIL' => 'sysop@brandmeisteryv.net',
 ];

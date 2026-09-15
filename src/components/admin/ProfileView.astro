@@ -1,0 +1,67 @@
+---
+// Perfil del usuario autenticado (cualquier rol). Lógica en src/scripts/admin/profile.ts
+---
+
+<section id="view-profile" class="wp-view">
+  <div class="view-header">
+    <h1 class="view-title">Perfil</h1>
+  </div>
+
+  <div id="profile-notice"></div>
+
+  <h2 class="form-section-title">Tu cuenta</h2>
+  <form id="profile-form" class="wp-form-table" novalidate>
+    <div class="form-row">
+      <span class="form-row-label">Usuario</span>
+      <div>
+        <strong id="profile-username">—</strong>
+        <span class="callsign-badge" id="profile-callsign">—</span>
+        <span class="role-badge" id="profile-role">—</span>
+        <span class="field-hint">El usuario, el indicativo y el rol solo los cambia un Administrador.</span>
+      </div>
+    </div>
+    <div class="form-row">
+      <label for="pf-full-name">Nombre completo</label>
+      <div>
+        <input type="text" id="pf-full-name" name="full_name" class="form-input" maxlength="120" required />
+      </div>
+    </div>
+    <div class="form-row">
+      <label for="pf-email">Correo electrónico</label>
+      <div>
+        <input type="email" id="pf-email" name="email" class="form-input" maxlength="120" required />
+        <span class="field-hint">Aquí llegan los enlaces para restablecer tu contraseña.</span>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" id="profile-submit">Actualizar perfil</button>
+    </div>
+  </form>
+
+  <h2 class="form-section-title">Cambiar contraseña</h2>
+  <form id="password-form" class="wp-form-table" novalidate>
+    <input type="text" name="username" autocomplete="username" hidden />
+    <div class="form-row">
+      <label for="pw-current">Contraseña actual</label>
+      <div>
+        <input type="password" id="pw-current" name="current_password" class="form-input" autocomplete="current-password" required />
+      </div>
+    </div>
+    <div class="form-row">
+      <label for="pw-new">Nueva contraseña</label>
+      <div>
+        <div class="password-field">
+          <input type="password" id="pw-new" name="new_password" class="form-input" autocomplete="new-password" minlength="10" maxlength="200" required />
+          <button type="button" class="btn btn-secondary btn-sm" data-generate-password="pw-new">Generar</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-toggle-password="pw-new">Mostrar</button>
+        </div>
+        <span class="field-hint">Mínimo 10 caracteres. Al cambiarla se cierran tus sesiones en otros dispositivos.</span>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" id="password-submit">Cambiar contraseña</button>
+    </div>
+  </form>
+
+  <p class="field-hint profile-meta" id="profile-meta"></p>
+</section>
