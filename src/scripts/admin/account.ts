@@ -1,4 +1,4 @@
-// Backoffice · Pantallas públicas de cuenta: "¿Olvidaste tu contraseña?" y crear/restablecer contraseña (?clave=token)
+// Panel · Pantallas públicas de cuenta: "¿Olvidaste tu contraseña?" y crear/restablecer contraseña (?clave=token)
 import { api, escapeHtml, withBusy, bindPasswordTools } from './api';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;

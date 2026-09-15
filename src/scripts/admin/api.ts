@@ -1,4 +1,4 @@
-// Utilidades compartidas por los módulos del Backoffice
+// Utilidades compartidas por los módulos del panel de administración
 
 export type Role = 'admin' | 'editor' | 'author';
 

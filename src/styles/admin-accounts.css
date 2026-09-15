@@ -1,7 +1,13 @@
 /* =========================================================
-   Backoffice · Usuarios, perfil y pantallas de cuenta
+   Panel de administración · Usuarios, perfil y pantallas de cuenta
    Complementa los estilos de src/pages/admin.astro (solo se carga en /admin)
    ========================================================= */
+
+/* El atributo hidden siempre gana a los display de las clases (.btn, .field-hint…) */
+.wp-admin-app [hidden],
+.wp-login-wrapper [hidden] {
+  display: none !important;
+}
 
 .screen-reader-text {
   position: absolute;

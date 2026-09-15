@@ -9,12 +9,13 @@ $pdo = get_db_connection();
 // Ajustes visibles para cualquier visitante
 const PUBLIC_SETTINGS = [
     'hero_title', 'hero_description', 'emergency_alert', 'freq_vhf', 'freq_uhf',
-    'master_servers', 'contact_email', 'instagram_account', 'instagram_hashtag', 'instagram_last_sync'
+    'master_servers', 'contact_email', 'instagram_account', 'instagram_hashtag'
 ];
 // Ajustes que solo ven y editan admin/editor
 const PRIVATE_SETTINGS = ['instagram_app_id'];
-// Secretos: solo el admin puede escribirlos y nunca se devuelven, solo se indica si existen
-const SECRET_SETTINGS = ['instagram_app_secret', 'instagram_access_token'];
+// Secretos: solo el admin puede escribirlos y nunca se devuelven, solo se indica si existen.
+// El token de Instagram no está aquí: solo lo escribe la conexión OAuth (instagram-lib.php)
+const SECRET_SETTINGS = ['instagram_app_secret'];
 
 if ($method === 'GET') {
     $user = current_user();
@@ -80,9 +81,6 @@ if ($method === 'POST') {
             $rejected[] = $k;
         }
     }
-
-    // instagram_last_sync solo lo escribe el proceso de sincronización
-    unset($toSave['instagram_last_sync']);
 
     $stmt = $pdo->prepare("INSERT INTO bm_site_settings (setting_key, setting_value) VALUES (:k, :v) ON DUPLICATE KEY UPDATE setting_value = :v2");
     foreach ($toSave as $k => $v) {

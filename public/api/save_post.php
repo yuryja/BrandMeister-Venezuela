@@ -1,6 +1,6 @@
 <?php
 /**
- * Endpoint de guardado para el Backoffice en Hosting Compartido cPanel / Apache
+ * Endpoint de guardado del panel de administración en Hosting Compartido cPanel / Apache
  * BrandMeister Venezuela
  */
 

@@ -1,4 +1,4 @@
-// Backoffice · Usuarios: listado, alta/edición, invitaciones, correos y acciones en lote
+// Panel · Usuarios: listado, alta/edición, invitaciones, correos y acciones en lote
 import {
   api, escapeHtml, notice, showFieldErrors, timeAgo, openModal, closeModal, withBusy, bindPasswordTools,
   ROLE_LABELS, type Role, type SessionUser,
