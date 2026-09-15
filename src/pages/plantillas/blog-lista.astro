@@ -1,12 +1,7 @@
 ---
+// Plantilla del listado de noticias: Astro genera el diseño y PHP (public/blog.php)
+// repite el bloque <template data-bm-plantilla="articulo"> por cada noticia de la base de datos.
 import Layout from '../../layouts/Layout.astro';
-import { getCollection } from 'astro:content';
-
-const allPosts = await getCollection('blog');
-const sortedPosts = allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
-// Collect all unique categories
-const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
 ---
 
 <Layout
@@ -14,73 +9,87 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
   title="Noticias & Comunicados Técnicos · BrandMeister Venezuela"
   description="Noticias, guías de configuración de hotspots, protocolos de emergencia y novedades de la comunidad BrandMeister Venezuela DMR."
 >
-  <div class="blog-page-header">
-    <div class="container">
-      <div class="hero-badge">
-        <span>Archivo Oficial & Novedades</span>
-      </div>
-      <h1 class="page-title">Noticias, Novedades y Guías Técnicas DMR</h1>
-      <p class="page-subtitle">
-        Documentación técnica elaborada por los Sysops y colaboradores de BrandMeister Venezuela para fortalecer el conocimiento de nuestra comunidad.
-      </p>
+  <div class="blog-page">
+    <div class="blog-page-header">
+      <div class="container">
+        <div class="hero-badge">
+          <span>Archivo Oficial & Novedades</span>
+        </div>
+        <h1 class="page-title">Noticias, Novedades y Guías Técnicas DMR</h1>
+        <p class="page-subtitle">
+          Documentación técnica elaborada por los Sysops y colaboradores de BrandMeister Venezuela para fortalecer el conocimiento de nuestra comunidad.
+        </p>
 
-      <!-- Category Filter Pills -->
-      <div class="category-pills" id="category-filters">
-        <button class="cat-pill is-active" data-cat="all">Todos ({allPosts.length})</button>
-        {categories.map(cat => (
-          <button class="cat-pill" data-cat={cat}>{cat}</button>
-        ))}
+        <div class="category-pills" id="category-filters">
+          <button class="cat-pill is-active" data-cat="all">Todos (@@TOTAL@@)</button>
+          <template data-bm-plantilla="categoria"><button class="cat-pill" data-cat="@@CATEGORIA@@">@@CATEGORIA@@</button></template>
+          @@CATEGORIAS@@
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="bm-stripe"></div>
+    <div class="bm-stripe"></div>
 
-  <section class="blog-list-section section-padding">
-    <div class="container">
-      <div class="articles-archive" id="articles-container">
-        {sortedPosts.map(post => (
-          <article class="archive-item" data-category={post.data.category}>
+    <section class="blog-list-section section-padding">
+      <div class="container">
+        <div class="articles-archive" id="articles-container">
+          <template data-bm-plantilla="articulo"><article class="archive-item" data-category="@@CATEGORIA@@">
             <div class="item-meta">
-              <span class="item-cat">{post.data.category}</span>
-              <time datetime={post.data.pubDate.toISOString()} class="item-date">
-                {post.data.pubDate.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </time>
-              <span class="item-read">{post.data.readTime}</span>
+              <span class="item-cat">@@CATEGORIA@@</span>
+              <time datetime="@@FECHA_ISO@@" class="item-date">@@FECHA@@</time>
+              <span class="item-read">@@TIEMPO_LECTURA@@</span>
             </div>
 
             <h2 class="item-title">
-              <a href={`/blog/${post.slug}`}>{post.data.title}</a>
+              <a href="/blog/@@SLUG@@">@@TITULO@@</a>
             </h2>
 
-            <p class="item-desc">{post.data.description}</p>
+            <p class="item-desc">@@DESCRIPCION@@</p>
 
             <div class="item-footer">
               <div class="item-author">
-                <span>Por <strong>{post.data.author}</strong></span>
-                {post.data.authorCallsign && (
-                  <span class="item-callsign">{post.data.authorCallsign}</span>
-                )}
+                <span>Por <strong>@@AUTOR@@</strong></span>
+                <span class="item-callsign">@@INDICATIVO@@</span>
               </div>
 
-              <div class="item-tags">
-                {post.data.tags.map(t => (
-                  <span class="tag-label">#{t}</span>
-                ))}
-              </div>
+              <div class="item-tags">@@ETIQUETAS@@</div>
 
-              <a href={`/blog/${post.slug}`} class="item-read-link">
-                Leer noticia →
-              </a>
+              <a href="/blog/@@SLUG@@" class="item-read-link">Leer noticia →</a>
             </div>
-          </article>
-        ))}
+          </article></template>
+          <template data-bm-plantilla="etiqueta"><span class="tag-label">#@@ETIQUETA@@</span></template>
+          @@ARTICULOS@@
+          <p class="archive-empty" id="archive-empty" hidden>Todavía no hay noticias publicadas en esta categoría.</p>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </Layout>
 
-<style>
+<script is:inline>
+  const catButtons = document.querySelectorAll('#category-filters .cat-pill');
+  const articles = document.querySelectorAll('#articles-container .archive-item');
+  const vacio = document.getElementById('archive-empty');
+
+  catButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      catButtons.forEach((b) => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+
+      const cat = btn.getAttribute('data-cat');
+      let visibles = 0;
+      articles.forEach((art) => {
+        const coincide = cat === 'all' || art.getAttribute('data-category') === cat;
+        art.style.display = coincide ? 'block' : 'none';
+        if (coincide) visibles++;
+      });
+      if (vacio) vacio.hidden = visibles > 0 || articles.length === 0;
+    });
+  });
+</script>
+
+<!-- Global con prefijo .blog-page: PHP genera las tarjetas de noticia -->
+<style is:global>
   .blog-page-header {
     position: relative;
     box-sizing: border-box;
@@ -108,14 +117,14 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     }
   }
 
-  .bm-stripe {
+  .blog-page .bm-stripe {
     height: 3px;
     background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
     width: 100%;
     display: block;
   }
 
-  .hero-badge {
+  .blog-page .hero-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -131,25 +140,25 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     letter-spacing: 0.04em;
   }
 
-  .page-title {
+  .blog-page .page-title {
     margin-bottom: 1rem;
     max-width: 850px;
   }
 
-  .page-subtitle {
+  .blog-page .page-subtitle {
     font-size: 1.2rem;
     color: var(--text-muted);
     max-width: 720px;
     margin-bottom: 2rem;
   }
 
-  .category-pills {
+  .blog-page .category-pills {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
 
-  .cat-pill {
+  .blog-page .cat-pill {
     background: var(--bg-page);
     border: 1px solid var(--border-subtle);
     padding: 0.45rem 1rem;
@@ -161,30 +170,30 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     transition: all 0.2s ease;
   }
 
-  .cat-pill:hover {
+  .blog-page .cat-pill:hover {
     border-color: var(--bm-orange);
     color: var(--bm-orange);
   }
 
-  .cat-pill.is-active {
+  .blog-page .cat-pill.is-active {
     background: var(--bm-red);
     color: #FFFFFF;
     border-color: var(--bm-red);
   }
 
   /* Articles Archive (Linear, Editorial, NOT box cards) */
-  .blog-list-section {
+  .blog-page .blog-list-section {
     background: var(--bg-page);
   }
 
-  .articles-archive {
+  .blog-page .articles-archive {
     display: flex;
     flex-direction: column;
     gap: 2rem;
     max-width: 900px;
   }
 
-  .archive-item {
+  .blog-page .archive-item {
     background: #FFFFFF;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
@@ -192,13 +201,13 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     transition: all 0.2s ease;
   }
 
-  .archive-item:hover {
+  .blog-page .archive-item:hover {
     border-color: var(--bm-orange);
     box-shadow: var(--shadow-sm);
     transform: translateY(-2px);
   }
 
-  .item-meta {
+  .blog-page .item-meta {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -206,39 +215,39 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     margin-bottom: 0.85rem;
   }
 
-  .item-cat {
+  .blog-page .item-cat {
     font-weight: 700;
     text-transform: uppercase;
     color: var(--bm-red);
   }
 
-  .item-date {
+  .blog-page .item-date {
     color: var(--text-faint);
   }
 
-  .item-read {
+  .blog-page .item-read {
     color: var(--text-faint);
     padding-left: 0.75rem;
     border-left: 1px solid var(--border-subtle);
   }
 
-  .item-title {
+  .blog-page .item-title {
     font-size: clamp(1.35rem, 2.5vw, 1.8rem);
     margin-bottom: 0.85rem;
   }
 
-  .item-title a:hover {
+  .blog-page .item-title a:hover {
     color: var(--bm-red);
   }
 
-  .item-desc {
+  .blog-page .item-desc {
     font-size: 1.05rem;
     line-height: 1.65;
     color: var(--text-muted);
     margin-bottom: 1.5rem;
   }
 
-  .item-footer {
+  .blog-page .item-footer {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -248,7 +257,7 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     border-top: 1px solid var(--border-subtle);
   }
 
-  .item-author {
+  .blog-page .item-author {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -256,7 +265,7 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     color: var(--text-main);
   }
 
-  .item-callsign {
+  .blog-page .item-callsign {
     font-size: 0.78rem;
     font-weight: 700;
     color: var(--bm-orange);
@@ -265,46 +274,37 @@ const categories = Array.from(new Set(allPosts.map(p => p.data.category)));
     border-radius: var(--radius-sm);
   }
 
-  .item-tags {
+  .blog-page .item-tags {
     display: flex;
     gap: 0.4rem;
   }
 
-  .tag-label {
+  .blog-page .tag-label {
     font-size: 0.78rem;
     color: var(--text-faint);
   }
 
-  .item-read-link {
+  .blog-page .item-read-link {
     font-size: 0.92rem;
     font-weight: 700;
     color: var(--bm-orange);
   }
 
-  .item-read-link:hover {
+  .blog-page .item-read-link:hover {
     color: var(--bm-red);
   }
+
+  .blog-page .archive-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 2.5rem 1rem;
+  }
+
+  .blog-page [hidden] {
+    display: none !important;
+  }
+
+  .blog-page template {
+    display: none;
+  }
 </style>
-
-<script>
-  const catButtons = document.querySelectorAll('#category-filters .cat-pill');
-  const articles = document.querySelectorAll('#articles-container .archive-item');
-
-  catButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      catButtons.forEach(b => b.classList.remove('is-active'));
-      btn.classList.add('is-active');
-
-      const cat = btn.getAttribute('data-cat');
-
-      articles.forEach(art => {
-        const itemCat = art.getAttribute('data-category');
-        if (cat === 'all' || itemCat === cat) {
-          (art as HTMLElement).style.display = 'block';
-        } else {
-          (art as HTMLElement).style.display = 'none';
-        }
-      });
-    });
-  });
-</script>

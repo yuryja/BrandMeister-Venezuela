@@ -1,184 +1,346 @@
 <?php
+/**
+ * Noticias del portal.
+ *
+ * Público
+ *   GET                       listado de noticias publicadas (?limit=&category=)
+ *   GET ?slug=                una noticia publicada
+ * Admin / Editor / Autor
+ *   GET  ?scope=admin         listado completo con filtros (?status=&category=&search=)
+ *   GET  ?scope=admin&id=     una noticia para editar
+ *   POST ?action=save         crear / editar
+ *   POST ?action=status       {id, status: published|draft|trash}
+ *   POST ?action=delete       {id} (borrado definitivo)
+ *   POST ?action=bulk         {ids[], operation: publish|draft|trash|restore|delete}
+ *
+ * Los autores solo ven y editan sus propias noticias y no pueden publicar.
+ */
+
 require_once __DIR__ . '/db.php';
+
+const POST_STATUSES = ['published', 'draft', 'trash'];
+const POST_CATEGORIES = ['Innovación', 'Guías Técnicas', 'Operación', 'Comunidad', 'General'];
 
 start_secure_session();
 
 $method = $_SERVER['REQUEST_METHOD'];
+$action = $_GET['action'] ?? '';
 $pdo = get_db_connection();
-$sessionUser = current_user();
-// Solo el equipo autenticado puede ver borradores y papelera
-$canSeeDrafts = $sessionUser !== null;
 
-// GET: Listar o consultar noticia
-if ($method === 'GET') {
-    $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
+if (!$pdo) {
+    send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento.'], 503);
+}
 
-    if ($id && $pdo) {
-        $sql = "SELECT p.*, u.full_name as author_name, u.callsign as author_callsign FROM bm_posts p JOIN bm_users u ON p.author_id = u.id WHERE p.id = :id";
-        if (!$canSeeDrafts) {
-            $sql .= " AND p.status = 'published'";
-        }
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([':id' => $id]);
-        $post = $stmt->fetch();
-        if ($post) {
-            send_json(['success' => true, 'post' => $post]);
-        } else {
-            send_json(['success' => false, 'error' => 'Noticia no encontrada'], 404);
-        }
-    }
-
-    if ($pdo) {
-        $status = $_GET['status'] ?? 'all';
-        if (!in_array($status, ['all', 'published', 'draft', 'trash'], true)) {
-            $status = 'all';
-        }
-        if (!$canSeeDrafts) {
-            $status = 'published';
-        }
-        $sql = "SELECT p.id, p.title, p.slug, p.category, p.status, p.featured, p.read_time, p.created_at, u.full_name as author_name, u.callsign as author_callsign 
-                FROM bm_posts p 
-                JOIN bm_users u ON p.author_id = u.id";
-        
-        if ($status !== 'all') {
-            $sql .= " WHERE p.status = :status";
-        }
-        $sql .= " ORDER BY p.created_at DESC";
-
-        $stmt = $pdo->prepare($sql);
-        if ($status !== 'all') {
-            $stmt->execute([':status' => $status]);
-        } else {
-            $stmt->execute();
-        }
-        $posts = $stmt->fetchAll();
-        send_json(['success' => true, 'posts' => $posts, 'source' => 'mysql']);
-    }
-
-    // Fallback con datos sembrados si aún no se conecta a MySQL
-    $defaultPosts = [
-        [
-            'id' => 1,
-            'title' => 'Evolución y estado del sistema Petra para el TG 734 en Venezuela',
-            'slug' => 'petra-telemetria-tg734',
-            'category' => 'Innovación',
-            'status' => 'published',
-            'featured' => 1,
-            'read_time' => '5 min de lectura',
-            'author_name' => 'Yury',
-            'author_callsign' => 'YY3BIG',
-            'created_at' => '2026-08-20 10:00:00'
-        ],
-        [
-            'id' => 2,
-            'title' => 'Guía esencial: Configuración de Hotspots DMR en BrandMeister Venezuela',
-            'slug' => 'configuracion-hotspots-dmr-venezuela',
-            'category' => 'Guías Técnicas',
-            'status' => 'published',
-            'featured' => 0,
-            'read_time' => '6 min de lectura',
-            'author_name' => 'Severino Mastracci',
-            'author_callsign' => 'YV5OF',
-            'created_at' => '2026-08-05 14:30:00'
-        ],
-        [
-            'id' => 3,
-            'title' => 'Protocolo de operación en emergencias con el TG 734911 y Radio Club Venezolano',
-            'slug' => 'red-emergencia-tg734911',
-            'category' => 'Operación',
-            'status' => 'published',
-            'featured' => 0,
-            'read_time' => '4 min de lectura',
-            'author_name' => 'Arnaldo',
-            'author_callsign' => 'YV5ADM',
-            'created_at' => '2026-07-18 09:15:00'
-        ],
-        [
-            'id' => 4,
-            'title' => 'Actualización RadioID.net: Proceso anual de verificación y preservación de IDs DMR',
-            'slug' => 'verificacion-radioid-dmr',
-            'category' => 'Comunidad',
-            'status' => 'published',
-            'featured' => 0,
-            'read_time' => '3 min de lectura',
-            'author_name' => 'Severino Mastracci',
-            'author_callsign' => 'YV5OF',
-            'created_at' => '2026-06-25 16:45:00'
-        ]
+function post_payload(array $r, $withContent = false) {
+    $data = [
+        'id' => (int)$r['id'],
+        'title' => $r['title'],
+        'slug' => $r['slug'],
+        'description' => $r['description'],
+        'category' => $r['category'],
+        'tags' => array_values(array_filter(array_map('trim', explode(',', (string)$r['tags'])))),
+        'read_time' => $r['read_time'],
+        'featured' => (bool)$r['featured'],
+        'status' => $r['status'],
+        'author_id' => (int)$r['author_id'],
+        'author_name' => $r['author_name'] ?? '',
+        'author_callsign' => $r['author_callsign'] ?? '',
+        'views_count' => (int)($r['views_count'] ?? 0),
+        'published_ts' => (int)$r['published_ts'],
+        'url' => '/blog/' . $r['slug'],
     ];
-    send_json(['success' => true, 'posts' => $defaultPosts, 'source' => 'memory']);
+    if ($withContent) {
+        $data['content'] = $r['content'];
+    }
+    return $data;
 }
 
-// POST: Crear Noticia (Requiere estar autenticado)
-if ($method === 'POST') {
-    $sessionUser = require_role(['admin', 'editor', 'author']);
-    $role = $sessionUser['role'];
-    $userId = $sessionUser['id'];
+/** Minutos de lectura a 200 palabras por minuto */
+function post_read_time($content) {
+    $words = str_word_count(strip_tags($content), 0, 'áéíóúüñÁÉÍÓÚÜÑ0123456789');
+    return max(1, (int)round($words / 200)) . ' min de lectura';
+}
 
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (!$input || empty($input['title']) || empty($input['content'])) {
-        send_json(['success' => false, 'error' => 'Título y contenido requeridos'], 400);
-    }
+/** Slug limpio y único (añade -2, -3… si ya existe) */
+function post_unique_slug(PDO $pdo, $slug, $title, $ignoreId = 0) {
+    $base = $slug !== '' ? $slug : $title;
+    $base = strtolower(trim(iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $base) ?: $base));
+    $base = trim(preg_replace('/[^a-z0-9]+/', '-', $base), '-');
+    $base = substr($base ?: 'noticia', 0, 180);
 
-    $title = trim($input['title']);
-    $slug = preg_replace('/[^a-z0-9\-_]/', '', strtolower((string)($input['slug'] ?? ''))) ?: 'noticia-' . time();
-    $description = trim($input['description'] ?? '');
-    $content = trim($input['content']);
-    $category = trim($input['category'] ?? 'General');
-    $tags = trim($input['tags'] ?? '');
-    $readTime = trim($input['read_time'] ?? '4 min de lectura');
-    $featured = !empty($input['featured']) ? 1 : 0;
-    
-    // ACL: Los autores solo pueden guardar como borrador o someter a revisión
-    $status = trim((string)($input['status'] ?? 'published'));
-    if (!in_array($status, ['published', 'draft', 'trash'], true)) {
-        $status = 'draft';
+    $candidate = $base;
+    $stmt = $pdo->prepare("SELECT id FROM bm_posts WHERE slug = :s AND id <> :id LIMIT 1");
+    for ($i = 2; $i < 50; $i++) {
+        $stmt->execute([':s' => $candidate, ':id' => (int)$ignoreId]);
+        if (!$stmt->fetch()) {
+            return $candidate;
+        }
+        $candidate = "$base-$i";
     }
-    if ($role === 'author' && $status === 'published') {
-        $status = 'draft';
-    }
+    return $base . '-' . substr(bin2hex(random_bytes(3)), 0, 4);
+}
 
-    if ($pdo) {
-        $stmt = $pdo->prepare("INSERT INTO bm_posts (title, slug, description, content, category, tags, read_time, featured, status, author_id) 
-                               VALUES (:title, :slug, :description, :content, :category, :tags, :read_time, :featured, :status, :author_id)");
-        $stmt->execute([
-            ':title' => $title,
-            ':slug' => $slug,
-            ':description' => $description,
-            ':content' => $content,
-            ':category' => $category,
-            ':tags' => $tags,
-            ':read_time' => $readTime,
-            ':featured' => $featured,
-            ':status' => $status,
-            ':author_id' => $userId
+function post_can_edit(array $user, array $post) {
+    return $user['role'] !== 'author' || (int)$post['author_id'] === $user['id'];
+}
+
+$select = "SELECT p.*, UNIX_TIMESTAMP(p.created_at) AS published_ts, u.full_name AS author_name, u.callsign AS author_callsign
+           FROM bm_posts p JOIN bm_users u ON u.id = p.author_id";
+
+// --------------------------------------------------------------------
+// GET
+// --------------------------------------------------------------------
+if ($method === 'GET') {
+    $adminScope = ($_GET['scope'] ?? '') === 'admin';
+
+    if ($adminScope) {
+        $user = require_role(['admin', 'editor', 'author']);
+
+        if (!empty($_GET['id'])) {
+            $stmt = $pdo->prepare("$select WHERE p.id = :id");
+            $stmt->execute([':id' => (int)$_GET['id']]);
+            $post = $stmt->fetch();
+            if (!$post) {
+                send_json(['success' => false, 'error' => 'Noticia no encontrada.'], 404);
+            }
+            if (!post_can_edit($user, $post)) {
+                send_json(['success' => false, 'error' => 'Solo puedes editar tus propias noticias.'], 403);
+            }
+            send_json(['success' => true, 'post' => post_payload($post, true)]);
+        }
+
+        $where = [];
+        $params = [];
+        if ($user['role'] === 'author') {
+            $where[] = 'p.author_id = :me';
+            $params[':me'] = $user['id'];
+        }
+        $status = (string)($_GET['status'] ?? 'all');
+        if (in_array($status, POST_STATUSES, true)) {
+            $where[] = 'p.status = :status';
+            $params[':status'] = $status;
+        } elseif ($status === 'all') {
+            $where[] = "p.status <> 'trash'";
+        }
+        $search = trim((string)($_GET['search'] ?? ''));
+        if ($search !== '') {
+            $where[] = '(p.title LIKE :q OR p.description LIKE :q2 OR p.tags LIKE :q3)';
+            $like = '%' . $search . '%';
+            $params += [':q' => $like, ':q2' => $like, ':q3' => $like];
+        }
+        $sql = $select . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY p.created_at DESC LIMIT 300';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $posts = array_map(function ($r) { return post_payload($r); }, $stmt->fetchAll());
+
+        // Recuentos por estado (respetando el filtro de autor)
+        $countSql = "SELECT status, COUNT(*) AS n FROM bm_posts" . ($user['role'] === 'author' ? ' WHERE author_id = :me' : '') . ' GROUP BY status';
+        $countStmt = $pdo->prepare($countSql);
+        $countStmt->execute($user['role'] === 'author' ? [':me' => $user['id']] : []);
+        $counts = $countStmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        send_json([
+            'success' => true,
+            'posts' => $posts,
+            'counts' => [
+                'published' => (int)($counts['published'] ?? 0),
+                'draft' => (int)($counts['draft'] ?? 0),
+                'trash' => (int)($counts['trash'] ?? 0),
+            ],
+            'categories' => POST_CATEGORIES,
+            'can_publish' => $user['role'] !== 'author',
+            'current_user_id' => $user['id'],
         ]);
-        $postId = $pdo->lastInsertId();
-
-        send_json(['success' => true, 'message' => 'Noticia guardada en base de datos bmvenezuela', 'id' => $postId]);
     }
 
-    send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento'], 503);
+    // Público
+    if (!empty($_GET['slug'])) {
+        $stmt = $pdo->prepare("$select WHERE p.slug = :slug AND p.status = 'published' LIMIT 1");
+        $stmt->execute([':slug' => (string)$_GET['slug']]);
+        $post = $stmt->fetch();
+        if (!$post) {
+            send_json(['success' => false, 'error' => 'Noticia no encontrada.'], 404);
+        }
+        send_json(['success' => true, 'post' => post_payload($post, true)]);
+    }
+
+    $limit = min(50, max(1, (int)($_GET['limit'] ?? 30)));
+    $stmt = $pdo->prepare("$select WHERE p.status = 'published' ORDER BY p.created_at DESC LIMIT $limit");
+    $stmt->execute();
+    $posts = array_map(function ($r) { return post_payload($r); }, $stmt->fetchAll());
+    header('Cache-Control: public, max-age=120');
+    send_json(['success' => true, 'count' => count($posts), 'posts' => $posts]);
 }
 
-// DELETE: Eliminar Noticia (Solo admin o editor)
-if ($method === 'DELETE') {
-    require_role(['admin', 'editor']);
+if ($method !== 'POST') {
+    send_json(['success' => false, 'error' => 'Método no permitido'], 405);
+}
 
-    $id = (int)($_GET['id'] ?? 0);
-    if ($id <= 0) {
-        send_json(['success' => false, 'error' => 'Noticia no válida'], 400);
-    }
-    if (!$pdo) {
-        send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento'], 503);
+$user = require_role(['admin', 'editor', 'author']);
+$input = json_input();
+
+// --------------------------------------------------------------------
+// Crear / editar
+// --------------------------------------------------------------------
+if ($action === 'save') {
+    $id = (int)($input['id'] ?? 0);
+    $existing = null;
+    if ($id) {
+        $stmt = $pdo->prepare("SELECT * FROM bm_posts WHERE id = :id");
+        $stmt->execute([':id' => $id]);
+        $existing = $stmt->fetch();
+        if (!$existing) {
+            send_json(['success' => false, 'error' => 'Noticia no encontrada.'], 404);
+        }
+        if (!post_can_edit($user, $existing)) {
+            send_json(['success' => false, 'error' => 'Solo puedes editar tus propias noticias.'], 403);
+        }
     }
 
-    $stmt = $pdo->prepare("DELETE FROM bm_posts WHERE id = :id");
+    $title = trim((string)($input['title'] ?? ''));
+    $description = trim((string)($input['description'] ?? ''));
+    $content = trim((string)($input['content'] ?? ''));
+    $category = (string)($input['category'] ?? 'General');
+    $tagsInput = $input['tags'] ?? '';
+    $tags = is_array($tagsInput) ? $tagsInput : explode(',', (string)$tagsInput);
+    $tags = array_slice(array_values(array_filter(array_map(function ($t) {
+        return trim(preg_replace('/[,#]/', '', (string)$t));
+    }, $tags))), 0, 10);
+    $featured = !empty($input['featured']) ? 1 : 0;
+    $date = (string)($input['published_date'] ?? '');
+
+    $errors = [];
+    if (mb_strlen($title) < 5 || mb_strlen($title) > 255) $errors['title'] = 'Entre 5 y 255 caracteres.';
+    if (mb_strlen($description) < 10 || mb_strlen($description) > 500) $errors['description'] = 'Entre 10 y 500 caracteres (es el resumen que se ve en el listado).';
+    if (mb_strlen($content) < 20) $errors['content'] = 'Escribe el cuerpo de la noticia (mínimo 20 caracteres).';
+    if (mb_strlen($content) > 200000) $errors['content'] = 'El contenido es demasiado largo.';
+    if (!in_array($category, POST_CATEGORIES, true)) $errors['category'] = 'Categoría no válida.';
+    if ($date !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) $errors['published_date'] = 'Fecha no válida.';
+    if ($errors) {
+        send_json(['success' => false, 'error' => 'Revisa los campos marcados.', 'validation_errors' => $errors], 422);
+    }
+
+    // ACL: un autor solo guarda borradores; el resto decide el estado
+    $status = (string)($input['status'] ?? ($existing['status'] ?? 'draft'));
+    if (!in_array($status, POST_STATUSES, true)) $status = 'draft';
+    if ($user['role'] === 'author' && $status === 'published') {
+        $status = 'draft';
+    }
+
+    $slug = post_unique_slug($pdo, (string)($input['slug'] ?? ''), $title, $id);
+    $readTime = trim((string)($input['read_time'] ?? '')) ?: post_read_time($content);
+
+    $columns = [
+        'title' => $title,
+        'slug' => $slug,
+        'description' => $description,
+        'content' => $content,
+        'category' => $category,
+        'tags' => implode(', ', $tags),
+        'read_time' => $readTime,
+        'featured' => $featured,
+        'status' => $status,
+    ];
+    $sets = [];
+    $params = [];
+    foreach ($columns as $col => $value) {
+        $sets[] = "`$col` = :$col";
+        $params[":$col"] = $value;
+    }
+    if ($date !== '') {
+        $sets[] = '`created_at` = :created_at';
+        $params[':created_at'] = $date . ' 12:00:00';
+    }
+
+    if ($existing) {
+        $params[':id'] = $id;
+        $pdo->prepare('UPDATE bm_posts SET ' . implode(', ', $sets) . ' WHERE id = :id')->execute($params);
+        log_activity($user['id'], 'post_updated', ['id' => $id, 'status' => $status]);
+    } else {
+        $sets[] = '`author_id` = :author_id';
+        $params[':author_id'] = $user['id'];
+        $pdo->prepare('INSERT INTO bm_posts SET ' . implode(', ', $sets))->execute($params);
+        $id = (int)$pdo->lastInsertId();
+        log_activity($user['id'], 'post_created', ['id' => $id, 'status' => $status]);
+    }
+
+    $stmt = $pdo->prepare("$select WHERE p.id = :id");
     $stmt->execute([':id' => $id]);
-    if ($stmt->rowCount() === 0) {
-        send_json(['success' => false, 'error' => 'Noticia no encontrada'], 404);
+    $saved = post_payload($stmt->fetch(), true);
+
+    $message = $status === 'published' ? 'Noticia publicada.' : ($status === 'trash' ? 'Noticia movida a la papelera.' : 'Borrador guardado.');
+    if ($user['role'] === 'author' && ($input['status'] ?? '') === 'published') {
+        $message = 'Guardado como borrador: un Editor debe publicarlo.';
     }
-    send_json(['success' => true, 'message' => 'Noticia eliminada']);
+    send_json(['success' => true, 'message' => $message, 'post' => $saved]);
 }
 
-send_json(['success' => false, 'error' => 'Método no permitido'], 405);
+// --------------------------------------------------------------------
+// Estado / borrado
+// --------------------------------------------------------------------
+function posts_change_status(PDO $pdo, array $user, array $ids, $status) {
+    $ids = array_values(array_filter(array_map('intval', $ids)));
+    if (!$ids) return 0;
+    if ($user['role'] === 'author' && $status === 'published') {
+        return -1;
+    }
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $sql = "UPDATE bm_posts SET status = ? WHERE id IN ($placeholders)";
+    $params = array_merge([$status], $ids);
+    if ($user['role'] === 'author') {
+        $sql .= ' AND author_id = ?';
+        $params[] = $user['id'];
+    }
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->rowCount();
+}
+
+if ($action === 'status') {
+    $status = (string)($input['status'] ?? '');
+    if (!in_array($status, POST_STATUSES, true)) {
+        send_json(['success' => false, 'error' => 'Estado no válido.'], 400);
+    }
+    $changed = posts_change_status($pdo, $user, [$input['id'] ?? 0], $status);
+    if ($changed === -1) {
+        send_json(['success' => false, 'error' => 'Los autores no pueden publicar: guarda el borrador y avisa a un Editor.'], 403);
+    }
+    if ($changed === 0) {
+        send_json(['success' => false, 'error' => 'Noticia no encontrada o sin permisos.'], 404);
+    }
+    log_activity($user['id'], 'post_status', ['id' => (int)($input['id'] ?? 0), 'status' => $status]);
+    $labels = ['published' => 'Noticia publicada.', 'draft' => 'Noticia pasada a borrador.', 'trash' => 'Noticia movida a la papelera.'];
+    send_json(['success' => true, 'message' => $labels[$status]]);
+}
+
+if ($action === 'delete' || ($action === 'bulk' && ($input['operation'] ?? '') === 'delete')) {
+    $ids = $action === 'delete' ? [$input['id'] ?? 0] : (array)($input['ids'] ?? []);
+    $ids = array_values(array_filter(array_map('intval', $ids)));
+    if (!$ids) {
+        send_json(['success' => false, 'error' => 'No seleccionaste noticias.'], 400);
+    }
+    if ($user['role'] === 'author') {
+        send_json(['success' => false, 'error' => 'Los autores no pueden borrar definitivamente: usa la papelera.'], 403);
+    }
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $stmt = $pdo->prepare("DELETE FROM bm_posts WHERE id IN ($placeholders)");
+    $stmt->execute($ids);
+    log_activity($user['id'], 'post_deleted', ['ids' => $ids]);
+    send_json(['success' => true, 'message' => $stmt->rowCount() . ' noticia(s) eliminada(s) definitivamente.']);
+}
+
+if ($action === 'bulk') {
+    $operation = (string)($input['operation'] ?? '');
+    $map = ['publish' => 'published', 'draft' => 'draft', 'trash' => 'trash', 'restore' => 'draft'];
+    if (!isset($map[$operation])) {
+        send_json(['success' => false, 'error' => 'Acción en lote no válida.'], 400);
+    }
+    $changed = posts_change_status($pdo, $user, (array)($input['ids'] ?? []), $map[$operation]);
+    if ($changed === -1) {
+        send_json(['success' => false, 'error' => 'Los autores no pueden publicar.'], 403);
+    }
+    log_activity($user['id'], 'posts_bulk', ['operation' => $operation, 'ids' => (array)($input['ids'] ?? [])]);
+    send_json(['success' => true, 'message' => "Cambios aplicados a $changed noticia(s)."]);
+}
+
+send_json(['success' => false, 'error' => 'Acción no válida'], 400);

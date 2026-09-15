@@ -32,7 +32,7 @@ jobs:
 
       - name: Validar sintaxis PHP
         run: |
-          for f in public/api/*.php scripts/*.php; do php -l "$f" >/dev/null || exit 1; done
+          for f in public/*.php public/api/*.php scripts/*.php; do php -l "$f" >/dev/null || exit 1; done
 
       - name: Compilar
         env:

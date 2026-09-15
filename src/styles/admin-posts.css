@@ -1,0 +1,116 @@
+/* =========================================================
+   Panel de administración · Noticias
+   ========================================================= */
+
+.posts-table .col-num {
+  text-align: center;
+  width: 90px;
+}
+
+.posts-table .cell-title strong {
+  font-size: 0.95rem;
+}
+
+.posts-table .cell-title strong a {
+  color: var(--text-main);
+}
+
+.posts-table .cell-title strong a:hover {
+  color: var(--bm-orange);
+}
+
+.post-excerpt {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  max-width: 560px;
+}
+
+.post-tags .tag-label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-sm);
+  margin: 0 0.15rem 0.15rem 0;
+}
+
+.posts-table .row-actions {
+  visibility: hidden;
+}
+
+.posts-table tr:hover .row-actions,
+.posts-table tr:focus-within .row-actions {
+  visibility: visible;
+}
+
+@media (hover: none) {
+  .posts-table .row-actions {
+    visibility: visible;
+  }
+}
+
+/* Editor */
+.editor-main-col {
+  min-width: 0;
+}
+
+#pf-slug {
+  min-width: 14rem;
+}
+
+.slug-permalink-bar a {
+  color: var(--bm-orange);
+}
+
+.wp-editor-toolbar {
+  flex-wrap: wrap;
+}
+
+#pf-preview-toggle {
+  margin-left: auto;
+}
+
+/* Vista previa con el mismo aire que el artículo publicado */
+.prose-preview h2 {
+  font-size: 1.35rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.prose-preview h3 {
+  font-size: 1.12rem;
+  margin: 1.25rem 0 0.6rem;
+}
+
+.prose-preview p,
+.prose-preview li {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: var(--text-muted);
+}
+
+.prose-preview ul,
+.prose-preview ol {
+  padding-left: 1.4rem;
+  margin: 0.75rem 0;
+}
+
+.prose-preview blockquote {
+  border-left: 3px solid var(--bm-orange);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--text-muted);
+}
+
+.prose-preview code {
+  background: var(--bg-subtle);
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+.prose-preview a {
+  color: var(--bm-orange);
+}

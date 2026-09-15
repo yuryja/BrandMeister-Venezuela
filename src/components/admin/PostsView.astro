@@ -1,0 +1,171 @@
+---
+// Noticias del panel: listado con filtros y editor. Lógica en src/scripts/admin/posts.ts
+---
+
+<!-- ========================================================= -->
+<!-- NOTICIAS: LISTADO -->
+<!-- ========================================================= -->
+<section id="view-posts" class="wp-view">
+  <div class="view-header">
+    <h1 class="view-title">
+      Noticias
+      <button type="button" class="btn btn-secondary btn-sm page-title-action" data-view="new-post">Añadir nueva</button>
+    </h1>
+  </div>
+
+  <div id="posts-notice"></div>
+
+  <ul class="wp-subsubsub" id="posts-status-filter">
+    <li><a href="#" data-post-filter="all" class="is-current">Todas <span class="count" data-count="all">(0)</span></a></li>
+    <li><a href="#" data-post-filter="published">Publicadas <span class="count" data-count="published">(0)</span></a></li>
+    <li><a href="#" data-post-filter="draft">Borradores <span class="count" data-count="draft">(0)</span></a></li>
+    <li><a href="#" data-post-filter="trash">Papelera <span class="count" data-count="trash">(0)</span></a></li>
+  </ul>
+
+  <div class="wp-table-toolbar">
+    <div class="toolbar-left">
+      <label class="screen-reader-text" for="posts-bulk-action">Acciones en lote</label>
+      <select id="posts-bulk-action" class="form-input select-bulk">
+        <option value="">Acciones en lote</option>
+        <option value="publish">Publicar</option>
+        <option value="draft">Pasar a borrador</option>
+        <option value="trash">Mover a la papelera</option>
+        <option value="restore">Restaurar</option>
+        <option value="delete">Eliminar definitivamente</option>
+      </select>
+      <button type="button" id="posts-bulk-apply" class="btn btn-secondary btn-sm">Aplicar</button>
+    </div>
+    <div class="toolbar-right">
+      <label class="screen-reader-text" for="posts-search">Buscar noticias</label>
+      <input type="search" id="posts-search" class="form-input select-filter" placeholder="Buscar por título, resumen o etiqueta…" />
+      <span class="items-count" id="posts-count">0 elementos</span>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="wp-list-table posts-table">
+      <thead>
+        <tr>
+          <th class="col-cb"><input type="checkbox" id="posts-select-all" aria-label="Seleccionar todas" /></th>
+          <th>Título</th>
+          <th>Autor</th>
+          <th>Categoría</th>
+          <th>Etiquetas</th>
+          <th class="col-num">Lecturas</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody id="posts-table-body">
+        <tr><td colspan="7" class="table-empty">Cargando noticias…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ========================================================= -->
+<!-- NOTICIAS: AÑADIR / EDITAR -->
+<!-- ========================================================= -->
+<section id="view-new-post" class="wp-view">
+  <div class="view-header">
+    <h1 class="view-title" id="post-form-title">Añadir nueva noticia</h1>
+  </div>
+
+  <div id="post-form-notice"></div>
+
+  <form id="post-form" class="wp-editor-layout" novalidate>
+    <input type="hidden" name="id" />
+
+    <div class="editor-main-col">
+      <div class="form-group">
+        <label for="pf-title" class="screen-reader-text">Título</label>
+        <input type="text" id="pf-title" name="title" class="form-input wp-title-input" placeholder="Título de la noticia" maxlength="255" required />
+      </div>
+
+      <div class="slug-permalink-bar">
+        <span>Enlace:</span>
+        <code>/blog/<input type="text" id="pf-slug" name="slug" class="slug-inline-input" placeholder="se-genera-solo" maxlength="180" /></code>
+        <a href="#" id="pf-view-link" target="_blank" rel="noopener" hidden>Ver ↗</a>
+      </div>
+
+      <div class="form-group">
+        <label for="pf-description">Resumen</label>
+        <textarea id="pf-description" name="description" class="form-input" rows="2" maxlength="500" placeholder="Una o dos frases: es lo que se lee en el listado y en Google." required></textarea>
+        <span class="field-hint"><span id="pf-description-count">0</span> / 500</span>
+      </div>
+
+      <div class="wp-editor-toolbar" role="toolbar" aria-label="Formato del texto">
+        <button type="button" class="wp-tool-btn" data-md="bold" title="Negrita"><strong>B</strong></button>
+        <button type="button" class="wp-tool-btn" data-md="italic" title="Cursiva"><em>I</em></button>
+        <button type="button" class="wp-tool-btn" data-md="h2" title="Título de sección">H2</button>
+        <button type="button" class="wp-tool-btn" data-md="h3" title="Subtítulo">H3</button>
+        <button type="button" class="wp-tool-btn" data-md="ul" title="Lista con viñetas">• Lista</button>
+        <button type="button" class="wp-tool-btn" data-md="ol" title="Lista numerada">1. Lista</button>
+        <button type="button" class="wp-tool-btn" data-md="link" title="Enlace">🔗</button>
+        <button type="button" class="wp-tool-btn" data-md="quote" title="Cita">❝</button>
+        <button type="button" class="wp-tool-btn" id="pf-preview-toggle" title="Vista previa">Vista previa</button>
+      </div>
+
+      <label for="pf-content" class="screen-reader-text">Contenido</label>
+      <textarea id="pf-content" name="content" class="form-input wp-content-area" rows="20" placeholder="Escribe aquí la noticia. Puedes usar **negrita**, ## títulos, listas y [enlaces](https://…)." required></textarea>
+      <div id="pf-preview" class="wp-live-preview-box" style="display: none;"></div>
+      <span class="field-hint" id="pf-content-stats"></span>
+    </div>
+
+    <aside class="editor-sidebar-col">
+      <div class="wp-box metabox">
+        <div class="wp-box-head"><h4>Publicar</h4></div>
+        <div class="wp-box-body">
+          <div class="meta-setting-row">
+            <span class="meta-label">Estado</span>
+            <select id="pf-status" name="status" class="form-input select-sm">
+              <option value="draft">Borrador</option>
+              <option value="published">Publicada</option>
+            </select>
+          </div>
+          <div class="meta-setting-row">
+            <span class="meta-label">Fecha</span>
+            <input type="date" id="pf-date" name="published_date" class="form-input select-sm" />
+          </div>
+          <div class="meta-setting-row">
+            <span class="meta-label">Autor</span>
+            <span id="pf-author">—</span>
+          </div>
+          <p class="field-hint" id="pf-author-hint" hidden>Como Autor puedes guardar borradores; un Editor los publica.</p>
+
+          <div class="metabox-actions">
+            <button type="button" class="btn btn-secondary btn-sm" data-view="posts">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="post-submit">Guardar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="wp-box metabox">
+        <div class="wp-box-head"><h4>Categoría</h4></div>
+        <div class="wp-box-body">
+          <div class="checkbox-list" id="pf-categories"></div>
+        </div>
+      </div>
+
+      <div class="wp-box metabox">
+        <div class="wp-box-head"><h4>Etiquetas y destacado</h4></div>
+        <div class="wp-box-body">
+          <div class="form-group">
+            <label for="pf-tags">Etiquetas</label>
+            <input type="text" id="pf-tags" name="tags" class="form-input select-sm" placeholder="Petra, TG734, Tutorial" />
+            <span class="field-hint">Separadas por comas, hasta 10.</span>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-inline">
+              <input type="checkbox" id="pf-featured" name="featured" />
+              Destacar en la portada
+            </label>
+          </div>
+          <div class="form-group">
+            <label for="pf-read-time">Tiempo de lectura</label>
+            <input type="text" id="pf-read-time" name="read_time" class="form-input select-sm" placeholder="Se calcula solo" maxlength="40" />
+          </div>
+        </div>
+      </div>
+    </aside>
+  </form>
+</section>

@@ -1,10 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
-
-const posts = await getCollection('blog');
-const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const featuredPost = sortedPosts.find(p => p.data.featured) || sortedPosts[0];
-const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0, 3);
+// Últimas noticias en la portada. Se cargan desde /api/posts.php (MySQL) al abrir la página.
 ---
 
 <section class="blog-preview-section section-padding">
@@ -22,74 +17,91 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
       </a>
     </div>
 
-    <!-- Editorial Asymmetric Layout (NOT generic card grid) -->
-    <div class="editorial-blog-layout reveal-on-scroll">
-      <!-- Main Lead Article -->
-      {featuredPost && (
-        <article class="featured-post">
-          <div class="post-meta-top">
-            <span class="post-cat">{featuredPost.data.category}</span>
-            <span class="post-date">
-              {featuredPost.data.pubDate.toLocaleDateString('es-VE', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </span>
-            <span class="post-read">{featuredPost.data.readTime}</span>
-          </div>
-
-          <h3 class="featured-title">
-            <a href={`/blog/${featuredPost.slug}`}>{featuredPost.data.title}</a>
-          </h3>
-
-          <p class="featured-excerpt">{featuredPost.data.description}</p>
-
-          <div class="post-author-row">
-            <span class="author-badge">
-              <strong>{featuredPost.data.author}</strong>
-              {featuredPost.data.authorCallsign && (
-                <span class="callsign-tag">{featuredPost.data.authorCallsign}</span>
-              )}
-            </span>
-            <a href={`/blog/${featuredPost.slug}`} class="read-more-link">
-              Leer artículo completo →
-            </a>
-          </div>
-        </article>
-      )}
-
-      <!-- Secondary Linear Article Stream -->
+    <div class="editorial-blog-layout reveal-on-scroll" id="blog-preview-layout" aria-busy="true">
+      <article class="featured-post is-loading" aria-hidden="true">
+        <div class="post-meta-top"><span class="skeleton-chip"></span></div>
+        <h3 class="featured-title"><span class="skeleton-line"></span></h3>
+        <p class="featured-excerpt"><span class="skeleton-line short"></span></p>
+      </article>
       <div class="articles-stream">
-        {otherPosts.map(post => (
-          <article class="stream-article">
-            <div class="post-meta-top">
-              <span class="post-cat">{post.data.category}</span>
-              <span class="post-date">
-                {post.data.pubDate.toLocaleDateString('es-VE', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </span>
-            </div>
-
-            <h4 class="stream-title">
-              <a href={`/blog/${post.slug}`}>{post.data.title}</a>
-            </h4>
-
-            <p class="stream-excerpt">{post.data.description}</p>
-
-            <div class="stream-footer">
-              <span class="stream-author">{post.data.authorCallsign || post.data.author}</span>
-              <span class="stream-read">{post.data.readTime}</span>
-            </div>
-          </article>
-        ))}
+        <article class="stream-article is-loading" aria-hidden="true"><span class="skeleton-line"></span></article>
+        <article class="stream-article is-loading" aria-hidden="true"><span class="skeleton-line"></span></article>
       </div>
     </div>
   </div>
 </section>
 
-<style>
+<script is:inline>
+  (async () => {
+    const layout = document.getElementById('blog-preview-layout');
+    if (!layout) return;
+
+    const escapeHtml = (value) =>
+      String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const fecha = (ts, opts) => new Date(ts * 1000).toLocaleDateString('es-VE', opts);
+
+    let posts = [];
+    try {
+      const res = await fetch('/api/posts.php?limit=4', { headers: { Accept: 'application/json' } });
+      const data = await res.json();
+      posts = Array.isArray(data?.posts) ? data.posts : [];
+    } catch {
+      posts = [];
+    }
+
+    layout.setAttribute('aria-busy', 'false');
+    if (!posts.length) {
+      layout.closest('.blog-preview-section').hidden = true;
+      return;
+    }
+
+    const destacada = posts.find((p) => p.featured) || posts[0];
+    const resto = posts.filter((p) => p.id !== destacada.id).slice(0, 3);
+
+    const autor = (p) => escapeHtml(p.author_callsign || p.author_name);
+    layout.innerHTML = `
+      <article class="featured-post">
+        <div class="post-meta-top">
+          <span class="post-cat">${escapeHtml(destacada.category)}</span>
+          <span class="post-date">${fecha(destacada.published_ts, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <span class="post-read">${escapeHtml(destacada.read_time)}</span>
+        </div>
+        <h3 class="featured-title"><a href="${escapeHtml(destacada.url)}">${escapeHtml(destacada.title)}</a></h3>
+        <p class="featured-excerpt">${escapeHtml(destacada.description)}</p>
+        <div class="post-author-row">
+          <span class="author-badge">
+            <strong>${escapeHtml(destacada.author_name)}</strong>
+            ${destacada.author_callsign ? `<span class="callsign-tag">${escapeHtml(destacada.author_callsign)}</span>` : ''}
+          </span>
+          <a href="${escapeHtml(destacada.url)}" class="read-more-link">Leer artículo completo →</a>
+        </div>
+      </article>
+      <div class="articles-stream">
+        ${resto.map((post) => `
+          <article class="stream-article">
+            <div class="post-meta-top">
+              <span class="post-cat">${escapeHtml(post.category)}</span>
+              <span class="post-date">${fecha(post.published_ts, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            </div>
+            <h4 class="stream-title"><a href="${escapeHtml(post.url)}">${escapeHtml(post.title)}</a></h4>
+            <p class="stream-excerpt">${escapeHtml(post.description)}</p>
+            <div class="stream-footer">
+              <span class="stream-author">${autor(post)}</span>
+              <span class="stream-read">${escapeHtml(post.read_time)}</span>
+            </div>
+          </article>`).join('')}
+      </div>`;
+  })();
+</script>
+
+<!-- Global con prefijo .blog-preview-section: las tarjetas se generan con JS -->
+<style is:global>
   .blog-preview-section {
     background: #FFFFFF;
     border-bottom: 1px solid var(--border-subtle);
   }
 
-  .blog-header-row {
+  .blog-preview-section .blog-header-row {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -97,7 +109,7 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
   }
 
   @media (min-width: 768px) {
-    .blog-header-row {
+    .blog-preview-section .blog-header-row {
       flex-direction: row;
       justify-content: space-between;
       align-items: flex-end;
@@ -105,14 +117,14 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
   }
 
   /* Editorial Split Grid */
-  .editorial-blog-layout {
+  .blog-preview-section .editorial-blog-layout {
     display: grid;
     grid-template-columns: 1fr;
     gap: 2.5rem;
   }
 
   @media (min-width: 960px) {
-    .editorial-blog-layout {
+    .blog-preview-section .editorial-blog-layout {
       grid-template-columns: 1.25fr 1fr;
       gap: 3.5rem;
       align-items: stretch;
@@ -120,7 +132,7 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
   }
 
   /* Featured Post Styling */
-  .featured-post {
+  .blog-preview-section .featured-post {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -131,7 +143,7 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
     border-radius: var(--radius-md);
   }
 
-  .post-meta-top {
+  .blog-preview-section .post-meta-top {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -139,40 +151,40 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
     font-size: 0.82rem;
   }
 
-  .post-cat {
+  .blog-preview-section .post-cat {
     font-weight: 700;
     text-transform: uppercase;
     color: var(--bm-red);
   }
 
-  .post-date {
+  .blog-preview-section .post-date {
     color: var(--text-faint);
   }
 
-  .post-read {
+  .blog-preview-section .post-read {
     color: var(--text-faint);
     padding-left: 0.75rem;
     border-left: 1px solid var(--border-subtle);
   }
 
-  .featured-title {
+  .blog-preview-section .featured-title {
     font-size: clamp(1.5rem, 2.5vw, 2.1rem);
     line-height: 1.25;
     margin-bottom: 1.25rem;
   }
 
-  .featured-title a:hover {
+  .blog-preview-section .featured-title a:hover {
     color: var(--bm-red);
   }
 
-  .featured-excerpt {
+  .blog-preview-section .featured-excerpt {
     font-size: 1.1rem;
     line-height: 1.7;
     color: var(--text-muted);
     margin-bottom: 2rem;
   }
 
-  .post-author-row {
+  .blog-preview-section .post-author-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -180,7 +192,7 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
     border-top: 1px solid var(--border-subtle);
   }
 
-  .author-badge {
+  .blog-preview-section .author-badge {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -188,7 +200,7 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
     color: var(--text-main);
   }
 
-  .callsign-tag {
+  .blog-preview-section .callsign-tag {
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--bm-orange);
@@ -197,48 +209,48 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
     border-radius: var(--radius-sm);
   }
 
-  .read-more-link {
+  .blog-preview-section .read-more-link {
     font-size: 0.92rem;
     font-weight: 700;
     color: var(--bm-orange);
   }
 
-  .read-more-link:hover {
+  .blog-preview-section .read-more-link:hover {
     color: var(--bm-red);
   }
 
   /* Articles Stream (Linear, NOT boxy cards) */
-  .articles-stream {
+  .blog-preview-section .articles-stream {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
   }
 
-  .stream-article {
+  .blog-preview-section .stream-article {
     padding: 1.5rem 0;
     border-bottom: 1px solid var(--border-subtle);
   }
 
-  .stream-article:first-child {
+  .blog-preview-section .stream-article:first-child {
     padding-top: 0;
   }
 
-  .stream-article:last-child {
+  .blog-preview-section .stream-article:last-child {
     border-bottom: none;
     padding-bottom: 0;
   }
 
-  .stream-title {
+  .blog-preview-section .stream-title {
     font-size: 1.15rem;
     line-height: 1.35;
     margin-bottom: 0.5rem;
   }
 
-  .stream-title a:hover {
+  .blog-preview-section .stream-title a:hover {
     color: var(--bm-red);
   }
 
-  .stream-excerpt {
+  .blog-preview-section .stream-excerpt {
     font-size: 0.92rem;
     color: var(--text-muted);
     line-height: 1.55;
@@ -249,15 +261,52 @@ const otherPosts = sortedPosts.filter(p => p.slug !== featuredPost.slug).slice(0
     overflow: hidden;
   }
 
-  .stream-footer {
+  .blog-preview-section .stream-footer {
     display: flex;
     justify-content: space-between;
     font-size: 0.8rem;
     color: var(--text-faint);
   }
 
-  .stream-author {
+  .blog-preview-section .stream-author {
     font-weight: 600;
     color: var(--text-muted);
+  }
+
+  /* Esqueleto mientras cargan las noticias */
+  .blog-preview-section .is-loading .skeleton-line,
+  .blog-preview-section .is-loading .skeleton-chip {
+    display: block;
+    height: 1rem;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #EEF2F6 25%, #F8FAFC 50%, #EEF2F6 75%);
+    background-size: 200% 100%;
+    animation: blogPreviewSkeleton 1.2s ease-in-out infinite;
+  }
+
+  .blog-preview-section .is-loading .skeleton-line {
+    width: 100%;
+    height: 1.4rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .blog-preview-section .is-loading .skeleton-line.short {
+    width: 65%;
+  }
+
+  .blog-preview-section .is-loading .skeleton-chip {
+    width: 8rem;
+  }
+
+  @keyframes blogPreviewSkeleton {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blog-preview-section .is-loading .skeleton-line,
+    .blog-preview-section .is-loading .skeleton-chip {
+      animation: none;
+    }
   }
 </style>

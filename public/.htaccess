@@ -9,6 +9,11 @@ Options -Indexes
   # Proxy /api/petra to petra.php
   RewriteRule ^api/petra/(.*)$ api/petra.php?endpoint=$1 [QSA,L]
 
+  # Blog dinámico: las noticias salen de MySQL a través de blog.php
+  RewriteRule ^plantillas(/|$) - [F]
+  RewriteRule ^blog/?$ /blog.php [L]
+  RewriteRule ^blog/([A-Za-z0-9_-]+)/?$ /blog.php?slug=$1 [L,QSA]
+
   # Redirect trailing slashes if not a directory
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^(.*)/$ /$1 [L,R=301]
@@ -58,7 +63,7 @@ Options -Indexes
 </IfModule>
 
 # Archivos internos del API: solo se incluyen desde PHP, nunca se sirven directamente
-<FilesMatch "^(config|env|db|accounts|mailer|recaptcha)\.php$">
+<FilesMatch "^(config|env|db|accounts|mailer|recaptcha|markdown)\.php$">
   Require all denied
 </FilesMatch>
 

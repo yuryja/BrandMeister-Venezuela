@@ -1,13 +1,12 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getCollection } from 'astro:content';
 import UsersView from '../components/admin/UsersView.astro';
 import ProfileView from '../components/admin/ProfileView.astro';
 import GalleryView from '../components/admin/GalleryView.astro';
+import PostsView from '../components/admin/PostsView.astro';
 import '../styles/admin-accounts.css';
 import '../styles/admin-gallery.css';
-
-const localPosts = await getCollection('blog');
+import '../styles/admin-posts.css';
 
 const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const getCellIntensity = (hour: number) => {
@@ -161,7 +160,7 @@ const getCellIntensity = (hour: number) => {
                 <polyline points="10 9 9 9 8 9"></polyline>
               </svg>
               <span>Noticias</span>
-              <span class="count-pill">4</span>
+              <span class="count-pill" id="menu-posts-count" hidden></span>
             </button>
             <ul class="wp-submenu">
               <li><button class="submenu-link is-active" data-view="posts">Todas las noticias</button></li>
@@ -345,340 +344,10 @@ const getCellIntensity = (hour: number) => {
         </section>
 
         <!-- ========================================================= -->
-        <!-- VIEW 2: TODAS LAS NOTICIAS (WP LIST TABLE) -->
+        <!-- NOTICIAS -->
         <!-- ========================================================= -->
-        <section id="view-posts" class="wp-view">
-          <div class="view-header">
-            <h1 class="view-title">Noticias</h1>
-            <button class="btn btn-primary" onclick="window.switchView('new-post')">
-              Añadir nueva noticia
-            </button>
-          </div>
+        <PostsView />
 
-          <!-- Views Subsubsub filter -->
-          <div class="wp-subsubsub">
-            <span class="is-current">Todas <span class="count">(4)</span></span> |
-            <a href="#">Publicadas <span class="count">(4)</span></a> |
-            <a href="#">Borradores <span class="count">(0)</span></a> |
-            <a href="#">Papelera <span class="count">(0)</span></a>
-          </div>
-
-          <!-- Table Tools Toolbar -->
-          <div class="wp-table-toolbar">
-            <div class="toolbar-left">
-              <select class="form-input select-bulk">
-                <option>Acciones en lote</option>
-                <option>Mover a la papelera</option>
-              </select>
-              <button class="btn btn-secondary btn-sm">Aplicar</button>
-
-              <select class="form-input select-filter">
-                <option>Todas las categorías</option>
-                <option>Innovación</option>
-                <option>Guías Técnicas</option>
-                <option>Operación</option>
-                <option>Comunidad</option>
-              </select>
-              <button class="btn btn-secondary btn-sm">Filtrar</button>
-            </div>
-
-            <div class="toolbar-right">
-              <span class="items-count">4 elementos</span>
-            </div>
-          </div>
-
-          <!-- WP List Table -->
-          <div class="table-container">
-            <table class="wp-list-table">
-              <thead>
-                <tr>
-                  <th class="col-cb"><input type="checkbox" /></th>
-                  <th class="col-title">Título</th>
-                  <th class="col-author">Autor</th>
-                  <th class="col-category">Categoría</th>
-                  <th class="col-tags">Etiquetas</th>
-                  <th class="col-status">Estado</th>
-                  <th class="col-date">Fecha</th>
-                </tr>
-              </thead>
-              <tbody id="posts-table-body">
-                <tr>
-                  <td><input type="checkbox" /></td>
-                  <td class="cell-title">
-                    <strong><a href="/blog/petra-telemetria-tg734" target="_blank">Evolución y estado del sistema Petra para el TG 734 en Venezuela</a></strong>
-                    <div class="row-actions">
-                      <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
-                      <span class="trash"><a href="#">Papelera</a> | </span>
-                      <span class="view"><a href="/blog/petra-telemetria-tg734" target="_blank">Ver</a></span>
-                    </div>
-                  </td>
-                  <td>Yury (YY3BIG)</td>
-                  <td><span class="cat-pill-mini">Innovación</span></td>
-                  <td>Petra, Telemetría, TG734</td>
-                  <td><span class="status-badge-pub">Publicada</span></td>
-                  <td>20/08/2026</td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" /></td>
-                  <td class="cell-title">
-                    <strong><a href="/blog/configuracion-hotspots-dmr-venezuela" target="_blank">Guía esencial: Configuración de Hotspots DMR en BrandMeister Venezuela</a></strong>
-                    <div class="row-actions">
-                      <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
-                      <span class="trash"><a href="#">Papelera</a> | </span>
-                      <span class="view"><a href="/blog/configuracion-hotspots-dmr-venezuela" target="_blank">Ver</a></span>
-                    </div>
-                  </td>
-                  <td>Severino (YV5OF)</td>
-                  <td><span class="cat-pill-mini">Guías Técnicas</span></td>
-                  <td>Hotspots, Pi-Star, MMDVM</td>
-                  <td><span class="status-badge-pub">Publicada</span></td>
-                  <td>05/08/2026</td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" /></td>
-                  <td class="cell-title">
-                    <strong><a href="/blog/red-emergencia-tg734911" target="_blank">Protocolo de operación en emergencias con el TG 734911 y Radio Club Venezolano</a></strong>
-                    <div class="row-actions">
-                      <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
-                      <span class="trash"><a href="#">Papelera</a> | </span>
-                      <span class="view"><a href="/blog/red-emergencia-tg734911" target="_blank">Ver</a></span>
-                    </div>
-                  </td>
-                  <td>Arnaldo (YV5ADM)</td>
-                  <td><span class="cat-pill-mini">Operación</span></td>
-                  <td>Emergencias, YV5RNE, RCV</td>
-                  <td><span class="status-badge-pub">Publicada</span></td>
-                  <td>18/07/2026</td>
-                </tr>
-                <tr>
-                  <td><input type="checkbox" /></td>
-                  <td class="cell-title">
-                    <strong><a href="/blog/verificacion-radioid-dmr" target="_blank">Actualización RadioID.net: Proceso anual de verificación y preservación de IDs DMR</a></strong>
-                    <div class="row-actions">
-                      <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
-                      <span class="trash"><a href="#">Papelera</a> | </span>
-                      <span class="view"><a href="/blog/verificacion-radioid-dmr" target="_blank">Ver</a></span>
-                    </div>
-                  </td>
-                  <td>Severino (YV5OF)</td>
-                  <td><span class="cat-pill-mini">Comunidad</span></td>
-                  <td>RadioID, DMR, Normativa</td>
-                  <td><span class="status-badge-pub">Publicada</span></td>
-                  <td>25/06/2026</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <!-- ========================================================= -->
-        <!-- VIEW 3: AÑADIR / EDITAR NOTICIA (WP EDITOR STYLE) -->
-        <!-- ========================================================= -->
-        <section id="view-new-post" class="wp-view">
-          <div class="view-header">
-            <h1 class="view-title">Añadir Nueva Noticia</h1>
-            <button class="btn btn-secondary" onclick="window.switchView('posts')">
-              ← Volver a la lista
-            </button>
-          </div>
-
-          <form id="wp-post-editor-form" class="wp-editor-layout">
-            <!-- Main Content Area -->
-            <div class="editor-main-col">
-              <div class="form-group">
-                <input
-                  type="text"
-                  id="wp-post-title"
-                  class="form-input wp-title-input"
-                  placeholder="Añade el título de la noticia..."
-                  required
-                />
-              </div>
-
-              <div class="slug-permalink-bar">
-                <span>Enlace permanente:</span>
-                <code>https://brandmeisteryv.net/blog/<input type="text" id="wp-post-slug" class="slug-inline-input" value="nueva-noticia" /></code>
-              </div>
-
-              <!-- Toolbar -->
-              <div class="wp-editor-toolbar">
-                <button type="button" class="wp-tool-btn" data-insert="## ">H2</button>
-                <button type="button" class="wp-tool-btn" data-insert="### ">H3</button>
-                <button type="button" class="wp-tool-btn" data-wrap="**">B</button>
-                <button type="button" class="wp-tool-btn" data-wrap="*">I</button>
-                <button type="button" class="wp-tool-btn" data-insert="- ">Lista</button>
-                <button type="button" class="wp-tool-btn" data-insert="> ">Cita</button>
-                <div style="flex:1;"></div>
-                <button type="button" id="btn-toggle-preview" class="btn btn-secondary btn-sm">
-                  Alternar Vista Previa
-                </button>
-              </div>
-
-              <!-- Content Area -->
-              <div class="editor-textarea-wrap">
-                <textarea
-                  id="wp-post-content"
-                  class="form-input wp-content-area"
-                  rows="14"
-                  placeholder="Escribe el cuerpo de la noticia en formato Markdown..."
-                  required
-                ></textarea>
-                <div id="wp-live-preview-box" class="wp-live-preview-box" style="display: none;"></div>
-              </div>
-
-              <div class="form-group" style="margin-top: 1.5rem;">
-                <label for="wp-post-desc">Extracto / Resumen</label>
-                <textarea id="wp-post-desc" class="form-input" rows="2" placeholder="Escribe un breve extracto para las tarjetas y buscadores..."></textarea>
-              </div>
-            </div>
-
-            <!-- Sidebar Metaboxes -->
-            <div class="editor-sidebar-col">
-              <!-- Metabox: Publicar -->
-              <div class="wp-box metabox">
-                <div class="wp-box-head">
-                  <h4>Publicar</h4>
-                </div>
-                <div class="wp-box-body">
-                  <div class="meta-setting-row">
-                    <span class="meta-label">Estado:</span>
-                    <select id="wp-post-status" class="form-input select-sm">
-                      <option value="published" selected>Publicado</option>
-                      <option value="draft">Borrador</option>
-                    </select>
-                  </div>
-                  <div class="meta-setting-row">
-                    <span class="meta-label">Visibilidad:</span>
-                    <strong>Público</strong>
-                  </div>
-                  <div class="meta-setting-row">
-                    <span class="meta-label">Publicar:</span>
-                    <strong>Inmediatamente</strong>
-                  </div>
-                  <div class="metabox-actions">
-                    <button type="button" id="btn-save-draft" class="btn btn-secondary btn-sm">Guardar Borrador</button>
-                    <button type="submit" id="btn-publish-post" class="btn btn-primary btn-sm">Publicar Noticia</button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Metabox: Categorías -->
-              <div class="wp-box metabox">
-                <div class="wp-box-head">
-                  <h4>Categorías</h4>
-                </div>
-                <div class="wp-box-body">
-                  <div class="checkbox-list">
-                    <label><input type="radio" name="post-cat" value="Innovación" checked /> Innovación</label>
-                    <label><input type="radio" name="post-cat" value="Guías Técnicas" /> Guías Técnicas</label>
-                    <label><input type="radio" name="post-cat" value="Operación" /> Operación</label>
-                    <label><input type="radio" name="post-cat" value="Comunidad" /> Comunidad</label>
-                    <label><input type="radio" name="post-cat" value="Anuncios Oficiales" /> Anuncios Oficiales</label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Metabox: Etiquetas -->
-              <div class="wp-box metabox">
-                <div class="wp-box-head">
-                  <h4>Etiquetas</h4>
-                </div>
-                <div class="wp-box-body">
-                  <input type="text" id="wp-post-tags" class="form-input" placeholder="DMR, Hotspots, TG734" value="DMR, TG734, Venezuela" />
-                  <span class="field-hint">Separar las etiquetas con comas</span>
-                </div>
-              </div>
-
-              <!-- Metabox: Destacado -->
-              <div class="wp-box metabox">
-                <div class="wp-box-head">
-                  <h4>Opciones de Entrada</h4>
-                </div>
-                <div class="wp-box-body">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="wp-post-featured" />
-                    <span>Fijar como Noticia Destacada</span>
-                  </label>
-                  <div class="form-group" style="margin-top: 0.75rem;">
-                    <label style="font-size: 0.75rem;">Tiempo de lectura:</label>
-                    <input type="text" id="wp-post-readtime" class="form-input select-sm" value="4 min de lectura" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </form>
-        </section>
-
-        <!-- ========================================================= -->
-        <!-- USUARIOS Y PERFIL -->
-        <!-- ========================================================= -->
-        <UsersView />
-        <ProfileView />
-
-        <!-- ========================================================= -->
-        <!-- VIEW 5: TEXTOS DEL PORTAL -->
-        <!-- ========================================================= -->
-        <section id="view-site-content" class="wp-view">
-          <div class="view-header">
-            <h1 class="view-title">Textos del Portal Oficial</h1>
-            <button id="btn-save-site-texts" class="btn btn-primary">
-              Guardar Cambios
-            </button>
-          </div>
-
-          <div class="wp-editor-layout">
-            <div class="editor-main-col">
-              <div class="wp-box">
-                <div class="wp-box-head">
-                  <h3>Página de Inicio (Hero)</h3>
-                </div>
-                <div class="wp-box-body">
-                  <div class="form-group">
-                    <label>Titular Principal</label>
-                    <input type="text" id="sett-hero-title" class="form-input" value="La voz digital que une a los radioaficionados de Venezuela y el mundo." />
-                  </div>
-                  <div class="form-group" style="margin-top: 1rem;">
-                    <label>Descripción Principal</label>
-                    <textarea id="sett-hero-desc" class="form-input" rows="3">Infraestructura abierta y 100% digital basada en el estándar DMR. Conectamos repetidores, puntos de acceso de alta potencia y operadores en todo el territorio nacional con acceso directo a la red global BrandMeister.</textarea>
-                  </div>
-                </div>
-              </div>
-
-              <div class="wp-box" style="margin-top: 1.5rem;">
-                <div class="wp-box-head">
-                  <h3>Aviso Prioritario de Emergencias (TG 734911)</h3>
-                </div>
-                <div class="wp-box-body">
-                  <div class="form-group">
-                    <label>Texto de la Alerta EMCOM / YV5RNE</label>
-                    <textarea id="sett-alert-text" class="form-input" rows="3">Reservado exclusivamente para prevención, boletines por fenómenos meteorológicos, alertas sísmicas o contingencias mayores. Se recomienda a todos los radioaficionados mantenerlo programado en su lista de recepción (RX List) bajo el Slot 1 en todos los repetidores del país.</textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="editor-sidebar-col">
-              <div class="wp-box metabox">
-                <div class="wp-box-head">
-                  <h4>Frecuencias Recomendadas</h4>
-                </div>
-                <div class="wp-box-body">
-                  <div class="form-group">
-                    <label>Frecuencia VHF Hotspot</label>
-                    <input type="text" id="sett-freq-vhf" class="form-input select-sm" value="146.550 MHz (Alterna: 146.490 MHz)" />
-                  </div>
-                  <div class="form-group" style="margin-top: 0.75rem;">
-                    <label>Frecuencia UHF Hotspot</label>
-                    <input type="text" id="sett-freq-uhf" class="form-input select-sm" value="436.550 MHz (Alterna: 436.490 MHz)" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ========================================================= -->
-        <!-- GALERÍA DE INSTAGRAM -->
         <!-- ========================================================= -->
         <GalleryView />
 
@@ -1579,6 +1248,7 @@ const getCellIntensity = (hour: number) => {
   import { initUsers } from '../scripts/admin/users';
   import { initProfile } from '../scripts/admin/profile';
   import { initGallery } from '../scripts/admin/gallery';
+  import { initPosts } from '../scripts/admin/posts';
   import { initAccount, showAccountPanel } from '../scripts/admin/account';
 
   // Usuario autenticado según la sesión PHP (nunca desde localStorage)
@@ -1589,6 +1259,8 @@ const getCellIntensity = (hour: number) => {
     users: ['admin'],
     'user-new': ['admin'],
     'site-content': ['admin', 'editor'],
+    posts: ['admin', 'editor', 'author'],
+    'new-post': ['admin', 'editor', 'author'],
     gallery: ['admin', 'editor'],
     'gallery-edit': ['admin', 'editor'],
   };
@@ -1756,90 +1428,6 @@ const getCellIntensity = (hour: number) => {
     showLogin();
   });
 
-  // Post Publishing Form
-  const postForm = document.getElementById('wp-post-editor-form');
-  if (postForm) {
-    postForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const title = (document.getElementById('wp-post-title') as HTMLInputElement).value;
-      const slug = (document.getElementById('wp-post-slug') as HTMLInputElement).value;
-      const content = (document.getElementById('wp-post-content') as HTMLTextAreaElement).value;
-      const desc = (document.getElementById('wp-post-desc') as HTMLTextAreaElement).value;
-      const status = (document.getElementById('wp-post-status') as HTMLSelectElement).value;
-      const cat = (document.querySelector('input[name="post-cat"]:checked') as HTMLInputElement)?.value || 'General';
-      const tags = (document.getElementById('wp-post-tags') as HTMLInputElement).value;
-      const featured = (document.getElementById('wp-post-featured') as HTMLInputElement).checked;
-
-      let data: any = null;
-      try {
-        const res = await fetch('/api/posts.php', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, slug, content, description: desc, status, category: cat, tags, featured })
-        });
-        if (handleUnauthorized(res)) return;
-        data = await res.json().catch(() => null);
-      } catch (err) {
-        alert('No fue posible contactar al servidor. La noticia no se guardó.');
-        return;
-      }
-
-      if (!data?.success) {
-        alert('Error al guardar: ' + (data?.error || 'Ocurrió un error'));
-        return;
-      }
-
-      // Add row to table
-      const tbody = document.getElementById('posts-table-body');
-      if (tbody) {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><input type="checkbox" /></td>
-          <td class="cell-title">
-            <strong>${escapeHtml(title)}</strong>
-            <div class="row-actions">
-              <span class="edit"><a href="#" onclick="window.switchView('new-post')">Editar</a> | </span>
-              <span class="trash"><a href="#">Papelera</a> | </span>
-              <span class="view"><a href="#">Ver</a></span>
-            </div>
-          </td>
-          <td>${escapeHtml(currentUser.full_name)} (${escapeHtml(currentUser.callsign)})</td>
-          <td><span class="cat-pill-mini">${escapeHtml(cat)}</span></td>
-          <td>${escapeHtml(tags)}</td>
-          <td><span class="status-badge-pub">${status === 'published' ? 'Publicada' : 'Borrador'}</span></td>
-          <td>${new Date().toLocaleDateString('es-VE')}</td>
-        `;
-        tbody.insertBefore(tr, tbody.firstChild);
-      }
-
-      alert(data.message || '¡Noticia guardada exitosamente!');
-      window.switchView('posts');
-    });
-  }
-
-  // Auto-slug
-  document.getElementById('wp-post-title')?.addEventListener('input', (e) => {
-    const title = (e.target as HTMLInputElement).value;
-    const slug = title.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-    const slugInput = document.getElementById('wp-post-slug') as HTMLInputElement;
-    if (slugInput) slugInput.value = slug;
-  });
-
-  // Preview Toggle
-  document.getElementById('btn-toggle-preview')?.addEventListener('click', () => {
-    const box = document.getElementById('wp-live-preview-box');
-    const area = document.getElementById('wp-post-content') as HTMLTextAreaElement;
-    if (box && area) {
-      if (box.style.display === 'none') {
-        box.innerHTML = `<h4>Vista previa:</h4><p>${escapeHtml(area.value).replace(/\n\n/g, '</p><p>')}</p>`;
-        box.style.display = 'block';
-      } else {
-        box.style.display = 'none';
-      }
-    }
-  });
-
   // Site text save
   document.getElementById('btn-save-site-texts')?.addEventListener('click', () => {
     alert('Los textos del portal todavía no se guardan: pendiente en la siguiente fase.');
@@ -1849,6 +1437,7 @@ const getCellIntensity = (hour: number) => {
   initUsers();
   initProfile();
   initGallery();
+  initPosts();
   initAccount().then((handledToken) => {
     if (!handledToken) checkAuth();
   });
