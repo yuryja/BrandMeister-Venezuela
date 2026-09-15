@@ -6,6 +6,11 @@ export const WSS_URL = `${WSS_BASE}?token=${DEFAULT_TOKEN}`;
 export const PROTOCOL = "spotter";
 export const DEFAULT_TG = 734;
 
+// Reconexión con espera exponencial: 1s, 2s, 4s... hasta 30s; tras MAX_RECONNECT_ATTEMPTS se pasa a "error"
+const RECONNECT_BASE_MS = 1000;
+const RECONNECT_MAX_MS = 30000;
+const MAX_RECONNECT_ATTEMPTS = 8;
+
 export const TYPE_GROUP_JOIN = 1;
 export const TYPE_GROUP_LEAVE = 2;
 export const TYPE_GROUP_RESET = 3;
@@ -49,7 +54,8 @@ class HoselineService {
   private state: PlayerState = "idle";
   private activeCall: ActiveCall | null = null;
   private volume = 0.9;
-  private reconnectTimer: any = null;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private reconnectAttempts = 0;
   private manualStop = false;
 
   constructor() {
@@ -81,104 +87,148 @@ class HoselineService {
 
   private initAudio() {
     if (!this.audioCtx) {
+      // Reutiliza el contexto desbloqueado durante el toque del usuario (ver HoselineDock):
+      // en móviles un AudioContext creado fuera del gesto queda suspendido y no suena.
+      const shared = (window as any).__bmAudioCtx as AudioContext | undefined;
       const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
-      this.audioCtx = new AudioCtxClass();
+      this.audioCtx = shared ?? new AudioCtxClass();
       this.gainNode = this.audioCtx.createGain();
       this.gainNode.gain.setValueAtTime(this.volume, this.audioCtx.currentTime);
       this.gainNode.connect(this.audioCtx.destination);
     }
     if (this.audioCtx.state === "suspended") {
-      this.audioCtx.resume();
+      this.audioCtx.resume().catch(() => {});
     }
   }
 
   public async connect(tg: number = DEFAULT_TG) {
     this.manualStop = false;
     this.currentTg = tg;
+    this.clearReconnectTimer();
     this.setState("connecting");
     this.initAudio();
 
-    if (this.ws) {
-      try {
-        this.ws.close();
-      } catch (e) {}
-      this.ws = null;
-    }
+    // Soltar el socket anterior sin que sus eventos tardíos afecten al nuevo
+    this.closeSocket();
 
+    let ws: WebSocket;
     try {
-      this.ws = new WebSocket(WSS_URL, PROTOCOL);
-      this.ws.binaryType = "arraybuffer";
-
-      this.ws.onopen = () => {
-        // Subscribe to TG 734
-        const joinPacket = encode([TYPE_GROUP_JOIN, [this.currentTg]]);
-        this.ws?.send(joinPacket);
-        this.setState("listening");
-        this.dispatch("connected", { talkgroup: this.currentTg });
-      };
-
-      this.ws.onmessage = (event: MessageEvent) => {
-        try {
-          const raw = new Uint8Array(event.data);
-          const data = decode(raw) as any[];
-          this.handlePacket(data);
-        } catch (err) {
-          console.warn("[Hoseline] Packet decode error:", err);
-        }
-      };
-
-      this.ws.onerror = (err) => {
-        console.warn("[Hoseline] Socket error:", err);
-        this.setState("error");
-        this.dispatch("error", { error: err });
-      };
-
-      this.ws.onclose = (event) => {
-        this.ws = null;
-        if (!this.manualStop) {
-          // Reconnect attempt after 3s
-          this.setState("connecting");
-          clearTimeout(this.reconnectTimer);
-          this.reconnectTimer = setTimeout(() => {
-            if (!this.manualStop) this.connect(this.currentTg);
-          }, 3000);
-        } else {
-          this.setState("idle");
-          this.dispatch("disconnected", {});
-        }
-      };
+      ws = new WebSocket(WSS_URL, PROTOCOL);
     } catch (err) {
-      this.setState("error");
       this.dispatch("error", { error: err });
+      this.scheduleReconnect();
+      return;
     }
+    ws.binaryType = "arraybuffer";
+    this.ws = ws;
+
+    ws.onopen = () => {
+      if (this.ws !== ws) return;
+      this.reconnectAttempts = 0;
+      ws.send(encode([TYPE_GROUP_JOIN, [this.currentTg]]));
+      this.setState("listening");
+      this.dispatch("connected", { talkgroup: this.currentTg });
+    };
+
+    ws.onmessage = (event: MessageEvent) => {
+      if (this.ws !== ws) return;
+      try {
+        const data = decode(new Uint8Array(event.data)) as any[];
+        this.handlePacket(data);
+      } catch (err) {
+        console.warn("[Hoseline] Packet decode error:", err);
+      }
+    };
+
+    ws.onerror = (err) => {
+      if (this.ws !== ws) return;
+      // onclose llega siempre después de onerror y es quien decide si reconectar
+      console.warn("[Hoseline] Socket error:", err);
+      this.dispatch("error", { error: err });
+    };
+
+    ws.onclose = () => {
+      if (this.ws !== ws) return;
+      this.ws = null;
+      this.activeCall = null;
+      if (this.manualStop) {
+        this.setState("idle");
+        this.dispatch("disconnected", {});
+      } else {
+        this.scheduleReconnect();
+      }
+    };
   }
 
   public disconnect() {
     this.manualStop = true;
-    clearTimeout(this.reconnectTimer);
-
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      try {
-        const leavePacket = encode([TYPE_GROUP_LEAVE, [this.currentTg]]);
-        this.ws.send(leavePacket);
-        this.ws.close();
-      } catch (e) {}
-    }
-    this.ws = null;
+    this.clearReconnectTimer();
+    this.reconnectAttempts = 0;
+    this.closeSocket(true);
 
     if (this.audioCtx && this.audioCtx.state === "running") {
-      try {
-        this.audioCtx.suspend();
-      } catch (e) {}
+      this.audioCtx.suspend().catch(() => {});
     }
+    this.nextStartTime = 0;
 
+    const wasIdle = this.state === "idle";
     this.activeCall = null;
     this.setState("idle");
-    this.dispatch("disconnected", {});
+    if (!wasIdle) this.dispatch("disconnected", {});
+  }
+
+  private closeSocket(sendLeave = false) {
+    const ws = this.ws;
+    if (!ws) return;
+    this.ws = null;
+
+    // Desconectar handlers para que onopen/onclose tardíos no reviertan el estado
+    ws.onopen = null;
+    ws.onmessage = null;
+    ws.onerror = null;
+    ws.onclose = null;
+
+    try {
+      if (sendLeave && ws.readyState === WebSocket.OPEN) {
+        ws.send(encode([TYPE_GROUP_LEAVE, [this.currentTg]]));
+      }
+      // close() también cancela un socket que sigue en CONNECTING
+      if (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+    } catch (e) {}
+  }
+
+  private scheduleReconnect() {
+    this.clearReconnectTimer();
+    if (this.manualStop) return;
+
+    if (this.reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      this.reconnectAttempts = 0;
+      this.activeCall = null;
+      this.setState("error");
+      return;
+    }
+
+    const delay = Math.min(RECONNECT_BASE_MS * 2 ** this.reconnectAttempts, RECONNECT_MAX_MS);
+    this.reconnectAttempts++;
+    this.setState("connecting");
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      if (!this.manualStop) this.connect(this.currentTg);
+    }, delay);
+  }
+
+  private clearReconnectTimer() {
+    if (this.reconnectTimer !== null) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
   }
 
   public toggle(tg: number = DEFAULT_TG) {
     if (this.state === "idle" || this.state === "error") {
+      this.reconnectAttempts = 0;
       this.connect(tg);
     } else {
       this.disconnect();
@@ -240,7 +290,7 @@ class HoselineService {
   private playAudioBuffer(muLawData: Uint8Array | number[]) {
     if (!this.audioCtx) return;
     if (this.audioCtx.state === "suspended") {
-      this.audioCtx.resume();
+      this.audioCtx.resume().catch(() => {});
     }
 
     const numSamples = muLawData.length;
@@ -252,8 +302,7 @@ class HoselineService {
     }
 
     // DMR audio is 8000 Hz mono
-    const buffer = this.audioCtx.createBuffer(1, numSamples, 8000);
-    buffer.copyToChannel(pcm8k, 0);
+    const buffer = this.createPcmBuffer(pcm8k);
 
     const sourceNode = this.audioCtx.createBufferSource();
     sourceNode.buffer = buffer;
@@ -271,6 +320,34 @@ class HoselineService {
 
     sourceNode.start(this.nextStartTime);
     this.nextStartTime += buffer.duration;
+  }
+
+  private supports8k: boolean | null = null;
+
+  /** Buffer a 8 kHz; si el navegador no admite esa frecuencia, remuestrea a la del contexto */
+  private createPcmBuffer(pcm8k: Float32Array): AudioBuffer {
+    const ctx = this.audioCtx!;
+    if (this.supports8k !== false) {
+      try {
+        const buffer = ctx.createBuffer(1, pcm8k.length, 8000);
+        buffer.getChannelData(0).set(pcm8k);
+        this.supports8k = true;
+        return buffer;
+      } catch {
+        this.supports8k = false;
+      }
+    }
+    const ratio = ctx.sampleRate / 8000;
+    const outLength = Math.round(pcm8k.length * ratio);
+    const buffer = ctx.createBuffer(1, outLength, ctx.sampleRate);
+    const out = buffer.getChannelData(0);
+    for (let i = 0; i < outLength; i++) {
+      const pos = i / ratio;
+      const i0 = Math.floor(pos);
+      const i1 = Math.min(i0 + 1, pcm8k.length - 1);
+      out[i] = pcm8k[i0] + (pcm8k[i1] - pcm8k[i0]) * (pos - i0);
+    }
+    return buffer;
   }
 
   private setState(newState: PlayerState) {

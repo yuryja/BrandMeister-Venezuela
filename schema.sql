@@ -141,14 +141,15 @@ CREATE TABLE `bm_gallery_posts` (
 -- DATOS INICIALES (SEED DATA)
 -- ====================================================================
 
--- 1. Usuarios Sysops y Administradores (Contraseña por defecto: bm734venezuela)
--- Hash generado con password_hash('bm734venezuela', PASSWORD_BCRYPT)
+-- 1. Usuarios Sysops y Administradores
+-- Se crean SIN contraseña válida (el hash '!' nunca coincide). Asigna cada contraseña con:
+--   php scripts/set-password.php <usuario>
 INSERT INTO `bm_users` (`id`, `username`, `callsign`, `full_name`, `email`, `password_hash`, `role`, `status`) VALUES
-(1, 'yv5of', 'YV5OF', 'Severino Mastracci', 'yv5of@brandmeisteryv.net', '$2y$10$wN9v.l50j1rL8gC7N4tXq.3R7wG4J3VbN6qQ1gU7J8K9l0M1N2O3P', 'admin', 'active'),
-(2, 'yy3big', 'YY3BIG', 'Yury', 'yy3big@brandmeisteryv.net', '$2y$10$wN9v.l50j1rL8gC7N4tXq.3R7wG4J3VbN6qQ1gU7J8K9l0M1N2O3P', 'admin', 'active'),
-(3, 'yv5adm', 'YV5ADM', 'Arnaldo', 'yv5adm@brandmeisteryv.net', '$2y$10$wN9v.l50j1rL8gC7N4tXq.3R7wG4J3VbN6qQ1gU7J8K9l0M1N2O3P', 'editor', 'active'),
-(4, 'yv5ve', 'YV5VE', 'Will', 'yv5ve@brandmeisteryv.net', '$2y$10$wN9v.l50j1rL8gC7N4tXq.3R7wG4J3VbN6qQ1gU7J8K9l0M1N2O3P', 'editor', 'active'),
-(5, 'autor_demo', 'YV5DEMO', 'Colaborador Radioaficionado', 'colaborador@brandmeisteryv.net', '$2y$10$wN9v.l50j1rL8gC7N4tXq.3R7wG4J3VbN6qQ1gU7J8K9l0M1N2O3P', 'author', 'active');
+(1, 'yv5of', 'YV5OF', 'Severino Mastracci', 'yv5of@brandmeisteryv.net', '!', 'admin', 'active'),
+(2, 'yy3big', 'YY3BIG', 'Yury', 'yy3big@brandmeisteryv.net', '!', 'admin', 'active'),
+(3, 'yv5adm', 'YV5ADM', 'Arnaldo', 'yv5adm@brandmeisteryv.net', '!', 'editor', 'active'),
+(4, 'yv5ve', 'YV5VE', 'Will', 'yv5ve@brandmeisteryv.net', '!', 'editor', 'active'),
+(5, 'autor_demo', 'YV5DEMO', 'Colaborador Radioaficionado', 'colaborador@brandmeisteryv.net', '!', 'author', 'active');
 
 -- 2. Noticias Iniciales
 INSERT INTO `bm_posts` (`id`, `title`, `slug`, `description`, `content`, `category`, `tags`, `read_time`, `featured`, `status`, `author_id`) VALUES

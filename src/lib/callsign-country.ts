@@ -131,6 +131,3 @@ export function callsignToCountry(callsign: string): string | null {
   }
   return null;
 }
-
-/** Serialized for embedding into client-side polling script. */
-export const PREFIX_MAP_JSON = JSON.stringify(PREFIX_MAP);

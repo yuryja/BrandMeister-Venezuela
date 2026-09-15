@@ -1,17 +1,24 @@
 <?php
 require_once __DIR__ . '/db.php';
 
-session_start();
+start_secure_session();
 
 $method = $_SERVER['REQUEST_METHOD'];
 $pdo = get_db_connection();
+$sessionUser = current_user();
+// Solo el equipo autenticado puede ver borradores y papelera
+$canSeeDrafts = $sessionUser !== null;
 
 // GET: Listar o consultar noticia
 if ($method === 'GET') {
     $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
 
     if ($id && $pdo) {
-        $stmt = $pdo->prepare("SELECT p.*, u.full_name as author_name, u.callsign as author_callsign FROM bm_posts p JOIN bm_users u ON p.author_id = u.id WHERE p.id = :id");
+        $sql = "SELECT p.*, u.full_name as author_name, u.callsign as author_callsign FROM bm_posts p JOIN bm_users u ON p.author_id = u.id WHERE p.id = :id";
+        if (!$canSeeDrafts) {
+            $sql .= " AND p.status = 'published'";
+        }
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
         $post = $stmt->fetch();
         if ($post) {
@@ -23,6 +30,12 @@ if ($method === 'GET') {
 
     if ($pdo) {
         $status = $_GET['status'] ?? 'all';
+        if (!in_array($status, ['all', 'published', 'draft', 'trash'], true)) {
+            $status = 'all';
+        }
+        if (!$canSeeDrafts) {
+            $status = 'published';
+        }
         $sql = "SELECT p.id, p.title, p.slug, p.category, p.status, p.featured, p.read_time, p.created_at, u.full_name as author_name, u.callsign as author_callsign 
                 FROM bm_posts p 
                 JOIN bm_users u ON p.author_id = u.id";
@@ -98,8 +111,9 @@ if ($method === 'GET') {
 
 // POST: Crear Noticia (Requiere estar autenticado)
 if ($method === 'POST') {
-    $role = $_SESSION['role'] ?? 'author';
-    $userId = $_SESSION['user_id'] ?? 1;
+    $sessionUser = require_role(['admin', 'editor', 'author']);
+    $role = $sessionUser['role'];
+    $userId = $sessionUser['id'];
 
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input || empty($input['title']) || empty($input['content'])) {
@@ -107,7 +121,7 @@ if ($method === 'POST') {
     }
 
     $title = trim($input['title']);
-    $slug = !empty($input['slug']) ? preg_replace('/[^a-z0-9\-_]/', '', strtolower($input['slug'])) : 'noticia-' . time();
+    $slug = preg_replace('/[^a-z0-9\-_]/', '', strtolower((string)($input['slug'] ?? ''))) ?: 'noticia-' . time();
     $description = trim($input['description'] ?? '');
     $content = trim($input['content']);
     $category = trim($input['category'] ?? 'General');
@@ -116,7 +130,10 @@ if ($method === 'POST') {
     $featured = !empty($input['featured']) ? 1 : 0;
     
     // ACL: Los autores solo pueden guardar como borrador o someter a revisión
-    $status = trim($input['status'] ?? 'published');
+    $status = trim((string)($input['status'] ?? 'published'));
+    if (!in_array($status, ['published', 'draft', 'trash'], true)) {
+        $status = 'draft';
+    }
     if ($role === 'author' && $status === 'published') {
         $status = 'draft';
     }
@@ -141,22 +158,27 @@ if ($method === 'POST') {
         send_json(['success' => true, 'message' => 'Noticia guardada en base de datos bmvenezuela', 'id' => $postId]);
     }
 
-    send_json(['success' => true, 'message' => 'Noticia procesada exitosamente', 'slug' => $slug]);
+    send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento'], 503);
 }
 
 // DELETE: Eliminar Noticia (Solo admin o editor)
 if ($method === 'DELETE') {
-    $role = $_SESSION['role'] ?? 'admin';
-    if ($role !== 'admin' && $role !== 'editor') {
-        send_json(['success' => false, 'error' => 'Permiso denegado por política ACL'], 403);
-    }
+    require_role(['admin', 'editor']);
 
     $id = (int)($_GET['id'] ?? 0);
-    if ($pdo && $id > 0) {
-        $stmt = $pdo->prepare("DELETE FROM bm_posts WHERE id = :id");
-        $stmt->execute([':id' => $id]);
-        send_json(['success' => true, 'message' => 'Noticia eliminada']);
+    if ($id <= 0) {
+        send_json(['success' => false, 'error' => 'Noticia no válida'], 400);
+    }
+    if (!$pdo) {
+        send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento'], 503);
     }
 
+    $stmt = $pdo->prepare("DELETE FROM bm_posts WHERE id = :id");
+    $stmt->execute([':id' => $id]);
+    if ($stmt->rowCount() === 0) {
+        send_json(['success' => false, 'error' => 'Noticia no encontrada'], 404);
+    }
     send_json(['success' => true, 'message' => 'Noticia eliminada']);
 }
+
+send_json(['success' => false, 'error' => 'Método no permitido'], 405);

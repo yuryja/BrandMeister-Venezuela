@@ -1,18 +1,35 @@
 <?php
 require_once __DIR__ . '/db.php';
 
-session_start();
+start_secure_session();
 
 $method = $_SERVER['REQUEST_METHOD'];
 $pdo = get_db_connection();
 
+// Ajustes visibles para cualquier visitante
+const PUBLIC_SETTINGS = [
+    'hero_title', 'hero_description', 'emergency_alert', 'freq_vhf', 'freq_uhf',
+    'master_servers', 'contact_email', 'instagram_account', 'instagram_hashtag', 'instagram_last_sync'
+];
+// Ajustes que solo ven y editan admin/editor
+const PRIVATE_SETTINGS = ['instagram_app_id'];
+// Secretos: solo el admin puede escribirlos y nunca se devuelven, solo se indica si existen
+const SECRET_SETTINGS = ['instagram_app_secret', 'instagram_access_token'];
+
 if ($method === 'GET') {
+    $user = current_user();
+    $isStaff = $user !== null && in_array($user['role'], ['admin', 'editor'], true);
+
     if ($pdo) {
-        $stmt = $pdo->query("SELECT setting_key, setting_value FROM bm_site_settings");
-        $rows = $stmt->fetchAll();
+        $rows = $pdo->query("SELECT setting_key, setting_value FROM bm_site_settings")->fetchAll();
         $settings = [];
         foreach ($rows as $r) {
-            $settings[$r['setting_key']] = $r['setting_value'];
+            $key = $r['setting_key'];
+            if (in_array($key, PUBLIC_SETTINGS, true) || ($isStaff && in_array($key, PRIVATE_SETTINGS, true))) {
+                $settings[$key] = $r['setting_value'];
+            } elseif ($isStaff && in_array($key, SECRET_SETTINGS, true)) {
+                $settings[$key . '_set'] = trim((string)$r['setting_value']) !== '';
+            }
         }
         send_json(['success' => true, 'settings' => $settings, 'source' => 'mysql']);
     }
@@ -28,18 +45,56 @@ if ($method === 'GET') {
 }
 
 if ($method === 'POST') {
-    $role = $_SESSION['role'] ?? 'admin';
-    if ($role !== 'admin' && $role !== 'editor') {
-        send_json(['success' => false, 'error' => 'Permiso denegado'], 403);
-    }
+    $user = require_role(['admin', 'editor']);
 
     $input = json_decode(file_get_contents('php://input'), true);
-    if ($pdo && is_array($input)) {
-        $stmt = $pdo->prepare("INSERT INTO bm_site_settings (setting_key, setting_value) VALUES (:k, :v) ON DUPLICATE KEY UPDATE setting_value = :v2");
-        foreach ($input as $k => $v) {
-            $stmt->execute([':k' => $k, ':v' => $v, ':v2' => $v]);
+    if (!is_array($input)) {
+        send_json(['success' => false, 'error' => 'Datos no válidos'], 400);
+    }
+    if (!$pdo) {
+        send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento'], 503);
+    }
+
+    $allowed = array_merge(PUBLIC_SETTINGS, PRIVATE_SETTINGS);
+    $toSave = [];
+    $rejected = [];
+
+    foreach ($input as $k => $v) {
+        if (!is_string($k) || (!is_scalar($v) && $v !== null)) {
+            $rejected[] = (string)$k;
+            continue;
+        }
+        $value = trim((string)$v);
+
+        if (in_array($k, SECRET_SETTINGS, true)) {
+            // Campo vacío = conservar el secreto actual
+            if ($value === '') continue;
+            if ($user['role'] !== 'admin') {
+                $rejected[] = $k;
+                continue;
+            }
+            $toSave[$k] = $value;
+        } elseif (in_array($k, $allowed, true)) {
+            $toSave[$k] = $value;
+        } else {
+            $rejected[] = $k;
         }
     }
 
-    send_json(['success' => true, 'message' => 'Ajustes guardados correctamente']);
+    // instagram_last_sync solo lo escribe el proceso de sincronización
+    unset($toSave['instagram_last_sync']);
+
+    $stmt = $pdo->prepare("INSERT INTO bm_site_settings (setting_key, setting_value) VALUES (:k, :v) ON DUPLICATE KEY UPDATE setting_value = :v2");
+    foreach ($toSave as $k => $v) {
+        $stmt->execute([':k' => $k, ':v' => $v, ':v2' => $v]);
+    }
+
+    send_json([
+        'success' => true,
+        'message' => 'Ajustes guardados correctamente',
+        'saved' => array_keys($toSave),
+        'rejected' => $rejected
+    ]);
 }
+
+send_json(['success' => false, 'error' => 'Método no permitido'], 405);

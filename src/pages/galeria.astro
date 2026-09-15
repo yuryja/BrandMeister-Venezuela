@@ -7,6 +7,7 @@ const initialPosts = seedPosts;
 ---
 
 <Layout
+  heroImage={{ desktop: '/assets/hero-dmr-venezuela-landscape.webp', mobile: '/assets/hero-dmr-venezuela-landscape-m.webp' }}
   title="Galería · BrandMeister Venezuela"
   description="Fotografías de campo, montajes en repetidores, estaciones y videos de la comunidad de radioaficionados @brandmeister_yv."
 >
@@ -282,6 +283,24 @@ const initialPosts = seedPosts;
     let currentPostIndex = 0;
     let currentCarouselIndex = 0;
 
+    const escapeHtml = (value) =>
+      String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    // Solo URLs http(s); evita javascript:, data:, etc.
+    const safeUrl = (value, fallback = '') => {
+      try {
+        const url = new URL(String(value ?? ''), window.location.origin);
+        return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : fallback;
+      } catch {
+        return fallback;
+      }
+    };
+
     // 1. Filtrado de Publicaciones (Todos / Fotos / Carruseles / Videos)
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -312,13 +331,13 @@ const initialPosts = seedPosts;
       modalDate.textContent = new Date(post.published_at).toLocaleDateString('es-VE', { 
         year: 'numeric', month: 'long', day: 'numeric' 
       });
-      modalIgLink.href = post.permalink || 'https://www.instagram.com/brandmeister_yv/';
+      modalIgLink.href = safeUrl(post.permalink, 'https://www.instagram.com/brandmeister_yv/');
       modalLikes.textContent = post.likes_count || 0;
       modalComments.textContent = post.comments_count || 0;
 
       // Resaltar hashtags y menciones en el caption (excluyendo #experienciadmr de la vista)
       const rawCaption = (post.caption || '').replace(/#experienciadmr\s*/gi, '').trim();
-      const formattedCaption = rawCaption
+      const formattedCaption = escapeHtml(rawCaption)
         .replace(/(#\w+)/g, '<span class="hl-hashtag">$1</span>')
         .replace(/(@\w+)/g, '<span class="hl-mention">$1</span>');
       modalCaption.innerHTML = formattedCaption;
@@ -344,12 +363,12 @@ const initialPosts = seedPosts;
           modalMediaWrap.innerHTML = `
             <div class="video-player-wrapper">
               <video 
-                src="${post.video_url}" 
+                src="${escapeHtml(safeUrl(post.video_url))}" 
                 controls 
                 autoplay 
                 playsinline 
                 loop 
-                poster="${post.thumbnail_url || post.media_url}"
+                poster="${escapeHtml(safeUrl(post.thumbnail_url || post.media_url))}"
                 class="lightbox-video"
               >
                 Tu navegador no soporta reproducción de video HTML5.
@@ -358,14 +377,14 @@ const initialPosts = seedPosts;
           `;
         } else {
           modalMediaWrap.innerHTML = `
-            <img src="${post.media_url}" alt="${post.caption}" class="lightbox-img" />
+            <img src="${escapeHtml(safeUrl(post.media_url))}" alt="${escapeHtml(post.caption)}" class="lightbox-img" />
           `;
         }
       } else {
         // IMAGE sencilla
         carouselNav.classList.add('is-hidden');
         modalMediaWrap.innerHTML = `
-          <img src="${post.media_url}" alt="${post.caption}" class="lightbox-img" />
+          <img src="${escapeHtml(safeUrl(post.media_url))}" alt="${escapeHtml(post.caption)}" class="lightbox-img" />
         `;
       }
     };
@@ -379,8 +398,8 @@ const initialPosts = seedPosts;
 
       modalMediaWrap.innerHTML = `
         <div class="carousel-slide-view">
-          <img src="${slide.url}" alt="Foto ${currentCarouselIndex + 1}" class="lightbox-img" />
-          ${slide.caption ? `<div class="slide-caption-bar">${slide.caption}</div>` : ''}
+          <img src="${escapeHtml(safeUrl(slide.url))}" alt="Foto ${currentCarouselIndex + 1}" class="lightbox-img" />
+          ${slide.caption ? `<div class="slide-caption-bar">${escapeHtml(slide.caption)}</div>` : ''}
         </div>
       `;
     };
@@ -464,7 +483,7 @@ const initialPosts = seedPosts;
     background-image:
       linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 45%, rgba(255, 255, 255, 0.65) 75%, rgba(255, 255, 255, 0.2) 100%),
       linear-gradient(0deg, #FAFAFA 0%, rgba(255, 255, 255, 0.8) 12%, transparent 35%),
-      url('/assets/hero-dmr-venezuela-landscape.jpg');
+      url('/assets/hero-dmr-venezuela-landscape.webp');
     background-size: cover;
     background-position: right center;
     background-repeat: no-repeat;
@@ -476,7 +495,7 @@ const initialPosts = seedPosts;
       min-height: 50vh;
       background-image:
         linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 60%, rgba(255, 255, 255, 0.88) 100%),
-        url('/assets/hero-dmr-venezuela-landscape.jpg');
+        url('/assets/hero-dmr-venezuela-landscape-m.webp');
       background-position: center top;
       background-size: cover;
       padding: 2.5rem 0;

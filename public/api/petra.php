@@ -7,37 +7,52 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Accept');
 header('Content-Type: application/json; charset=utf-8');
+header('X-Content-Type-Options: nosniff');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-$endpoint = isset($_GET['endpoint']) ? $_GET['endpoint'] : '';
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Method not allowed']);
+    exit;
+}
 
-// Sanitize endpoint to avoid path traversal
-$endpoint = ltrim($endpoint, '/');
-if (empty($endpoint)) {
+$endpoint = isset($_GET['endpoint']) ? (string)$_GET['endpoint'] : '';
+$endpoint = trim($endpoint, '/');
+
+if ($endpoint === '') {
+    http_response_code(400);
     echo json_encode(['error' => 'Missing endpoint']);
     exit;
 }
 
-// Re-append query parameters from original request
-$queryString = $_SERVER['QUERY_STRING'] ?? '';
-// Remove 'endpoint=...' from query string if present
-parse_str($queryString, $params);
+// Solo nombres simples de endpoint (live, summary, rne-stats...): sin barras, puntos ni codificaciones
+if (!preg_match('/^[a-z0-9][a-z0-9_-]{0,39}$/i', $endpoint)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Invalid endpoint']);
+    exit;
+}
+
+// Re-append query parameters from original request (only simple scalar values)
+parse_str($_SERVER['QUERY_STRING'] ?? '', $params);
 unset($params['endpoint']);
+$params = array_filter($params, function ($v, $k) {
+    return is_string($v) && preg_match('/^[a-z0-9_]{1,20}$/i', (string)$k) && strlen($v) <= 40;
+}, ARRAY_FILTER_USE_BOTH);
 $extraQuery = !empty($params) ? '?' . http_build_query($params) : '';
 
 $targetUrl = 'https://petra.brandmeisteryv.net/api/' . $endpoint . $extraQuery;
 
 // Fetch data using cURL or file_get_contents
-$response = false;
 if (function_exists('curl_init')) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $targetUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+    curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTPS);
     curl_setopt($ch, CURLOPT_TIMEOUT, 6);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -52,15 +67,13 @@ if (function_exists('curl_init')) {
         echo $response;
         exit;
     }
-}
-
-// Fallback to file_get_contents
-if ($response === false) {
+} else {
     $context = stream_context_create([
         'http' => [
             'method' => 'GET',
             'header' => "Accept: application/json\r\nUser-Agent: BrandMeister-Venezuela-Proxy/1.0\r\n",
-            'timeout' => 6
+            'timeout' => 6,
+            'follow_location' => 0
         ]
     ]);
     $response = @file_get_contents($targetUrl, false, $context);

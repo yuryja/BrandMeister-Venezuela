@@ -7,7 +7,7 @@
 
 require_once __DIR__ . '/db.php';
 
-session_start();
+start_secure_session();
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? 'list';
@@ -49,6 +49,7 @@ if ($pdo) {
 if ($method === 'GET') {
     $filterType = $_GET['type'] ?? 'all';
     $posts = [];
+    $rows = [];
 
     if ($pdo) {
         try {
@@ -119,6 +120,9 @@ if ($method === 'GET') {
 // 2. POST: Operaciones administrativas (Guardar manual, Eliminar, Sync)
 // --------------------------------------------------------------------
 if ($method === 'POST') {
+    // Todas las operaciones de escritura requieren sesión de admin o editor
+    require_role(['admin', 'editor']);
+
     $rawInput = file_get_contents('php://input');
     $input = json_decode($rawInput, true) ?: $_POST;
 
@@ -216,7 +220,9 @@ if ($method === 'POST') {
             }
 
             // Actualizar fecha de última sincronización
-            $pdo->exec("INSERT INTO bm_site_settings (setting_key, setting_value) VALUES ('instagram_last_sync', '" . date('d/m/Y H:i') . "') ON DUPLICATE KEY UPDATE setting_value = '" . date('d/m/Y H:i') . "'");
+            $stmtSync = $pdo->prepare("INSERT INTO bm_site_settings (setting_key, setting_value) VALUES ('instagram_last_sync', :v) ON DUPLICATE KEY UPDATE setting_value = :v2");
+            $now = date('d/m/Y H:i');
+            $stmtSync->execute([':v' => $now, ':v2' => $now]);
         }
 
         send_json([
@@ -230,7 +236,7 @@ if ($method === 'POST') {
     // B. Guardar o editar publicación manualmente
     if ($action === 'save_post') {
         $id          = !empty($input['id']) ? (int)$input['id'] : null;
-        $permalink   = trim($input['permalink'] ?? 'https://www.instagram.com/brandmeister_yv/');
+        $permalink   = trim((string)($input['permalink'] ?? '')) ?: 'https://www.instagram.com/brandmeister_yv/';
         $mediaType   = in_array($input['media_type'] ?? '', ['IMAGE', 'CAROUSEL_ALBUM', 'VIDEO']) ? $input['media_type'] : 'IMAGE';
         $mediaUrl    = trim($input['media_url'] ?? '');
         $thumbnail   = trim($input['thumbnail_url'] ?? '') ?: $mediaUrl;
@@ -242,6 +248,27 @@ if ($method === 'POST') {
 
         if (empty($mediaUrl)) {
             send_json(['success' => false, 'error' => 'La URL de la imagen principal es requerida.'], 422);
+        }
+
+        // Solo se aceptan URLs http(s) para evitar esquemas como javascript: o data:
+        $isHttpUrl = function ($url) {
+            return is_string($url) && $url !== '' && filter_var($url, FILTER_VALIDATE_URL) && preg_match('#^https?://#i', $url);
+        };
+        foreach (['media_url' => $mediaUrl, 'thumbnail_url' => $thumbnail, 'permalink' => $permalink] as $field => $url) {
+            if (!$isHttpUrl($url)) {
+                send_json(['success' => false, 'error' => "La URL de $field no es válida (debe comenzar por http:// o https://)."], 422);
+            }
+        }
+        if ($videoUrl !== '' && !$isHttpUrl($videoUrl)) {
+            send_json(['success' => false, 'error' => 'La URL del video no es válida.'], 422);
+        }
+        if (is_array($carouselRaw)) {
+            $carouselRaw = array_values(array_filter(array_map(function ($item) use ($isHttpUrl) {
+                $url = is_array($item) ? trim((string)($item['url'] ?? '')) : '';
+                if (!$isHttpUrl($url)) return null;
+                return ['url' => $url, 'caption' => is_array($item) ? trim((string)($item['caption'] ?? '')) : ''];
+            }, $carouselRaw)));
+            $carouselJson = !empty($carouselRaw) ? json_encode($carouselRaw, JSON_UNESCAPED_SLASHES) : null;
         }
 
         if ($pdo) {
@@ -287,7 +314,7 @@ if ($method === 'POST') {
             }
             send_json(['success' => true, 'message' => 'Publicación guardada exitosamente.']);
         } else {
-            send_json(['success' => true, 'message' => 'Publicación registrada (Modo local sin MySQL).']);
+            send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento.'], 503);
         }
     }
 
@@ -301,4 +328,8 @@ if ($method === 'POST') {
         }
         send_json(['success' => false, 'error' => 'No fue posible eliminar la publicación.'], 400);
     }
+
+    send_json(['success' => false, 'error' => 'Acción no válida'], 400);
 }
+
+send_json(['success' => false, 'error' => 'Método no permitido'], 405);

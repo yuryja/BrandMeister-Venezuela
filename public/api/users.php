@@ -1,32 +1,21 @@
 <?php
 require_once __DIR__ . '/db.php';
 
-session_start();
+start_secure_session();
 
-$role = $_SESSION['role'] ?? 'admin';
+// ACL: Solo administradores pueden ver y gestionar usuarios
+$currentUser = require_role(['admin']);
+
 $method = $_SERVER['REQUEST_METHOD'];
 $pdo = get_db_connection();
 
-// ACL: Solo administradores pueden ver y gestionar usuarios
-if ($role !== 'admin') {
-    send_json(['success' => false, 'error' => 'Acceso denegado: se requiere rol de Administrador'], 403);
+if (!$pdo) {
+    send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento'], 503);
 }
 
 if ($method === 'GET') {
-    if ($pdo) {
-        $stmt = $pdo->query("SELECT id, username, callsign, full_name, email, role, status, created_at FROM bm_users ORDER BY id ASC");
-        $users = $stmt->fetchAll();
-        send_json(['success' => true, 'users' => $users, 'source' => 'mysql']);
-    }
-
-    $defaultUsers = [
-        ['id' => 1, 'username' => 'yv5of', 'callsign' => 'YV5OF', 'full_name' => 'Severino Mastracci', 'email' => 'yv5of@brandmeisteryv.net', 'role' => 'admin', 'status' => 'active'],
-        ['id' => 2, 'username' => 'yy3big', 'callsign' => 'YY3BIG', 'full_name' => 'Yury', 'email' => 'yy3big@brandmeisteryv.net', 'role' => 'admin', 'status' => 'active'],
-        ['id' => 3, 'username' => 'yv5adm', 'callsign' => 'YV5ADM', 'full_name' => 'Arnaldo', 'email' => 'yv5adm@brandmeisteryv.net', 'role' => 'editor', 'status' => 'active'],
-        ['id' => 4, 'username' => 'yv5ve', 'callsign' => 'YV5VE', 'full_name' => 'Will', 'email' => 'yv5ve@brandmeisteryv.net', 'role' => 'editor', 'status' => 'active'],
-        ['id' => 5, 'username' => 'autor_demo', 'callsign' => 'YV5DEMO', 'full_name' => 'Colaborador Radioaficionado', 'email' => 'colaborador@brandmeisteryv.net', 'role' => 'author', 'status' => 'active']
-    ];
-    send_json(['success' => true, 'users' => $defaultUsers, 'source' => 'memory']);
+    $stmt = $pdo->query("SELECT id, username, callsign, full_name, email, role, status, created_at FROM bm_users ORDER BY id ASC");
+    send_json(['success' => true, 'users' => $stmt->fetchAll(), 'source' => 'mysql']);
 }
 
 if ($method === 'POST') {
@@ -35,17 +24,29 @@ if ($method === 'POST') {
 
     if ($action === 'update_role') {
         $userId = (int)($input['user_id'] ?? 0);
-        $newRole = trim($input['role'] ?? '');
+        $newRole = trim((string)($input['role'] ?? ''));
 
-        if (!in_array($newRole, ['admin', 'editor', 'author'])) {
+        if (!in_array($newRole, ['admin', 'editor', 'author'], true)) {
             send_json(['success' => false, 'error' => 'Rol no válido'], 400);
         }
+        if ($userId <= 0) {
+            send_json(['success' => false, 'error' => 'Usuario no válido'], 400);
+        }
+        if ($userId === $currentUser['id'] && $newRole !== 'admin') {
+            send_json(['success' => false, 'error' => 'No puedes quitarte a ti mismo el rol de Administrador'], 400);
+        }
 
-        if ($pdo && $userId > 0) {
-            $stmt = $pdo->prepare("UPDATE bm_users SET role = :r WHERE id = :id");
-            $stmt->execute([':r' => $newRole, ':id' => $userId]);
+        $stmt = $pdo->prepare("UPDATE bm_users SET role = :r WHERE id = :id");
+        $stmt->execute([':r' => $newRole, ':id' => $userId]);
+
+        if ($stmt->rowCount() === 0) {
+            send_json(['success' => false, 'error' => 'Usuario no encontrado o sin cambios'], 404);
         }
 
         send_json(['success' => true, 'message' => 'Rol de usuario actualizado correctamente', 'user_id' => $userId, 'role' => $newRole]);
     }
+
+    send_json(['success' => false, 'error' => 'Acción no válida'], 400);
 }
+
+send_json(['success' => false, 'error' => 'Método no permitido'], 405);

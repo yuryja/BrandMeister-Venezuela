@@ -1,0 +1,71 @@
+name: Build y rama deploy
+
+# Compila el sitio Astro y publica el resultado en la rama `deploy`,
+# que cPanel (Git Version Control) clona y despliega en public_html.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Validar sintaxis PHP
+        run: |
+          for f in public/api/*.php scripts/*.php; do php -l "$f" >/dev/null || exit 1; done
+
+      - name: Compilar
+        env:
+          # Clave de sitio pública de reCAPTCHA v3: GitHub → Settings → Secrets and variables → Actions → Variables
+          PUBLIC_RECAPTCHA_SITE_KEY: ${{ vars.PUBLIC_RECAPTCHA_SITE_KEY }}
+        run: npm run build
+
+      - name: Publicar en la rama deploy
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898299+github-actions[bot]@users.noreply.github.com"
+
+          REPO_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git ls-remote --exit-code --heads "$REPO_URL" deploy >/dev/null 2>&1; then
+            git clone --quiet --branch deploy --depth 1 "$REPO_URL" out
+          else
+            mkdir out && git -C out init --quiet -b deploy && git -C out remote add origin "$REPO_URL"
+          fi
+
+          # Reemplazar el contenido por el build nuevo (se conserva el historial para poder volver atrás)
+          find out -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a dist/. out/
+          cp deploy/.cpanel.yml out/.cpanel.yml
+          printf 'Build de %s (%s)\nGenerado automáticamente; no editar esta rama.\n' "$SOURCE_SHA" "$(date -u +%FT%TZ)" > out/DEPLOY.md
+
+          cd out
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Sin cambios en el build"
+            exit 0
+          fi
+          git commit --quiet -m "deploy: build de ${SOURCE_SHA::7}"
+          git push --quiet origin deploy

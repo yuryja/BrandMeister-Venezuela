@@ -1,0 +1,23 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PetraDashboard from '../../components/petra/PetraDashboard.astro';
+import { DEFAULT_PETRA_TG, getPetraTalkgroup } from '../../lib/petra';
+
+const talkgroup = getPetraTalkgroup(DEFAULT_PETRA_TG)!;
+---
+
+<Layout
+  heroImage={{ desktop: '/assets/petra-hero-bg.webp', mobile: '/assets/petra-hero-bg-m.webp' }}
+  title="Conoce a Petra · Telemetría en vivo del TG 734 · BrandMeister Venezuela"
+  description="Conoce a Petra, plataforma informativa y de telemetría de BrandMeister Venezuela: actividad en vivo de los TG 734, 73452 y 73473, balizas horarias y boletines sísmicos y meteorológicos."
+>
+  <PetraDashboard talkgroup={talkgroup} />
+</Layout>
+
+<script is:inline>
+  // Compatibilidad con los enlaces antiguos /petra?tg=73452
+  (function () {
+    var tg = new URLSearchParams(window.location.search).get('tg');
+    if (tg === '73452' || tg === '73473') window.location.replace('/petra/' + tg);
+  })();
+</script>

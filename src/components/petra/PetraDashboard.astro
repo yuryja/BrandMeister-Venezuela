@@ -1,0 +1,205 @@
+---
+import '../../styles/petra.css';
+import { PETRA_TALKGROUPS, type PetraTalkgroup } from '../../lib/petra';
+
+interface Props {
+  talkgroup: PetraTalkgroup;
+}
+
+const { talkgroup } = Astro.props;
+const has = (m: string) => talkgroup.modules.includes(m as any);
+---
+
+<main class="pt-page">
+  <section class="pt-hero">
+    <div class="container">
+      <div class="pt-hero__content">
+        <span class="pt-hero__badge">Desarrollo comunitario venezolano</span>
+        <h1 class="pt-hero__title">Conoce a Petra</h1>
+        <p class="pt-hero__lead">
+          Plataforma informativa y de telemetría de BrandMeister Venezuela. Emite al <strong>TG 734</strong> boletines
+          meteorológicos y alertas sísmicas en tiempo real, y una baliza horaria en telegrafía que evoca los repetidores
+          analógicos. Aquí puedes seguir, minuto a minuto, la actividad de cada talkgroup que monitorea.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="pt-stripe" aria-hidden="true"></div>
+
+  <section class="pt-body">
+    <div class="container">
+      <nav class="pt-tabs" aria-label="Talkgroups monitoreados por Petra">
+        {PETRA_TALKGROUPS.map((tg) => (
+          <a
+            href={`/petra/${tg.id}`}
+            class={`pt-tab ${tg.id === talkgroup.id ? 'is-active' : ''}`}
+            aria-current={tg.id === talkgroup.id ? 'page' : undefined}
+          >
+            <span class="pt-tab__id">TG {tg.id}</span>
+            <span class="pt-tab__name">{tg.name}</span>
+          </a>
+        ))}
+      </nav>
+
+      <div id="petra-dashboard" class="pt-grid" data-tg={talkgroup.id}>
+        <!-- Enlace y último escuchado -->
+        <article class="pt-card pt-live pt-span-full">
+          <header class="pt-live__head">
+            <div>
+              <p class="pt-eyebrow">Información del TG {talkgroup.id}</p>
+              <h2 class="pt-live__title">{talkgroup.name}</h2>
+              <p class="pt-live__desc">{talkgroup.description}</p>
+            </div>
+            <div class="pt-live__status" data-petra-slot="link">
+              <span class="pt-badge"><span class="pt-dot"></span>Enlace ?</span>
+            </div>
+          </header>
+
+          <div class="pt-live__body">
+            <div class="pt-live__label">
+              <span>Último escuchado</span>
+              <span class="pt-note" data-petra-slot="updated">Consultando…</span>
+            </div>
+            <div data-petra-module="live">
+              <div class="pt-skel pt-skel--lg"></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Resumen del día -->
+        <div class="pt-tiles pt-span-full" data-petra-module="summary">
+          {['Transmisiones hoy', 'Tiempo al aire', 'Operadores hoy', 'La más larga'].map((label) => (
+            <div class="pt-tile">
+              <div class="pt-tile__label">{label}</div>
+              <div class="pt-tile__value">·</div>
+            </div>
+          ))}
+        </div>
+
+        <!-- Actividad por hora -->
+        <article class="pt-card pt-span-full">
+          <header class="pt-card__head">
+            <h3 class="pt-card__title">Actividad por hora</h3>
+            <span class="pt-note" data-petra-slot="hourly-note"></span>
+          </header>
+          <div data-petra-module="hourly">
+            <div class="pt-skel pt-skel--chart"></div>
+          </div>
+        </article>
+
+        <!-- Actividad por día y por mes -->
+        <article class="pt-card pt-span-full">
+          <header class="pt-card__head">
+            <h3 class="pt-card__title">Actividad por día y por mes</h3>
+            <span class="pt-note" data-petra-slot="calendar-note"></span>
+          </header>
+          <div data-petra-module="calendar">
+            <div class="pt-skel pt-skel--chart"></div>
+          </div>
+        </article>
+
+        <!-- Más escuchados -->
+        <article class="pt-card">
+          <header class="pt-card__head">
+            <h3 class="pt-card__title">Más escuchados</h3>
+            <div class="pt-segment" role="group" aria-label="Periodo">
+              <button type="button" class="pt-segment__btn" data-top-days="1" aria-pressed="false">Hoy</button>
+              <button type="button" class="pt-segment__btn" data-top-days="7" aria-pressed="true">7 días</button>
+              <button type="button" class="pt-segment__btn" data-top-days="30" aria-pressed="false">30 días</button>
+            </div>
+          </header>
+          <div data-petra-module="top">
+            <div class="pt-skel"></div><div class="pt-skel"></div><div class="pt-skel"></div><div class="pt-skel"></div>
+          </div>
+        </article>
+
+        <!-- Últimas intervenciones -->
+        <article class="pt-card">
+          <header class="pt-card__head">
+            <h3 class="pt-card__title">Últimas intervenciones</h3>
+            <span class="pt-live-tag"><span class="pt-dot pt-dot--pulse"></span>En vivo</span>
+          </header>
+          <div data-petra-module="recent">
+            <div class="pt-skel"></div><div class="pt-skel"></div><div class="pt-skel"></div><div class="pt-skel"></div>
+          </div>
+        </article>
+
+        <!-- La semana, hora a hora -->
+        <article class="pt-card pt-span-full">
+          <header class="pt-card__head">
+            <h3 class="pt-card__title">La semana, hora a hora</h3>
+            <div class="pt-legend" aria-hidden="true">
+              <span class="pt-legend__label">De silencio a saturado</span>
+              <span class="pt-legend__swatches">
+                <i class="pt-heat-0"></i><i class="pt-heat-1"></i><i class="pt-heat-2"></i><i class="pt-heat-3"></i><i class="pt-heat-4"></i>
+              </span>
+            </div>
+          </header>
+          <div data-petra-module="heatmap">
+            <div class="pt-skel pt-skel--chart"></div>
+          </div>
+        </article>
+
+        {has('health') && (
+          <article class="pt-card">
+            <header class="pt-card__head">
+              <h3 class="pt-card__title">Salud del anunciador</h3>
+              <span class="pt-note">Últimas 24 h</span>
+            </header>
+            <div data-petra-module="health">
+              <p class="pt-note">Consultando…</p>
+            </div>
+          </article>
+        )}
+
+        {has('alerts') && (
+          <article class="pt-card">
+            <header class="pt-card__head">
+              <h3 class="pt-card__title">Lo último al aire</h3>
+            </header>
+            <div data-petra-module="alerts">
+              <div class="pt-skel"></div><div class="pt-skel"></div><div class="pt-skel"></div>
+            </div>
+          </article>
+        )}
+
+        {has('rne-stats') && (
+          <article class="pt-card pt-span-full">
+            <header class="pt-card__head">
+              <div>
+                <p class="pt-eyebrow">Emisión YV5RNE</p>
+                <h3 class="pt-card__title">Promedio de estaciones por día entre las 19:30 y las 20:15</h3>
+              </div>
+            </header>
+            <div data-petra-module="rne-stats">
+              <div class="pt-skel pt-skel--lg"></div>
+            </div>
+          </article>
+        )}
+
+        {has('rne-report') && (
+          <article class="pt-card pt-span-full">
+            <header class="pt-card__head">
+              <h3 class="pt-card__title">Estaciones reportadas durante la última emisión</h3>
+              <span class="pt-chip" data-petra-slot="rne-day" hidden></span>
+            </header>
+            <div data-petra-module="rne-report">
+              <div class="pt-skel"></div><div class="pt-skel"></div><div class="pt-skel"></div>
+            </div>
+          </article>
+        )}
+      </div>
+
+      <p class="pt-credits">
+        Datos en vivo de <a href={`https://petra.brandmeisteryv.net/${talkgroup.id}`} target="_blank" rel="noopener noreferrer">petra.brandmeisteryv.net</a> ·
+        Petra fue desarrollada por YY3BIG con el apoyo de la comunidad DMR de Venezuela.
+      </p>
+    </div>
+  </section>
+</main>
+
+<script>
+  import { initPetraDashboard } from '../../scripts/petra-client';
+  initPetraDashboard();
+</script>

@@ -1,8 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-// Clave pública de reCAPTCHA: permite usar variable de entorno o fallback a clave de prueba de Google
-const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+// Clave de sitio pública de reCAPTCHA v3 (en build: GitHub → Variables → PUBLIC_RECAPTCHA_SITE_KEY).
+// Sin clave, el formulario funciona sin reCAPTCHA (útil en desarrollo).
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
 const statesVenezuela = [
   "Distrito Capital (Caracas)",
@@ -44,6 +45,7 @@ const categories = [
 ---
 
 <Layout
+  heroImage={{ desktop: '/assets/contacto-em200-bg.webp', mobile: '/assets/contacto-em200-bg-m.webp' }}
   title="Contacto y Soporte Técnico · BrandMeister Venezuela"
   description="Canal oficial de contacto de BrandMeister Venezuela (TG 734). Envía consultas, solicitudes de soporte para hotspots MMDVM, integración de repetidores o dudas al equipo de sysops."
 >
@@ -112,7 +114,7 @@ const categories = [
               </div>
 
               <!-- Formulario de Contacto -->
-              <form id="contact-form" class="contact-form" novalidate>
+              <form id="contact-form" class="contact-form" novalidate data-recaptcha-site-key={recaptchaSiteKey}>
                 <!-- Campo Honeypot Anti-Spam (Invisible para humanos, visible para robots) -->
                 <div class="form-honeypot" aria-hidden="true">
                   <label for="form-website">Sitio web (no llenar):</label>
@@ -276,20 +278,15 @@ const categories = [
                   <span class="field-error" id="error-message"></span>
                 </div>
 
-                <!-- Fila 6: Google reCAPTCHA -->
-                <div class="recaptcha-section">
-                  <div class="recaptcha-wrapper">
-                    <!-- Widget Google reCAPTCHA v2 -->
-                    <div
-                      class="g-recaptcha"
-                      data-sitekey={recaptchaSiteKey}
-                      data-callback="onRecaptchaSuccess"
-                      data-expired-callback="onRecaptchaExpired"
-                    ></div>
-                    <input type="hidden" name="recaptcha_token" id="recaptcha_token" />
-                  </div>
-                  <span class="field-error" id="error-recaptcha"></span>
-                </div>
+                <!-- Google reCAPTCHA v3: invisible; atribución obligatoria al ocultar la insignia -->
+                {recaptchaSiteKey && (
+                  <p class="recaptcha-notice">
+                    Este formulario está protegido por reCAPTCHA y se aplican la
+                    <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Política de privacidad</a> y las
+                    <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Condiciones del servicio</a> de Google.
+                  </p>
+                )}
+                <span class="field-error" id="error-recaptcha"></span>
 
                 <!-- Botón de Envío con Estado de Carga -->
                 <div class="form-actions">
@@ -396,22 +393,57 @@ const categories = [
 </Layout>
 
 <!-- Script oficial de Google reCAPTCHA v2 -->
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script is:inline>
+  // reCAPTCHA v3 (~480 KB de Google) se carga cuando el formulario se acerca a la pantalla o el usuario
+  // interactúa con él (v3 necesita unos segundos de señales antes de enviar). El token se pide al enviar.
+  (function () {
+    var form = document.getElementById('contact-form');
+    var siteKey = form ? form.getAttribute('data-recaptcha-site-key') : '';
+    var loader = null;
+
+    window.bmLoadRecaptcha = function () {
+      if (!siteKey) return Promise.resolve(null);
+      if (loader) return loader;
+      loader = new Promise(function (resolve, reject) {
+        var script = document.createElement('script');
+        script.src = 'https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(siteKey) + '&hl=es-419';
+        script.async = true;
+        script.onload = function () { window.grecaptcha.ready(function () { resolve(window.grecaptcha); }); };
+        script.onerror = function () { loader = null; reject(new Error('No se pudo cargar reCAPTCHA')); };
+        document.head.appendChild(script);
+      });
+      return loader;
+    };
+
+    // Token recién generado para la acción indicada (caduca a los 2 minutos)
+    window.bmRecaptchaToken = function (action) {
+      if (!siteKey) return Promise.resolve('');
+      var token = window.bmLoadRecaptcha().then(function (grecaptcha) {
+        return grecaptcha.execute(siteKey, { action: action });
+      });
+      // Con una clave inválida o un bloqueador, Google puede no responder nunca
+      var timeout = new Promise(function (_, reject) {
+        setTimeout(function () { reject(new Error('reCAPTCHA no respondió')); }, 10000);
+      });
+      return Promise.race([token, timeout]);
+    };
+
+    if (!form || !siteKey) return;
+    var warm = function () { window.bmLoadRecaptcha().catch(function () {}); };
+    form.addEventListener('focusin', warm, { once: true });
+    form.addEventListener('pointerdown', warm, { once: true });
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); warm(); }
+      }, { rootMargin: '600px 0px' });
+      io.observe(form);
+    } else {
+      warm();
+    }
+  })();
+</script>
 
 <script is:inline>
-  // Handlers globales para reCAPTCHA
-  window.onRecaptchaSuccess = function(token) {
-    const hiddenToken = document.getElementById('recaptcha_token');
-    const errRecaptcha = document.getElementById('error-recaptcha');
-    if (hiddenToken) hiddenToken.value = token;
-    if (errRecaptcha) errRecaptcha.textContent = '';
-  };
-
-  window.onRecaptchaExpired = function() {
-    const hiddenToken = document.getElementById('recaptcha_token');
-    if (hiddenToken) hiddenToken.value = '';
-  };
-
   document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('contact-form');
     const inputMessage = document.getElementById('input-message');
@@ -523,12 +555,6 @@ const categories = [
         const messageVal = (document.getElementById('input-message')?.value || '').trim();
         const websiteHoneypot = (document.getElementById('form-website')?.value || '').trim();
 
-        // Obtener respuesta de reCAPTCHA
-        let recaptchaToken = '';
-        if (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function') {
-          recaptchaToken = window.grecaptcha.getResponse();
-        }
-
         // Validación Nombre
         if (nameVal.length < 2) {
           const el = document.getElementById('input-name');
@@ -566,13 +592,6 @@ const categories = [
           hasErrors = true;
         }
 
-        // Validación reCAPTCHA (en producción o cuando está disponible)
-        if (!recaptchaToken && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-          const err = document.getElementById('error-recaptcha');
-          if (err) err.textContent = 'Por favor marca la casilla "No soy un robot" de Google reCAPTCHA.';
-          hasErrors = true;
-        }
-
         if (hasErrors) {
           // Scroll suave al primer error
           const firstErr = form.querySelector('.is-invalid, .field-error:not(:empty)');
@@ -586,6 +605,20 @@ const categories = [
         btnSubmit.disabled = true;
         btnSubmit.classList.add('is-loading');
         if (btnText) btnText.textContent = 'Transmitiendo paquete...';
+
+        // reCAPTCHA v3: token generado en el momento del envío
+        const errRecaptcha = document.getElementById('error-recaptcha');
+        if (errRecaptcha) errRecaptcha.textContent = '';
+        let recaptchaToken = '';
+        try {
+          recaptchaToken = await window.bmRecaptchaToken('contact');
+        } catch (captchaErr) {
+          if (errRecaptcha) errRecaptcha.textContent = 'No se pudo cargar la verificación de Google. Revisa tu conexión o desactiva bloqueadores e inténtalo de nuevo.';
+          btnSubmit.disabled = false;
+          btnSubmit.classList.remove('is-loading');
+          if (btnText) btnText.textContent = 'Transmitir Mensaje';
+          return;
+        }
 
         const payload = {
           name: nameVal,
@@ -651,12 +684,9 @@ const categories = [
             formAlert.classList.remove('is-hidden');
             formAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-            // Reiniciar formulario y reCAPTCHA
+            // Reiniciar formulario
             form.reset();
             if (charCounter) charCounter.textContent = '0 / 2500';
-            if (window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
-              window.grecaptcha.reset();
-            }
           } else {
             // Error devuelto por la API
             throw new Error(data?.error || 'No fue posible enviar tu mensaje en este momento.');
@@ -708,7 +738,7 @@ const categories = [
     background-image:
       linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 45%, rgba(255, 255, 255, 0.65) 75%, rgba(255, 255, 255, 0.18) 100%),
       linear-gradient(0deg, #FAFAFA 0%, rgba(255, 255, 255, 0.8) 12%, transparent 35%),
-      url('/assets/contacto-em200-bg.jpg');
+      url('/assets/contacto-em200-bg.webp');
     background-size: cover;
     background-position: right center;
     background-repeat: no-repeat;
@@ -720,7 +750,7 @@ const categories = [
       min-height: 50vh;
       background-image:
         linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 60%, rgba(255, 255, 255, 0.88) 100%),
-        url('/assets/contacto-em200-bg.jpg');
+        url('/assets/contacto-em200-bg-m.webp');
       background-position: center top;
       background-size: cover;
       padding: 2.5rem 0;
@@ -1011,20 +1041,21 @@ const categories = [
     min-height: 1rem;
   }
 
-  /* reCAPTCHA Section */
-  .recaptcha-section {
-    margin: 1.5rem 0 2rem 0;
-    padding: 1.25rem;
-    background: #F8FAFC;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+  /* reCAPTCHA v3: aviso de atribución (sustituye a la insignia flotante) */
+  .recaptcha-notice {
+    margin: 1.25rem 0 0.25rem;
+    color: var(--text-faint);
+    font-size: 0.78rem;
+    line-height: 1.5;
   }
 
-  .recaptcha-wrapper {
-    display: flex;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
+  .recaptcha-notice a {
+    color: var(--text-muted);
+    text-decoration: underline;
+  }
+
+  :global(.grecaptcha-badge) {
+    visibility: hidden;
   }
 
   /* Form Actions */
