@@ -1,2 +1,2 @@
-Build de fe9692a86ce40ad9196383e1f0e6dac1b3515736 (2026-09-15T04:05:26Z)
+Build de 2d20162587ec731a8f3e9d6e15ef7780db131dc7 (2026-09-15T04:24:39Z)
 Generado desde fix/seguridad-backend; no editar esta rama.
