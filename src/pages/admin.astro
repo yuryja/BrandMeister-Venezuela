@@ -349,6 +349,74 @@ const getCellIntensity = (hour: number) => {
         <PostsView />
 
         <!-- ========================================================= -->
+        <!-- USUARIOS Y PERFIL -->
+        <!-- ========================================================= -->
+        <UsersView />
+        <ProfileView />
+
+        <!-- ========================================================= -->
+        <!-- VIEW 5: TEXTOS DEL PORTAL -->
+        <!-- ========================================================= -->
+        <section id="view-site-content" class="wp-view">
+          <div class="view-header">
+            <h1 class="view-title">Textos del Portal Oficial</h1>
+            <button id="btn-save-site-texts" class="btn btn-primary">
+              Guardar Cambios
+            </button>
+          </div>
+
+          <div class="wp-editor-layout">
+            <div class="editor-main-col">
+              <div class="wp-box">
+                <div class="wp-box-head">
+                  <h3>Página de Inicio (Hero)</h3>
+                </div>
+                <div class="wp-box-body">
+                  <div class="form-group">
+                    <label>Titular Principal</label>
+                    <input type="text" id="sett-hero-title" class="form-input" value="La voz digital que une a los radioaficionados de Venezuela y el mundo." />
+                  </div>
+                  <div class="form-group" style="margin-top: 1rem;">
+                    <label>Descripción Principal</label>
+                    <textarea id="sett-hero-desc" class="form-input" rows="3">Infraestructura abierta y 100% digital basada en el estándar DMR. Conectamos repetidores, puntos de acceso de alta potencia y operadores en todo el territorio nacional con acceso directo a la red global BrandMeister.</textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="wp-box" style="margin-top: 1.5rem;">
+                <div class="wp-box-head">
+                  <h3>Aviso Prioritario de Emergencias (TG 734911)</h3>
+                </div>
+                <div class="wp-box-body">
+                  <div class="form-group">
+                    <label>Texto de la Alerta EMCOM / YV5RNE</label>
+                    <textarea id="sett-alert-text" class="form-input" rows="3">Reservado exclusivamente para prevención, boletines por fenómenos meteorológicos, alertas sísmicas o contingencias mayores. Se recomienda a todos los radioaficionados mantenerlo programado en su lista de recepción (RX List) bajo el Slot 1 en todos los repetidores del país.</textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="editor-sidebar-col">
+              <div class="wp-box metabox">
+                <div class="wp-box-head">
+                  <h4>Frecuencias Recomendadas</h4>
+                </div>
+                <div class="wp-box-body">
+                  <div class="form-group">
+                    <label>Frecuencia VHF Hotspot</label>
+                    <input type="text" id="sett-freq-vhf" class="form-input select-sm" value="146.550 MHz (Alterna: 146.490 MHz)" />
+                  </div>
+                  <div class="form-group" style="margin-top: 0.75rem;">
+                    <label>Frecuencia UHF Hotspot</label>
+                    <input type="text" id="sett-freq-uhf" class="form-input select-sm" value="436.550 MHz (Alterna: 436.490 MHz)" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= -->
         <GalleryView />
 
       </main>
