@@ -38,6 +38,12 @@ import Layout from '../../layouts/Layout.astro';
       </div>
     </header>
 
+    <figure class="article-hero-image" data-bm-opcional="imagen">
+      <div class="container container-reading">
+        <img src="@@IMAGEN@@" alt="@@TITULO@@" width="1920" height="1280" fetchpriority="high" />
+      </div>
+    </figure>
+
     <div class="article-body section-padding">
       <div class="container container-reading">
         <div class="prose-content">@@CONTENIDO@@</div>
@@ -414,5 +420,20 @@ import Layout from '../../layouts/Layout.astro';
       padding: 0.55rem;
       border-radius: 50%;
     }
+  }
+
+  .article-page .article-hero-image {
+    margin: 0;
+    padding: clamp(1.5rem, 3vw, 2.25rem) 0 0;
+    background: var(--bg-page);
+  }
+
+  .article-page .article-hero-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    background: var(--bg-subtle);
   }
 </style>

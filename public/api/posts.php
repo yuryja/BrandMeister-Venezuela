@@ -16,7 +16,7 @@
  * Los autores solo ven y editan sus propias noticias y no pueden publicar.
  */
 
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/uploads.php';
 
 const POST_STATUSES = ['published', 'draft', 'trash'];
 const POST_CATEGORIES = ['Innovación', 'Guías Técnicas', 'Operación', 'Comunidad', 'General'];
@@ -46,6 +46,7 @@ function post_payload(array $r, $withContent = false) {
         'author_name' => $r['author_name'] ?? '',
         'author_callsign' => $r['author_callsign'] ?? '',
         'views_count' => (int)($r['views_count'] ?? 0),
+        'image_url' => (string)($r['image_url'] ?? ''),
         'published_ts' => (int)$r['published_ts'],
         'url' => '/blog/' . $r['slug'],
     ];
@@ -177,6 +178,11 @@ if ($method !== 'POST') {
 }
 
 $user = require_role(['admin', 'editor', 'author']);
+
+if ($action === 'upload_chunk') {
+    upload_handle_chunk();
+}
+
 $input = json_input();
 
 // --------------------------------------------------------------------
@@ -230,8 +236,22 @@ if ($action === 'save') {
     $slug = post_unique_slug($pdo, (string)($input['slug'] ?? ''), $title, $id);
     $readTime = trim((string)($input['read_time'] ?? '')) ?: post_read_time($content);
 
+    // Imagen destacada: se envía el identificador de una subida ya completada
+    $imageUrl = $existing['image_url'] ?? '';
+    $oldImage = $imageUrl;
+    if (!empty($input['image'])) {
+        try {
+            $imageUrl = upload_commit((string)$input['image'], ['post-image'], 'noticias');
+        } catch (Exception $e) {
+            send_json(['success' => false, 'error' => $e->getMessage()], 422);
+        }
+    } elseif (!empty($input['remove_image'])) {
+        $imageUrl = '';
+    }
+
     $columns = [
         'title' => $title,
+        'image_url' => $imageUrl,
         'slug' => $slug,
         'description' => $description,
         'content' => $content,
@@ -255,6 +275,9 @@ if ($action === 'save') {
     if ($existing) {
         $params[':id'] = $id;
         $pdo->prepare('UPDATE bm_posts SET ' . implode(', ', $sets) . ' WHERE id = :id')->execute($params);
+        if ($oldImage && $oldImage !== $imageUrl) {
+            upload_delete_files([$oldImage]);
+        }
         log_activity($user['id'], 'post_updated', ['id' => $id, 'status' => $status]);
     } else {
         $sets[] = '`author_id` = :author_id';
@@ -323,6 +346,10 @@ if ($action === 'delete' || ($action === 'bulk' && ($input['operation'] ?? '') =
         send_json(['success' => false, 'error' => 'Los autores no pueden borrar definitivamente: usa la papelera.'], 403);
     }
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $images = $pdo->prepare("SELECT image_url FROM bm_posts WHERE id IN ($placeholders)");
+    $images->execute($ids);
+    upload_delete_files($images->fetchAll(PDO::FETCH_COLUMN));
+
     $stmt = $pdo->prepare("DELETE FROM bm_posts WHERE id IN ($placeholders)");
     $stmt->execute($ids);
     log_activity($user['id'], 'post_deleted', ['ids' => $ids]);

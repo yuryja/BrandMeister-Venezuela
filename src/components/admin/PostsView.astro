@@ -140,6 +140,24 @@
       </div>
 
       <div class="wp-box metabox">
+        <div class="wp-box-head"><h4>Imagen destacada</h4></div>
+        <div class="wp-box-body">
+          <label class="drop-zone drop-zone-sm" id="pf-image-drop" for="pf-image-input">
+            <input type="file" id="pf-image-input" accept="image/*" class="screen-reader-text" />
+            <strong>Elegir imagen</strong>
+            <span>o arrástrala aquí</span>
+            <span class="drop-zone-rules">Se guarda en WebP muy comprimido, máximo 1920×1280.</span>
+          </label>
+
+          <figure class="featured-image-preview" id="pf-image-preview" hidden>
+            <img id="pf-image-thumb" alt="Imagen destacada de la noticia" />
+            <figcaption id="pf-image-info"></figcaption>
+            <button type="button" class="btn btn-secondary btn-sm" id="pf-image-remove">Quitar imagen</button>
+          </figure>
+        </div>
+      </div>
+
+      <div class="wp-box metabox">
         <div class="wp-box-head"><h4>Categoría</h4></div>
         <div class="wp-box-body">
           <div class="checkbox-list" id="pf-categories"></div>

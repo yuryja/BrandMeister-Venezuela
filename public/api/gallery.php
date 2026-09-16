@@ -15,12 +15,8 @@
  *   POST ?action=delete              {id}
  */
 
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/uploads.php';
 
-const GALLERY_MAX_IMAGE_SIDE = 1500;
-const GALLERY_MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-const GALLERY_MAX_VIDEO_BYTES = 250 * 1024 * 1024;
-const GALLERY_MAX_CHUNK_BYTES = 6 * 1024 * 1024;
 const GALLERY_MAX_IMAGES = 20;
 
 start_secure_session();
@@ -33,118 +29,13 @@ if (!$pdo) {
     send_json(['success' => false, 'error' => 'La base de datos no está disponible en este momento.'], 503);
 }
 
-function gallery_root() {
-    return rtrim(getenv('GALLERY_MEDIA_DIR') ?: dirname(__DIR__) . '/media', '/');
-}
-
-function gallery_tmp_dir() {
-    $dir = gallery_root() . '/gallery/.tmp';
-    if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
-        throw new Exception('No se pudo crear la carpeta temporal de subidas.');
-    }
-    gallery_protect_dir(gallery_root() . '/gallery', true);
-    // La carpeta temporal nunca se sirve
-    if (!file_exists("$dir/.htaccess")) {
-        @file_put_contents("$dir/.htaccess", "Require all denied\n");
-    }
-    return $dir;
-}
-
-/** Sin listados ni ejecución de scripts dentro de las carpetas de medios */
-function gallery_protect_dir($dir, $create = false) {
-    if ($create && !is_dir($dir)) {
-        @mkdir($dir, 0755, true);
-    }
-    if (is_dir($dir) && !file_exists("$dir/.htaccess")) {
-        @file_put_contents("$dir/.htaccess", "Options -Indexes\n<FilesMatch \"\\.(php|phtml|phar|pl|py|cgi|sh|html?|svg)$\">\n  Require all denied\n</FilesMatch>\n");
-    }
-}
-
-/** Borra subidas temporales abandonadas (más de 24 h) */
-function gallery_purge_tmp() {
-    foreach (glob(gallery_tmp_dir() . '/*') ?: [] as $file) {
-        if (is_file($file) && basename($file) !== '.htaccess' && filemtime($file) < time() - 86400) {
-            @unlink($file);
-        }
-    }
-}
-
-function gallery_valid_upload_id($id) {
-    return is_string($id) && preg_match('/^[a-f0-9]{32}$/', $id);
-}
-
-/** Busca una subida temporal ya completa y validada: devuelve [ruta, kind, ext] o null */
-function gallery_find_upload($uploadId) {
-    if (!gallery_valid_upload_id($uploadId)) return null;
-    foreach (['image' => ['webp'], 'poster' => ['webp'], 'video' => ['mp4', 'webm']] as $kind => $exts) {
-        foreach ($exts as $ext) {
-            $path = gallery_tmp_dir() . "/$uploadId.$kind.$ext";
-            if (is_file($path)) return [$path, $kind, $ext];
-        }
-    }
-    return null;
-}
-
-/** Valida un archivo ensamblado. Devuelve la extensión final o lanza Exception */
-function gallery_validate_file($path, $kind) {
-    $size = filesize($path);
-    if ($kind === 'video') {
-        if ($size > GALLERY_MAX_VIDEO_BYTES) {
-            throw new Exception('El video supera el tamaño máximo (250 MB).');
-        }
-        $head = file_get_contents($path, false, null, 0, 12);
-        if (strlen($head) >= 8 && substr($head, 4, 4) === 'ftyp') return 'mp4';
-        if (strncmp($head, "\x1A\x45\xDF\xA3", 4) === 0) return 'webm';
-        throw new Exception('El video debe ser MP4 o WebM.');
-    }
-
-    if ($size > GALLERY_MAX_IMAGE_BYTES) {
-        throw new Exception('La imagen es demasiado pesada.');
-    }
-    $info = @getimagesize($path);
-    if (!$info || $info[2] !== IMAGETYPE_WEBP) {
-        throw new Exception('Las imágenes deben llegar en formato WebP.');
-    }
-    if ($info[0] > GALLERY_MAX_IMAGE_SIDE || $info[1] > GALLERY_MAX_IMAGE_SIDE) {
-        throw new Exception('La imagen supera 1500×1500 píxeles.');
-    }
-    return 'webp';
-}
-
-/** Mueve una subida temporal a su carpeta definitiva y devuelve la URL pública */
-function gallery_commit_upload($uploadId, array $allowedKinds) {
-    $found = gallery_find_upload($uploadId);
-    if (!$found || !in_array($found[1], $allowedKinds, true)) {
-        throw new Exception('Un archivo subido no se encontró o expiró. Vuelve a añadirlo.');
-    }
-    [$path, , $ext] = $found;
-    $subdir = 'gallery/' . gmdate('Y/m');
-    $dir = gallery_root() . '/' . $subdir;
-    if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
-        throw new Exception('No se pudo crear la carpeta de la galería.');
-    }
-    $name = bin2hex(random_bytes(12)) . '.' . $ext;
-    if (!rename($path, "$dir/$name")) {
-        throw new Exception('No se pudo guardar el archivo.');
-    }
-    @chmod("$dir/$name", 0644);
-    return '/media/' . $subdir . '/' . $name;
-}
-
-/** Borra del disco los archivos locales de una publicación (solo dentro de /media/) */
+/** Borra del disco los archivos de una publicación */
 function gallery_delete_files(array $row) {
     $urls = [$row['media_url'], $row['thumbnail_url'], $row['video_url']];
     foreach (json_decode($row['carousel_json'] ?: '[]', true) ?: [] as $item) {
         $urls[] = $item['url'] ?? null;
     }
-    $root = realpath(gallery_root());
-    foreach (array_unique(array_filter($urls)) as $url) {
-        if (strpos($url, '/media/') !== 0) continue;
-        $file = realpath(gallery_root() . substr($url, strlen('/media')));
-        if ($file && $root && strpos($file, $root . DIRECTORY_SEPARATOR) === 0 && is_file($file)) {
-            @unlink($file);
-        }
-    }
+    upload_delete_files($urls);
 }
 
 function gallery_row_payload(array $r) {
@@ -194,63 +85,7 @@ $user = require_role(['admin', 'editor']);
 // Subida por partes: evita los límites de upload_max_filesize del hosting
 // --------------------------------------------------------------------
 if ($action === 'upload_chunk') {
-    $uploadId = (string)($_POST['upload_id'] ?? '');
-    $index = (int)($_POST['index'] ?? -1);
-    $total = (int)($_POST['total'] ?? 0);
-    $kind = (string)($_POST['kind'] ?? '');
-    $chunk = $_FILES['chunk'] ?? null;
-
-    if (!gallery_valid_upload_id($uploadId) || !in_array($kind, ['image', 'poster', 'video'], true)) {
-        send_json(['success' => false, 'error' => 'Subida no válida.'], 400);
-    }
-    if ($total < 1 || $total > 100 || $index < 0 || $index >= $total) {
-        send_json(['success' => false, 'error' => 'Parte de la subida no válida.'], 400);
-    }
-    if (!$chunk || ($chunk['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file($chunk['tmp_name'])) {
-        $code = $chunk['error'] ?? UPLOAD_ERR_NO_FILE;
-        $msg = in_array($code, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
-            ? 'El servidor rechazó la parte por tamaño (upload_max_filesize).'
-            : 'No se recibió el archivo.';
-        send_json(['success' => false, 'error' => $msg], 400);
-    }
-    if ($chunk['size'] > GALLERY_MAX_CHUNK_BYTES) {
-        send_json(['success' => false, 'error' => 'Parte demasiado grande.'], 413);
-    }
-
-    if ($index === 0) {
-        gallery_purge_tmp();
-    }
-    $partPath = gallery_tmp_dir() . "/$uploadId.$kind.part";
-    if ($index === 0) {
-        @unlink($partPath);
-    } elseif (!is_file($partPath)) {
-        send_json(['success' => false, 'error' => 'La subida se interrumpió. Vuelve a intentarlo.'], 409);
-    }
-
-    // Las partes llegan en orden: se añaden al final del archivo
-    $maxBytes = $kind === 'video' ? GALLERY_MAX_VIDEO_BYTES : GALLERY_MAX_IMAGE_BYTES;
-    if ((is_file($partPath) ? filesize($partPath) : 0) + $chunk['size'] > $maxBytes) {
-        @unlink($partPath);
-        send_json(['success' => false, 'error' => 'El archivo supera el tamaño máximo permitido.'], 413);
-    }
-    $out = fopen($partPath, 'ab');
-    $in = fopen($chunk['tmp_name'], 'rb');
-    stream_copy_to_stream($in, $out);
-    fclose($in);
-    fclose($out);
-
-    if ($index < $total - 1) {
-        send_json(['success' => true, 'received' => $index + 1]);
-    }
-
-    try {
-        $ext = gallery_validate_file($partPath, $kind);
-    } catch (Exception $e) {
-        @unlink($partPath);
-        send_json(['success' => false, 'error' => $e->getMessage()], 422);
-    }
-    rename($partPath, gallery_tmp_dir() . "/$uploadId.$kind.$ext");
-    send_json(['success' => true, 'upload_id' => $uploadId, 'complete' => true]);
+    upload_handle_chunk();
 }
 
 // --------------------------------------------------------------------
@@ -319,11 +154,11 @@ if ($action === 'save') {
                 if ($poster === null) {
                     throw new Exception('Falta la portada del video.');
                 }
-                $videoUrl = gallery_commit_upload($video, ['video']);
-                $posterUrl = gallery_commit_upload($poster, ['poster', 'image']);
+                $videoUrl = upload_commit($video, ['video'], 'gallery');
+                $posterUrl = upload_commit($poster, ['poster', 'image'], 'gallery');
                 $columns += ['media_type' => 'VIDEO', 'media_url' => $posterUrl, 'thumbnail_url' => $posterUrl, 'video_url' => $videoUrl, 'carousel_json' => null];
             } else {
-                $urls = array_map(function ($uploadId) { return gallery_commit_upload($uploadId, ['image']); }, $images);
+                $urls = array_map(function ($uploadId) { return upload_commit($uploadId, ['image'], 'gallery'); }, $images);
                 $columns += [
                     'media_type' => count($urls) > 1 ? 'CAROUSEL_ALBUM' : 'IMAGE',
                     'media_url' => $urls[0],

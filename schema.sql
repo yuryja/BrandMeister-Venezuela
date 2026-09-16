@@ -58,6 +58,7 @@ CREATE TABLE `bm_posts` (
   `slug` VARCHAR(255) NOT NULL UNIQUE,
   `description` TEXT NOT NULL,
   `content` LONGTEXT NOT NULL,
+  `image_url` VARCHAR(255) NOT NULL DEFAULT '',
   `category` VARCHAR(60) NOT NULL DEFAULT 'General',
   `tags` VARCHAR(255) NOT NULL DEFAULT '',
   `read_time` VARCHAR(40) NOT NULL DEFAULT '4 min de lectura',

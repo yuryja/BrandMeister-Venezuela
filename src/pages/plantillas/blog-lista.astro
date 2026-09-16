@@ -34,6 +34,9 @@ import Layout from '../../layouts/Layout.astro';
       <div class="container">
         <div class="articles-archive" id="articles-container">
           <template data-bm-plantilla="articulo"><article class="archive-item" data-category="@@CATEGORIA@@">
+            <a class="item-thumb" href="/blog/@@SLUG@@" data-bm-opcional="imagen" tabindex="-1" aria-hidden="true">
+              <img src="@@IMAGEN@@" alt="" loading="lazy" />
+            </a>
             <div class="item-meta">
               <span class="item-cat">@@CATEGORIA@@</span>
               <time datetime="@@FECHA_ISO@@" class="item-date">@@FECHA@@</time>
@@ -306,5 +309,37 @@ import Layout from '../../layouts/Layout.astro';
 
   .blog-page template {
     display: none;
+  }
+
+  .blog-page .archive-item {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 760px) {
+    .blog-page .archive-item:has(.item-thumb) {
+      grid-template-columns: 240px 1fr;
+      align-items: start;
+    }
+  }
+
+  .blog-page .item-thumb {
+    display: block;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--bg-subtle);
+  }
+
+  .blog-page .item-thumb img {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .blog-page .archive-item:hover .item-thumb img {
+    transform: scale(1.03);
   }
 </style>
