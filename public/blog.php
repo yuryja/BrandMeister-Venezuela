@@ -42,6 +42,11 @@ function blog_extract_template(&$html, $name) {
     return $m[1];
 }
 
+/** Quita los bloques marcados con data-bm-opcional cuando no hay dato (p. ej. sin imagen) */
+function blog_drop_optional($html, $name) {
+    return preg_replace('#<(figure|a|div)[^>]*data-bm-opcional="' . preg_quote($name, '#') . '"[^>]*>.*?</\1>#s', '', $html);
+}
+
 function blog_fill($template, array $values) {
     return str_replace(
         array_map(function ($k) { return "@@$k@@"; }, array_keys($values)),
@@ -132,7 +137,11 @@ if ($slug !== '') {
         return blog_fill($tagTemplate, ['ETIQUETA' => e($tag)]);
     }, $tags));
 
-    blog_head($html, $post['title'] . ' · ' . BLOG_SITE_NAME, $post['description'], $url);
+    $imagen = (string)($post['image_url'] ?? '');
+    if ($imagen === '') {
+        $html = blog_drop_optional($html, 'imagen');
+    }
+    blog_head($html, $post['title'] . ' · ' . BLOG_SITE_NAME, $post['description'], $url, $imagen ? $siteUrl . $imagen : null);
     $html = blog_fill($html, [
         'TITULO' => e($post['title']),
         'DESCRIPCION' => e($post['description']),
@@ -143,6 +152,7 @@ if ($slug !== '') {
         'FECHA_ISO' => date('c', (int)$post['ts']),
         'FECHA_LARGA' => blog_fecha_larga((int)$post['ts']),
         'CONTENIDO' => bm_markdown($post['content']),
+        'IMAGEN' => e($imagen),
         'ETIQUETAS' => $tagsHtml,
         'URL' => e($url),
         'URL_CODIFICADA' => rawurlencode($url),
@@ -181,7 +191,9 @@ $items = [];
 foreach ($posts as $post) {
     $categories[$post['category']] = true;
     $tags = array_values(array_filter(array_map('trim', explode(',', (string)$post['tags']))));
-    $items[] = blog_fill($itemTemplate, [
+    $item = (string)($post['image_url'] ?? '') === '' ? blog_drop_optional($itemTemplate, 'imagen') : $itemTemplate;
+    $items[] = blog_fill($item, [
+        'IMAGEN' => e((string)($post['image_url'] ?? '')),
         'CATEGORIA' => e($post['category']),
         'FECHA_ISO' => date('c', (int)$post['ts']),
         'FECHA' => blog_fecha_larga((int)$post['ts']),

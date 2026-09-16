@@ -4,7 +4,10 @@
 //  - Subida por partes para no chocar con upload_max_filesize del hosting
 
 export const MAX_IMAGE_SIDE = 1500;
+// Imagen destacada de una noticia: más grande pero exprimida al máximo
+export const POST_IMAGE_MAX = { width: 1920, height: 1280 };
 const WEBP_QUALITY = 0.82;
+const WEBP_QUALITY_ULTRA = 0.68;
 const VIDEO_MAX_LONG_SIDE = 1920;
 const VIDEO_MAX_SHORT_SIDE = 1080;
 const VIDEO_BITRATE = 2_500_000;
@@ -23,11 +26,19 @@ export type ProcessedVideo = {
   compressed: boolean;
 };
 
-/** Tamaño final que cabe en un cuadro de maxSide × maxSide sin agrandar */
-export function fitWithin(width: number, height: number, maxSide = MAX_IMAGE_SIDE) {
-  const scale = Math.min(1, maxSide / width, maxSide / height);
+/** Tamaño final que cabe en un cuadro de maxWidth × maxHeight sin agrandar ni recortar */
+export function fitWithin(width: number, height: number, maxWidth = MAX_IMAGE_SIDE, maxHeight = maxWidth) {
+  const scale = Math.min(1, maxWidth / width, maxHeight / height);
   return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) };
 }
+
+export type ImageOptions = {
+  maxWidth?: number;
+  maxHeight?: number;
+  quality?: number;
+  /** 'ultra' usa el codificador WebAssembly (más lento, archivos bastante menores) */
+  mode?: 'rapido' | 'ultra';
+};
 
 // ---------------------------------------------------------------------------
 // Fotos
@@ -85,24 +96,47 @@ function drawScaled(source: CanvasImageSource, srcW: number, srcH: number, dstW:
   return canvas;
 }
 
-async function canvasToWebp(canvas: HTMLCanvasElement): Promise<Blob> {
-  const native = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', WEBP_QUALITY));
+/** Codificador WebAssembly: compresión máxima (método 6) y también el respaldo de Safari */
+async function encodeWithWasm(canvas: HTMLCanvasElement, quality: number, ultra: boolean): Promise<Blob> {
+  const { default: encode } = await import('@jsquash/webp/encode');
+  const data = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
+  const buffer = await encode(data, ultra
+    ? { quality: Math.round(quality * 100), method: 6, sns_strength: 80, filter_strength: 40, use_sharp_yuv: 1 }
+    : { quality: Math.round(quality * 100) });
+  return new Blob([buffer], { type: 'image/webp' });
+}
+
+async function canvasToWebp(canvas: HTMLCanvasElement, quality = WEBP_QUALITY, mode: 'rapido' | 'ultra' = 'rapido'): Promise<Blob> {
+  if (mode === 'ultra') {
+    // Se prueban las dos vías y se sube la más liviana
+    const wasm = await encodeWithWasm(canvas, quality, true).catch(() => null);
+    const native = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
+    const valido = native && native.type === 'image/webp' ? native : null;
+    if (wasm && valido) return wasm.size <= valido.size ? wasm : valido;
+    if (wasm || valido) return (wasm ?? valido)!;
+    throw new Error('No se pudo convertir la imagen a WebP.');
+  }
+
+  const native = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
   if (native && native.type === 'image/webp') {
     return native;
   }
   // Safari no codifica WebP en canvas: codificador WebAssembly (se descarga solo si hace falta)
-  const { default: encode } = await import('@jsquash/webp/encode');
-  const data = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
-  const buffer = await encode(data, { quality: Math.round(WEBP_QUALITY * 100) });
-  return new Blob([buffer], { type: 'image/webp' });
+  return encodeWithWasm(canvas, quality, false);
 }
 
-export async function processImage(file: Blob): Promise<ProcessedImage> {
+export async function processImage(file: Blob, options: ImageOptions = {}): Promise<ProcessedImage> {
+  const {
+    maxWidth = MAX_IMAGE_SIDE,
+    maxHeight = maxWidth,
+    mode = 'rapido',
+    quality = mode === 'ultra' ? WEBP_QUALITY_ULTRA : WEBP_QUALITY,
+  } = options;
   const bitmap = await decodeImage(file);
   try {
-    const target = fitWithin(bitmap.width, bitmap.height);
+    const target = fitWithin(bitmap.width, bitmap.height, maxWidth, maxHeight);
     const canvas = drawScaled(bitmap, bitmap.width, bitmap.height, target.width, target.height);
-    const blob = await canvasToWebp(canvas);
+    const blob = await canvasToWebp(canvas, quality, mode);
     return { blob, width: target.width, height: target.height, originalBytes: file.size };
   } finally {
     bitmap.close();
@@ -276,8 +310,9 @@ function newUploadId() {
 /** Sube un Blob en partes de 4 MB y devuelve el upload_id que usa gallery.php?action=save */
 export async function uploadInChunks(
   blob: Blob,
-  kind: 'image' | 'poster' | 'video',
-  onProgress?: (ratio: number) => void
+  kind: 'image' | 'poster' | 'video' | 'post-image',
+  onProgress?: (ratio: number) => void,
+  endpoint = '/api/gallery.php?action=upload_chunk'
 ): Promise<string> {
   const uploadId = newUploadId();
   const total = Math.max(1, Math.ceil(blob.size / CHUNK_BYTES));
@@ -295,7 +330,7 @@ export async function uploadInChunks(
     // Reintenta cada parte hasta 3 veces ante fallos de red
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const res = await fetch('/api/gallery.php?action=upload_chunk', { method: 'POST', body: form, credentials: 'same-origin' });
+        const res = await fetch(endpoint, { method: 'POST', body: form, credentials: 'same-origin' });
         const data = await res.json().catch(() => ({}));
         if (res.status === 401) {
           document.dispatchEvent(new CustomEvent('bm:unauthorized'));

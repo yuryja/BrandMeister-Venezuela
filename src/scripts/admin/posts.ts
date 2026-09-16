@@ -1,5 +1,6 @@
 // Panel · Noticias: listado con filtros, papelera y editor con vista previa
 import { api, escapeHtml, notice, showFieldErrors, withBusy, type SessionUser } from './api';
+import { processImage, uploadInChunks, formatBytes, POST_IMAGE_MAX, type ProcessedImage } from './media';
 
 type PostRow = {
   id: number;
@@ -16,6 +17,7 @@ type PostRow = {
   author_name: string;
   author_callsign: string;
   views_count: number;
+  image_url: string;
   published_ts: number;
   url: string;
 };
@@ -32,6 +34,10 @@ let search = '';
 let editing: PostRow | null = null;
 let pendingEdit: PostRow | null | 'new' = null;
 let searchTimer = 0;
+// Imagen destacada pendiente de subir y marca de "quitar la actual"
+let imagenNueva: ProcessedImage | null = null;
+let imagenPreviewUrl = '';
+let quitarImagen = false;
 
 const STATUS_LABELS = { published: 'Publicada', draft: 'Borrador', trash: 'Papelera' };
 const fmtDate = (ts: number) => new Date(ts * 1000).toLocaleDateString('es-VE', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -97,6 +103,7 @@ function renderList() {
       <tr data-post-id="${p.id}" class="${p.status !== 'published' ? 'is-inactive' : ''}">
         <td class="col-cb"><input type="checkbox" class="post-cb" value="${p.id}" aria-label="Seleccionar ${escapeHtml(p.title)}" /></td>
         <td class="cell-title">
+          ${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="" loading="lazy" class="post-thumb" />` : ''}
           <strong>${inTrash ? escapeHtml(p.title) : `<a href="#" data-action="edit">${escapeHtml(p.title)}</a>`}</strong>
           ${p.status !== 'published' ? `<span class="state-badge state-${p.status === 'draft' ? 'pending' : 'inactive'}">${STATUS_LABELS[p.status]}</span>` : ''}
           ${p.featured ? '<span class="state-badge state-self">Destacada</span>' : ''}
@@ -203,8 +210,58 @@ async function prepareEditor() {
   view.hidden = !editing || editing.status !== 'published';
   if (editing) view.href = editing.url;
 
+  limpiarImagen();
+  pintarImagen();
   updateCounters();
   ($('pf-title') as HTMLInputElement).focus();
+}
+
+function limpiarImagen() {
+  if (imagenPreviewUrl) URL.revokeObjectURL(imagenPreviewUrl);
+  imagenPreviewUrl = '';
+  imagenNueva = null;
+  quitarImagen = false;
+}
+
+function pintarImagen() {
+  const preview = $('pf-image-preview')!;
+  const thumb = $('pf-image-thumb') as HTMLImageElement;
+  const info = $('pf-image-info')!;
+  const actual = !quitarImagen && editing?.image_url ? editing.image_url : '';
+
+  if (imagenNueva) {
+    thumb.src = imagenPreviewUrl;
+    const ahorro = Math.max(0, Math.round((1 - imagenNueva.blob.size / imagenNueva.originalBytes) * 100));
+    info.textContent = `${imagenNueva.width}×${imagenNueva.height} · ${formatBytes(imagenNueva.blob.size)}${ahorro ? ` · −${ahorro}%` : ''} · se sube al guardar`;
+    preview.hidden = false;
+  } else if (actual) {
+    thumb.src = actual;
+    info.textContent = 'Imagen actual de la noticia';
+    preview.hidden = false;
+  } else {
+    preview.hidden = true;
+  }
+}
+
+async function procesarImagen(file: File) {
+  const info = $('pf-image-info')!;
+  $('pf-image-preview')!.hidden = false;
+  info.textContent = 'Optimizando imagen…';
+  try {
+    const procesada = await processImage(file, {
+      maxWidth: POST_IMAGE_MAX.width,
+      maxHeight: POST_IMAGE_MAX.height,
+      mode: 'ultra',
+    });
+    limpiarImagen();
+    imagenNueva = procesada;
+    imagenPreviewUrl = URL.createObjectURL(procesada.blob);
+  } catch {
+    notice($('post-form-notice'), 'error', /hei[cf]$/i.test(file.name)
+      ? 'HEIC solo se puede leer en Safari: conviértela a JPG antes de subirla.'
+      : 'No se pudo leer esa imagen.');
+  }
+  pintarImagen();
 }
 
 function updateCounters() {
@@ -291,13 +348,23 @@ async function submit(e: Event) {
     published_date: fd.get('published_date'),
   };
 
-  const res = await withBusy($('post-submit') as HTMLButtonElement, () => api<{ post: PostRow }>('/api/posts.php?action=save', payload));
+  const res = await withBusy($('post-submit') as HTMLButtonElement, async () => {
+    if (imagenNueva) {
+      $('pf-image-info')!.textContent = 'Subiendo imagen…';
+      const uploadId = await uploadInChunks(imagenNueva.blob, 'post-image', undefined, '/api/posts.php?action=upload_chunk');
+      (payload as Record<string, unknown>).image = uploadId;
+    } else if (quitarImagen) {
+      (payload as Record<string, unknown>).remove_image = true;
+    }
+    return api<{ post: PostRow }>('/api/posts.php?action=save', payload);
+  });
   if (!res.ok) {
     showFieldErrors(form, res.data.validation_errors);
     notice($('post-form-notice'), 'error', res.data.error || 'No se pudo guardar la noticia.');
     return;
   }
   const message = res.data.message || 'Noticia guardada.';
+  limpiarImagen();
   await loadPosts();
   window.switchView('posts');
   notice($('posts-notice'), 'success', message);
@@ -373,6 +440,28 @@ export function initPosts() {
   slugInput.addEventListener('input', () => (slugTouched = true));
   $('pf-title')!.addEventListener('input', (e) => {
     if (!slugTouched && !editing) slugInput.value = slugify((e.target as HTMLInputElement).value);
+  });
+
+  const imageInput = $('pf-image-input') as HTMLInputElement;
+  imageInput.addEventListener('change', () => {
+    if (imageInput.files?.[0]) procesarImagen(imageInput.files[0]);
+    imageInput.value = '';
+  });
+  const imageDrop = $('pf-image-drop')!;
+  ['dragenter', 'dragover'].forEach((tipo) => imageDrop.addEventListener(tipo, (e) => {
+    e.preventDefault();
+    imageDrop.classList.add('is-dragging');
+  }));
+  ['dragleave', 'drop'].forEach((tipo) => imageDrop.addEventListener(tipo, () => imageDrop.classList.remove('is-dragging')));
+  imageDrop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const file = (e as DragEvent).dataTransfer?.files?.[0];
+    if (file) procesarImagen(file);
+  });
+  $('pf-image-remove')!.addEventListener('click', () => {
+    limpiarImagen();
+    quitarImagen = true;
+    pintarImagen();
   });
 
   $('pf-content')!.addEventListener('input', updateCounters);
