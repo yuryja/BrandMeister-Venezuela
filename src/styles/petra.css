@@ -228,18 +228,6 @@
   font-weight: 700;
 }
 
-.pt-credits {
-  margin-top: 2rem;
-  color: var(--text-faint);
-  font-size: 0.82rem;
-  text-align: center;
-}
-
-.pt-credits a {
-  color: var(--bm-orange);
-  font-weight: 600;
-}
-
 /* ── Estados: badge, punto, al aire ───────────────────────────────────── */
 
 .pt-badge {
