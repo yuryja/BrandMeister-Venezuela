@@ -25,6 +25,10 @@ function blog_site_url() {
 function blog_template($name) {
     $file = __DIR__ . "/plantillas/blog-$name/index.html";
     if (!is_file($file)) {
+        $dist = dirname(__DIR__) . "/dist/plantillas/blog-$name/index.html";
+        if (is_file($dist)) {
+            return file_get_contents($dist);
+        }
         error_log("[BM-YV] Falta la plantilla del blog: $file");
         http_response_code(500);
         exit('El blog no está disponible en este momento.');
