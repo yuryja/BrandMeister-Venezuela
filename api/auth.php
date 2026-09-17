@@ -1,5 +1,16 @@
 <?php
 require_once __DIR__ . '/accounts.php';
+require_once __DIR__ . '/recaptcha.php';
+
+/** reCAPTCHA v3 para login y restablecimiento: corta la petición si Google no la da por humana */
+function auth_require_recaptcha(array $input, $action) {
+    $check = bm_verify_recaptcha((string)($input['recaptcha_token'] ?? ''), $action);
+    if (!$check['ok']) {
+        error_log("[BM-YV] $action rechazado por reCAPTCHA: " . ($check['reason'] ?? '') . (isset($check['score']) ? ' score=' . $check['score'] : ''));
+        log_activity(null, 'recaptcha_blocked', ['action' => $action, 'reason' => $check['reason'] ?? '']);
+        send_json(['success' => false, 'error' => 'No pudimos verificar que eres una persona. Recarga la página e inténtalo de nuevo.'], 400);
+    }
+}
 
 start_secure_session();
 
@@ -18,6 +29,7 @@ if ($action === 'login') {
     if ($username === '' || $password === '') {
         send_json(['success' => false, 'error' => 'Ingresa tu usuario o indicativo y tu contraseña'], 400);
     }
+    auth_require_recaptcha($input, 'login');
 
     // Freno contra fuerza bruta: 5 fallos por sesión y 20 por IP cada 15 minutos
     $attempts = $_SESSION['login_attempts'] ?? ['count' => 0, 'since' => time()];
@@ -91,12 +103,14 @@ if ($action === 'forgot') {
     if ($method !== 'POST') {
         send_json(['success' => false, 'error' => 'Método no permitido'], 405);
     }
-    $identifier = trim((string)(json_input()['identifier'] ?? ''));
+    $input = json_input();
+    $identifier = trim((string)($input['identifier'] ?? ''));
     $generic = ['success' => true, 'message' => 'Si la cuenta existe y está activa, enviamos un enlace para restablecer la contraseña a su correo.'];
 
     if ($identifier === '' || mb_strlen($identifier) > 120) {
         send_json(['success' => false, 'error' => 'Ingresa tu usuario, indicativo o correo'], 400);
     }
+    auth_require_recaptcha($input, 'forgot');
     if (bm_recent_attempts_from_ip('password_reset_requested', 3600) >= 5) {
         send_json(['success' => false, 'error' => 'Demasiadas solicitudes. Inténtalo más tarde.'], 429);
     }
