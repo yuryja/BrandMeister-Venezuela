@@ -8,8 +8,8 @@ const repeaters = [
     location: "Caracas, Distrito Capital",
     region: "Capital",
     band: "VHF",
-    freqRx: "145.000 MHz",
-    freqTx: "145.600 MHz",
+    freqRx: "147.840 MHz",
+    freqTx: "147.240 MHz",
     offset: "+0.600 MHz",
     colorCode: "CC1",
     status: "Activo",
@@ -22,9 +22,9 @@ const repeaters = [
     location: "Caracas, Distrito Capital",
     region: "Capital",
     band: "UHF",
-    freqRx: "434.200 MHz",
-    freqTx: "439.200 MHz",
-    offset: "+5.000 MHz",
+    freqRx: "434.600 MHz",
+    freqTx: "439.600 MHz",
+    offset: "-5.000 MHz",
     colorCode: "CC1",
     status: "Activo",
     type: "Repetidor Oficial",
@@ -36,8 +36,8 @@ const repeaters = [
     location: "La Guaira",
     region: "Litoral Central",
     band: "VHF",
-    freqRx: "145.025 MHz",
-    freqTx: "145.625 MHz",
+    freqRx: "147.750 MHz",
+    freqTx: "147.150 MHz",
     offset: "+0.600 MHz",
     colorCode: "CC1",
     status: "Activo",
@@ -50,9 +50,9 @@ const repeaters = [
     location: "Valencia, Carabobo",
     region: "Central",
     band: "VHF",
-    freqRx: "145.150 MHz",
-    freqTx: "145.750 MHz",
-    offset: "+0.600 MHz",
+    freqRx: "146.100 MHz",
+    freqTx: "146.700 MHz",
+    offset: "-0.600 MHz",
     colorCode: "CC1",
     status: "Activo",
     type: "Repetidor Oficial",
@@ -61,44 +61,44 @@ const repeaters = [
   {
     id: "734009",
     callsign: "YV5VE",
-    location: "San Juan de los Morros, Guárico",
+    location: "Altagracia de Orituco, Guárico",
     region: "Llanos Centrales",
     band: "VHF",
-    freqRx: "145.050 MHz",
-    freqTx: "145.650 MHz",
+    freqRx: "147.990 MHz",
+    freqTx: "147.390 MHz",
     offset: "+0.600 MHz",
     colorCode: "CC1",
     status: "Activo",
     type: "Repetidor Oficial",
-    notes: "Enlace estratégico en la puerta de entrada a los llanos centrales venezolanos."
+    notes: "Enlace estratégico en Altagracia de Orituco y los llanos centrales venezolanos."
   },
   {
     id: "734012",
     callsign: "YV5VE",
-    location: "Guárico",
+    location: "Cerro Portachuelo, Guárico",
     region: "Llanos Centrales",
     band: "VHF",
-    freqRx: "145.100 MHz",
-    freqTx: "145.700 MHz",
-    offset: "+0.600 MHz",
+    freqRx: "146.220 MHz",
+    freqTx: "146.820 MHz",
+    offset: "-0.600 MHz",
     colorCode: "CC1",
     status: "Activo",
     type: "Repetidor Oficial",
-    notes: "Expansión de la huella digital DMR en la vasta llanura guariqueña."
+    notes: "Expansión de la huella digital DMR en la región llanera desde Cerro Portachuelo."
   },
   {
     id: "734004",
     callsign: "YV4KWT",
-    location: "Guárico",
+    location: "Cerro Platillón, Guárico",
     region: "Llanos Centrales",
     band: "VHF",
-    freqRx: "145.075 MHz",
-    freqTx: "145.675 MHz",
+    freqRx: "147.690 MHz",
+    freqTx: "147.090 MHz",
     offset: "+0.600 MHz",
     colorCode: "CC1",
     status: "Local",
     type: "Repetidor Local",
-    notes: "Enlace operativo para tráfico y experimentos comunitarios locales."
+    notes: "Enlace operativo de gran altura en Cerro Platillón para tráfico local y regional."
   },
   {
     id: "734015",
@@ -106,9 +106,9 @@ const repeaters = [
     location: "Ciudad Ojeda, Zulia",
     region: "Occidente",
     band: "UHF",
-    freqRx: "434.100 MHz",
-    freqTx: "439.100 MHz",
-    offset: "+5.000 MHz",
+    freqRx: "434.600 MHz",
+    freqTx: "439.600 MHz",
+    offset: "-5.000 MHz",
     colorCode: "CC1",
     status: "Activo",
     type: "Repetidor Oficial",
@@ -193,6 +193,9 @@ const repeaters = [
 
         <!-- Tabla Técnica Interactiva -->
         <div class="table-card">
+          <div class="table-scroll-hint">
+            <span>⟵ Desliza horizontalmente para ver todas las especificaciones ⟶</span>
+          </div>
           <div class="table-responsive">
             <table class="rep-table" id="repeaters-table">
               <thead>
@@ -498,12 +501,32 @@ const repeaters = [
     margin-bottom: 4rem;
   }
 
+  .table-scroll-hint {
+    display: none;
+    font-size: 0.76rem;
+    color: var(--bm-orange);
+    text-align: center;
+    padding: 0.45rem 1rem;
+    background: #FFF7ED;
+    border-bottom: 1px solid rgba(238, 108, 31, 0.15);
+    font-weight: 700;
+  }
+
+  @media (max-width: 992px) {
+    .table-scroll-hint {
+      display: block;
+    }
+  }
+
   .table-responsive {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
   }
 
   .rep-table {
     width: 100%;
+    min-width: 1040px;
     border-collapse: collapse;
     text-align: left;
     font-size: 0.92rem;
@@ -554,17 +577,23 @@ const repeaters = [
     color: var(--bm-red);
   }
 
+  .col-location {
+    min-width: 270px;
+    max-width: 340px;
+  }
+
   .loc-name {
     font-weight: 700;
     color: var(--text-main);
     margin-bottom: 0.2rem;
+    white-space: normal;
   }
 
   .loc-notes {
     font-size: 0.8rem;
     color: var(--text-muted);
     line-height: 1.4;
-    max-width: 300px;
+    white-space: normal;
   }
 
   /* Píldora estandarizada BrandMeister */

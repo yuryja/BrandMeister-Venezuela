@@ -5,6 +5,9 @@ const repeaters = [
     callsign: "YV5DMR",
     location: "Caracas, Distrito Capital",
     band: "VHF",
+    freqRx: "147.840 MHz",
+    freqTx: "147.240 MHz",
+    offset: "+0.600 MHz",
     status: "Activo",
     type: "Repetidor Oficial",
     notes: "Pionero en Venezuela desde 2010. Cobertura en la Gran Caracas y valles del Tuy."
@@ -14,6 +17,9 @@ const repeaters = [
     callsign: "YV5VE",
     location: "Caracas, Distrito Capital",
     band: "UHF",
+    freqRx: "434.600 MHz",
+    freqTx: "439.600 MHz",
+    offset: "-5.000 MHz",
     status: "Activo",
     type: "Repetidor Oficial",
     notes: "Enlace UHF de alta penetración urbana en el área metropolitana."
@@ -23,6 +29,9 @@ const repeaters = [
     callsign: "YV5CBO",
     location: "La Guaira",
     band: "VHF",
+    freqRx: "147.750 MHz",
+    freqTx: "147.150 MHz",
+    offset: "+0.600 MHz",
     status: "Activo",
     type: "Repetidor Oficial",
     notes: "Cobertura en el litoral central y zona costera de La Guaira."
@@ -32,6 +41,9 @@ const repeaters = [
     callsign: "YV4EGG",
     location: "Valencia, Carabobo",
     band: "VHF",
+    freqRx: "146.100 MHz",
+    freqTx: "146.700 MHz",
+    offset: "-0.600 MHz",
     status: "Activo",
     type: "Repetidor Oficial",
     notes: "Cobertura regional en el estado Carabobo y zonas adyacentes del centro."
@@ -39,35 +51,47 @@ const repeaters = [
   {
     id: "734009",
     callsign: "YV5VE",
-    location: "San Juan de los Morros, Guárico",
+    location: "Altagracia de Orituco, Guárico",
     band: "VHF",
+    freqRx: "147.990 MHz",
+    freqTx: "147.390 MHz",
+    offset: "+0.600 MHz",
     status: "Activo",
     type: "Repetidor Oficial",
-    notes: "Enlace estratégico en los llanos centrales."
+    notes: "Enlace estratégico en Altagracia de Orituco y los llanos centrales."
   },
   {
     id: "734012",
     callsign: "YV5VE",
-    location: "Guárico",
+    location: "Cerro Portachuelo, Guárico",
     band: "VHF",
+    freqRx: "146.220 MHz",
+    freqTx: "146.820 MHz",
+    offset: "-0.600 MHz",
     status: "Activo",
     type: "Repetidor Oficial",
-    notes: "Ampliación de cobertura en la región llanera."
+    notes: "Ampliación de cobertura en la región llanera desde Cerro Portachuelo."
   },
   {
     id: "734004",
     callsign: "YV4KWT",
-    location: "Guárico",
+    location: "Cerro Platillón, Guárico",
     band: "VHF",
+    freqRx: "147.690 MHz",
+    freqTx: "147.090 MHz",
+    offset: "+0.600 MHz",
     status: "Local",
     type: "Repetidor Local",
-    notes: "Enlace en modo de operación local."
+    notes: "Enlace de gran altura en Cerro Platillón en modo de operación local."
   },
   {
     id: "734015",
     callsign: "YV1GDQ",
     location: "Ciudad Ojeda, Zulia",
     band: "UHF",
+    freqRx: "434.600 MHz",
+    freqTx: "439.600 MHz",
+    offset: "-5.000 MHz",
     status: "Activo",
     type: "Repetidor Oficial",
     notes: "Cobertura en la Costa Oriental del Lago y occidente venezolano."
@@ -77,6 +101,9 @@ const repeaters = [
     callsign: "YV3ARO",
     location: "Araure, Portuguesa",
     band: "VHF",
+    freqRx: "146.550 MHz",
+    freqTx: "146.550 MHz",
+    offset: "Simplex",
     status: "Activo",
     type: "Hotspot Alta Potencia",
     notes: "Acceso comunitario extendido para la zona metropolitana de Acarigua-Araure."
@@ -113,6 +140,9 @@ const repeaters = [
 
     <!-- Technical Repeater Table (NO cards) -->
     <div class="table-container reveal-on-scroll">
+      <div class="table-scroll-hint">
+        <span>⟵ Desliza horizontalmente para ver todas las especificaciones ⟶</span>
+      </div>
       <div class="repeater-table" id="repeater-list">
         <div class="table-head">
           <div class="col-id">ID Dispositivo</div>
@@ -138,6 +168,7 @@ const repeaters = [
             </div>
             <div class="col-loc">
               <span class="location-name">{r.location}</span>
+              <span class="location-freq">RX: {r.freqRx} · TX: {r.freqTx} <span class="freq-offset">({r.offset})</span></span>
               <span class="location-notes">{r.notes}</span>
             </div>
             <div class="col-band">
@@ -269,15 +300,32 @@ const repeaters = [
     box-sizing: border-box;
   }
 
+  .table-scroll-hint {
+    display: none;
+    font-size: 0.76rem;
+    color: var(--bm-orange);
+    text-align: center;
+    padding: 0.45rem 1rem;
+    background: #FFF7ED;
+    border-bottom: 1px solid rgba(238, 108, 31, 0.15);
+    font-weight: 700;
+  }
+
+  @media (max-width: 992px) {
+    .table-scroll-hint {
+      display: block;
+    }
+  }
+
   .repeater-table {
-    min-width: 850px;
+    min-width: 1040px;
     display: flex;
     flex-direction: column;
   }
 
   .table-head {
     display: grid;
-    grid-template-columns: 140px 110px 1.8fr 90px 170px 110px 140px;
+    grid-template-columns: 130px 115px minmax(300px, 2fr) 85px 160px 105px 135px;
     padding: 1rem 1.5rem;
     background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
     font-size: 0.78rem;
@@ -295,7 +343,7 @@ const repeaters = [
 
   .table-row {
     display: grid;
-    grid-template-columns: 140px 110px 1.8fr 90px 170px 110px 140px;
+    grid-template-columns: 130px 115px minmax(300px, 2fr) 85px 160px 105px 135px;
     padding: 1.25rem 1.5rem;
     align-items: center;
     border-bottom: 1px solid var(--border-subtle);
@@ -330,6 +378,7 @@ const repeaters = [
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+    min-width: 280px;
   }
 
   .location-name {
@@ -337,6 +386,20 @@ const repeaters = [
     font-weight: 700;
     color: var(--text-main);
     letter-spacing: 0 !important;
+  }
+
+  .location-freq {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--bm-orange);
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+  }
+
+  .freq-offset {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
   }
 
   .location-notes {
