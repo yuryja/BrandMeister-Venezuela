@@ -6,6 +6,16 @@ Options -Indexes
   RewriteEngine On
   RewriteBase /
 
+  # Todo el sitio por HTTPS: sin esto la contraseña y la cookie del panel viajan sin cifrar
+  # (localhost queda fuera para poder probar el sitio en local, donde no hay certificado)
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # En /media/ solo hay fotos y videos: nada que el servidor deba ejecutar o mostrar como página
+  RewriteRule ^media/.*\.(php[0-9]?|phtml|phar|cgi|pl|py|sh|s?html?|xml|svg)$ - [F]
+
   # Proxy /api/petra to petra.php
   RewriteRule ^api/petra/(.*)$ api/petra.php?endpoint=$1 [QSA,L]
 
@@ -72,4 +82,15 @@ Options -Indexes
   Header set X-Content-Type-Options "nosniff"
   Header set X-Frame-Options "SAMEORIGIN"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), interest-cohort=()"
+
+  # HSTS: el navegador recuerda que este dominio solo se visita por HTTPS.
+  # Empieza en 7 días; cuando confirmes que todo entra bien por HTTPS, súbelo a 31536000 (1 año).
+  Header always set Strict-Transport-Security "max-age=604800" "expr=%{HTTPS} == 'on'"
+
+  # Content-Security-Policy: limita de dónde puede cargar el navegador.
+  # 'unsafe-inline' sigue siendo necesario porque Astro incrusta scripts y estilos en el HTML;
+  # aun así, esto bloquea scripts de dominios ajenos, iframes, formularios hacia fuera y objetos.
+  # 'wasm-unsafe-eval': el panel comprime imágenes a WebP con WebAssembly.
+  Header set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://www.google.com https://www.gstatic.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https://unpkg.com https://tile.openstreetmap.org https://*.tile.openstreetmap.org; font-src 'self' data:; media-src 'self' blob:; connect-src 'self' blob: wss://hose.brandmeister.network https://www.google.com; frame-src https://www.google.com; worker-src 'self' blob:"
 </IfModule>

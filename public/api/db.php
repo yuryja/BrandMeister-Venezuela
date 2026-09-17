@@ -34,13 +34,38 @@ function get_db_connection() {
     }
 }
 
+/**
+ * CORS solo para el propio sitio y sus subdominios: la web y el panel se sirven desde el mismo
+ * dominio, así que ninguna página ajena necesita leer estas respuestas.
+ */
+function bm_cors_headers() {
+    $origin = trim((string)($_SERVER['HTTP_ORIGIN'] ?? ''));
+    if ($origin === '') {
+        return;
+    }
+    header('Vary: Origin');
+
+    $host = strtolower((string)parse_url($origin, PHP_URL_HOST));
+    $siteHost = strtolower((string)(parse_url((string)getenv('SITE_URL'), PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? '')));
+    $base = preg_replace(['/:\d+$/', '/^www\./'], '', $siteHost);
+    if ($host === '' || $base === '') {
+        return;
+    }
+    if ($host !== $base && substr($host, -strlen(".$base")) !== ".$base") {
+        return;
+    }
+
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
+}
+
 function send_json($data, $statusCode = 200) {
     http_response_code($statusCode);
     header('Content-Type: application/json; charset=utf-8');
     header('X-Content-Type-Options: nosniff');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+    bm_cors_headers();
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
 }

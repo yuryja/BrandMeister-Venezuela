@@ -92,39 +92,34 @@ if (!$captcha['ok']) {
     ], 400);
 }
 
+// 4-bis. Freno por conexión: como máximo 5 mensajes por hora desde la misma IP
+$pdo = get_db_connection();
+if ($pdo) {
+    try {
+        $recent = $pdo->prepare("SELECT COUNT(*) FROM `bm_contact_messages` WHERE ip_address = :ip AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)");
+        $recent->execute([':ip' => $_SERVER['REMOTE_ADDR'] ?? '']);
+        if ((int)$recent->fetchColumn() >= 5) {
+            send_json([
+                'success' => false,
+                'error' => 'Has enviado varios mensajes seguidos. Espera un momento antes de escribirnos de nuevo.'
+            ], 429);
+        }
+    } catch (Exception $e) {
+        error_log('[BM-YV] Freno de contacto: ' . $e->getMessage());
+    }
+}
+
 // 5. Generación de código único de Ticket
 $ticketId = 'BM-734-' . strtoupper(substr(md5(uniqid((string)mt_rand(), true)), 0, 6));
 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'desconocida';
 $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 250);
 
 // 6. Almacenamiento en Base de Datos MySQL (si la conexión está activa)
+// La tabla se crea con la migración 006; aquí solo se inserta.
 $pdo = get_db_connection();
 if ($pdo) {
     try {
-        // Asegurar que la tabla exista
-        $pdo->exec("CREATE TABLE IF NOT EXISTS `bm_contact_messages` (
-            `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-            `ticket_id` VARCHAR(30) NOT NULL UNIQUE,
-            `name` VARCHAR(120) NOT NULL,
-            `callsign` VARCHAR(20) NULL,
-            `dmr_id` VARCHAR(20) NULL,
-            `email` VARCHAR(150) NOT NULL,
-            `phone` VARCHAR(50) NULL,
-            `category` VARCHAR(80) NOT NULL,
-            `state_region` VARCHAR(80) NULL,
-            `subject` VARCHAR(200) NOT NULL,
-            `message` TEXT NOT NULL,
-            `ip_address` VARCHAR(45) NULL,
-            `user_agent` VARCHAR(255) NULL,
-            `status` ENUM('unread', 'read', 'in_progress', 'resolved') NOT NULL DEFAULT 'unread',
-            `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (`id`),
-            INDEX `idx_ticket` (`ticket_id`),
-            INDEX `idx_callsign` (`callsign`),
-            INDEX `idx_status` (`status`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-
-        $stmt = $pdo->prepare("INSERT INTO `bm_contact_messages` 
+        $stmt = $pdo->prepare("INSERT INTO `bm_contact_messages`
             (`ticket_id`, `name`, `callsign`, `dmr_id`, `email`, `phone`, `category`, `state_region`, `subject`, `message`, `ip_address`, `user_agent`, `status`)
             VALUES (:ticket, :name, :callsign, :dmr_id, :email, :phone, :category, :state_region, :subject, :message, :ip, :ua, 'unread')");
 

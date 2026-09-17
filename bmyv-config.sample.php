@@ -37,4 +37,8 @@ return [
 
     // Correo que recibe los mensajes del formulario de contacto
     'SYSOP_ALERT_EMAIL' => 'sysop@brandmeisteryv.net',
+
+    // Solo si el sitio pasa por Cloudflare u otro proxy: cabecera con la IP real del visitante
+    // (p. ej. 'CF-Connecting-IP'). Vacío = se usa la IP de la conexión, que nadie puede falsear.
+    'TRUSTED_PROXY_HEADER' => '',
 ];
