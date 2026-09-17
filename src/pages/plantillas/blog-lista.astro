@@ -35,60 +35,206 @@ import Layout from '../../layouts/Layout.astro';
         <div class="articles-archive" id="articles-container">
           <template data-bm-plantilla="articulo"><article class="archive-item" data-category="@@CATEGORIA@@">
             <a class="item-thumb" href="/blog/@@SLUG@@" data-bm-opcional="imagen" tabindex="-1" aria-hidden="true">
-              <img src="@@IMAGEN@@" alt="" loading="lazy" />
+              <img src="@@IMAGEN@@" alt="@@TITULO@@" loading="lazy" />
             </a>
-            <div class="item-meta">
-              <span class="item-cat">@@CATEGORIA@@</span>
-              <time datetime="@@FECHA_ISO@@" class="item-date">@@FECHA@@</time>
-              <span class="item-read">@@TIEMPO_LECTURA@@</span>
-            </div>
-
-            <h2 class="item-title">
-              <a href="/blog/@@SLUG@@">@@TITULO@@</a>
-            </h2>
-
-            <p class="item-desc">@@DESCRIPCION@@</p>
-
-            <div class="item-footer">
-              <div class="item-author">
-                <span>Por <strong>@@AUTOR@@</strong></span>
-                <span class="item-callsign">@@INDICATIVO@@</span>
+            <div class="item-content">
+              <div class="item-meta">
+                <span class="item-cat">@@CATEGORIA@@</span>
+                <span class="item-read">
+                  <svg class="meta-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  @@TIEMPO_LECTURA@@
+                </span>
               </div>
+
+              <h2 class="item-title">
+                <a href="/blog/@@SLUG@@">@@TITULO@@</a>
+              </h2>
+
+              <p class="item-desc">@@DESCRIPCION@@</p>
 
               <div class="item-tags">@@ETIQUETAS@@</div>
 
-              <a href="/blog/@@SLUG@@" class="item-read-link">Leer noticia →</a>
+              <div class="item-footer">
+                <div class="item-author">
+                  <div class="author-avatar" aria-hidden="true">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                  </div>
+                  <div class="author-details">
+                    <span class="by-text">Por</span>
+                    <strong class="author-name">@@AUTOR@@</strong>
+                    <span class="item-callsign">@@INDICATIVO@@</span>
+                  </div>
+                </div>
+
+                <div class="item-bottom-row">
+                  <time datetime="@@FECHA_ISO@@" class="item-date">
+                    <svg class="meta-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    @@FECHA@@
+                  </time>
+                  <a href="/blog/@@SLUG@@" class="item-read-link">
+                    <span>Leer noticia</span>
+                    <svg class="arrow-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </a>
+                </div>
+              </div>
             </div>
           </article></template>
           <template data-bm-plantilla="etiqueta"><span class="tag-label">#@@ETIQUETA@@</span></template>
           @@ARTICULOS@@
           <p class="archive-empty" id="archive-empty" hidden>Todavía no hay noticias publicadas en esta categoría.</p>
         </div>
+
+        <!-- Paginación de noticias (después de 6 publicaciones) -->
+        <nav class="blog-pagination" id="blog-pagination" aria-label="Navegación de páginas" hidden>
+          <button type="button" class="page-btn page-prev" id="page-prev" aria-label="Página anterior">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <span>Anterior</span>
+          </button>
+          <div class="page-numbers" id="page-numbers"></div>
+          <button type="button" class="page-btn page-next" id="page-next" aria-label="Página siguiente">
+            <span>Siguiente</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </nav>
       </div>
     </section>
   </div>
 </Layout>
 
 <script is:inline>
+  const PER_PAGE = 6;
   const catButtons = document.querySelectorAll('#category-filters .cat-pill');
-  const articles = document.querySelectorAll('#articles-container .archive-item');
+  const articles = Array.from(document.querySelectorAll('#articles-container .archive-item'));
   const vacio = document.getElementById('archive-empty');
+  const paginationNav = document.getElementById('blog-pagination');
+  const pageNumbersContainer = document.getElementById('page-numbers');
+  const prevBtn = document.getElementById('page-prev');
+  const nextBtn = document.getElementById('page-next');
 
+  let currentCategory = 'all';
+  let currentPage = 1;
+
+  function getMatchingArticles() {
+    return articles.filter((art) => {
+      return currentCategory === 'all' || art.getAttribute('data-category') === currentCategory;
+    });
+  }
+
+  function renderPage(page, scrollToTop = false) {
+    const matching = getMatchingArticles();
+    const totalMatching = matching.length;
+    const totalPages = Math.ceil(totalMatching / PER_PAGE) || 1;
+
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentPage = page;
+
+    // Ocultar todos primero
+    articles.forEach((art) => {
+      art.style.display = 'none';
+    });
+
+    // Mostrar únicamente el lote de 6 correspondiente a la página actual
+    const start = (currentPage - 1) * PER_PAGE;
+    const end = start + PER_PAGE;
+    const pageItems = matching.slice(start, end);
+
+    pageItems.forEach((art) => {
+      art.style.display = '';
+    });
+
+    // Estado vacío si no hay coincidencias
+    if (vacio) {
+      vacio.hidden = totalMatching > 0 || articles.length === 0;
+    }
+
+    // Renderizar controles de paginación
+    if (paginationNav && pageNumbersContainer) {
+      if (totalPages <= 1) {
+        paginationNav.hidden = true;
+      } else {
+        paginationNav.hidden = false;
+        pageNumbersContainer.innerHTML = '';
+
+        if (prevBtn) prevBtn.disabled = currentPage <= 1;
+        if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+
+        for (let i = 1; i <= totalPages; i++) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'page-num' + (i === currentPage ? ' is-active' : '');
+          btn.textContent = i;
+          btn.setAttribute('aria-label', `Página ${i}`);
+          if (i === currentPage) {
+            btn.setAttribute('aria-current', 'page');
+          }
+          btn.addEventListener('click', () => {
+            renderPage(i, true);
+          });
+          pageNumbersContainer.appendChild(btn);
+        }
+      }
+    }
+
+    // Actualizar parámetro de URL ?page= sin recargar la página
+    try {
+      const url = new URL(window.location.href);
+      if (currentPage > 1) {
+        url.searchParams.set('page', currentPage);
+      } else {
+        url.searchParams.delete('page');
+      }
+      window.history.replaceState(null, '', url.toString());
+    } catch (e) {}
+
+    // Desplazar suavemente a la parte superior de la grilla si el usuario hizo clic en la paginación
+    if (scrollToTop) {
+      const target = document.getElementById('articles-container');
+      if (target) {
+        const yOffset = -90;
+        const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+  }
+
+  // Filtrado por categoría
   catButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       catButtons.forEach((b) => b.classList.remove('is-active'));
       btn.classList.add('is-active');
-
-      const cat = btn.getAttribute('data-cat');
-      let visibles = 0;
-      articles.forEach((art) => {
-        const coincide = cat === 'all' || art.getAttribute('data-category') === cat;
-        art.style.display = coincide ? 'block' : 'none';
-        if (coincide) visibles++;
-      });
-      if (vacio) vacio.hidden = visibles > 0 || articles.length === 0;
+      currentCategory = btn.getAttribute('data-cat') || 'all';
+      renderPage(1, false);
     });
   });
+
+  // Botones Anterior y Siguiente
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        renderPage(currentPage - 1, true);
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      const matching = getMatchingArticles();
+      const totalPages = Math.ceil(matching.length / PER_PAGE);
+      if (currentPage < totalPages) {
+        renderPage(currentPage + 1, true);
+      }
+    });
+  }
+
+  // Inicializar leyendo si hay página en la URL
+  try {
+    const initialParams = new URLSearchParams(window.location.search);
+    const initialP = parseInt(initialParams.get('page'), 10);
+    renderPage(!isNaN(initialP) && initialP > 0 ? initialP : 1, false);
+  } catch (e) {
+    renderPage(1, false);
+  }
 </script>
 
 <!-- Global con prefijo .blog-page: PHP genera las tarjetas de noticia -->
@@ -158,149 +304,426 @@ import Layout from '../../layouts/Layout.astro';
   .blog-page .category-pills {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.6rem;
   }
 
   .blog-page .cat-pill {
-    background: var(--bg-page);
-    border: 1px solid var(--border-subtle);
-    padding: 0.45rem 1rem;
+    background: #FFFFFF;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    padding: 0.45rem 1.1rem;
     border-radius: var(--radius-pill);
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--text-muted);
+    color: #475569;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   }
 
   .blog-page .cat-pill:hover {
     border-color: var(--bm-orange);
     color: var(--bm-orange);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(238, 108, 31, 0.12);
   }
 
   .blog-page .cat-pill.is-active {
     background: var(--bm-red);
     color: #FFFFFF;
     border-color: var(--bm-red);
+    box-shadow: 0 3px 10px rgba(232, 38, 28, 0.3);
   }
 
-  /* Articles Archive (Linear, Editorial, NOT box cards) */
+  /* Articles Archive (Modern Responsive Editorial Grid) */
   .blog-page .blog-list-section {
-    background: var(--bg-page);
+    background: #F8FAFC;
+    min-height: 60vh;
   }
 
   .blog-page .articles-archive {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    max-width: 900px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    width: 100%;
+    margin: 0 auto;
   }
 
+  @media (min-width: 680px) {
+    .blog-page .articles-archive {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.75rem;
+    }
+  }
+
+  @media (min-width: 1060px) {
+    .blog-page .articles-archive {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+  }
+
+  /* Individual Card */
   .blog-page .archive-item {
     background: #FFFFFF;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: clamp(1.75rem, 3.5vw, 2.5rem);
-    transition: all 0.2s ease;
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    border-radius: 18px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+    position: relative;
+    overflow: hidden;
   }
 
   .blog-page .archive-item:hover {
-    border-color: var(--bm-orange);
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    border-color: rgba(238, 108, 31, 0.4);
+    box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.09), 0 4px 12px rgba(238, 108, 31, 0.07);
+  }
+
+  /* Thumbnail Media Container */
+  .blog-page .item-thumb {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0F172A;
+    position: relative;
+    margin-bottom: 1.15rem;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  }
+
+  .blog-page .item-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .blog-page .archive-item:hover .item-thumb img {
+    transform: scale(1.05);
+  }
+
+  /* Fallback header for cards without image */
+  .blog-page .archive-item:not(:has(.item-thumb))::before {
+    content: '';
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 12px;
+    margin-bottom: 1.15rem;
+    background:
+      radial-gradient(circle at 85% 25%, rgba(232, 38, 28, 0.35) 0%, transparent 55%),
+      radial-gradient(circle at 15% 75%, rgba(242, 169, 59, 0.3) 0%, transparent 55%),
+      linear-gradient(135deg, #0B1120 0%, #1A2740 60%, #0F172A 100%);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Content Column */
+  .blog-page .item-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
   }
 
   .blog-page .item-meta {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    font-size: 0.82rem;
-    margin-bottom: 0.85rem;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    margin-bottom: 0.75rem;
   }
 
   .blog-page .item-cat {
-    font-weight: 700;
+    font-size: 0.72rem;
+    font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
     color: var(--bm-red);
-  }
-
-  .blog-page .item-date {
-    color: var(--text-faint);
+    background: rgba(232, 38, 28, 0.08);
+    border: 1px solid rgba(232, 38, 28, 0.2);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    line-height: 1.2;
   }
 
   .blog-page .item-read {
-    color: var(--text-faint);
-    padding-left: 0.75rem;
-    border-left: 1px solid var(--border-subtle);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #64748B;
+    font-weight: 500;
+    font-size: 0.78rem;
+  }
+
+  .blog-page .meta-icon {
+    color: #94A3B8;
+    flex-shrink: 0;
   }
 
   .blog-page .item-title {
-    font-size: clamp(1.35rem, 2.5vw, 1.8rem);
-    margin-bottom: 0.85rem;
+    font-family: var(--font-headline);
+    font-size: clamp(1.15rem, 1.4vw, 1.3rem);
+    font-weight: 800;
+    line-height: 1.32;
+    letter-spacing: -0.015em;
+    margin: 0 0 0.65rem;
   }
 
-  .blog-page .item-title a:hover {
-    color: var(--bm-red);
+  .blog-page .item-title a {
+    color: #0F172A;
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+
+  .blog-page .archive-item:hover .item-title a {
+    color: var(--bm-orange);
   }
 
   .blog-page .item-desc {
-    font-size: 1.05rem;
-    line-height: 1.65;
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #64748B;
+    margin: 0 0 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .blog-page .item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    overflow: hidden;
+    max-height: 26px;
+    margin-bottom: 1.15rem;
+  }
+
+  .blog-page .item-tags:empty {
+    display: none;
+    margin-bottom: 0;
+  }
+
+  .blog-page .tag-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #64748B;
+    background: #F1F5F9;
+    border: 1px solid #E2E8F0;
+    padding: 0.12rem 0.45rem;
+    border-radius: 4px;
   }
 
   .blog-page .item-footer {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--border-subtle);
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    margin-top: auto;
   }
 
   .blog-page .item-author {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.88rem;
-    color: var(--text-main);
+    gap: 0.55rem;
+  }
+
+  .blog-page .author-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1E293B, #0F172A);
+    color: #F8FAFC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .blog-page .author-details {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    font-size: 0.84rem;
+  }
+
+  .blog-page .by-text {
+    color: #94A3B8;
+  }
+
+  .blog-page .author-name {
+    color: #1E293B;
+    font-weight: 700;
   }
 
   .blog-page .item-callsign {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--bm-orange);
-    background: rgba(238, 108, 31, 0.1);
-    padding: 0.15rem 0.5rem;
-    border-radius: var(--radius-sm);
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #B45309;
+    background: #FEF3C7;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    padding: 0.12rem 0.45rem;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
   }
 
-  .blog-page .item-tags {
+  .blog-page .item-callsign:empty {
+    display: none;
+  }
+
+  .blog-page .item-bottom-row {
     display: flex;
-    gap: 0.4rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
   }
 
-  .blog-page .tag-label {
+  .blog-page .item-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #64748B;
+    font-weight: 500;
     font-size: 0.78rem;
-    color: var(--text-faint);
   }
 
   .blog-page .item-read-link {
-    font-size: 0.92rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.86rem;
     font-weight: 700;
     color: var(--bm-orange);
+    text-decoration: none;
+    transition: color 0.18s ease;
+    margin-left: auto;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
-  .blog-page .item-read-link:hover {
+  .blog-page .item-read-link .arrow-icon {
+    transition: transform 0.2s ease;
+  }
+
+  .blog-page .archive-item:hover .item-read-link {
     color: var(--bm-red);
+  }
+
+  .blog-page .archive-item:hover .item-read-link .arrow-icon {
+    transform: translateX(4px);
+  }
+
+  /* Paginación */
+  .blog-page .blog-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 3.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  .blog-page .blog-pagination[hidden] {
+    display: none !important;
+  }
+
+  .blog-page .page-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.15rem;
+    background: #FFFFFF;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: var(--radius-md);
+    color: #475569;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  }
+
+  .blog-page .page-btn:hover:not(:disabled) {
+    border-color: var(--bm-orange);
+    color: var(--bm-orange);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(238, 108, 31, 0.12);
+  }
+
+  .blog-page .page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #F8FAFC;
+    border-color: #E2E8F0;
+    color: #94A3B8;
+  }
+
+  .blog-page .page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .blog-page .page-num {
+    min-width: 42px;
+    height: 42px;
+    padding: 0 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFFFFF;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: var(--radius-md);
+    color: #475569;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  }
+
+  .blog-page .page-num:hover:not(.is-active) {
+    border-color: var(--bm-orange);
+    color: var(--bm-orange);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(238, 108, 31, 0.12);
+  }
+
+  .blog-page .page-num.is-active {
+    background: var(--bm-red);
+    color: #FFFFFF;
+    border-color: var(--bm-red);
+    box-shadow: 0 4px 14px rgba(232, 38, 28, 0.35);
+    cursor: default;
+  }
+
+  @media (max-width: 540px) {
+    .blog-page .page-btn span {
+      display: none;
+    }
+    .blog-page .page-btn {
+      padding: 0.6rem 0.8rem;
+    }
   }
 
   .blog-page .archive-empty {
     text-align: center;
     color: var(--text-muted);
     padding: 2.5rem 1rem;
+    grid-column: 1 / -1;
   }
 
   .blog-page [hidden] {
@@ -309,37 +732,5 @@ import Layout from '../../layouts/Layout.astro';
 
   .blog-page template {
     display: none;
-  }
-
-  .blog-page .archive-item {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-
-  @media (min-width: 760px) {
-    .blog-page .archive-item:has(.item-thumb) {
-      grid-template-columns: 240px 1fr;
-      align-items: start;
-    }
-  }
-
-  .blog-page .item-thumb {
-    display: block;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background: var(--bg-subtle);
-  }
-
-  .blog-page .item-thumb img {
-    width: 100%;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.35s ease;
-  }
-
-  .blog-page .archive-item:hover .item-thumb img {
-    transform: scale(1.03);
   }
 </style>
