@@ -37,6 +37,25 @@ RadioID.net ↗
     }
   });
 
+  // Lectura de la noticia (una por visita a la página)
+  (() => {
+    const slug = window.location.pathname.split('/').filter(Boolean).pop() || '';
+    if (!slug) return;
+    try {
+      fetch('/api/analytics.php?action=track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'post_view',
+          event_category: 'blog',
+          entity_id: slug,
+          entity_title: document.querySelector('.article-headline')?.textContent?.trim() || document.title,
+        }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch (_) {}
+  })();
+
   // Rastreo de compartidos en redes sociales para telemetría
   document.querySelectorAll('.article-share-strip .share-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -47,7 +66,7 @@ RadioID.net ↗
       else if (btn.classList.contains('facebook')) platform = 'facebook';
       
       const slug = window.location.pathname.split('/').filter(Boolean).pop() || '';
-      const title = document.querySelector('.article-title')?.textContent?.trim() || document.title;
+      const title = document.querySelector('.article-headline')?.textContent?.trim() || document.title;
       try {
         fetch('/api/analytics.php?action=track', {
           method: 'POST',

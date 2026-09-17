@@ -99,38 +99,61 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
         send_json(['error' => 'Tipo de evento no válido'], 400);
     }
 
-    $eventCategory = trim((string)($data['event_category'] ?? 'general'));
-    $entityId = substr(trim((string)($data['entity_id'] ?? '')), 0, 100);
-    $entityTitle = substr(trim((string)($data['entity_title'] ?? '')), 0, 255);
-    $platform = substr(trim((string)($data['platform'] ?? 'web')), 0, 50);
+    // Solo identificadores simples: nada de HTML ni texto arbitrario en estos campos
+    $eventCategory = preg_replace('/[^a-z0-9_-]/i', '', (string)($data['event_category'] ?? 'general')) ?: 'general';
+    $eventCategory = substr($eventCategory, 0, 50);
+    $entityId = mb_substr(trim(strip_tags((string)($data['entity_id'] ?? ''))), 0, 100);
+    $entityTitle = mb_substr(trim(preg_replace('/\s+/', ' ', strip_tags((string)($data['entity_title'] ?? '')))), 0, 255);
+    $platform = strtolower(preg_replace('/[^a-z0-9_-]/i', '', (string)($data['platform'] ?? 'web')));
+    $platform = substr($platform ?: 'web', 0, 50);
 
     $ipAddress = get_client_ip();
     $deviceType = detect_device_type();
     $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
     $referrer = substr($_SERVER['HTTP_REFERER'] ?? '', 0, 255);
 
-    // Detección de país y coordenadas iniciales
-    $countryCode = strtoupper(substr(trim($_SERVER['HTTP_CF_IPCOUNTRY'] ?? ($data['country_code'] ?? 'VE')), 0, 3));
-    $countryName = trim((string)($data['country_name'] ?? 'Venezuela'));
-    $city = trim((string)($data['city'] ?? 'Caracas'));
-    $lat = isset($data['latitude']) ? (float)$data['latitude'] : 10.4806;
-    $lng = isset($data['longitude']) ? (float)$data['longitude'] : -66.9036;
+    // La ubicación nunca se toma del navegador (se podría falsear): solo de la IP.
+    // Sin geolocalización se guarda sin coordenadas y no aparece en el mapa.
+    $countryCode = preg_replace('/[^A-Z]/', '', strtoupper((string)($_SERVER['HTTP_CF_IPCOUNTRY'] ?? '')));
+    $countryCode = substr($countryCode, 0, 2) ?: null;
+    $countryName = null;
+    $city = null;
+    $lat = null;
+    $lng = null;
 
-    // Si es una IP pública de internet y no venían coordenadas del cliente, geolocalizar automáticamente sin API key
-    if (empty($data['latitude'])) {
-        $geo = resolve_ip_location($ipAddress);
-        if ($geo) {
-            $countryCode = strtoupper($geo['countryCode'] ?? $countryCode);
-            $countryName = $geo['country'] ?? $countryName;
-            $city = $geo['city'] ?? $city;
-            $lat = (float)($geo['lat'] ?? $lat);
-            $lng = (float)($geo['lon'] ?? $lng);
+    $pdo = get_db_connection();
+
+    // Freno contra abusos: máximo 120 eventos por IP cada 10 minutos
+    if ($pdo) {
+        try {
+            $recent = $pdo->prepare("SELECT COUNT(*) FROM bm_analytics_events WHERE ip_address = :ip AND created_at > DATE_SUB(NOW(), INTERVAL 10 MINUTE)");
+            $recent->execute([':ip' => $ipAddress]);
+            if ((int)$recent->fetchColumn() >= 120) {
+                send_json(['success' => true, 'logged' => false]);
+            }
+        } catch (Exception $e) {
+            error_log('[BM-YV Analytics] ' . $e->getMessage());
         }
     }
 
-    $metadataJson = isset($data['metadata']) ? json_encode($data['metadata'], JSON_UNESCAPED_UNICODE) : null;
+    $geo = resolve_ip_location($ipAddress);
+    if ($geo) {
+        $countryCode = substr(preg_replace('/[^A-Z]/', '', strtoupper((string)($geo['countryCode'] ?? ''))), 0, 2) ?: $countryCode;
+        $countryName = mb_substr(strip_tags((string)($geo['country'] ?? '')), 0, 100) ?: null;
+        $city = mb_substr(strip_tags((string)($geo['city'] ?? '')), 0, 100) ?: null;
+        if (is_numeric($geo['lat'] ?? null) && is_numeric($geo['lon'] ?? null)) {
+            $lat = max(-90, min(90, (float)$geo['lat']));
+            $lng = max(-180, min(180, (float)$geo['lon']));
+        }
+    }
 
-    $pdo = get_db_connection();
+    // Metadatos acotados (no se guardan objetos arbitrariamente grandes)
+    $metadataJson = null;
+    if (isset($data['metadata']) && is_array($data['metadata'])) {
+        $encoded = json_encode($data['metadata'], JSON_UNESCAPED_UNICODE);
+        $metadataJson = ($encoded !== false && strlen($encoded) <= 2000) ? $encoded : null;
+    }
+
     if ($pdo) {
         try {
             $stmt = $pdo->prepare("INSERT INTO bm_analytics_events 
@@ -170,14 +193,24 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
 // 2. OBTENCIÓN DE ESTADÍSTICAS (GET)
 // --------------------------------------------------------------------
 if ($action === 'stats' || $action === 'summary') {
+    // Contiene IP y ubicación de los visitantes: solo para el equipo del panel
+    start_secure_session();
+    require_role(['admin', 'editor']);
+
     $pdo = get_db_connection();
     if (!$pdo) {
         send_json(get_empty_stats());
     }
 
+    // Rango: 7d, 30d o all (histórico). Se aplica a todas las consultas de eventos
+    $ranges = ['7d' => 7, '30d' => 30, 'all' => 0];
+    $rangeKey = isset($ranges[$_GET['range'] ?? '']) ? $_GET['range'] : '7d';
+    $days = $ranges[$rangeKey];
+    $since = $days ? " AND created_at >= DATE_SUB(NOW(), INTERVAL $days DAY)" : '';
+
     try {
         // Verificar si la tabla existe y tiene registros
-        $check = $pdo->query("SELECT COUNT(*) FROM bm_analytics_events");
+        $check = $pdo->query("SELECT COUNT(*) FROM bm_analytics_events WHERE 1 = 1 $since");
         $totalEvents = (int)$check->fetchColumn();
         if ($totalEvents === 0) {
             send_json(get_empty_stats());
@@ -191,7 +224,8 @@ if ($action === 'stats' || $action === 'summary') {
             SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_views,
             SUM(CASE WHEN event_type = 'post_share' THEN 1 ELSE 0 END) AS post_shares,
             COUNT(DISTINCT country_code) AS active_countries
-            FROM bm_analytics_events");
+            FROM bm_analytics_events
+            WHERE 1 = 1 $since");
         $kpis = $kpisStmt->fetch() ?: [];
 
         // Puntos geográficos para Leaflet
@@ -203,9 +237,10 @@ if ($action === 'stats' || $action === 'summary') {
             country_code AS code,
             COUNT(*) AS count,
             SUM(CASE WHEN event_type = 'player_play' THEN 1 ELSE 0 END) AS audio_count,
-            SUM(CASE WHEN event_type = 'link_click' THEN 1 ELSE 0 END) AS link_count
+            SUM(CASE WHEN event_type = 'link_click' THEN 1 ELSE 0 END) AS link_count,
+            SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_count
             FROM bm_analytics_events
-            WHERE latitude IS NOT NULL AND longitude IS NOT NULL
+            WHERE latitude IS NOT NULL AND longitude IS NOT NULL $since
             GROUP BY latitude, longitude, city, country_name, country_code
             ORDER BY count DESC");
         $mapPointsRaw = $mapStmt->fetchAll();
@@ -221,6 +256,7 @@ if ($action === 'stats' || $action === 'summary') {
                 'events' => [
                     'player_play' => (int)$row['audio_count'],
                     'link_click' => (int)$row['link_count'],
+                    'post_view' => (int)$row['post_count'],
                 ]
             ];
         }
@@ -231,7 +267,7 @@ if ($action === 'stats' || $action === 'summary') {
             country_code AS code,
             COUNT(*) AS plays
             FROM bm_analytics_events
-            WHERE event_type = 'player_play' AND country_name IS NOT NULL
+            WHERE event_type = 'player_play' AND country_name IS NOT NULL $since
             GROUP BY country_name, country_code
             ORDER BY plays DESC LIMIT 6");
         $playerCountriesRaw = $countryStmt->fetchAll();
@@ -256,7 +292,7 @@ if ($action === 'stats' || $action === 'summary') {
             COUNT(*) AS plays,
             MAX(created_at) AS last_active_ts
             FROM bm_analytics_events
-            WHERE event_type = 'player_play'
+            WHERE event_type = 'player_play' $since
             GROUP BY ip_address, country_name, country_code, city
             ORDER BY plays DESC LIMIT 10");
         $listenersRaw = $listenersStmt->fetchAll();
@@ -280,56 +316,76 @@ if ($action === 'stats' || $action === 'summary') {
             event_category AS category,
             COUNT(*) AS clicks
             FROM bm_analytics_events
-            WHERE event_type = 'link_click'
+            WHERE event_type = 'link_click' $since
             GROUP BY title, url, category
             ORDER BY clicks DESC LIMIT 8");
         $linkClicks = $linksStmt->fetchAll() ?: [];
 
-        // Lecturas de publicaciones
+        // Lecturas de publicaciones: en el histórico se usa el contador total de la noticia;
+        // en 7/30 días, las lecturas registradas en ese periodo
+        $joinSince = $days ? " AND e.created_at >= DATE_SUB(NOW(), INTERVAL $days DAY)" : '';
         $postsStmt = $pdo->query("SELECT
             p.title,
+            p.slug,
             p.category,
-            COALESCE(p.views_count, COUNT(e.id)) AS views,
-            SUM(CASE WHEN e.event_type = 'post_share' THEN 1 ELSE 0 END) AS shares
+            p.views_count AS total_views,
+            COALESCE(SUM(e.event_type = 'post_view'), 0) AS period_views,
+            COALESCE(SUM(e.event_type = 'post_share'), 0) AS shares
             FROM bm_posts p
-            LEFT JOIN bm_analytics_events e ON (e.entity_id = p.slug OR e.entity_id = CONCAT(p.id, ''))
+            LEFT JOIN bm_analytics_events e ON e.entity_id = p.slug $joinSince
             WHERE p.status = 'published'
-            GROUP BY p.id, p.title, p.category, p.views_count
-            ORDER BY views DESC LIMIT 6");
-        $postViews = $postsStmt->fetchAll() ?: [];
+            GROUP BY p.id, p.title, p.slug, p.category, p.views_count
+            ORDER BY " . ($days ? 'period_views' : "GREATEST(p.views_count, COALESCE(SUM(e.event_type = 'post_view'), 0))") . " DESC, p.created_at DESC
+            LIMIT 6");
+        $postViews = array_map(function ($row) use ($days) {
+            return [
+                'title' => $row['title'],
+                'slug' => $row['slug'],
+                'category' => $row['category'],
+                // Histórico: el contador de la noticia incluye lecturas anteriores al registro de eventos
+                'views' => (int)($days ? $row['period_views'] : max((int)$row['total_views'], (int)$row['period_views'])),
+                'total_views' => (int)$row['total_views'],
+                'shares' => (int)$row['shares'],
+            ];
+        }, $postsStmt->fetchAll() ?: []);
 
         // Compartidos en redes
         $sharesStmt = $pdo->query("SELECT
             platform,
             COUNT(*) AS shares
             FROM bm_analytics_events
-            WHERE event_type = 'post_share'
+            WHERE event_type = 'post_share' $since
             GROUP BY platform
             ORDER BY shares DESC");
         $sharesRaw = $sharesStmt->fetchAll() ?: [];
         $totalShares = max(1, (int)($kpis['post_shares'] ?? 0));
         $platformMap = [
-            'whatsapp' => ['name' => 'WhatsApp', 'color' => '#25D366'],
-            'telegram' => ['name' => 'Telegram', 'color' => '#229ED9'],
-            'twitter' => ['name' => 'X (Twitter)', 'color' => '#0F172A'],
-            'facebook' => ['name' => 'Facebook', 'color' => '#1877F2'],
-            'copy_link' => ['name' => 'Copiar Enlace', 'color' => '#64748B'],
+            'whatsapp' => ['name' => 'WhatsApp'],
+            'telegram' => ['name' => 'Telegram'],
+            'twitter' => ['name' => 'X (Twitter)'],
+            'facebook' => ['name' => 'Facebook'],
+            'copy_link' => ['name' => 'Copiar enlace'],
         ];
         $platforms = [];
         foreach ($sharesRaw as $row) {
             $key = strtolower($row['platform'] ?: 'copy_link');
-            $meta = $platformMap[$key] ?? ['name' => ucfirst($key), 'color' => '#64748B'];
+            $meta = $platformMap[$key] ?? ['name' => ucfirst($key)];
             $cnt = (int)$row['shares'];
             $platforms[] = [
                 'name' => $meta['name'],
                 'shares' => $cnt,
+                'key' => $key,
                 'percent' => round(($cnt / $totalShares) * 100),
-                'color' => $meta['color']
             ];
+        }
+
+        if (!$days) {
+            $kpis['post_views'] = max((int)($kpis['post_views'] ?? 0), (int)$pdo->query("SELECT COALESCE(SUM(views_count), 0) FROM bm_posts WHERE status = 'published'")->fetchColumn());
         }
 
         send_json([
             'success' => true,
+            'range' => $rangeKey,
             'kpis' => [
                 'player_plays' => (int)($kpis['player_plays'] ?? 0),
                 'unique_listeners' => (int)($kpis['unique_listeners'] ?? 0),
