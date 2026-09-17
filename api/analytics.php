@@ -292,7 +292,7 @@ if ($action === 'stats' || $action === 'summary') {
             COALESCE(p.views_count, COUNT(e.id)) AS views,
             SUM(CASE WHEN e.event_type = 'post_share' THEN 1 ELSE 0 END) AS shares
             FROM bm_posts p
-            LEFT JOIN bm_analytics_events e ON e.entity_id = p.slug OR e.entity_id = CAST(p.id AS CHAR)
+            LEFT JOIN bm_analytics_events e ON (e.entity_id = p.slug OR e.entity_id = CONCAT(p.id, ''))
             WHERE p.status = 'published'
             GROUP BY p.id, p.title, p.category, p.views_count
             ORDER BY views DESC LIMIT 6");
