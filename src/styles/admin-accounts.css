@@ -371,33 +371,8 @@
   font-size: 0.85rem;
 }
 
-/* Móvil: el menú lateral pasa arriba (prefijo .wp-admin-app para ganar a los estilos de la página) */
+/* La vista móvil del panel está en admin-layout.css */
 @media (max-width: 760px) {
-  .wp-admin-app .wp-admin-layout {
-    flex-direction: column;
-  }
-
-  .wp-admin-app .wp-sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border-subtle);
-  }
-
-  .wp-admin-app .wp-content-stage {
-    padding: 1.25rem 1rem;
-  }
-
-  .wp-admin-app .wp-adminbar {
-    height: auto;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-  }
-
-  .wp-admin-app .db-status-badge {
-    display: none;
-  }
-
   #users-search {
     min-width: 0;
     flex: 1;

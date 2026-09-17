@@ -1,6 +1,8 @@
 // Panel · Analíticas y Telemetría del Escritorio
 // Integración con Leaflet + Leaflet.markercluster y KPIs en tiempo real
 
+import { escapeHtml } from './api';
+
 declare const L: any;
 
 interface MapPoint {
@@ -34,9 +36,9 @@ interface AnalyticsData {
     total_plays: number;
   };
   links: Array<{ title: string; url: string; category?: string; clicks: number }>;
-  posts: Array<{ title: string; category: string; views: number; shares?: number }>;
+  posts: Array<{ title: string; slug?: string; category: string; views: number; total_views?: number; shares?: number }>;
   shares: {
-    platforms: Array<{ name: string; shares: number; percent: number; color: string }>;
+    platforms: Array<{ name: string; key?: string; shares: number; percent: number }>;
     total: number;
   };
 }
@@ -54,7 +56,7 @@ const fmt = (n: number | undefined) => (n ?? 0).toLocaleString('es-VE');
 
 // Bandera emoji aproximada según código ISO 2
 function getFlagEmoji(countryCode: string): string {
-  if (!countryCode || countryCode.length !== 2) return '🌐';
+  if (!countryCode || !/^[A-Za-z]{2}$/.test(countryCode)) return '🌐';
   const codePoints = countryCode
     .toUpperCase()
     .split('')
@@ -151,16 +153,16 @@ function renderMarkers() {
       <div class="bm-popup-card">
         <div class="bm-popup-header">
           <span>${flag}</span>
-          <span>${pt.city}</span>
-          <span class="bm-popup-badge">${pt.country}</span>
+          <span>${escapeHtml(pt.city)}</span>
+          <span class="bm-popup-badge">${escapeHtml(pt.country)}</span>
         </div>
         <div class="bm-popup-stat">
           <span>Total actividad:</span>
-          <strong>${pt.count} interacciones</strong>
+          <strong>${fmt(pt.count)} interacciones</strong>
         </div>
-        ${audioPlays ? `<div class="bm-popup-stat"><span>🔊 Reproductor audio:</span><strong>${audioPlays}</strong></div>` : ''}
-        ${linkClicks ? `<div class="bm-popup-stat"><span>🔗 Clics en enlaces:</span><strong>${linkClicks}</strong></div>` : ''}
-        ${postViews ? `<div class="bm-popup-stat"><span>📰 Lecturas blog:</span><strong>${postViews}</strong></div>` : ''}
+        ${audioPlays ? `<div class="bm-popup-stat"><span>Reproducciones</span><strong>${fmt(audioPlays)}</strong></div>` : ''}
+        ${linkClicks ? `<div class="bm-popup-stat"><span>Clics en enlaces</span><strong>${fmt(linkClicks)}</strong></div>` : ''}
+        ${postViews ? `<div class="bm-popup-stat"><span>Lecturas del blog</span><strong>${fmt(postViews)}</strong></div>` : ''}
       </div>
     `;
 
@@ -199,6 +201,14 @@ function renderDashboard(data: AnalyticsData) {
   if ($('kpi-post-shares')) $('kpi-post-shares')!.textContent = fmt(data.kpis?.post_shares);
   if ($('kpi-active-countries')) $('kpi-active-countries')!.textContent = fmt(data.kpis?.active_countries);
 
+  // Países principales según las conexiones del periodo
+  const topCountries = Array.from(new Set((data.map_points || []).map((p) => p.code).filter((c) => /^[A-Z]{2}$/.test(c)))).slice(0, 4);
+  if ($('kpi-top-countries')) $('kpi-top-countries')!.textContent = topCountries.length ? topCountries.join(', ') : 'Sin datos aún';
+  const topPlatform = (data.shares?.platforms || [])[0];
+  if ($('kpi-top-platform')) $('kpi-top-platform')!.textContent = topPlatform ? `Más usado: ${topPlatform.name}` : 'Sin compartidos aún';
+  const rangeLabels: Record<string, string> = { '7d': 'Últimos 7 días', '30d': 'Últimos 30 días', all: 'Histórico' };
+  document.querySelectorAll('[data-range-label]').forEach((el) => (el.textContent = rangeLabels[currentRange] ?? ''));
+
   // 2. Mapa
   renderMarkers();
 
@@ -207,7 +217,7 @@ function renderDashboard(data: AnalyticsData) {
   if (countriesList) {
     const countries = data.player?.countries || [];
     if (!countries.length) {
-      countriesList.innerHTML = '<p style="font-size:0.85rem; color:#64748B;">Sin datos de reproducción aún.</p>';
+      countriesList.innerHTML = '<p class="analytics-empty">Sin reproducciones en este periodo.</p>';
     } else {
       countriesList.innerHTML = countries
         .map((c) => {
@@ -217,16 +227,16 @@ function renderDashboard(data: AnalyticsData) {
               <div class="country-bar-header">
                 <span class="country-name-wrap">
                   <span>${flag}</span>
-                  <span>${c.country}</span>
-                  <span class="country-code-pill">${c.code}</span>
+                  <span>${escapeHtml(c.country)}</span>
+                  <span class="country-code-pill">${escapeHtml(c.code)}</span>
                 </span>
                 <span class="country-bar-metrics">
                   <strong>${fmt(c.plays)}</strong>
-                  <span>(${c.percent}%)</span>
+                  <span>${Number(c.percent) || 0}%</span>
                 </span>
               </div>
               <div class="country-bar-track">
-                <div class="country-bar-fill" style="width: ${c.percent}%;"></div>
+                <div class="country-bar-fill" style="width: ${Math.max(0, Math.min(100, Number(c.percent) || 0))}%;"></div>
               </div>
             </div>
           `;
@@ -240,20 +250,20 @@ function renderDashboard(data: AnalyticsData) {
   if (listenersTbody) {
     const listeners = data.player?.listeners || [];
     if (!listeners.length) {
-      listenersTbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1.5rem; color:#64748B;">Sin registros recientes de oyentes.</td></tr>';
+      listenersTbody.innerHTML = '<tr><td colspan="4" class="analytics-empty">Sin oyentes en este periodo.</td></tr>';
     } else {
       listenersTbody.innerHTML = listeners
         .map((l) => {
           const flag = getFlagEmoji(l.code);
           return `
             <tr>
-              <td><span class="ip-pill">${l.ip}</span></td>
-              <td>${flag} ${l.city}, ${l.code}</td>
-              <td style="text-align: center;">
+              <td><span class="ip-pill">${escapeHtml(l.ip)}</span></td>
+              <td>${flag} ${escapeHtml(l.city)}, ${escapeHtml(l.code)}</td>
+              <td class="cell-num">
                 <span class="badge-count">${l.plays} ${l.plays === 1 ? 'escucha' : 'escuchas'}</span>
               </td>
-              <td style="text-align: right; color: #64748B; font-size: 0.8rem;">
-                <span class="status-dot-active"></span>${l.last_active}
+              <td class="cell-right cell-muted">
+                ${escapeHtml(l.last_active)}
               </td>
             </tr>
           `;
@@ -267,20 +277,20 @@ function renderDashboard(data: AnalyticsData) {
   if (linkClicksTbody) {
     const links = data.links || [];
     if (!links.length) {
-      linkClicksTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:1.5rem; color:#64748B;">No hay clics en enlaces registrados todavía.</td></tr>';
+      linkClicksTbody.innerHTML = '<tr><td colspan="3" class="analytics-empty">Sin clics en enlaces en este periodo.</td></tr>';
     } else {
       linkClicksTbody.innerHTML = links
         .map((link) => {
           return `
             <tr>
               <td>
-                <div style="font-weight: 600; color: #0F172A;">${link.title}</div>
-                <div style="font-size: 0.74rem; color: #64748B;">${link.url}</div>
+                <div class="cell-strong">${escapeHtml(link.title)}</div>
+                <div class="cell-url">${escapeHtml(link.url)}</div>
               </td>
-              <td>
-                <span class="badge-tag-category">${link.category || 'Enlace'}</span>
+              <td class="col-opt">
+                <span class="badge-tag-category">${escapeHtml(link.category === 'external_link' ? 'Externo' : link.category === 'portal_link' ? 'Portal' : (link.category || 'Enlace'))}</span>
               </td>
-              <td style="text-align: right; font-weight: 700; font-variant-numeric: tabular-nums;">
+              <td class="cell-num cell-right">
                 ${fmt(link.clicks)}
               </td>
             </tr>
@@ -295,23 +305,20 @@ function renderDashboard(data: AnalyticsData) {
   if (sharesContainer) {
     const platforms = data.shares?.platforms || [];
     if (!platforms.length) {
-      sharesContainer.innerHTML = '<p style="font-size:0.85rem; color:#64748B;">Aún no se registran compartidos.</p>';
+      sharesContainer.innerHTML = '<p class="analytics-empty">Sin compartidos en este periodo.</p>';
     } else {
       sharesContainer.innerHTML = platforms
         .map((p) => {
           return `
             <div class="share-platform-row">
               <div class="share-platform-header">
-                <span class="share-platform-name">
-                  <span class="platform-indicator" style="background: ${p.color};"></span>
-                  <span>${p.name}</span>
-                </span>
+                <span class="share-platform-name">${escapeHtml(p.name)}</span>
                 <span class="share-platform-count">
-                  <strong>${fmt(p.shares)}</strong> (${p.percent}%)
+                  <strong>${fmt(p.shares)}</strong> <span>${Number(p.percent) || 0}%</span>
                 </span>
               </div>
               <div class="share-track">
-                <div class="share-fill" style="width: ${p.percent}%; background: ${p.color};"></div>
+                <div class="share-fill" style="width: ${Math.max(0, Math.min(100, Number(p.percent) || 0))}%;"></div>
               </div>
             </div>
           `;
@@ -325,28 +332,31 @@ function renderDashboard(data: AnalyticsData) {
   if (postsTbody) {
     const posts = data.posts || [];
     if (!posts.length) {
-      postsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:#64748B;">Sin publicaciones registradas.</td></tr>';
+      postsTbody.innerHTML = '<tr><td colspan="5" class="analytics-empty">Sin noticias publicadas.</td></tr>';
     } else {
+      const maxViews = Math.max(1, ...posts.map((p) => Number(p.views) || 0));
       postsTbody.innerHTML = posts
         .map((post) => {
+          const relative = Math.round(((Number(post.views) || 0) / maxViews) * 100);
           return `
             <tr>
               <td>
-                <div style="font-weight: 600; color: #0F172A;">${post.title}</div>
+                <div class="cell-strong">${post.slug ? `<a href="/blog/${encodeURIComponent(post.slug)}" target="_blank" rel="noopener">${escapeHtml(post.title)}</a>` : escapeHtml(post.title)}</div>
               </td>
-              <td>
-                <span class="badge-tag-category" style="background: #F1F5F9; color: #334155;">${post.category || 'General'}</span>
+              <td class="col-opt">
+                <span class="badge-tag-category is-neutral">${escapeHtml(post.category || 'General')}</span>
               </td>
-              <td style="text-align: center; font-weight: 700; font-variant-numeric: tabular-nums;">
+              <td class="cell-num">
                 ${fmt(post.views)}
               </td>
-              <td style="text-align: center; color: #64748B; font-variant-numeric: tabular-nums;">
+              <td class="cell-num cell-muted col-opt">
                 ${fmt(post.shares || 0)}
               </td>
-              <td style="text-align: right;">
-                <span style="font-size: 0.76rem; font-weight: 600; color: #16A34A; background: #DCFCE7; padding: 0.15rem 0.5rem; border-radius: 9999px;">
-                  Alta lectura
-                </span>
+              <td class="cell-interest" title="${relative}% respecto a la noticia más leída">
+                <div class="interest-wrap">
+                  <span class="interest-track"><span class="interest-fill" style="width: ${relative}%;"></span></span>
+                  <span class="interest-value">${relative}%</span>
+                </div>
               </td>
             </tr>
           `;
@@ -386,7 +396,7 @@ const EMPTY_ANALYTICS: AnalyticsData = {
 export async function loadAnalytics(range = '7d') {
   currentRange = range;
   try {
-    const res = await fetch(`/api/analytics.php?action=stats&range=${range}`);
+    const res = await fetch(`/api/analytics.php?action=stats&range=${encodeURIComponent(range)}`, { credentials: 'same-origin' });
     if (res.ok) {
       const data = await res.json();
       if (data && data.kpis) {

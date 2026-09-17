@@ -1,0 +1,436 @@
+/* =========================================================
+   Panel de administración · Estructura (barra superior, menú lateral) y vista móvil
+   Prefijo .wp-admin-app para ganar a los estilos base de admin.astro
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Menú lateral: submenús plegables
+   --------------------------------------------------------- */
+.wp-admin-app .wp-menu-item.has-submenu {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: stretch;
+}
+
+.wp-admin-app .wp-menu-item.has-submenu > .wp-submenu {
+  grid-column: 1 / -1;
+}
+
+.wp-admin-app .submenu-toggle {
+  width: 40px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.wp-admin-app .submenu-toggle:hover {
+  color: var(--bm-orange);
+  background: #F8FAFC;
+}
+
+.wp-admin-app .submenu-toggle:focus-visible,
+.wp-admin-app .btn-menu-toggle:focus-visible,
+.wp-admin-app .menu-link:focus-visible,
+.wp-admin-app .submenu-link:focus-visible {
+  outline: 2px solid var(--bm-orange);
+  outline-offset: -2px;
+}
+
+.wp-admin-app .submenu-toggle svg {
+  transition: transform 0.2s ease;
+}
+
+.wp-admin-app .has-submenu.is-open .submenu-toggle svg {
+  transform: rotate(180deg);
+}
+
+/* El enlace principal activo pinta el fondo de toda la fila */
+.wp-admin-app .has-submenu:has(> .menu-link.is-active) .submenu-toggle {
+  background: var(--bm-orange-light);
+  color: var(--bm-orange);
+}
+
+.wp-admin-app .wp-submenu[hidden] {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wp-admin-app .submenu-toggle svg {
+    transition: none;
+  }
+}
+
+/* Botón de menú: solo en pantallas pequeñas */
+.wp-admin-app .btn-menu-toggle {
+  display: none;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  margin-left: -0.35rem;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.wp-admin-app .btn-menu-toggle:hover {
+  background: #F1F5F9;
+}
+
+.wp-sidebar-backdrop[hidden] {
+  display: none;
+}
+
+/* ---------------------------------------------------------
+   Pantallas medianas y pequeñas: menú como cajón
+   --------------------------------------------------------- */
+@media (max-width: 900px) {
+  .wp-admin-app .btn-menu-toggle {
+    display: grid;
+  }
+
+  .wp-admin-app .wp-admin-layout {
+    flex-direction: row;
+  }
+
+  .wp-admin-app .wp-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 120;
+    width: min(280px, 82vw);
+    border-right: 1px solid var(--border-subtle);
+    border-bottom: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-top: 0.5rem;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 0.22s ease, visibility 0s linear 0.22s;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  }
+
+  .wp-admin-app .wp-sidebar.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.22s ease;
+  }
+
+  .wp-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  body.panel-menu-abierto {
+    overflow: hidden;
+  }
+
+  /* Más espacio táctil en el cajón */
+  .wp-admin-app .menu-link {
+    padding: 0.85rem 1.25rem;
+  }
+
+  .wp-admin-app .submenu-link {
+    padding: 0.6rem 1.25rem 0.6rem 2.85rem;
+  }
+
+  .wp-admin-app .submenu-toggle {
+    width: 48px;
+  }
+}
+
+@media (max-width: 900px) and (prefers-reduced-motion: reduce) {
+  .wp-admin-app .wp-sidebar,
+  .wp-admin-app .wp-sidebar.is-open {
+    transition: none;
+  }
+}
+
+/* ---------------------------------------------------------
+   Móvil: barra superior compacta y contenido proporcionado
+   --------------------------------------------------------- */
+@media (max-width: 760px) {
+  /* Barra superior en una sola línea */
+  .wp-admin-app .wp-adminbar {
+    height: 52px;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    padding: 0 0.75rem;
+  }
+
+  .wp-admin-app .adminbar-left {
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .wp-admin-app .adminbar-site-link .site-name,
+  .wp-admin-app .adminbar-site-link .visit-label,
+  .wp-admin-app .greeting-word,
+  .wp-admin-app .logout-label {
+    display: none;
+  }
+
+  .wp-admin-app .adminbar-site-link {
+    width: 38px;
+    height: 38px;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+  }
+
+  .wp-admin-app .user-profile-menu {
+    gap: 0.45rem;
+  }
+
+  .wp-admin-app .role-badge {
+    font-size: 0.64rem;
+    padding: 0.14rem 0.45rem;
+  }
+
+  .wp-admin-app .btn-logout {
+    width: 38px;
+    height: 38px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* Contenido */
+  .wp-admin-app .wp-content-stage {
+    padding: 1rem 0.85rem 2rem;
+    min-width: 0;
+  }
+
+  .wp-admin-app .view-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .wp-admin-app .view-title {
+    font-size: 1.3rem;
+    line-height: 1.25;
+  }
+
+  .wp-admin-app .view-subtitle,
+  .wp-admin-app .view-intro {
+    font-size: 0.82rem;
+  }
+
+  .wp-admin-app .page-title-action {
+    margin-left: 0.4rem;
+  }
+
+  .wp-admin-app .wp-box-head {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .wp-admin-app .wp-box-head h3,
+  .wp-admin-app .wp-box-head h4 {
+    font-size: 0.95rem;
+  }
+
+  .wp-admin-app .wp-box-body {
+    padding: 0.9rem;
+  }
+
+  .wp-admin-app .btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.88rem;
+  }
+
+  .wp-admin-app .btn-sm {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  /* Tablas: más compactas; las columnas secundarias se ocultan */
+  .wp-admin-app .wp-list-table,
+  .wp-admin-app .analytics-table {
+    font-size: 0.8rem;
+  }
+
+  .wp-admin-app .wp-list-table th,
+  .wp-admin-app .wp-list-table td,
+  .wp-admin-app .analytics-table th,
+  .wp-admin-app .analytics-table td {
+    padding: 0.55rem 0.6rem;
+  }
+
+  .wp-admin-app .col-opt {
+    display: none;
+  }
+
+  .wp-admin-app .users-table td.cell-title,
+  .wp-admin-app .posts-table td.cell-title {
+    min-width: 220px;
+  }
+
+  .wp-admin-app .wp-table-toolbar .toolbar-left {
+    flex-wrap: wrap;
+  }
+
+  /* Escritorio y analíticas */
+  .wp-admin-app .analytics-time-filter {
+    width: 100%;
+  }
+
+  .wp-admin-app .btn-time-range {
+    flex: 1;
+    padding: 0.45rem 0.4rem;
+  }
+
+  .wp-admin-app .analytics-kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Con 5 tarjetas, la última ocupa toda la fila */
+  .wp-admin-app .kpi-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .wp-admin-app .kpi-card {
+    padding: 0.75rem 0.8rem;
+    border-radius: 10px;
+  }
+
+  .wp-admin-app .kpi-card:hover {
+    transform: none;
+  }
+
+  .wp-admin-app .kpi-header {
+    margin-bottom: 0.35rem;
+    gap: 0.4rem;
+  }
+
+  .wp-admin-app .kpi-label {
+    font-size: 0.66rem;
+    line-height: 1.25;
+  }
+
+  .wp-admin-app .kpi-icon-wrap {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .wp-admin-app .kpi-icon-wrap svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .wp-admin-app .kpi-value {
+    font-size: 1.35rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .wp-admin-app .kpi-footer {
+    font-size: 0.7rem;
+    padding-top: 0.35rem;
+  }
+
+  .wp-admin-app .analytics-map-card {
+    margin-bottom: 1rem;
+  }
+
+  .wp-admin-app .analytics-map {
+    height: 300px;
+  }
+
+  .wp-admin-app .map-subtitle {
+    display: none;
+  }
+
+  .wp-admin-app .map-controls {
+    width: 100%;
+    margin-top: 0.25rem;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .wp-admin-app .map-filter-pills {
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: calc(100% - 44px);
+  }
+
+  .wp-admin-app .map-filter-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wp-admin-app .map-pill {
+    white-space: nowrap;
+  }
+
+  .wp-admin-app .btn-map-reset span {
+    display: none;
+  }
+
+  .wp-admin-app .analytics-row-grid {
+    gap: 1rem;
+  }
+
+  .wp-admin-app .analytics-row-grid + .analytics-row-grid,
+  .wp-admin-app .analytics-row-grid + .wp-box {
+    margin-top: 1rem !important;
+  }
+
+  .wp-admin-app .box-sub {
+    font-size: 0.74rem;
+  }
+
+  .wp-admin-app .analytics-table .cell-interest {
+    width: 110px;
+    min-width: 96px;
+  }
+}
+
+/* Mapa: altura de escritorio (antes estaba en línea).
+   Contexto de apilamiento propio para que las capas de Leaflet (z-index 400-1000)
+   no se dibujen encima del menú móvil ni de su fondo */
+.analytics-map {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: 440px;
+  background: #F8FAFC;
+}
+
+/* ---------------------------------------------------------
+   Escritorio: cabeceras que no se amontonan
+   --------------------------------------------------------- */
+.wp-admin-app .btn-time-range {
+  white-space: nowrap;
+}
+
+.wp-admin-app .analytics-map-card .wp-box-head {
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.wp-admin-app .analytics-map-card .map-head-title {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.wp-admin-app .view-header {
+  gap: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .wp-admin-app .view-header {
+    flex-wrap: wrap;
+  }
+}

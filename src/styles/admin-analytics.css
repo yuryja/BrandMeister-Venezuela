@@ -1,7 +1,22 @@
 /* ==========================================================================
-   Panel de Administración · Analíticas y Telemetría Aesthetic
-   Diseño sobrio, moderno y de alta legibilidad (paleta neutra Slate/Zinc)
+   Panel de Administración · Analíticas y Telemetría
+   Paleta: tintas neutras para texto y un único acento de marca para los datos.
+   - Barras (países, redes, interés): un solo tono, porque cada barra lleva su nombre
+   - Grupos del mapa: rampa ordinal clara → oscura del mismo naranja
+   Validado con el validador de dataviz (contraste ≥ 3:1 en marcas, texto ≥ 4.5:1)
    ========================================================================== */
+
+.wp-admin-app {
+  --chart-bar: #E0621A;          /* marcas de datos (3.5:1 sobre blanco) */
+  --chart-track: #F1F5F9;
+  --chart-tier-1: #F4A26B;       /* grupos pequeños, texto oscuro */
+  --chart-tier-2: #E0621A;       /* grupos medianos, texto oscuro */
+  --chart-tier-3: #9E3F0B;       /* grupos grandes, texto blanco */
+  --accent-soft: #FFEDD5;
+  --accent-ink: #9A3412;         /* 6.4:1 sobre --accent-soft */
+  --ink-strong: #0F172A;
+  --ink-muted: #64748B;
+}
 
 /* Encabezado y Filtro Temporal */
 .view-subtitle {
@@ -19,16 +34,6 @@
   padding: 0.25rem 0.35rem;
   border-radius: 8px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-}
-
-.filter-indicator {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #10B981;
-  padding: 0 0.5rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
 }
 
 .btn-time-range {
@@ -49,14 +54,15 @@
 }
 
 .btn-time-range.is-active {
-  background: #0F172A;
-  color: #FFFFFF;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
 }
 
 /* 1. Grid de Tarjetas KPI */
 .analytics-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  /* Las 5 tarjetas caben en una fila en escritorio */
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -102,11 +108,10 @@
   justify-content: center;
 }
 
-.kpi-icon-wrap.icon-audio { background: #FFF7ED; color: #EA580C; }
-.kpi-icon-wrap.icon-links { background: #EFF6FF; color: #2563EB; }
-.kpi-icon-wrap.icon-posts { background: #F0FDF4; color: #16A34A; }
-.kpi-icon-wrap.icon-shares { background: #FAF5FF; color: #9333EA; }
-.kpi-icon-wrap.icon-geo { background: #F8FAFC; color: #475569; border: 1px solid #E2E8F0; }
+.kpi-icon-wrap {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
 
 .kpi-value {
   font-size: 1.85rem;
@@ -142,11 +147,7 @@
   color: #475569;
 }
 
-.kpi-trend {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #16A34A;
-}
+
 
 /* 2. Mapa Leaflet Grande */
 .analytics-map-card {
@@ -180,8 +181,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #10B981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+  background: var(--bm-orange, #EE6C1F);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .map-subtitle {
@@ -252,7 +253,7 @@
   position: absolute;
   bottom: 12px;
   left: 12px;
-  z-index: 800;
+  z-index: 1;
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(226, 232, 240, 0.9);
@@ -277,26 +278,14 @@
   border-radius: 50%;
 }
 
-.cluster-sample.sm {
-  width: 10px;
-  height: 10px;
-  background: #334155;
-  border: 1px solid rgba(234, 88, 12, 0.6);
+.cluster-sample {
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.15);
 }
 
-.cluster-sample.md {
-  width: 12px;
-  height: 12px;
-  background: #1E293B;
-  border: 2px solid #EA580C;
-}
-
-.cluster-sample.lg {
-  width: 14px;
-  height: 14px;
-  background: #0F172A;
-  border: 2px solid #DC2626;
-}
+.cluster-sample.sm { width: 10px; height: 10px; background: var(--chart-tier-1); }
+.cluster-sample.md { width: 13px; height: 13px; background: var(--chart-tier-2); }
+.cluster-sample.lg { width: 16px; height: 16px; background: var(--chart-tier-3); }
 
 /* Overrides de Leaflet y Clusters */
 .bm-custom-cluster {
@@ -304,10 +293,11 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  color: #FFFFFF;
+  border: 3px solid #FFFFFF;
   font-weight: 700;
   font-size: 0.78rem;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
   transition: transform 0.15s ease;
 }
 
@@ -315,28 +305,17 @@
   transform: scale(1.1);
 }
 
-.bm-cluster-sm {
-  background: #334155;
-  border: 2.5px solid rgba(234, 88, 12, 0.75);
-}
-
-.bm-cluster-md {
-  background: #1E293B;
-  border: 3px solid #EA580C;
-}
-
-.bm-cluster-lg {
-  background: #0F172A;
-  border: 3.5px solid #DC2626;
-}
+.bm-cluster-sm { background: var(--chart-tier-1); color: var(--ink-strong); }
+.bm-cluster-md { background: var(--chart-tier-2); color: var(--ink-strong); }
+.bm-cluster-lg { background: var(--chart-tier-3); color: #FFFFFF; }
 
 .bm-single-pin {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #EA580C;
-  border: 2.5px solid #FFFFFF;
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.45);
+  background: var(--chart-bar);
+  border: 3px solid #FFFFFF;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
   cursor: pointer;
   transition: transform 0.15s ease;
 }
@@ -451,19 +430,32 @@
   font-variant-numeric: tabular-nums;
 }
 
-.country-bar-track {
+.country-bar-track,
+.share-track,
+.interest-track {
   width: 100%;
-  height: 6px;
-  background: #F1F5F9;
-  border-radius: 9999px;
+  height: 8px;
+  background: var(--chart-track);
+  border-radius: 4px;
   overflow: hidden;
 }
 
-.country-bar-fill {
+.country-bar-fill,
+.share-fill,
+.interest-fill {
+  display: block;
   height: 100%;
-  background: linear-gradient(90deg, #EA580C, #F97316);
-  border-radius: 9999px;
+  background: var(--chart-bar);
+  border-radius: 4px;
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .country-bar-fill,
+  .share-fill,
+  .interest-fill {
+    transition: none;
+  }
 }
 
 /* Tablas Minimalistas de Analíticas */
@@ -518,9 +510,10 @@
   font-weight: 700;
   padding: 0.18rem 0.55rem;
   border-radius: 9999px;
-  background: #FFF7ED;
-  color: #C2410C;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .badge-tag-category {
@@ -528,17 +521,28 @@
   font-weight: 600;
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
-  background: #EFF6FF;
-  color: #1D4ED8;
+  background: #F1F5F9;
+  color: #334155;
+  white-space: nowrap;
 }
 
-.status-dot-active {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #10B981;
-  margin-right: 0.35rem;
+/* Celdas de las tablas de analíticas */
+.analytics-table .cell-num { text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.analytics-table .cell-right { text-align: right; white-space: nowrap; }
+.analytics-table .cell-muted { color: var(--ink-muted); font-weight: 500; font-size: 0.8rem; }
+.analytics-table .cell-strong { font-weight: 600; color: var(--ink-strong); }
+.analytics-table .cell-strong a { color: inherit; }
+.analytics-table .cell-strong a:hover { color: var(--accent-ink); }
+.analytics-table .cell-url { font-size: 0.74rem; color: var(--ink-muted); word-break: break-all; }
+.analytics-table .cell-interest { width: 150px; min-width: 120px; }
+.analytics-table .interest-wrap { display: flex; align-items: center; gap: 0.5rem; }
+.interest-value { font-size: 0.76rem; color: var(--ink-muted); font-variant-numeric: tabular-nums; min-width: 2.5rem; text-align: right; }
+
+.analytics-empty {
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  text-align: center;
+  padding: 1.5rem !important;
 }
 
 /* 4. Compartidos en Redes Sociales */
@@ -569,12 +573,6 @@
   color: #0F172A;
 }
 
-.platform-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
 .share-platform-count {
   font-size: 0.8rem;
   color: #64748B;
@@ -585,19 +583,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.share-track {
-  width: 100%;
-  height: 6px;
-  background: #F1F5F9;
-  border-radius: 9999px;
-  overflow: hidden;
-}
 
-.share-fill {
-  height: 100%;
-  border-radius: 9999px;
-  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
 
 /* Responsive */
 @media (max-width: 680px) {
@@ -619,4 +605,18 @@
   .map-legend {
     display: none;
   }
+}
+
+/* Etiqueta pequeña del periodo en las cabeceras de las cajas */
+.badge-mini {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background: #F1F5F9;
+  color: #475569;
+  white-space: nowrap;
 }
