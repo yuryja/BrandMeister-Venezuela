@@ -235,16 +235,16 @@
 
   @media (max-width: 768px) {
     .hero-stamp {
-      right: 20px;
-      bottom: 30px;
-      width: 132px;
+      right: 2em;
+      bottom: 6em;
+      width: 10em;
     }
   }
 
-  /* Teléfonos muy angostos: más pequeño para no pisar las etiquetas de las cifras */
-  @media (max-width: 359px) {
+  /* Teléfonos angostos: ocupa solo el espacio libre a la derecha de las etiquetas de las cifras */
+  @media (max-width: 374px) {
     .hero-stamp {
-      width: 104px;
+      width: calc(100% - 13.5em);
     }
   }
 
