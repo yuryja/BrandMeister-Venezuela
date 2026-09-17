@@ -57,92 +57,30 @@ function resolve_ip_location(string $ip): ?array {
     return null;
 }
 
-// Datos semilla de respaldo si la base de datos no está conectada o está vacía (entorno local)
-function get_fallback_stats(): array {
-    $mapPoints = [
-        ['lat' => 10.4806, 'lng' => -66.9036, 'city' => 'Caracas', 'country' => 'Venezuela', 'code' => 'VE', 'count' => 14, 'events' => ['player_play' => 6, 'link_click' => 4, 'post_view' => 2, 'post_share' => 2]],
-        ['lat' => 10.4264, 'lng' => -66.8256, 'city' => 'Caracas (El Hatillo)', 'country' => 'Venezuela', 'code' => 'VE', 'count' => 4, 'events' => ['player_play' => 2, 'link_click' => 1, 'post_share' => 1]],
-        ['lat' => 10.4925, 'lng' => -66.8569, 'city' => 'Caracas (Chacao)', 'country' => 'Venezuela', 'code' => 'VE', 'count' => 6, 'events' => ['player_play' => 4, 'link_click' => 2]],
-        ['lat' => 10.1620, 'lng' => -68.0077, 'city' => 'Valencia', 'country' => 'Venezuela', 'code' => 'VE', 'count' => 9, 'events' => ['player_play' => 5, 'link_click' => 2, 'post_share' => 2]],
-        ['lat' => 10.2469, 'lng' => -67.5958, 'city' => 'Maracay', 'country' => 'Venezuela', 'code' => 'VE', 'count' => 3, 'events' => ['player_play' => 2, 'link_click' => 1]],
-        ['lat' => 10.6427, 'lng' => -71.6125, 'city' => 'Maracaibo', 'country' => 'Venezuela', 'code' => 'VE', 'count' => 8, 'events' => ['player_play' => 4, 'link_click' => 2, 'post_view' => 1, 'post_share' => 1]],
-        ['lat' => 10.0678, 'lng' => -69.3474, 'city' => 'Barquisimeto', 'country' => 'Venezuela', 'code' => 'VE', 'count' => 4, 'events' => ['player_play' => 3, 'post_view' => 1]],
-        ['lat' => 7.7669, 'lng' => -72.2250, 'city' => 'San Cristóbal', 'country' => 'Venezuela', 'code' => 'VE', 'count' => 3, 'events' => ['player_play' => 2, 'link_click' => 1]],
-        ['lat' => 25.7617, 'lng' => -80.1918, 'city' => 'Miami, FL', 'country' => 'Estados Unidos', 'code' => 'US', 'count' => 7, 'events' => ['player_play' => 4, 'link_click' => 1, 'post_view' => 1, 'post_share' => 1]],
-        ['lat' => 28.5383, 'lng' => -81.3792, 'city' => 'Orlando, FL', 'country' => 'Estados Unidos', 'code' => 'US', 'count' => 2, 'events' => ['player_play' => 2]],
-        ['lat' => 40.4168, 'lng' => -3.7038, 'city' => 'Madrid', 'country' => 'España', 'code' => 'ES', 'count' => 4, 'events' => ['player_play' => 2, 'post_view' => 1, 'post_share' => 1]],
-        ['lat' => 41.3874, 'lng' => 2.1686, 'city' => 'Barcelona', 'country' => 'España', 'code' => 'ES', 'count' => 2, 'events' => ['player_play' => 2]],
-        ['lat' => 4.7110, 'lng' => -74.0721, 'city' => 'Bogotá', 'country' => 'Colombia', 'code' => 'CO', 'count' => 3, 'events' => ['player_play' => 2, 'link_click' => 1]],
-        ['lat' => -33.4489, 'lng' => -70.6693, 'city' => 'Santiago', 'country' => 'Chile', 'code' => 'CL', 'count' => 2, 'events' => ['player_play' => 2]],
-        ['lat' => -34.6037, 'lng' => -58.3816, 'city' => 'Buenos Aires', 'country' => 'Argentina', 'code' => 'AR', 'count' => 2, 'events' => ['player_play' => 1, 'link_click' => 1]],
-    ];
-
-    $playerCountries = [
-        ['country' => 'Venezuela', 'code' => 'VE', 'plays' => 28, 'percent' => 62],
-        ['country' => 'Estados Unidos', 'code' => 'US', 'plays' => 6, 'percent' => 13],
-        ['country' => 'España', 'code' => 'ES', 'plays' => 4, 'percent' => 9],
-        ['country' => 'Colombia', 'code' => 'CO', 'plays' => 3, 'percent' => 7],
-        ['country' => 'Chile', 'code' => 'CL', 'plays' => 2, 'percent' => 5],
-        ['country' => 'Argentina', 'code' => 'AR', 'plays' => 2, 'percent' => 4],
-    ];
-
-    $playerListeners = [
-        ['ip' => '190.202.14.82', 'country' => 'Venezuela', 'code' => 'VE', 'city' => 'Caracas', 'plays' => 18, 'last_active' => 'Hace 15 min', 'status' => 'Activo'],
-        ['ip' => '186.94.101.44', 'country' => 'Venezuela', 'code' => 'VE', 'city' => 'Maracaibo', 'plays' => 12, 'last_active' => 'Hace 30 min', 'status' => 'Activo'],
-        ['ip' => '200.84.18.90', 'country' => 'Venezuela', 'code' => 'VE', 'city' => 'Valencia', 'plays' => 9, 'last_active' => 'Hace 1 hora', 'status' => 'Reciente'],
-        ['ip' => '104.28.19.45', 'country' => 'Estados Unidos', 'code' => 'US', 'city' => 'Miami, FL', 'plays' => 7, 'last_active' => 'Hace 20 min', 'status' => 'Activo'],
-        ['ip' => '186.92.204.55', 'country' => 'Venezuela', 'code' => 'VE', 'city' => 'Caracas (Chacao)', 'plays' => 6, 'last_active' => 'Hace 3 horas', 'status' => 'Reciente'],
-        ['ip' => '88.12.45.190', 'country' => 'España', 'code' => 'ES', 'city' => 'Madrid', 'plays' => 5, 'last_active' => 'Hace 2 horas', 'status' => 'Reciente'],
-        ['ip' => '201.209.65.18', 'country' => 'Venezuela', 'code' => 'VE', 'city' => 'Barquisimeto', 'plays' => 4, 'last_active' => 'Hace 5 horas', 'status' => 'Inactivo'],
-        ['ip' => '181.143.20.9', 'country' => 'Colombia', 'code' => 'CO', 'city' => 'Bogotá', 'plays' => 3, 'last_active' => 'Hace 8 horas', 'status' => 'Inactivo'],
-    ];
-
-    $linkClicks = [
-        ['title' => 'BrandMeister Server Master 3341', 'url' => 'https://brandmeister.network/?page=master&id=3341', 'clicks' => 48, 'category' => 'Servidor Master'],
-        ['title' => 'RadioID.net Registro Oficial', 'url' => 'https://radioid.net', 'clicks' => 39, 'category' => 'Identificador DMR'],
-        ['title' => 'Comunidad Telegram TG 734', 'url' => 'https://t.me/brandmeister_yv', 'clicks' => 31, 'category' => 'Comunidad'],
-        ['title' => 'BrandMeister Hoseline Web Global', 'url' => 'https://hoseline.brandmeister.network/734', 'clicks' => 26, 'category' => 'Audio Web'],
-        ['title' => 'Ficha Repetidor YV5DMR Caracas', 'url' => '/repetidores#yv5dmr', 'clicks' => 22, 'category' => 'Infraestructura'],
-        ['title' => 'Ficha Repetidor YV4EGG Carabobo', 'url' => '/repetidores#yv4egg', 'clicks' => 19, 'category' => 'Infraestructura'],
-    ];
-
-    $postViews = [
-        ['title' => 'Evolución y estado del sistema Petra para el TG 734', 'category' => 'Innovación', 'views' => 342, 'shares' => 48],
-        ['title' => 'Guía esencial: Configuración de Hotspots DMR en Venezuela', 'category' => 'Guías Técnicas', 'views' => 289, 'shares' => 37],
-        ['title' => 'Protocolo de operación en emergencias con el TG 734911', 'category' => 'Operación', 'views' => 194, 'shares' => 29],
-        ['title' => 'Actualización RadioID.net: Proceso anual de verificación', 'category' => 'Comunidad', 'views' => 165, 'shares' => 18],
-    ];
-
-    $socialShares = [
-        'platforms' => [
-            ['name' => 'WhatsApp', 'shares' => 64, 'percent' => 48, 'color' => '#25D366'],
-            ['name' => 'Telegram', 'shares' => 38, 'percent' => 29, 'color' => '#229ED9'],
-            ['name' => 'X (Twitter)', 'shares' => 16, 'percent' => 12, 'color' => '#0F172A'],
-            ['name' => 'Copiar Enlace', 'shares' => 10, 'percent' => 8, 'color' => '#64748B'],
-            ['name' => 'Facebook', 'shares' => 4, 'percent' => 3, 'color' => '#1877F2'],
-        ],
-        'total' => 132
-    ];
-
+// Estructura vacía cuando la base de datos no tiene eventos aún
+function get_empty_stats(): array {
     return [
         'success' => true,
         'kpis' => [
-            'player_plays' => 148,
-            'unique_listeners' => 42,
-            'link_clicks' => 185,
-            'post_views' => 990,
-            'post_shares' => 132,
-            'active_countries' => 7,
+            'player_plays' => 0,
+            'unique_listeners' => 0,
+            'link_clicks' => 0,
+            'post_views' => 0,
+            'post_shares' => 0,
+            'active_countries' => 0,
         ],
-        'map_points' => $mapPoints,
+        'map_points' => [],
         'player' => [
-            'countries' => $playerCountries,
-            'listeners' => $playerListeners,
-            'total_plays' => 148,
+            'countries' => [],
+            'listeners' => [],
+            'total_plays' => 0,
         ],
-        'links' => $linkClicks,
-        'posts' => $postViews,
-        'shares' => $socialShares,
+        'links' => [],
+        'posts' => [],
+        'shares' => [
+            'platforms' => [],
+            'total' => 0
+        ],
     ];
 }
 
@@ -234,7 +172,7 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
 if ($action === 'stats' || $action === 'summary') {
     $pdo = get_db_connection();
     if (!$pdo) {
-        send_json(get_fallback_stats());
+        send_json(get_empty_stats());
     }
 
     try {
@@ -242,7 +180,7 @@ if ($action === 'stats' || $action === 'summary') {
         $check = $pdo->query("SELECT COUNT(*) FROM bm_analytics_events");
         $totalEvents = (int)$check->fetchColumn();
         if ($totalEvents === 0) {
-            send_json(get_fallback_stats());
+            send_json(get_empty_stats());
         }
 
         // KPIs
@@ -415,7 +353,7 @@ if ($action === 'stats' || $action === 'summary') {
         ]);
     } catch (Exception $e) {
         error_log('[BM-YV Analytics Stats Error] ' . $e->getMessage());
-        send_json(get_fallback_stats());
+        send_json(get_empty_stats());
     }
 }
 
