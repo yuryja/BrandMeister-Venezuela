@@ -5,7 +5,30 @@
 import Layout from '../../layouts/Layout.astro';
 ---
 
-<Layout title="@@META_TITULO@@" description="@@META_DESCRIPCION@@">
+<Layout title="@@META_TITULO@@" description="@@META_DESCRIPCION@@" image="@@IMAGEN@@">
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "@@TITULO@@",
+      "description": "@@DESCRIPCION@@",
+      "image": "@@IMAGEN@@",
+      "datePublished": "@@FECHA_ISO@@",
+      "inLanguage": "es-VE",
+      "author": {
+        "@type": "Person",
+        "name": "@@AUTOR@@"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "BrandMeister Venezuela",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://brandmeisteryv.net/assets/og-brandmeister-dmr-con-radio-square.jpg"
+        }
+      }
+    })} />
+  </Fragment>
   <article class="article-page">
     <header class="article-header article-hero-header">
       <div class="article-hero-bg" data-bm-opcional="imagen" style="background-image: url('@@IMAGEN@@');" aria-hidden="true"></div>

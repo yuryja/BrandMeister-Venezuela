@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Página Principal / Portal Oficial BrandMeister Venezuela -->
+  <url>
+    <loc>https://brandmeisteryv.net/</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/og-brandmeister-dmr-con-radio.jpg</image:loc>
+      <image:title>BrandMeister Venezuela - Red Digital DMR TG 734 - DMR con Radio</image:title>
+      <image:caption>Portal oficial de la red BrandMeister DMR en Venezuela</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Directorio de Repetidores DMR Activos en Venezuela -->
+  <url>
+    <loc>https://brandmeisteryv.net/repetidores</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/og-brandmeister-dmr-con-radio.jpg</image:loc>
+      <image:title>Red de Repetidores DMR BrandMeister Venezuela</image:title>
+    </image:image>
+  </url>
+
+  <!-- Listado Oficial de Talkgroups Nacionales y Regionales (TG 734) -->
+  <url>
+    <loc>https://brandmeisteryv.net/talkgroups</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/og-brandmeister-dmr-con-radio.jpg</image:loc>
+      <image:title>Talkgroups Oficiales BrandMeister Venezuela TG 734</image:title>
+    </image:image>
+  </url>
+
+  <!-- Monitor y Dashboard Petra en Tiempo Real -->
+  <url>
+    <loc>https://brandmeisteryv.net/petra</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/og-brandmeister-dmr-con-radio.jpg</image:loc>
+      <image:title>Dashboard Petra DMR en Vivo - BrandMeister Venezuela</image:title>
+    </image:image>
+  </url>
+
+  <!-- Galería Multimedia y Actividades de la Red -->
+  <url>
+    <loc>https://brandmeisteryv.net/galeria</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/og-brandmeister-dmr-con-radio.jpg</image:loc>
+      <image:title>Galería de la Comunidad BrandMeister Venezuela</image:title>
+    </image:image>
+  </url>
+
+  <!-- Noticias, Comunicados y Artículos Técnicos (Blog) -->
+  <url>
+    <loc>https://brandmeisteryv.net/blog</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/og-brandmeister-dmr-con-radio.jpg</image:loc>
+      <image:title>Noticias y Comunicados Oficiales BrandMeister Venezuela</image:title>
+    </image:image>
+  </url>
+
+  <!-- Comunidad, Canales y Grupos de Radioaficionados -->
+  <url>
+    <loc>https://brandmeisteryv.net/comunidad</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/og-brandmeister-dmr-con-radio.jpg</image:loc>
+      <image:title>Comunidad de Radioaficionados BrandMeister Venezuela</image:title>
+    </image:image>
+  </url>
+
+  <!-- Contacto, Sysops y Soporte Técnico -->
+  <url>
+    <loc>https://brandmeisteryv.net/contacto</loc>
+    <lastmod>2026-09-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/og-brandmeister-dmr-con-radio.jpg</image:loc>
+      <image:title>Contacto y Soporte BrandMeister Venezuela</image:title>
+    </image:image>
+  </url>
+
+</urlset>

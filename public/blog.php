@@ -75,11 +75,11 @@ function blog_head(&$html, $title, $description, $canonical, $image = null) {
     $html = preg_replace('#(<link rel="canonical" href=")[^"]*(")#', '${1}' . e($canonical) . '${2}', $html, 1);
     $html = preg_replace('#(<meta property="og:url" content=")[^"]*(")#', '${1}' . e($canonical) . '${2}', $html, 1);
     foreach ([['og:title', $title], ['twitter:title', $title], ['og:description', $description], ['twitter:description', $description]] as [$prop, $value]) {
-        $html = preg_replace('#(<meta property="' . $prop . '" content=")[^"]*(")#', '${1}' . e($value) . '${2}', $html, 1);
+        $html = preg_replace('#(<meta (?:property|name)="' . $prop . '" content=")[^"]*(")#', '${1}' . e($value) . '${2}', $html, 1);
     }
     if ($image) {
-        foreach (['og:image', 'twitter:image'] as $prop) {
-            $html = preg_replace('#(<meta property="' . $prop . '" content=")[^"]*(")#', '${1}' . e($image) . '${2}', $html, 1);
+        foreach (['og:image', 'twitter:image', 'og:image:secure_url'] as $prop) {
+            $html = preg_replace('#(<meta (?:property|name)="' . $prop . '" content=")[^"]*(")#', '${1}' . e($image) . '${2}', $html, 1);
         }
     }
     $html = preg_replace('#(<meta property="og:type" content=")[^"]*(")#', '${1}article${2}', $html, 1);

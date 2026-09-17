@@ -137,6 +137,29 @@ const repeaters = [
   title="Repetidores y Puntos de Acceso · BrandMeister Venezuela"
   description="Red nacional de repetidores DMR y puntos de acceso en Venezuela. Consulta frecuencias de entrada y salida, desplazamientos, códigos de color y telemetría en tiempo real."
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Red Nacional de Repetidores DMR BrandMeister Venezuela",
+      "description": "Directorio oficial de repetidores y nodos de radioaficionados DMR en Venezuela",
+      "itemListElement": repeaters.map((r, i) => ({
+        "@type": "ListItem",
+        "position": i + 1,
+        "item": {
+          "@type": "RadioStation",
+          "name": `Repetidor DMR ${r.callsign} - ${r.location}`,
+          "callSign": r.callsign,
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": r.location,
+            "addressCountry": "VE"
+          },
+          "description": `${r.type} en banda ${r.band}, RX ${r.freqRx}, TX ${r.freqTx}, offset ${r.offset}, ${r.colorCode}. ${r.notes}`
+        }
+      }))
+    })} />
+  </Fragment>
   <main class="repeaters-page">
     <!-- Hero 50vh con fotografía real de trabajo de campo -->
     <section class="repeaters-hero">
