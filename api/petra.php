@@ -3,16 +3,14 @@
  * Petra API Proxy for BrandMeister Venezuela
  * Solves CORS and allows server-to-server data fetching from shared hosting.
  */
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Accept');
+require_once __DIR__ . '/db.php';
+
+// Solo el propio sitio consume este proxy (misma política que el resto del API)
+bm_cors_headers();
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+// Las peticiones OPTIONS ya las responde db.php
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);

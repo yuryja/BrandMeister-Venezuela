@@ -74,6 +74,10 @@ if ($action === 'login') {
 }
 
 if ($action === 'logout') {
+    // Solo POST: con GET, un enlace en cualquier web cerraría la sesión del que lo abra
+    if ($method !== 'POST') {
+        send_json(['success' => false, 'error' => 'Método no permitido'], 405);
+    }
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
         $p = session_get_cookie_params();

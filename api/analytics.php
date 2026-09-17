@@ -7,18 +7,25 @@
 
 require_once __DIR__ . '/db.php';
 
-// Detectar IP del cliente
+/**
+ * IP real del visitante.
+ *
+ * Cabeceras como X-Forwarded-For las puede inventar cualquiera con un curl, y con ellas se
+ * saltaría el freno por IP y se ensuciarían las estadísticas y el mapa. Por eso se usa siempre
+ * REMOTE_ADDR, salvo que el sitio esté detrás de un proxy de confianza (Cloudflare u otro) y se
+ * indique qué cabecera mira en ~/bmyv-config.php:
+ *   'TRUSTED_PROXY_HEADER' => 'CF-Connecting-IP'
+ */
+function bm_trusted_proxy_header(): string {
+    return trim((string)getenv('TRUSTED_PROXY_HEADER'));
+}
+
 function get_client_ip(): string {
-    $keys = [
-        'HTTP_CF_CONNECTING_IP',
-        'HTTP_X_FORWARDED_FOR',
-        'HTTP_X_REAL_IP',
-        'REMOTE_ADDR'
-    ];
-    foreach ($keys as $key) {
+    $header = bm_trusted_proxy_header();
+    if ($header !== '') {
+        $key = 'HTTP_' . strtoupper(str_replace('-', '_', $header));
         if (!empty($_SERVER[$key])) {
-            $ipList = explode(',', $_SERVER[$key]);
-            $ip = trim($ipList[0]);
+            $ip = trim(explode(',', (string)$_SERVER[$key])[0]);
             if (filter_var($ip, FILTER_VALIDATE_IP)) {
                 return $ip;
             }
@@ -37,6 +44,42 @@ function detect_device_type(): string {
         return 'mobile';
     }
     return 'desktop';
+}
+
+/**
+ * Ubicación ya conocida de esa IP en los últimos 30 días: evita salir a internet en cada visita
+ * (una consulta externa por evento ralentiza el sitio y se puede usar para saturarlo).
+ */
+function cached_ip_location(?PDO $pdo, string $ip): ?array {
+    if (!$pdo) return null;
+    try {
+        $stmt = $pdo->prepare("SELECT country_code, country_name, city, latitude, longitude
+            FROM bm_analytics_events
+            WHERE ip_address = :ip AND latitude IS NOT NULL AND created_at > DATE_SUB(NOW(), INTERVAL 30 DAY)
+            ORDER BY id DESC LIMIT 1");
+        $stmt->execute([':ip' => $ip]);
+        $row = $stmt->fetch();
+        if (!$row) return null;
+        return [
+            'countryCode' => $row['country_code'],
+            'country' => $row['country_name'],
+            'city' => $row['city'],
+            'lat' => $row['latitude'],
+            'lon' => $row['longitude'],
+        ];
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+/** Retención: ni las analíticas ni el registro de actividad guardan IPs para siempre */
+function purge_old_rows(PDO $pdo): void {
+    try {
+        $pdo->exec("DELETE FROM bm_analytics_events WHERE created_at < DATE_SUB(NOW(), INTERVAL 365 DAY) LIMIT 500");
+        $pdo->exec("DELETE FROM bm_activity_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 365 DAY) LIMIT 500");
+    } catch (Exception $e) {
+        error_log('[BM-YV Analytics] purga: ' . $e->getMessage());
+    }
 }
 
 // Detección geográfica gratuita por IP sin necesidad de API key (ip-api.com)
@@ -114,7 +157,9 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
 
     // La ubicación nunca se toma del navegador (se podría falsear): solo de la IP.
     // Sin geolocalización se guarda sin coordenadas y no aparece en el mapa.
-    $countryCode = preg_replace('/[^A-Z]/', '', strtoupper((string)($_SERVER['HTTP_CF_IPCOUNTRY'] ?? '')));
+    // El país de Cloudflare solo vale si de verdad estamos detrás de Cloudflare (ver get_client_ip)
+    $cfCountry = bm_trusted_proxy_header() !== '' ? (string)($_SERVER['HTTP_CF_IPCOUNTRY'] ?? '') : '';
+    $countryCode = preg_replace('/[^A-Z]/', '', strtoupper($cfCountry));
     $countryCode = substr($countryCode, 0, 2) ?: null;
     $countryName = null;
     $city = null;
@@ -136,7 +181,11 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
         }
     }
 
-    $geo = resolve_ip_location($ipAddress);
+    if ($pdo && random_int(1, 200) === 1) {
+        purge_old_rows($pdo);
+    }
+
+    $geo = cached_ip_location($pdo, $ipAddress) ?: resolve_ip_location($ipAddress);
     if ($geo) {
         $countryCode = substr(preg_replace('/[^A-Z]/', '', strtoupper((string)($geo['countryCode'] ?? ''))), 0, 2) ?: $countryCode;
         $countryName = mb_substr(strip_tags((string)($geo['country'] ?? '')), 0, 100) ?: null;
