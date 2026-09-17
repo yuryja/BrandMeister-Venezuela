@@ -387,3 +387,54 @@
 .users-table td.cell-title {
   min-width: 400px;
 }
+
+/* Pantalla de acceso: enlace de vuelta al sitio y aviso de reCAPTCHA */
+#wp-login-screen.wp-login-wrapper {
+  flex-direction: column;
+  gap: 1.25rem;
+  /* El panel ya no muestra la barra del sitio: el fondo ocupa toda la pantalla */
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.wp-login-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.wp-login-back:hover {
+  color: var(--bm-red-dark, #C91B12);
+  background: #FFFFFF;
+}
+
+.wp-login-back:focus-visible {
+  outline: 2px solid var(--bm-orange);
+  outline-offset: 2px;
+}
+
+.wp-login-recaptcha {
+  margin: 1.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.wp-login-recaptcha a {
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
+/* La insignia flotante se oculta: Google lo permite si se muestra el aviso de arriba */
+.grecaptcha-badge {
+  visibility: hidden;
+}

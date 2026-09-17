@@ -9,6 +9,9 @@ import '../styles/admin-gallery.css';
 import '../styles/admin-posts.css';
 import '../styles/admin-layout.css';
 import '../styles/admin-analytics.css';
+
+// Clave pública de reCAPTCHA v3 (GitHub → Variables → PUBLIC_RECAPTCHA_SITE_KEY). Sin clave, el login funciona sin él
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 ---
 
 <Layout
@@ -21,7 +24,7 @@ import '../styles/admin-analytics.css';
   <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" slot="head"></script>
   <script is:inline src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" slot="head"></script>
   <!-- WP LOGIN SCREEN (Shown if not authenticated) -->
-  <div id="wp-login-screen" class="wp-login-wrapper">
+  <div id="wp-login-screen" class="wp-login-wrapper" data-recaptcha-site-key={recaptchaSiteKey}>
     <div class="wp-login-card">
       <div class="wp-login-logo">
         <img src="/assets/logo.webp" alt="BrandMeister Venezuela" width="220" height="55" />
@@ -98,7 +101,20 @@ import '../styles/admin-analytics.css';
         </form>
         <p class="wp-login-links"><a href="#" data-show-panel="login">Ir a iniciar sesión</a></p>
       </div>
+
+      {recaptchaSiteKey && (
+        <p class="wp-login-recaptcha">
+          Protegido por reCAPTCHA de Google:
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacidad</a> ·
+          <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Términos</a>
+        </p>
+      )}
     </div>
+
+    <a href="/" class="wp-login-back">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Volver a BrandMeister Venezuela
+    </a>
   </div>
 
   <!-- PANEL DE ADMINISTRACIÓN (ESTILO WORDPRESS) -->
@@ -1479,6 +1495,7 @@ import '../styles/admin-analytics.css';
   import { initGallery } from '../scripts/admin/gallery';
   import { initPosts } from '../scripts/admin/posts';
   import { initNav } from '../scripts/admin/nav';
+  import { preloadRecaptcha, recaptchaToken } from '../scripts/admin/recaptcha';
   import { initAccount, showAccountPanel } from '../scripts/admin/account';
   import { initAnalytics } from '../scripts/admin/analytics';
 
@@ -1546,6 +1563,8 @@ import '../styles/admin-analytics.css';
 
   const showLogin = (message = '') => {
     document.getElementById('wp-login-screen')!.style.display = 'flex';
+    // v3 puntúa mejor si el script lleva unos segundos cargado antes de enviar
+    preloadRecaptcha().catch(() => {});
     document.getElementById('wp-app')!.style.display = 'none';
     showAccountPanel('login');
     const errorEl = document.getElementById('login-error');
@@ -1628,11 +1647,18 @@ import '../styles/admin-analytics.css';
       if (submitBtn) submitBtn.disabled = true;
 
       try {
+        let recaptcha = '';
+        try {
+          recaptcha = await recaptchaToken('login');
+        } catch (err) {
+          showLogin((err as Error).message);
+          return;
+        }
         const res = await fetch('/api/auth.php?action=login', {
           method: 'POST',
           credentials: 'same-origin',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value })
+          body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value, recaptcha_token: recaptcha })
         });
         const data = await res.json().catch(() => null);
         if (res.ok && data?.success && data.user) {
