@@ -59,37 +59,51 @@
     const resto = posts.filter((p) => p.id !== destacada.id).slice(0, 3);
 
     const autor = (p) => escapeHtml(p.author_callsign || p.author_name);
+    const hasImgDestacada = Boolean(destacada.image_url);
+
     layout.innerHTML = `
-      <article class="featured-post">
+      <article class="featured-post ${hasImgDestacada ? 'has-bg-image' : ''}">
+        ${hasImgDestacada ? `<div class="post-bg-layer" style="background-image: url('${escapeHtml(destacada.image_url)}');" aria-hidden="true"></div>` : ''}
         <div class="post-meta-top">
           <span class="post-cat">${escapeHtml(destacada.category)}</span>
           <span class="post-date">${fecha(destacada.published_ts, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
           <span class="post-read">${escapeHtml(destacada.read_time)}</span>
         </div>
-        <h3 class="featured-title"><a href="${escapeHtml(destacada.url)}">${escapeHtml(destacada.title)}</a></h3>
-        <p class="featured-excerpt">${escapeHtml(destacada.description)}</p>
+        <div class="featured-body">
+          <h3 class="featured-title"><a href="${escapeHtml(destacada.url)}">${escapeHtml(destacada.title)}</a></h3>
+          <p class="featured-excerpt">${escapeHtml(destacada.description)}</p>
+        </div>
         <div class="post-author-row">
           <span class="author-badge">
             <strong>${escapeHtml(destacada.author_name)}</strong>
             ${destacada.author_callsign ? `<span class="callsign-tag">${escapeHtml(destacada.author_callsign)}</span>` : ''}
           </span>
-          <a href="${escapeHtml(destacada.url)}" class="read-more-link">Leer artículo completo →</a>
+          <a href="${escapeHtml(destacada.url)}" class="read-more-link">
+            <span>Leer artículo completo</span>
+            <span aria-hidden="true">→</span>
+          </a>
         </div>
       </article>
       <div class="articles-stream">
-        ${resto.map((post) => `
-          <article class="stream-article">
-            <div class="post-meta-top">
-              <span class="post-cat">${escapeHtml(post.category)}</span>
-              <span class="post-date">${fecha(post.published_ts, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-            </div>
-            <h4 class="stream-title"><a href="${escapeHtml(post.url)}">${escapeHtml(post.title)}</a></h4>
-            <p class="stream-excerpt">${escapeHtml(post.description)}</p>
-            <div class="stream-footer">
-              <span class="stream-author">${autor(post)}</span>
-              <span class="stream-read">${escapeHtml(post.read_time)}</span>
-            </div>
-          </article>`).join('')}
+        ${resto.map((post) => {
+          const hasImg = Boolean(post.image_url);
+          return `
+            <article class="stream-article ${hasImg ? 'has-bg-image' : ''}">
+              ${hasImg ? `<div class="post-bg-layer" style="background-image: url('${escapeHtml(post.image_url)}');" aria-hidden="true"></div>` : ''}
+              <div class="stream-content">
+                <div class="post-meta-top">
+                  <span class="post-cat">${escapeHtml(post.category)}</span>
+                  <span class="post-date">${fecha(post.published_ts, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+                <h4 class="stream-title"><a href="${escapeHtml(post.url)}">${escapeHtml(post.title)}</a></h4>
+                <p class="stream-excerpt">${escapeHtml(post.description)}</p>
+                <div class="stream-footer">
+                  <span class="stream-author">${autor(post)}</span>
+                  <span class="stream-read">${escapeHtml(post.read_time)}</span>
+                </div>
+              </div>
+            </article>`;
+        }).join('')}
       </div>`;
   })();
 </script>
@@ -120,19 +134,55 @@
   .blog-preview-section .editorial-blog-layout {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: 2rem;
   }
 
   @media (min-width: 960px) {
     .blog-preview-section .editorial-blog-layout {
       grid-template-columns: 1.25fr 1fr;
-      gap: 3.5rem;
+      gap: 2.5rem;
       align-items: stretch;
     }
   }
 
+  /* Background image layer with smooth hover zoom and dark contrast overlay */
+  .blog-preview-section .post-bg-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 0;
+    pointer-events: none;
+    transform: scale(1.001);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .blog-preview-section .featured-post .post-bg-layer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.42) 0%, rgba(15, 23, 42, 0.76) 50%, rgba(15, 23, 42, 0.96) 100%);
+  }
+
+  .blog-preview-section .stream-article .post-bg-layer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.48) 0%, rgba(15, 23, 42, 0.82) 55%, rgba(15, 23, 42, 0.97) 100%);
+  }
+
+  .blog-preview-section .featured-post:hover .post-bg-layer,
+  .blog-preview-section .stream-article:hover .post-bg-layer {
+    transform: scale(1.045);
+  }
+
   /* Featured Post Styling */
   .blog-preview-section .featured-post {
+    position: relative;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -141,16 +191,46 @@
     border: 1px solid var(--border-subtle);
     border-left: 4px solid var(--bm-red);
     border-radius: var(--radius-md);
+    min-height: 440px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  }
+
+  .blog-preview-section .featured-post:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .blog-preview-section .featured-post.has-bg-image {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: 4px solid var(--bm-red);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  }
+
+  .blog-preview-section .featured-post.has-bg-image:hover {
+    box-shadow: 0 20px 48px rgba(15, 23, 42, 0.28);
+  }
+
+  /* Content elements inside featured post stay above the background */
+  .blog-preview-section .featured-post .post-meta-top,
+  .blog-preview-section .featured-post .featured-body,
+  .blog-preview-section .featured-post .post-author-row {
+    position: relative;
+    z-index: 1;
+  }
+
+  .blog-preview-section .featured-post .featured-body {
+    margin: 1.5rem 0;
   }
 
   .blog-preview-section .post-meta-top {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-bottom: 1.25rem;
     font-size: 0.82rem;
   }
 
+  /* Standard / Default Post Meta */
   .blog-preview-section .post-cat {
     font-weight: 700;
     text-transform: uppercase;
@@ -167,21 +247,61 @@
     border-left: 1px solid var(--border-subtle);
   }
 
+  /* High-contrast typography when background image is present */
+  .blog-preview-section .featured-post.has-bg-image .post-cat {
+    background: var(--bm-red);
+    color: #FFFFFF;
+    padding: 0.22rem 0.65rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.74rem;
+    letter-spacing: 0.4px;
+    box-shadow: 0 2px 8px rgba(232, 38, 28, 0.4);
+  }
+
+  .blog-preview-section .featured-post.has-bg-image .post-date {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 500;
+  }
+
+  .blog-preview-section .featured-post.has-bg-image .post-read {
+    color: rgba(255, 255, 255, 0.85);
+    border-left-color: rgba(255, 255, 255, 0.25);
+  }
+
   .blog-preview-section .featured-title {
     font-size: clamp(1.5rem, 2.5vw, 2.1rem);
     line-height: 1.25;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .blog-preview-section .featured-title a {
+    color: var(--text-main);
+    transition: color 0.2s ease, text-shadow 0.2s ease;
   }
 
   .blog-preview-section .featured-title a:hover {
     color: var(--bm-red);
   }
 
+  .blog-preview-section .featured-post.has-bg-image .featured-title a {
+    color: #FFFFFF;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75);
+  }
+
+  .blog-preview-section .featured-post.has-bg-image .featured-title a:hover {
+    color: var(--bm-yellow);
+    text-shadow: 0 2px 12px rgba(242, 169, 59, 0.45);
+  }
+
   .blog-preview-section .featured-excerpt {
-    font-size: 1.1rem;
-    line-height: 1.7;
+    font-size: 1.08rem;
+    line-height: 1.65;
     color: var(--text-muted);
-    margin-bottom: 2rem;
+  }
+
+  .blog-preview-section .featured-post.has-bg-image .featured-excerpt {
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
   }
 
   .blog-preview-section .post-author-row {
@@ -192,12 +312,20 @@
     border-top: 1px solid var(--border-subtle);
   }
 
+  .blog-preview-section .featured-post.has-bg-image .post-author-row {
+    border-top-color: rgba(255, 255, 255, 0.18);
+  }
+
   .blog-preview-section .author-badge {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     font-size: 0.9rem;
     color: var(--text-main);
+  }
+
+  .blog-preview-section .featured-post.has-bg-image .author-badge {
+    color: #FFFFFF;
   }
 
   .blog-preview-section .callsign-tag {
@@ -209,41 +337,86 @@
     border-radius: var(--radius-sm);
   }
 
+  .blog-preview-section .featured-post.has-bg-image .callsign-tag {
+    color: var(--bm-yellow);
+    background: rgba(242, 169, 59, 0.18);
+    border: 1px solid rgba(242, 169, 59, 0.4);
+  }
+
   .blog-preview-section .read-more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     font-size: 0.92rem;
     font-weight: 700;
     color: var(--bm-orange);
+    transition: color 0.2s ease, transform 0.2s ease;
   }
 
   .blog-preview-section .read-more-link:hover {
     color: var(--bm-red);
+    transform: translateX(3px);
   }
 
-  /* Articles Stream (Linear, NOT boxy cards) */
+  .blog-preview-section .featured-post.has-bg-image .read-more-link {
+    color: var(--bm-yellow);
+  }
+
+  .blog-preview-section .featured-post.has-bg-image .read-more-link:hover {
+    color: #FFFFFF;
+  }
+
+  /* Articles Stream (Modern balanced cards) */
   .blog-preview-section .articles-stream {
     display: flex;
     flex-direction: column;
+    gap: 1.25rem;
     justify-content: space-between;
   }
 
   .blog-preview-section .stream-article {
-    padding: 1.5rem 0;
-    border-bottom: 1px solid var(--border-subtle);
+    position: relative;
+    overflow: hidden;
+    padding: 1.35rem 1.5rem;
+    border-radius: var(--radius-md);
+    background: var(--bg-page);
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 125px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   }
 
-  .blog-preview-section .stream-article:first-child {
-    padding-top: 0;
+  .blog-preview-section .stream-article:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-medium);
+    box-shadow: var(--shadow-md);
   }
 
-  .blog-preview-section .stream-article:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
+  .blog-preview-section .stream-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
+
+  .blog-preview-section .stream-article .post-meta-top {
+    margin-bottom: 0.65rem;
   }
 
   .blog-preview-section .stream-title {
     font-size: 1.15rem;
     line-height: 1.35;
     margin-bottom: 0.5rem;
+  }
+
+  .blog-preview-section .stream-title a {
+    color: var(--text-main);
+    transition: color 0.2s ease;
   }
 
   .blog-preview-section .stream-title a:hover {
@@ -254,7 +427,7 @@
     font-size: 0.92rem;
     color: var(--text-muted);
     line-height: 1.55;
-    margin-bottom: 0.85rem;
+    margin-bottom: 0.75rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -264,13 +437,73 @@
   .blog-preview-section .stream-footer {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 0.8rem;
     color: var(--text-faint);
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border-subtle);
   }
 
   .blog-preview-section .stream-author {
     font-weight: 600;
     color: var(--text-muted);
+  }
+
+  .blog-preview-section .stream-read {
+    color: var(--text-faint);
+  }
+
+  /* Stream Article With Background Image */
+  .blog-preview-section .stream-article.has-bg-image {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.14);
+  }
+
+  .blog-preview-section .stream-article.has-bg-image:hover {
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.24);
+  }
+
+  .blog-preview-section .stream-article.has-bg-image .post-cat {
+    background: var(--bm-red);
+    color: #FFFFFF;
+    padding: 0.18rem 0.55rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(232, 38, 28, 0.3);
+  }
+
+  .blog-preview-section .stream-article.has-bg-image .post-date {
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .blog-preview-section .stream-article.has-bg-image .stream-title a {
+    color: #FFFFFF;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7);
+  }
+
+  .blog-preview-section .stream-article.has-bg-image .stream-title a:hover {
+    color: var(--bm-yellow);
+    text-shadow: 0 1px 8px rgba(242, 169, 59, 0.4);
+  }
+
+  .blog-preview-section .stream-article.has-bg-image .stream-excerpt {
+    color: rgba(255, 255, 255, 0.88);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  }
+
+  .blog-preview-section .stream-article.has-bg-image .stream-footer {
+    border-top-color: rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.82);
+  }
+
+  .blog-preview-section .stream-article.has-bg-image .stream-author {
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  .blog-preview-section .stream-article.has-bg-image .stream-read {
+    color: rgba(255, 255, 255, 0.82);
   }
 
   /* Esqueleto mientras cargan las noticias */
