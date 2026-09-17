@@ -318,14 +318,17 @@ const repeaters = [
   }
 
   .repeater-table {
-    min-width: 1040px;
+    min-width: 1080px;
+    width: 100%;
     display: flex;
     flex-direction: column;
   }
 
   .table-head {
     display: grid;
-    grid-template-columns: 130px 115px minmax(300px, 2fr) 85px 160px 105px 135px;
+    grid-template-columns: 125px 115px 360px 85px 165px 105px 130px;
+    min-width: 1080px;
+    box-sizing: border-box;
     padding: 1rem 1.5rem;
     background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
     font-size: 0.78rem;
@@ -343,11 +346,25 @@ const repeaters = [
 
   .table-row {
     display: grid;
-    grid-template-columns: 130px 115px minmax(300px, 2fr) 85px 160px 105px 135px;
+    grid-template-columns: 125px 115px 360px 85px 165px 105px 130px;
+    min-width: 1080px;
+    box-sizing: border-box;
     padding: 1.25rem 1.5rem;
     align-items: center;
     border-bottom: 1px solid var(--border-subtle);
     transition: background-color 0.18s ease;
+  }
+
+  @media (min-width: 1280px) {
+    .repeater-table {
+      min-width: 100%;
+    }
+
+    .table-head,
+    .table-row {
+      min-width: 100%;
+      grid-template-columns: 130px 120px 1fr 90px 170px 110px 140px;
+    }
   }
 
   .table-row:last-child {
@@ -377,15 +394,18 @@ const repeaters = [
   .col-loc {
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
-    min-width: 280px;
+    gap: 0.3rem;
+    min-width: 340px;
+    padding-right: 1.25rem;
+    box-sizing: border-box;
   }
 
   .location-name {
-    font-size: 0.95rem;
-    font-weight: 700;
+    font-size: 0.98rem;
+    font-weight: 800;
     color: var(--text-main);
     letter-spacing: 0 !important;
+    white-space: nowrap;
   }
 
   .location-freq {
@@ -394,6 +414,7 @@ const repeaters = [
     font-weight: 700;
     color: var(--bm-orange);
     font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    white-space: nowrap;
   }
 
   .freq-offset {
@@ -403,8 +424,10 @@ const repeaters = [
   }
 
   .location-notes {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
+    line-height: 1.45;
+    white-space: normal;
   }
 
   /* Band badges strictly in BrandMeister palette */
