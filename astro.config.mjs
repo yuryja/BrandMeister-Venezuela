@@ -1,4 +1,33 @@
 import { defineConfig } from 'astro/config';
+import { spawn } from 'node:child_process';
+
+function phpDevServer() {
+  let phpProcess = null;
+  return {
+    name: 'php-dev-server',
+    apply: 'serve',
+    configureServer(server) {
+      try {
+        phpProcess = spawn('php', ['-S', '127.0.0.1:8088', '-t', 'public'], {
+          stdio: 'ignore'
+        });
+        phpProcess.on('error', () => {});
+      } catch (_) {}
+
+      const cleanUp = () => {
+        if (phpProcess) {
+          try { phpProcess.kill(); } catch (_) {}
+          phpProcess = null;
+        }
+      };
+
+      server.httpServer?.on('close', cleanUp);
+      process.on('SIGINT', cleanUp);
+      process.on('SIGTERM', cleanUp);
+      process.on('exit', cleanUp);
+    }
+  };
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -19,12 +48,17 @@ export default defineConfig({
     clientPrerender: true
   },
   vite: {
+    plugins: [phpDevServer()],
     server: {
       proxy: {
         '/api/petra': {
           target: 'https://petra.brandmeisteryv.net/api',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/petra/, '')
+        },
+        '/api': {
+          target: 'http://127.0.0.1:8088',
+          changeOrigin: true
         }
       }
     }
