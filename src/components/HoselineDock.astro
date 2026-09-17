@@ -308,7 +308,22 @@
     if (target) {
       e.preventDefault();
       const willStart = !hoseline || hoseline.getState() === "idle" || hoseline.getState() === "error";
-      if (willStart) unlockAudio();
+      if (willStart) {
+        unlockAudio();
+        try {
+          fetch('/api/analytics.php?action=track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              event_type: 'player_play',
+              event_category: 'audio',
+              entity_id: 'tg-734',
+              entity_title: 'TG 734 Hoseline Audio'
+            }),
+            keepalive: true
+          }).catch(() => {});
+        } catch (_) {}
+      }
       loadHoseline().then((player) => player.toggle(734));
     }
   });

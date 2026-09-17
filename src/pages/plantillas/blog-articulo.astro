@@ -102,6 +102,34 @@ import Layout from '../../layouts/Layout.astro';
       /* Sin permiso de portapapeles: el usuario puede copiar la URL de la barra */
     }
   });
+
+  // Rastreo de compartidos en redes sociales para telemetría
+  document.querySelectorAll('.article-share-strip .share-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      let platform = 'copy_link';
+      if (btn.classList.contains('whatsapp')) platform = 'whatsapp';
+      else if (btn.classList.contains('telegram')) platform = 'telegram';
+      else if (btn.classList.contains('twitter')) platform = 'twitter';
+      else if (btn.classList.contains('facebook')) platform = 'facebook';
+      
+      const slug = window.location.pathname.split('/').filter(Boolean).pop() || '';
+      const title = document.querySelector('.article-title')?.textContent?.trim() || document.title;
+      try {
+        fetch('/api/analytics.php?action=track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event_type: 'post_share',
+            event_category: 'social',
+            entity_id: slug,
+            entity_title: title,
+            platform: platform
+          }),
+          keepalive: true
+        }).catch(() => {});
+      } catch (_) {}
+    });
+  });
 </script>
 
 <!-- Global con prefijo .article-page: PHP inserta el contenido del artículo -->

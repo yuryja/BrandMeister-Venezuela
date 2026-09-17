@@ -127,6 +127,32 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://brandmei
       // Iniciar en carga y en navegaciones
       document.addEventListener('DOMContentLoaded', initScrollObserver);
       initScrollObserver();
+
+      // Rastreo discreto de clics en enlaces comunitarios y externos
+      document.addEventListener('click', (e) => {
+        const link = (e.target as HTMLElement | null)?.closest?.('a');
+        if (!link || !link.href) return;
+        const href = link.getAttribute('href') || '';
+        const isExternal = Boolean(link.host && link.host !== window.location.host);
+        const isResourceKey = href.includes('repetidores') || href.includes('talkgroups') || href.includes('radioid') || href.includes('brandmeister');
+        
+        if (isExternal || isResourceKey) {
+          const title = link.getAttribute('title') || link.getAttribute('aria-label') || link.textContent?.trim() || href;
+          try {
+            fetch('/api/analytics.php?action=track', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                event_type: 'link_click',
+                event_category: isExternal ? 'external_link' : 'portal_link',
+                entity_id: href.slice(0, 100),
+                entity_title: title.slice(0, 100)
+              }),
+              keepalive: true
+            }).catch(() => {});
+          } catch (_) {}
+        }
+      }, { passive: true });
     </script>
   </body>
 </html>

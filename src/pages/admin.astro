@@ -7,14 +7,7 @@ import PostsView from '../components/admin/PostsView.astro';
 import '../styles/admin-accounts.css';
 import '../styles/admin-gallery.css';
 import '../styles/admin-posts.css';
-
-const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-const getCellIntensity = (hour: number) => {
-  if (hour >= 18 && hour <= 22) return hour % 2 === 0 ? 'level-3' : 'level-2';
-  if (hour >= 11 && hour <= 14) return 'level-1';
-  if (hour >= 1 && hour <= 5) return 'level-0';
-  return 'level-1';
-};
+import '../styles/admin-analytics.css';
 ---
 
 <Layout
@@ -22,6 +15,10 @@ const getCellIntensity = (hour: number) => {
   description="Panel de administración de BrandMeister Venezuela: noticias, galería y usuarios."
   chrome={false}
 >
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" slot="head" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" slot="head" />
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" slot="head"></script>
+  <script is:inline src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" slot="head"></script>
   <!-- WP LOGIN SCREEN (Shown if not authenticated) -->
   <div id="wp-login-screen" class="wp-login-wrapper">
     <div class="wp-login-card">
@@ -230,106 +227,270 @@ const getCellIntensity = (hour: number) => {
         <!-- ========================================================= -->
         <!-- VIEW 1: ESCRITORIO (DASHBOARD) -->
         <!-- ========================================================= -->
+        <!-- ========================================================= -->
+        <!-- VIEW 1: ESCRITORIO (DASHBOARD & ANALYTICS) -->
+        <!-- ========================================================= -->
         <section id="view-dashboard" class="wp-view is-active">
           <div class="view-header">
-            <h1 class="view-title">Escritorio</h1>
-            <button class="btn btn-primary" onclick="window.switchView('new-post')">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              <span>Añadir Noticia</span>
-            </button>
-          </div>
-
-          <!-- Welcome Banner -->
-          <div class="wp-welcome-panel">
-            <div class="welcome-text">
-              <h2>¡Bienvenido al panel de BrandMeister Venezuela!</h2>
-              <p>Gestiona los canales, consulta telemetría del TG 734 y publica comunicados oficiales de la red nacional.</p>
+            <div>
+              <h1 class="view-title">Escritorio y Analíticas</h1>
+              <p class="view-subtitle">Métricas de oyentes, clics en enlaces, lectura de publicaciones y compartidos.</p>
+            </div>
+            <div class="analytics-time-filter">
+              <span class="filter-indicator">● En vivo</span>
+              <button type="button" class="btn-time-range is-active" data-range="7d">7 días</button>
+              <button type="button" class="btn-time-range" data-range="30d">30 días</button>
+              <button type="button" class="btn-time-range" data-range="all">Histórico</button>
             </div>
           </div>
 
-          <!-- At a Glance & Quick Draft Grid -->
-          <div class="dashboard-widgets-grid">
-            <!-- At a Glance -->
+          <!-- 1. KPI SUMMARY CARDS -->
+          <div class="analytics-kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-label">Reproductor Audio</span>
+                <span class="kpi-icon-wrap icon-audio">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="kpi-value" id="kpi-player-plays">--</div>
+              <div class="kpi-footer">
+                <span class="kpi-subtext"><strong id="kpi-unique-listeners">--</strong> oyentes únicos</span>
+                <span class="kpi-badge">TG 734</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-label">Clics en Enlaces</span>
+                <span class="kpi-icon-wrap icon-links">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="kpi-value" id="kpi-link-clicks">--</div>
+              <div class="kpi-footer">
+                <span class="kpi-subtext">Red, Masters y RadioID</span>
+                <span class="kpi-trend">Tráfico activo</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-label">Lectura de Noticias</span>
+                <span class="kpi-icon-wrap icon-posts">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="kpi-value" id="kpi-post-views">--</div>
+              <div class="kpi-footer">
+                <span class="kpi-subtext">Visitas al blog</span>
+                <span class="kpi-trend">+14% mes</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-label">Compartidos</span>
+                <span class="kpi-icon-wrap icon-shares">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                  </svg>
+                </span>
+              </div>
+              <div class="kpi-value" id="kpi-post-shares">--</div>
+              <div class="kpi-footer">
+                <span class="kpi-subtext">WhatsApp & Telegram</span>
+                <span class="kpi-trend">Difusión</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-label">Países Conectados</span>
+                <span class="kpi-icon-wrap icon-geo">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="kpi-value" id="kpi-active-countries">--</div>
+              <div class="kpi-footer">
+                <span class="kpi-subtext">VE, US, ES, CO, CL, AR...</span>
+                <span class="kpi-badge">Global</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. LARGE LEAFLET MAP WIDGET (With marker clusters) -->
+          <div class="wp-box analytics-map-card">
+            <div class="wp-box-head">
+              <div class="map-head-title">
+                <div class="map-title-row">
+                  <span class="status-dot"></span>
+                  <h3>Distribución Geográfica y Conexiones</h3>
+                </div>
+                <p class="map-subtitle">Mapa en vivo con agrupamiento (cluster) de oyentes, lectores y visitantes por país y ciudad.</p>
+              </div>
+              <div class="map-controls">
+                <div class="map-filter-pills">
+                  <button type="button" class="map-pill is-active" data-map-filter="all">Todos</button>
+                  <button type="button" class="map-pill" data-map-filter="player_play">Reproductor</button>
+                  <button type="button" class="map-pill" data-map-filter="link_click">Enlaces</button>
+                  <button type="button" class="map-pill" data-map-filter="post_view">Publicaciones</button>
+                </div>
+                <button type="button" class="btn-map-reset" id="btn-reset-map" title="Centrar en Venezuela">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M3 12h3m12 0h3M12 3v3m0 12v3"></path>
+                  </svg>
+                  <span>Centrar</span>
+                </button>
+              </div>
+            </div>
+            <div class="wp-box-body" style="padding: 0; position: relative;">
+              <div id="analytics-leaflet-map" style="width: 100%; height: 440px; background: #F8FAFC;"></div>
+              <div class="map-legend">
+                <span class="legend-item"><span class="cluster-sample sm"></span> 2 - 9 conexiones</span>
+                <span class="legend-item"><span class="cluster-sample md"></span> 10 - 24 conexiones</span>
+                <span class="legend-item"><span class="cluster-sample lg"></span> 25+ conexiones</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. AUDIO PLAYER TELEMETRY (Countries & IPs / Frequency) -->
+          <div class="analytics-row-grid">
+            <!-- Left: Player Countries -->
             <div class="wp-box">
               <div class="wp-box-head">
-                <h3>De un vistazo</h3>
+                <div>
+                  <h3>Reproductor: Oyentes por País</h3>
+                  <p class="box-sub">Distribución porcentual de reproducciones en TG 734</p>
+                </div>
+                <span class="badge-mini">Audio Hoseline</span>
               </div>
               <div class="wp-box-body">
-                <ul class="glance-list">
-                  <li>
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--bm-orange)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
-                    <span><strong>4</strong> Noticias publicadas</span>
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--bm-red)" stroke-width="2"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49"></path></svg>
-                    <span><strong>8</strong> Repetidores enlazados</span>
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#16A34A" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path></svg>
-                    <span>Anunciador TG 734 <strong>Operativo</strong></span>
-                  </li>
-                  <li>
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--bm-yellow)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span>Pico diario: <strong>19:00 - 21:30 VET</strong></span>
-                  </li>
-                </ul>
+                <div class="country-bars-list" id="player-countries-list">
+                  <!-- Inyectado dinámicamente -->
+                </div>
               </div>
             </div>
 
-            <!-- Quick Draft -->
+            <!-- Right: IP Listener Frequency ("cuantas veces lo hacen") -->
             <div class="wp-box">
               <div class="wp-box-head">
-                <h3>Borrador rápido</h3>
+                <div>
+                  <h3>Registro de Oyentes (IPs y Frecuencia)</h3>
+                  <p class="box-sub">Direcciones IP, ciudad y cuántas veces han reproducido el audio</p>
+                </div>
+                <span class="badge-mini" id="listeners-total-count">Oyentes Activos</span>
               </div>
-              <div class="wp-box-body">
-                <form id="quick-draft-form">
-                  <div class="form-group">
-                    <input type="text" id="qd-title" class="form-input" placeholder="Título de la noticia..." required />
-                  </div>
-                  <div class="form-group">
-                    <textarea id="qd-content" class="form-input" rows="3" placeholder="¿Qué está sucediendo en la red hoy?..." required></textarea>
-                  </div>
-                  <button type="submit" class="btn btn-secondary" style="font-size: 0.85rem;">
-                    Guardar borrador
-                  </button>
-                </form>
+              <div class="wp-box-body" style="padding: 0;">
+                <div class="table-responsive-minimal">
+                  <table class="analytics-table">
+                    <thead>
+                      <tr>
+                        <th>Dirección IP</th>
+                        <th>Ubicación</th>
+                        <th style="text-align: center;">Reproducciones</th>
+                        <th style="text-align: right;">Última Actividad</th>
+                      </tr>
+                    </thead>
+                    <tbody id="player-listeners-tbody">
+                      <!-- Inyectado dinámicamente -->
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Activity Heatmap Panel -->
+          <!-- 4. LINK CLICKS & SOCIAL SHARES ROW -->
+          <div class="analytics-row-grid" style="margin-top: 1.5rem;">
+            <!-- Clics en Enlaces -->
+            <div class="wp-box">
+              <div class="wp-box-head">
+                <div>
+                  <h3>Clics en Enlaces y Recursos</h3>
+                  <p class="box-sub">Destinos más consultados por los operadores</p>
+                </div>
+                <span class="badge-mini">Enlaces salientes</span>
+              </div>
+              <div class="wp-box-body" style="padding: 0;">
+                <div class="table-responsive-minimal">
+                  <table class="analytics-table">
+                    <thead>
+                      <tr>
+                        <th>Destino / Recurso</th>
+                        <th>Categoría</th>
+                        <th style="text-align: right;">Clics</th>
+                      </tr>
+                    </thead>
+                    <tbody id="link-clicks-tbody">
+                      <!-- Inyectado dinámicamente -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Compartidos en Redes Sociales -->
+            <div class="wp-box">
+              <div class="wp-box-head">
+                <div>
+                  <h3>Difusión en Redes Sociales</h3>
+                  <p class="box-sub">Publicaciones compartidas por plataforma</p>
+                </div>
+                <span class="badge-mini">Viralidad</span>
+              </div>
+              <div class="wp-box-body">
+                <div class="shares-distribution" id="social-shares-container">
+                  <!-- Inyectado dinámicamente -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. PUBLICATIONS PERFORMANCE TABLE -->
           <div class="wp-box" style="margin-top: 1.5rem;">
             <div class="wp-box-head">
-              <h3>Telemetría de Ocupación del TG 734 (Semana Actual)</h3>
-              <span class="badge-mini">Sistema Petra</span>
+              <div>
+                <h3>Rendimiento de Publicaciones y Artículos</h3>
+                <p class="box-sub">Noticias con mayor lectura e interés de los operadores</p>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="window.switchView('posts')">Ver Noticias</button>
             </div>
-            <div class="wp-box-body">
-              <div class="heatmap-chart">
-                <div class="chart-hours">
-                  <span>00h</span>
-                  <span>04h</span>
-                  <span>08h</span>
-                  <span>12h</span>
-                  <span>16h</span>
-                  <span>20h</span>
-                  <span>23h</span>
-                </div>
-
-                <div class="heatmap-rows">
-                  {days.map((day) => (
-                    <div class="heatmap-day-row">
-                      <span class="day-label">{day}</span>
-                      <div class="heatmap-cells">
-                        {Array.from({ length: 24 }).map((_, hour) => (
-                          <div class={`heat-cell ${getCellIntensity(hour)}`} title={`${day} ${hour}:00 hrs`}></div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <div class="wp-box-body" style="padding: 0;">
+              <div class="table-responsive-minimal">
+                <table class="analytics-table">
+                  <thead>
+                    <tr>
+                      <th>Artículo</th>
+                      <th>Categoría</th>
+                      <th style="text-align: center;">Lecturas Totales</th>
+                      <th style="text-align: center;">Compartidos</th>
+                      <th style="text-align: right;">Interés</th>
+                    </tr>
+                  </thead>
+                  <tbody id="posts-views-tbody">
+                    <!-- Inyectado dinámicamente -->
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -1306,6 +1467,7 @@ const getCellIntensity = (hour: number) => {
   import { initGallery } from '../scripts/admin/gallery';
   import { initPosts } from '../scripts/admin/posts';
   import { initAccount, showAccountPanel } from '../scripts/admin/account';
+  import { initAnalytics } from '../scripts/admin/analytics';
 
   // Usuario autenticado según la sesión PHP (nunca desde localStorage)
   let currentUser: SessionUser = { id: 0, username: '', callsign: '', full_name: '', email: '', role: 'author' };
@@ -1494,6 +1656,7 @@ const getCellIntensity = (hour: number) => {
   initProfile();
   initGallery();
   initPosts();
+  initAnalytics();
   initAccount().then((handledToken) => {
     if (!handledToken) checkAuth();
   });
