@@ -7,6 +7,7 @@ import PostsView from '../components/admin/PostsView.astro';
 import '../styles/admin-accounts.css';
 import '../styles/admin-gallery.css';
 import '../styles/admin-posts.css';
+import '../styles/admin-layout.css';
 import '../styles/admin-analytics.css';
 ---
 
@@ -105,6 +106,13 @@ import '../styles/admin-analytics.css';
     <!-- TOP WP ADMIN BAR -->
     <header class="wp-adminbar">
       <div class="adminbar-left">
+        <button type="button" class="btn-menu-toggle" id="btn-menu-toggle" aria-controls="wp-sidebar" aria-expanded="false" aria-label="Abrir menú">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+          </svg>
+        </button>
         <a href="/" class="adminbar-site-link" target="_blank" title="Ver sitio público">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--bm-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
@@ -117,15 +125,15 @@ import '../styles/admin-analytics.css';
 
       <div class="adminbar-right">
         <div class="user-profile-menu">
-          <button type="button" class="greeting greeting-link" data-view="profile" title="Editar tu perfil">Hola, <strong id="bar-user-name"></strong></button>
+          <button type="button" class="greeting greeting-link" data-view="profile" title="Editar tu perfil"><span class="greeting-word">Hola, </span><strong id="bar-user-name"></strong></button>
           <span id="bar-user-role" class="role-badge"></span>
-          <button id="btn-logout" class="btn-logout" title="Cerrar sesión">
+          <button id="btn-logout" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
             </svg>
-            <span>Salir</span>
+            <span class="logout-label">Salir</span>
           </button>
         </div>
       </div>
@@ -133,7 +141,8 @@ import '../styles/admin-analytics.css';
 
     <div class="wp-admin-layout">
       <!-- LEFT WP SIDEBAR -->
-      <aside class="wp-sidebar">
+      <div class="wp-sidebar-backdrop" id="wp-sidebar-backdrop" hidden></div>
+      <aside class="wp-sidebar" id="wp-sidebar" aria-label="Menú del panel">
         <ul class="wp-menu">
           <li class="wp-menu-item">
             <button class="menu-link is-active" data-view="dashboard">
@@ -159,8 +168,11 @@ import '../styles/admin-analytics.css';
               <span>Noticias</span>
               <span class="count-pill" id="menu-posts-count" hidden></span>
             </button>
-            <ul class="wp-submenu">
-              <li><button class="submenu-link is-active" data-view="posts">Todas las noticias</button></li>
+            <button type="button" class="submenu-toggle" aria-expanded="false" aria-controls="submenu-posts" aria-label="Mostrar opciones de Noticias">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <ul class="wp-submenu" id="submenu-posts" hidden>
+              <li><button class="submenu-link" data-view="posts">Todas las noticias</button></li>
               <li><button class="submenu-link" data-view="new-post">Añadir nueva</button></li>
             </ul>
           </li>
@@ -184,7 +196,10 @@ import '../styles/admin-analytics.css';
               </svg>
               <span>Galería</span>
             </button>
-            <ul class="wp-submenu">
+            <button type="button" class="submenu-toggle" aria-expanded="false" aria-controls="submenu-gallery" aria-label="Mostrar opciones de Galería">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <ul class="wp-submenu" id="submenu-gallery" hidden>
               <li><button class="submenu-link" data-view="gallery">Todas</button></li>
               <li><button class="submenu-link" data-view="gallery-edit">Añadir publicación</button></li>
             </ul>
@@ -201,7 +216,10 @@ import '../styles/admin-analytics.css';
               </svg>
               <span>Usuarios</span>
             </button>
-            <ul class="wp-submenu">
+            <button type="button" class="submenu-toggle" aria-expanded="false" aria-controls="submenu-users" aria-label="Mostrar opciones de Usuarios">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <ul class="wp-submenu" id="submenu-users" hidden>
               <li><button class="submenu-link" data-view="users">Todos los usuarios</button></li>
               <li><button class="submenu-link" data-view="user-new">Añadir nuevo</button></li>
               <li><button class="submenu-link" data-view="profile">Perfil</button></li>
@@ -236,8 +254,7 @@ import '../styles/admin-analytics.css';
               <h1 class="view-title">Escritorio y Analíticas</h1>
               <p class="view-subtitle">Métricas de oyentes, clics en enlaces, lectura de publicaciones y compartidos.</p>
             </div>
-            <div class="analytics-time-filter">
-              <span class="filter-indicator">● En vivo</span>
+            <div class="analytics-time-filter" role="group" aria-label="Periodo de las estadísticas">
               <button type="button" class="btn-time-range is-active" data-range="7d">7 días</button>
               <button type="button" class="btn-time-range" data-range="30d">30 días</button>
               <button type="button" class="btn-time-range" data-range="all">Histórico</button>
@@ -260,7 +277,6 @@ import '../styles/admin-analytics.css';
               <div class="kpi-value" id="kpi-player-plays">--</div>
               <div class="kpi-footer">
                 <span class="kpi-subtext"><strong id="kpi-unique-listeners">--</strong> oyentes únicos</span>
-                <span class="kpi-badge">TG 734</span>
               </div>
             </div>
 
@@ -276,8 +292,7 @@ import '../styles/admin-analytics.css';
               </div>
               <div class="kpi-value" id="kpi-link-clicks">--</div>
               <div class="kpi-footer">
-                <span class="kpi-subtext">Red, Masters y RadioID</span>
-                <span class="kpi-trend">Tráfico activo</span>
+                <span class="kpi-subtext" data-range-label>Últimos 7 días</span>
               </div>
             </div>
 
@@ -293,8 +308,7 @@ import '../styles/admin-analytics.css';
               </div>
               <div class="kpi-value" id="kpi-post-views">--</div>
               <div class="kpi-footer">
-                <span class="kpi-subtext">Visitas al blog</span>
-                <span class="kpi-trend">+14% mes</span>
+                <span class="kpi-subtext" data-range-label>Últimos 7 días</span>
               </div>
             </div>
 
@@ -313,8 +327,7 @@ import '../styles/admin-analytics.css';
               </div>
               <div class="kpi-value" id="kpi-post-shares">--</div>
               <div class="kpi-footer">
-                <span class="kpi-subtext">WhatsApp & Telegram</span>
-                <span class="kpi-trend">Difusión</span>
+                <span class="kpi-subtext" id="kpi-top-platform">—</span>
               </div>
             </div>
 
@@ -331,8 +344,7 @@ import '../styles/admin-analytics.css';
               </div>
               <div class="kpi-value" id="kpi-active-countries">--</div>
               <div class="kpi-footer">
-                <span class="kpi-subtext">VE, US, ES, CO, CL, AR...</span>
-                <span class="kpi-badge">Global</span>
+                <span class="kpi-subtext" id="kpi-top-countries">—</span>
               </div>
             </div>
           </div>
@@ -345,7 +357,7 @@ import '../styles/admin-analytics.css';
                   <span class="status-dot"></span>
                   <h3>Distribución Geográfica y Conexiones</h3>
                 </div>
-                <p class="map-subtitle">Mapa en vivo con agrupamiento (cluster) de oyentes, lectores y visitantes por país y ciudad.</p>
+                <p class="map-subtitle">Oyentes, lectores y visitantes agrupados por ciudad. Los círculos juntan varias conexiones cercanas.</p>
               </div>
               <div class="map-controls">
                 <div class="map-filter-pills">
@@ -364,11 +376,11 @@ import '../styles/admin-analytics.css';
               </div>
             </div>
             <div class="wp-box-body" style="padding: 0; position: relative;">
-              <div id="analytics-leaflet-map" style="width: 100%; height: 440px; background: #F8FAFC;"></div>
+              <div id="analytics-leaflet-map" class="analytics-map"></div>
               <div class="map-legend">
-                <span class="legend-item"><span class="cluster-sample sm"></span> 2 - 9 conexiones</span>
-                <span class="legend-item"><span class="cluster-sample md"></span> 10 - 24 conexiones</span>
-                <span class="legend-item"><span class="cluster-sample lg"></span> 25+ conexiones</span>
+                <span class="legend-item"><span class="cluster-sample sm"></span> 2–9</span>
+                <span class="legend-item"><span class="cluster-sample md"></span> 10–24</span>
+                <span class="legend-item"><span class="cluster-sample lg"></span> 25 o más conexiones</span>
               </div>
             </div>
           </div>
@@ -382,7 +394,7 @@ import '../styles/admin-analytics.css';
                   <h3>Reproductor: Oyentes por País</h3>
                   <p class="box-sub">Distribución porcentual de reproducciones en TG 734</p>
                 </div>
-                <span class="badge-mini">Audio Hoseline</span>
+                <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
               <div class="wp-box-body">
                 <div class="country-bars-list" id="player-countries-list">
@@ -398,7 +410,7 @@ import '../styles/admin-analytics.css';
                   <h3>Registro de Oyentes (IPs y Frecuencia)</h3>
                   <p class="box-sub">Direcciones IP, ciudad y cuántas veces han reproducido el audio</p>
                 </div>
-                <span class="badge-mini" id="listeners-total-count">Oyentes Activos</span>
+                <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
               <div class="wp-box-body" style="padding: 0;">
                 <div class="table-responsive-minimal">
@@ -407,8 +419,8 @@ import '../styles/admin-analytics.css';
                       <tr>
                         <th>Dirección IP</th>
                         <th>Ubicación</th>
-                        <th style="text-align: center;">Reproducciones</th>
-                        <th style="text-align: right;">Última Actividad</th>
+                        <th class="cell-num">Reproducciones</th>
+                        <th class="cell-right">Última actividad</th>
                       </tr>
                     </thead>
                     <tbody id="player-listeners-tbody">
@@ -429,7 +441,7 @@ import '../styles/admin-analytics.css';
                   <h3>Clics en Enlaces y Recursos</h3>
                   <p class="box-sub">Destinos más consultados por los operadores</p>
                 </div>
-                <span class="badge-mini">Enlaces salientes</span>
+                <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
               <div class="wp-box-body" style="padding: 0;">
                 <div class="table-responsive-minimal">
@@ -437,8 +449,8 @@ import '../styles/admin-analytics.css';
                     <thead>
                       <tr>
                         <th>Destino / Recurso</th>
-                        <th>Categoría</th>
-                        <th style="text-align: right;">Clics</th>
+                        <th class="col-opt">Categoría</th>
+                        <th class="cell-right">Clics</th>
                       </tr>
                     </thead>
                     <tbody id="link-clicks-tbody">
@@ -456,7 +468,7 @@ import '../styles/admin-analytics.css';
                   <h3>Difusión en Redes Sociales</h3>
                   <p class="box-sub">Publicaciones compartidas por plataforma</p>
                 </div>
-                <span class="badge-mini">Viralidad</span>
+                <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
               <div class="wp-box-body">
                 <div class="shares-distribution" id="social-shares-container">
@@ -481,10 +493,10 @@ import '../styles/admin-analytics.css';
                   <thead>
                     <tr>
                       <th>Artículo</th>
-                      <th>Categoría</th>
-                      <th style="text-align: center;">Lecturas Totales</th>
-                      <th style="text-align: center;">Compartidos</th>
-                      <th style="text-align: right;">Interés</th>
+                      <th class="col-opt">Categoría</th>
+                      <th class="cell-num">Lecturas</th>
+                      <th class="cell-num col-opt">Compartidos</th>
+                      <th class="cell-interest">Interés relativo</th>
                     </tr>
                   </thead>
                   <tbody id="posts-views-tbody">
@@ -1466,6 +1478,7 @@ import '../styles/admin-analytics.css';
   import { initProfile } from '../scripts/admin/profile';
   import { initGallery } from '../scripts/admin/gallery';
   import { initPosts } from '../scripts/admin/posts';
+  import { initNav } from '../scripts/admin/nav';
   import { initAccount, showAccountPanel } from '../scripts/admin/account';
   import { initAnalytics } from '../scripts/admin/analytics';
 
@@ -1562,7 +1575,8 @@ import '../styles/admin-analytics.css';
 
     const show = (id: string, visible: boolean) => {
       const el = document.getElementById(id);
-      if (el) el.style.display = visible ? 'block' : 'none';
+      // '' devuelve el control al CSS (los grupos con submenú usan grid)
+      if (el) el.style.display = visible ? '' : 'none';
     };
     show('menu-users-item', currentUser.role === 'admin');
     show('menu-profile-item', currentUser.role !== 'admin');
@@ -1656,6 +1670,7 @@ import '../styles/admin-analytics.css';
   initProfile();
   initGallery();
   initPosts();
+  initNav();
   initAnalytics();
   initAccount().then((handledToken) => {
     if (!handledToken) checkAuth();
