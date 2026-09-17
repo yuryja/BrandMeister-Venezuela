@@ -172,7 +172,7 @@ if ($slug !== '') {
         $html = preg_replace('#<div class="article-tags-row">.*?</div>\s*</div>#s', '', $html, 1);
     }
 
-    header('Cache-Control: public, max-age=300');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
     echo $html;
     exit;
 }
@@ -229,5 +229,5 @@ $html = blog_fill($html, [
     'ARTICULOS' => $items ? implode("\n", $items) : '<p class="archive-empty">Todavía no hay noticias publicadas.</p>',
 ]);
 
-header('Cache-Control: public, max-age=300');
+header('Cache-Control: no-cache, no-store, must-revalidate');
 echo $html;
