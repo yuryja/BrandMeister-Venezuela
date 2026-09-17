@@ -187,7 +187,41 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
-        <!-- 3. Agradecimiento Fraterno a Todos los Colegas -->
+        <!-- 3. Servidores y Coordinación (Infraestructura y Soporte) -->
+        <div class="servers-section">
+          <div class="section-intro">
+            <span class="sub-label">Infraestructura y Soporte</span>
+            <h2 class="section-h2">Servidores Máster y Coordinación Técnica</h2>
+          </div>
+
+          <div class="servers-grid">
+            <div class="server-card">
+              <div class="server-badge">Servidor Primario</div>
+              <h3 class="server-name">7301 · BM Chile</h3>
+              <p class="server-desc">
+                Servidor de alta velocidad y baja latencia optimizado para el cono sur y la interconexión estable de hotspots y repetidores venezolanos.
+              </p>
+            </div>
+
+            <div class="server-card">
+              <div class="server-badge">Servidor Histórico</div>
+              <h3 class="server-name">3341 · BM México</h3>
+              <p class="server-desc">
+                El máster hermano que acogió los primeros pasos de Venezuela en 2010 y continúa brindando respaldo confiable a nuestra red.
+              </p>
+            </div>
+
+            <div class="server-card coordination-card">
+              <div class="server-badge">Equipo de Servicio</div>
+              <h3 class="server-name">Coordinación BrandMeister YV</h3>
+              <p class="server-desc">
+                Equipo de administración técnica y soporte a la comunidad: <strong>YV5OF</strong> (Main Sysop), <strong>YV5ADM</strong>, <strong>YV5VE</strong> y <strong>YY3BIG</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Agradecimiento Fraterno a Todos los Colegas -->
         <div class="tribute-box">
           <div class="tribute-badge">
             <span>El Corazón de la Red</span>
@@ -220,40 +254,6 @@ import Layout from '../layouts/Layout.astro';
             <p class="tribute-footer-quote">
               <em>«La tecnología evoluciona, pero la esencia de la radioafición sigue siendo la misma: servir, experimentar y tender puentes de amistad.»</em>
             </p>
-          </div>
-        </div>
-
-        <!-- 4. Servidores y Coordinación -->
-        <div class="servers-section">
-          <div class="section-intro">
-            <span class="sub-label">Infraestructura y Soporte</span>
-            <h2 class="section-h2">Servidores Máster y Coordinación Técnica</h2>
-          </div>
-
-          <div class="servers-grid">
-            <div class="server-card">
-              <div class="server-badge">Servidor Primario</div>
-              <h3 class="server-name">7301 · BM Chile</h3>
-              <p class="server-desc">
-                Servidor de alta velocidad y baja latencia optimizado para el cono sur y la interconexión estable de hotspots y repetidores venezolanos.
-              </p>
-            </div>
-
-            <div class="server-card">
-              <div class="server-badge">Servidor Histórico</div>
-              <h3 class="server-name">3341 · BM México</h3>
-              <p class="server-desc">
-                El máster hermano que acogió los primeros pasos de Venezuela en 2010 y continúa brindando respaldo confiable a nuestra red.
-              </p>
-            </div>
-
-            <div class="server-card coordination-card">
-              <div class="server-badge">Equipo de Servicio</div>
-              <h3 class="server-name">Coordinación BrandMeister YV</h3>
-              <p class="server-desc">
-                Equipo de administración técnica y soporte a la comunidad: <strong>YV5OF</strong> (Main Sysop), <strong>YV5ADM</strong>, <strong>YV5VE</strong> y <strong>YY3BIG</strong>.
-              </p>
-            </div>
           </div>
         </div>
 
@@ -724,7 +724,7 @@ import Layout from '../layouts/Layout.astro';
     border: 1px solid rgba(238, 108, 31, 0.25);
     border-radius: var(--radius-lg);
     padding: clamp(2rem, 5vw, 3rem);
-    margin-bottom: 4rem;
+    margin-bottom: 0;
     box-shadow: var(--shadow-sm);
   }
 
@@ -799,7 +799,7 @@ import Layout from '../layouts/Layout.astro';
 
   /* Servidores */
   .servers-section {
-    margin-bottom: 3.5rem;
+    margin-bottom: 4rem;
   }
 
   .servers-grid {
