@@ -92,7 +92,10 @@ import Layout from '../layouts/Layout.astro';
           {Array.from({ length: 6 }).map(() => (
             <div class="gallery-card is-skeleton" aria-hidden="true">
               <div class="card-media-wrap"></div>
-              <div class="card-footer-info"><span class="skeleton-line"></span></div>
+              <div class="card-content">
+                <span class="skeleton-line" style="width: 28%;"></span>
+                <span class="skeleton-line" style="width: 85%;"></span>
+              </div>
             </div>
           ))}
         </div>
@@ -110,31 +113,21 @@ import Layout from '../layouts/Layout.astro';
     <div id="gallery-lightbox" class="lightbox-modal is-hidden" role="dialog" aria-modal="true">
       <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
       
-      <div class="lightbox-container">
-        <!-- Barra Superior del Modal -->
+      <div class="lightbox-container" id="lightbox-container">
+        <!-- Barra Superior del Modal (Ver original a la izquierda, Cerrar a la derecha) -->
         <div class="lightbox-header">
-          <div class="lightbox-author-block">
-            <div class="author-avatar">BM</div>
-            <div>
-              <span class="author-handle" id="modal-author">@brandmeister_yv</span>
-              <span class="author-date" id="modal-date">Fecha</span>
-            </div>
-          </div>
-
-          <div class="lightbox-actions">
-            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-modal-ig" id="modal-ig-link">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-              </svg>
-              <span>Ver original</span>
-            </a>
-            <button type="button" class="btn-close-modal" id="btn-close-modal" aria-label="Cerrar visor">
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
+          <a href="#" target="_blank" rel="noopener noreferrer" class="btn-modal-ig" id="modal-ig-link">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+            <span>Ver original</span>
+          </a>
+          <button type="button" class="btn-close-modal" id="btn-close-modal" aria-label="Cerrar visor">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
 
         <!-- Área Central de Visualización de Medios -->
@@ -159,8 +152,11 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
-        <!-- Pie del Modal con Texto y Hashtags -->
+        <!-- Pie del Modal con Fecha y Texto Amplio -->
         <div class="lightbox-footer">
+          <div class="lightbox-footer-meta">
+            <span class="lightbox-date" id="modal-date"></span>
+          </div>
           <div class="lightbox-caption" id="modal-caption"></div>
         </div>
 
@@ -179,10 +175,10 @@ import Layout from '../layouts/Layout.astro';
 
     // Elementos del Modal Lightbox
     const modal = document.getElementById('gallery-lightbox');
+    const modalContainer = document.getElementById('lightbox-container');
     const backdrop = document.getElementById('lightbox-backdrop');
     const btnClose = document.getElementById('btn-close-modal');
     const modalMediaWrap = document.getElementById('modal-media-wrap');
-    const modalAuthor = document.getElementById('modal-author');
     const modalDate = document.getElementById('modal-date');
     const modalIgLink = document.getElementById('modal-ig-link');
     const modalCaption = document.getElementById('modal-caption');
@@ -215,37 +211,40 @@ import Layout from '../layouts/Layout.astro';
     const formatDate = (ts, opts) => new Date(ts * 1000).toLocaleDateString('es-VE', opts);
 
     const ICONS = {
-      carousel: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>',
-      video: '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>',
-      image: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>',
-    };
-
-    const badge = (post) => {
-      if (post.media_type === 'CAROUSEL_ALBUM') {
-        return `<span class="badge-carousel" title="Publicación con múltiples imágenes">${ICONS.carousel}<span>${(post.carousel_media || []).length || 2} fotos</span></span>`;
-      }
-      if (post.media_type === 'VIDEO') {
-        return `<span class="badge-video" title="Video / Reel">${ICONS.video}<span>Video</span></span>`;
-      }
-      return `<span class="badge-image" title="Fotografía">${ICONS.image}</span>`;
+      carousel: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>',
     };
 
     const cardHtml = (post, index) => {
       const caption = String(post.caption || '').trim();
-      const excerpt = caption.length > 110 ? caption.slice(0, 110) + '…' : caption;
+      const excerpt = caption.length > 115 ? caption.slice(0, 115) + '…' : caption;
+      const isVideo = post.media_type === 'VIDEO';
+      const isCarousel = post.media_type === 'CAROUSEL_ALBUM';
+      const carouselCount = (post.carousel_media || []).length || 2;
+      const thumbSrc = safeUrl(post.thumbnail_url || post.media_url);
+
       return `
-        <article class="gallery-card" data-type="${escapeHtml(post.media_type)}" data-index="${index}" tabindex="0" role="button" aria-label="Ver publicación de ${escapeHtml(post.author)}">
+        <article class="gallery-card" data-type="${escapeHtml(post.media_type)}" data-index="${index}" tabindex="0" role="button" aria-label="Ver publicación">
           <div class="card-media-wrap">
-            <img src="${escapeHtml(safeUrl(post.thumbnail_url || post.media_url))}" alt="${escapeHtml(caption.slice(0, 80) || 'Publicación BrandMeister Venezuela')}" loading="lazy" class="card-img" />
-            <div class="card-type-badge">${badge(post)}</div>
+            <img src="${escapeHtml(thumbSrc)}" alt="${escapeHtml(caption.slice(0, 80) || 'Publicación BrandMeister Venezuela')}" loading="lazy" class="card-img" />
+            ${isVideo ? `
+              <div class="card-play-button" aria-label="Reproducir video">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                  <polygon points="8 5 19 12 8 19 8 5"></polygon>
+                </svg>
+              </div>` : ''}
+            ${isCarousel ? `
+              <div class="card-type-badge">
+                <span class="badge-carousel" title="Álbum con múltiples fotos">${ICONS.carousel}<span>${carouselCount}</span></span>
+              </div>` : ''}
             <div class="card-hover-overlay">
-              <p class="overlay-caption">${escapeHtml(excerpt)}</p>
-              <span class="overlay-cta">Ver en detalle →</span>
+              <span class="overlay-cta">${isVideo ? 'Reproducir video →' : 'Ver en detalle →'}</span>
             </div>
           </div>
-          <div class="card-footer-info">
-            <span class="card-author">${escapeHtml(post.author)}</span>
-            <span class="card-date">${formatDate(post.published_ts, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+          <div class="card-content">
+            <div class="card-meta">
+              <time class="card-date">${formatDate(post.published_ts, { month: 'short', day: 'numeric', year: 'numeric' })}</time>
+            </div>
+            ${excerpt ? `<p class="card-preview-caption">${escapeHtml(excerpt)}</p>` : ''}
           </div>
         </article>`;
     };
@@ -265,15 +264,59 @@ import Layout from '../layouts/Layout.astro';
       });
     };
 
+    // Datos de muestra para previsualización en entorno de desarrollo local (localhost)
+    const sampleDevPosts = [
+      {
+        id: 'dev-1',
+        media_type: 'VIDEO',
+        media_url: '/assets/hero-dmr-venezuela-landscape.webp',
+        thumbnail_url: '/assets/hero-dmr-venezuela-landscape.webp',
+        video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+        caption: 'Prueba de enlace y transmisión en repetidor DMR Caracas #BrandMeister #DMR @brandmeister_yv con excelente modulación en Slot 1 TG 734.',
+        author: '@brandmeister_yv',
+        permalink: 'https://www.instagram.com/p/sample1/',
+        published_ts: 1789700000,
+      },
+      {
+        id: 'dev-2',
+        media_type: 'IMAGE',
+        media_url: '/assets/hero-dmr-venezuela-landscape.webp',
+        thumbnail_url: '/assets/hero-dmr-venezuela-landscape.webp',
+        video_url: null,
+        caption: 'Instalación de antena y duplexor en Cerro El Ávila para la red nacional #Venezuela #Radioaficionados #BrandMeister.',
+        author: '@brandmeister_yv',
+        permalink: 'https://www.instagram.com/p/sample2/',
+        published_ts: 1789600000,
+      },
+      {
+        id: 'dev-3',
+        media_type: 'CAROUSEL_ALBUM',
+        media_url: '/assets/hero-dmr-venezuela-landscape.webp',
+        thumbnail_url: '/assets/hero-dmr-venezuela-landscape.webp',
+        carousel_media: [
+          { url: '/assets/hero-dmr-venezuela-landscape.webp', caption: 'Montaje de torre y mástil' },
+          { url: '/assets/hero-dmr-venezuela-landscape-m.webp', caption: 'Verificación de ROE y potencia' }
+        ],
+        video_url: null,
+        caption: 'Álbum completo de la jornada de mantenimiento técnico en la estación repetidora #Comunidad #Radio #TG734.',
+        author: '@brandmeister_yv',
+        permalink: null,
+        published_ts: 1789500000,
+      }
+    ];
+
     // 1. Carga de publicaciones sincronizadas
     fetch('/api/gallery.php', { headers: { Accept: 'application/json' } })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('API no disponible');
+        return res.json();
+      })
       .then((data) => {
-        posts = Array.isArray(data?.posts) ? data.posts : [];
+        posts = Array.isArray(data?.posts) && data.posts.length > 0 ? data.posts : (window.location.hostname === 'localhost' ? sampleDevPosts : []);
         render();
       })
       .catch(() => {
-        posts = [];
+        posts = window.location.hostname === 'localhost' ? sampleDevPosts : [];
         render();
       });
 
@@ -294,16 +337,16 @@ import Layout from '../layouts/Layout.astro';
       currentPostIndex = index;
       currentCarouselIndex = 0;
 
-      modalAuthor.textContent = post.author || '@brandmeister_yv';
       modalDate.textContent = formatDate(post.published_ts, { year: 'numeric', month: 'long', day: 'numeric' });
       const external = post.permalink ? safeUrl(post.permalink) : '';
       modalIgLink.href = external || '#';
-      modalIgLink.hidden = !external;
+      modalIgLink.style.display = external ? 'inline-flex' : 'none';
 
-      // Resaltar hashtags y menciones en el texto (sin el hashtag de la galería)
-      modalCaption.innerHTML = escapeHtml(String(post.caption || '').trim())
+      // Resaltar hashtags y menciones en el texto
+      const cleanCaption = escapeHtml(String(post.caption || '').trim())
         .replace(/(#[\p{L}\p{N}_]+)/gu, '<span class="hl-hashtag">$1</span>')
         .replace(/(@[\w.]+)/g, '<span class="hl-mention">$1</span>');
+      modalCaption.innerHTML = cleanCaption || '<em style="color: var(--text-muted); font-style: normal;">Publicación sin texto descriptivo.</em>';
 
       renderMedia(post);
 
@@ -311,25 +354,115 @@ import Layout from '../layouts/Layout.astro';
       document.body.style.overflow = 'hidden';
     };
 
+    let currentMediaSizer = null;
+
+    // Ajusta perfectamente el modal a la proporción del video o imagen (sin espacios negros)
+    const adjustToMediaProportion = (w, h, mediaEl) => {
+      if (!w || !h || !modalContainer) return;
+      const ratio = w / h;
+      const isMobile = window.innerWidth <= 640;
+
+      // Límites del visor según el dispositivo
+      const maxAvailableW = isMobile ? Math.min(window.innerWidth * 0.96, 520) : Math.min(window.innerWidth * 0.90, 880);
+      const maxAvailableH = isMobile ? window.innerHeight * 0.50 : Math.min(window.innerHeight * 0.60, 620);
+
+      let targetW = maxAvailableH * ratio;
+      let targetH = maxAvailableH;
+
+      if (targetW > maxAvailableW) {
+        targetW = maxAvailableW;
+        targetH = targetW / ratio;
+      }
+
+      targetW = Math.round(targetW);
+      targetH = Math.round(targetH);
+
+      modalContainer.style.width = `${targetW}px`;
+      modalContainer.style.maxWidth = `${targetW}px`;
+
+      if (mediaEl) {
+        mediaEl.style.width = '100%';
+        mediaEl.style.height = `${targetH}px`;
+        mediaEl.style.aspectRatio = `${w} / ${h}`;
+        mediaEl.style.objectFit = 'contain';
+      }
+
+      const wrapper = modalMediaWrap.querySelector('.video-player-wrapper') || modalMediaWrap.querySelector('.carousel-slide-view');
+      if (wrapper) {
+        wrapper.style.width = `${targetW}px`;
+        wrapper.style.height = `${targetH}px`;
+        wrapper.style.aspectRatio = `${w} / ${h}`;
+      }
+    };
+
+    window.addEventListener('resize', () => {
+      if (!modal.classList.contains('is-hidden') && typeof currentMediaSizer === 'function') {
+        currentMediaSizer();
+      }
+    });
+
     // Renderizado según tipo de medio (IMAGE, CAROUSEL_ALBUM, VIDEO)
     const renderMedia = (post) => {
       modalMediaWrap.innerHTML = '';
+      currentMediaSizer = null;
 
       if (post.media_type === 'CAROUSEL_ALBUM' && (post.carousel_media || []).length) {
         carouselNav.classList.remove('is-hidden');
         updateCarouselSlide(post.carousel_media);
-      } else if (post.media_type === 'VIDEO' && post.video_url) {
+      } else if (post.media_type === 'VIDEO' && (post.video_url || post.media_url)) {
         carouselNav.classList.add('is-hidden');
+        const videoSrc = safeUrl(post.video_url || post.media_url);
+        const posterSrc = post.thumbnail_url ? safeUrl(post.thumbnail_url) : '';
         modalMediaWrap.innerHTML = `
           <div class="video-player-wrapper">
-            <video src="${escapeHtml(safeUrl(post.video_url))}" controls autoplay playsinline loop
-              poster="${escapeHtml(safeUrl(post.thumbnail_url || post.media_url))}" class="lightbox-video">
+            <video src="${escapeHtml(videoSrc)}" controls autoplay playsinline loop muted
+              ${posterSrc ? `poster="${escapeHtml(posterSrc)}"` : ''} class="lightbox-video">
               Tu navegador no soporta reproducción de video HTML5.
             </video>
           </div>`;
+
+        const video = modalMediaWrap.querySelector('video');
+        if (video) {
+          video.loop = true;
+          video.autoplay = true;
+          video.playsInline = true;
+          video.currentTime = 0;
+
+          // Ajuste exacto al ratio del video
+          currentMediaSizer = () => adjustToMediaProportion(video.videoWidth, video.videoHeight, video);
+
+          if (video.readyState >= 1) {
+            currentMediaSizer();
+          } else {
+            video.addEventListener('loadedmetadata', currentMediaSizer, { once: true });
+          }
+
+          // Reproducción automática inmediata con fallback a muted por políticas del navegador
+          const playPromise = video.play();
+          if (playPromise !== undefined) {
+            playPromise.catch(() => {
+              video.muted = true;
+              video.play().catch(() => {});
+            });
+          }
+
+          // Garantizar reproducción infinita
+          video.addEventListener('ended', () => {
+            video.currentTime = 0;
+            video.play().catch(() => {});
+          });
+        }
       } else {
         carouselNav.classList.add('is-hidden');
-        modalMediaWrap.innerHTML = `<img src="${escapeHtml(safeUrl(post.media_url))}" alt="${escapeHtml(String(post.caption || '').trim().slice(0, 120))}" class="lightbox-img" />`;
+        const imgSrc = safeUrl(post.media_url || post.thumbnail_url);
+        modalMediaWrap.innerHTML = `<img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(String(post.caption || '').trim().slice(0, 120))}" class="lightbox-img" />`;
+
+        const img = modalMediaWrap.querySelector('img');
+        if (img) {
+          currentMediaSizer = () => adjustToMediaProportion(img.naturalWidth, img.naturalHeight, img);
+          if (img.complete && img.naturalWidth) currentMediaSizer();
+          else img.addEventListener('load', currentMediaSizer, { once: true });
+        }
       }
     };
 
@@ -343,6 +476,13 @@ import Layout from '../layouts/Layout.astro';
           <img src="${escapeHtml(safeUrl(slide.url))}" alt="Foto ${currentCarouselIndex + 1}" class="lightbox-img" />
           ${slide.caption ? `<div class="slide-caption-bar">${escapeHtml(slide.caption)}</div>` : ''}
         </div>`;
+
+      const img = modalMediaWrap.querySelector('img');
+      if (img) {
+        currentMediaSizer = () => adjustToMediaProportion(img.naturalWidth, img.naturalHeight, img);
+        if (img.complete && img.naturalWidth) currentMediaSizer();
+        else img.addEventListener('load', currentMediaSizer, { once: true });
+      }
     };
 
     const stepCarousel = (delta) => {
@@ -366,7 +506,15 @@ import Layout from '../layouts/Layout.astro';
     const closeLightbox = () => {
       modal.classList.add('is-hidden');
       document.body.style.overflow = '';
-      modalMediaWrap.querySelector('video')?.pause();
+      modalMediaWrap.querySelectorAll('video').forEach((v) => {
+        v.pause();
+        v.currentTime = 0;
+      });
+      if (modalContainer) {
+        modalContainer.style.width = '';
+        modalContainer.style.maxWidth = '';
+      }
+      currentMediaSizer = null;
     };
 
     btnClose?.addEventListener('click', closeLightbox);
@@ -630,10 +778,42 @@ import Layout from '../layouts/Layout.astro';
     height: 100%;
     object-fit: cover;
     transition: transform 0.35s ease;
+    display: block;
   }
 
   .gallery-page .gallery-card:hover .card-img {
     transform: scale(1.05);
+  }
+
+  /* Botón de Play centrado en miniatura de video (sin píldora) */
+  .gallery-page .card-play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(15, 23, 42, 0.72);
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 3px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .gallery-page .gallery-card:hover .card-play-button {
+    background: var(--bm-red);
+    border-color: var(--bm-red);
+    transform: translate(-50%, -50%) scale(1.12);
+    box-shadow: 0 6px 24px rgba(232, 38, 28, 0.45);
   }
 
   .gallery-page .card-type-badge {
@@ -643,9 +823,7 @@ import Layout from '../layouts/Layout.astro';
     z-index: 2;
   }
 
-  .badge-carousel,
-  .badge-video,
-  .gallery-page .badge-image {
+  .gallery-page .badge-carousel {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -656,29 +834,15 @@ import Layout from '../layouts/Layout.astro';
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-
-  .gallery-page .badge-carousel {
     background: rgba(15, 23, 42, 0.8);
     color: #FFFFFF;
-  }
-
-  .gallery-page .badge-video {
-    background: rgba(225, 48, 108, 0.85);
-    color: #FFFFFF;
-  }
-
-  .gallery-page .badge-image {
-    background: rgba(0, 0, 0, 0.65);
-    color: #FFFFFF;
-    padding: 0.35rem 0.55rem;
   }
 
   /* Overlay al hacer hover */
   .gallery-page .card-hover-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.85) 100%);
     opacity: 0;
     transition: opacity 0.25s ease;
     display: flex;
@@ -693,27 +857,6 @@ import Layout from '../layouts/Layout.astro';
     opacity: 1;
   }
 
-  .gallery-page .overlay-stats {
-    display: flex;
-    gap: 1rem;
-    font-size: 0.82rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-
-  .gallery-page .stat-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  .gallery-page .overlay-caption {
-    font-size: 0.82rem;
-    line-height: 1.4;
-    color: rgba(255, 255, 255, 0.9);
-    margin: 0 0 0.6rem 0;
-  }
-
   .gallery-page .overlay-cta {
     font-size: 0.78rem;
     font-weight: 700;
@@ -722,24 +865,41 @@ import Layout from '../layouts/Layout.astro';
     letter-spacing: 0.04em;
   }
 
-  .gallery-page .card-footer-info {
-    padding: 0.9rem 1.25rem;
+  /* Contenido y vista previa de la publicación en tarjeta */
+  .gallery-page .card-content {
+    padding: 1rem 1.25rem 1.15rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid var(--border-color);
+    flex-direction: column;
+    gap: 0.45rem;
     background: #FFFFFF;
-    font-size: 0.82rem;
+    border-top: 1px solid var(--border-color);
+    flex: 1;
   }
 
-  .gallery-page .card-author {
-    font-weight: 700;
-    color: var(--text-main);
+  .gallery-page .card-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .gallery-page .card-date {
     color: var(--text-muted);
     font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .gallery-page .card-preview-caption {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text-main);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-weight: 400;
   }
 
   /* ====================================================================
@@ -752,7 +912,7 @@ import Layout from '../layouts/Layout.astro';
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 1.25rem;
   }
 
   .gallery-page .lightbox-modal.is-hidden {
@@ -762,9 +922,9 @@ import Layout from '../layouts/Layout.astro';
   .gallery-page .lightbox-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   .gallery-page .lightbox-container {
@@ -772,14 +932,17 @@ import Layout from '../layouts/Layout.astro';
     z-index: 2;
     background: #FFFFFF;
     border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 900px;
-    max-height: 90vh;
+    width: fit-content;
+    min-width: min(340px, 94vw);
+    max-width: min(920px, 94vw);
+    max-height: 92vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5);
     animation: modalIn 0.25s ease-out;
+    margin: auto;
+    transition: max-width 0.25s ease;
   }
 
   @keyframes modalIn {
@@ -787,51 +950,16 @@ import Layout from '../layouts/Layout.astro';
     to { opacity: 1; transform: scale(1); }
   }
 
+  /* Cabecera del modal: Ver original a la izquierda, cerrar a la derecha */
   .gallery-page .lightbox-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.25rem;
     border-bottom: 1px solid var(--border-color);
     background: #FFFFFF;
-  }
-
-  .gallery-page .lightbox-author-block {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .gallery-page .author-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--bm-red);
-    color: #FFFFFF;
-    font-weight: 800;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .gallery-page .author-handle {
-    display: block;
-    font-weight: 700;
-    font-size: 0.92rem;
-    color: var(--text-main);
-  }
-
-  .gallery-page .author-date {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
-
-  .gallery-page .lightbox-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.85rem;
+    flex-shrink: 0;
+    gap: 1rem;
   }
 
   .gallery-page .btn-modal-ig {
@@ -843,7 +971,7 @@ import Layout from '../layouts/Layout.astro';
     border: 1px solid rgba(225, 48, 108, 0.3);
     font-size: 0.82rem;
     font-weight: 700;
-    padding: 0.45rem 0.85rem;
+    padding: 0.45rem 0.9rem;
     border-radius: var(--radius-pill);
     text-decoration: none;
     transition: all 0.2s ease;
@@ -852,64 +980,71 @@ import Layout from '../layouts/Layout.astro';
   .gallery-page .btn-modal-ig:hover {
     background: #E1306C;
     color: #FFFFFF;
+    border-color: #E1306C;
   }
 
   .gallery-page .btn-close-modal {
-    background: none;
-    border: none;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
     color: var(--text-muted);
     cursor: pointer;
-    padding: 0.4rem;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    margin-left: auto;
   }
 
   .gallery-page .btn-close-modal:hover {
     background: #F1F5F9;
     color: var(--text-main);
+    border-color: var(--border-medium);
   }
 
-  /* Centro del Modal: Medios */
+  /* Centro del Modal: Medios (ajuste perfecto a la proporción sin espacios negros) */
   .gallery-page .lightbox-body {
     position: relative;
-    background: #0B0F19;
-    min-height: 380px;
-    max-height: 55vh;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    width: 100%;
   }
 
   .gallery-page .lightbox-media-container {
     width: 100%;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .gallery-page .lightbox-img {
-    max-width: 100%;
-    max-height: 55vh;
+    display: block;
+    width: 100%;
+    height: auto;
     object-fit: contain;
+    background: transparent;
   }
 
   .gallery-page .video-player-wrapper {
     width: 100%;
-    max-height: 55vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: transparent;
   }
 
   .gallery-page .lightbox-video {
-    max-width: 100%;
-    max-height: 55vh;
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
     outline: none;
+    background: transparent;
   }
 
   /* Controles de Carrusel en Modal */
@@ -927,7 +1062,7 @@ import Layout from '../layouts/Layout.astro';
     display: none;
   }
 
-  .btn-carousel-prev,
+  .gallery-page .btn-carousel-prev,
   .gallery-page .btn-carousel-next {
     pointer-events: auto;
     width: 44px;
@@ -944,7 +1079,7 @@ import Layout from '../layouts/Layout.astro';
     backdrop-filter: blur(6px);
   }
 
-  .btn-carousel-prev:hover,
+  .gallery-page .btn-carousel-prev:hover,
   .gallery-page .btn-carousel-next:hover {
     background: var(--bm-red);
     transform: scale(1.1);
@@ -975,20 +1110,39 @@ import Layout from '../layouts/Layout.astro';
     text-align: center;
   }
 
-  /* Pie del Modal */
+  /* Pie del Modal: Texto más visible, cómodo y legible */
   .gallery-page .lightbox-footer {
     padding: 1.25rem 1.5rem;
     background: #FFFFFF;
     border-top: 1px solid var(--border-color);
     overflow-y: auto;
-    max-height: 20vh;
+    max-height: 30vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .gallery-page .lightbox-footer-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .gallery-page .lightbox-date {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: capitalize;
   }
 
   .gallery-page .lightbox-caption {
-    font-size: 0.9rem;
-    line-height: 1.6;
-    color: var(--text-main);
-    margin-bottom: 0.85rem;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: #1E293B;
+    font-weight: 450;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   .gallery-page .hl-hashtag {
@@ -1001,21 +1155,7 @@ import Layout from '../layouts/Layout.astro';
     font-weight: 600;
   }
 
-  .gallery-page .lightbox-stats-footer {
-    display: flex;
-    gap: 1.5rem;
-    font-size: 0.82rem;
-    color: var(--text-muted);
-    font-weight: 600;
-  }
-
-  .gallery-page .footer-stat {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  /* Carga y estado vacío (tarjetas generadas desde la API) */
+  /* Carga y estado vacío */
   .gallery-page .gallery-card.is-skeleton {
     pointer-events: none;
   }
@@ -1029,7 +1169,6 @@ import Layout from '../layouts/Layout.astro';
 
   .gallery-page .skeleton-line {
     display: block;
-    width: 55%;
     height: 0.8rem;
     border-radius: 4px;
   }
@@ -1067,5 +1206,58 @@ import Layout from '../layouts/Layout.astro';
 
   .gallery-page .filter-count {
     font-weight: 500;
+  }
+
+  /* Adaptación perfecta a móviles */
+  @media (max-width: 640px) {
+    .gallery-page .lightbox-modal {
+      padding: 0.5rem;
+    }
+
+    .gallery-page .lightbox-container {
+      width: 100%;
+      max-width: 100% !important;
+      max-height: 94vh;
+      border-radius: var(--radius-md);
+    }
+
+    .gallery-page .lightbox-header {
+      padding: 0.65rem 1rem;
+    }
+
+    .gallery-page .btn-modal-ig {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.78rem;
+    }
+
+    .gallery-page .btn-close-modal {
+      width: 36px;
+      height: 36px;
+    }
+
+    .gallery-page .lightbox-body {
+      max-height: 48vh;
+    }
+
+    .gallery-page .lightbox-img,
+    .gallery-page .lightbox-video,
+    .gallery-page .video-player-wrapper {
+      max-height: 48vh;
+    }
+
+    .gallery-page .lightbox-footer {
+      padding: 1rem 1.15rem;
+      max-height: 38vh;
+    }
+
+    .gallery-page .lightbox-caption {
+      font-size: 0.94rem;
+      line-height: 1.55;
+    }
+
+    .gallery-page .card-play-button {
+      width: 48px;
+      height: 48px;
+    }
   }
 </style>
