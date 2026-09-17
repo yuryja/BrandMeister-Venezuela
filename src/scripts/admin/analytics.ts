@@ -357,6 +357,30 @@ function renderDashboard(data: AnalyticsData) {
 }
 
 // --------------------------------------------------------------------
+const EMPTY_ANALYTICS: AnalyticsData = {
+  kpis: {
+    player_plays: 0,
+    unique_listeners: 0,
+    link_clicks: 0,
+    post_views: 0,
+    post_shares: 0,
+    active_countries: 0,
+  },
+  map_points: [],
+  player: {
+    countries: [],
+    listeners: [],
+    total_plays: 0,
+  },
+  links: [],
+  posts: [],
+  shares: {
+    platforms: [],
+    total: 0,
+  },
+};
+
+// --------------------------------------------------------------------
 // Carga de Datos desde la API
 // --------------------------------------------------------------------
 export async function loadAnalytics(range = '7d') {
@@ -370,8 +394,9 @@ export async function loadAnalytics(range = '7d') {
         return;
       }
     }
+    renderDashboard(EMPTY_ANALYTICS);
   } catch (err) {
-    console.warn('[BM-YV] No se pudo cargar analíticas del servidor, usando fallback:', err);
+    renderDashboard(EMPTY_ANALYTICS);
   }
 }
 
