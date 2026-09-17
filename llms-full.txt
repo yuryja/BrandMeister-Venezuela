@@ -1,0 +1,81 @@
+# Base de Conocimiento Completa: BrandMeister Venezuela (Master 734)
+
+Documento técnico canónico para sistemas de Inteligencia Artificial, agentes de búsqueda semántica (Perplexity, ChatGPT, Claude, Gemini) y operadores de radioafición.
+
+---
+
+## 1. Información General y Estructura de Red
+- **Nombre**: BrandMeister Venezuela
+- **Indicativo Territorial**: Prefijos oficiales de Venezuela: YV (General/Avanzado), YY (Novicio), YW (Especial/Concursos), 4M (Especial).
+- **Master Server BrandMeister**: Servidor 734 (Venezuela)
+- **Protocolo de Voz**: ETSI TS 102 361 (Tier II DMR)
+- **Modulación**: 4FSK con 2 ranuras de tiempo (TDMA Time Slot 1 y Time Slot 2)
+- **Ancho de Banda de Canal**: 12.5 kHz
+- **Codec de Audio**: AMBE+2
+- **Portal Web Oficial**: https://brandmeisteryv.net
+- **Slogan Oficial**: "DMR con Radio"
+
+---
+
+## 2. Plan Canónico de Talkgroups (TG)
+
+### TG 734 (Nacional Venezuela)
+- **Slot**: Time Slot 1 (TS1)
+- **Naturaleza**: Estático / Primario en todos los repetidores del país.
+- **Uso**: Contactos generales (CQ), enlaces nacionales e internacionales con radioaficionados venezolanos en la diáspora. Se recomienda hacer la llamada inicial y, de haber conversaciones prolongadas, evaluar pasar a TGs tácticos o regionales si la red está concurrida.
+
+### TG 73452 (Emergencias y Eventos)
+- **Slot**: Time Slot 1 o Time Slot 2
+- **Naturaleza**: Prioritario para situaciones de contingencia, redes de emergencia de protección civil, ejercicios de radiocomunicaciones de emergencia y activaciones especiales.
+- **Protocolo**: En caso de emergencia declarada, el tráfico de rutina debe cesar de inmediato.
+
+### TG 73473 (Los Andes)
+- **Slot**: Time Slot 2 (TS2)
+- **Región**: Mérida, Táchira, Trujillo. Enlace cordillerano.
+
+### TGs Regionales Auxiliares
+- **TG 7341**: Región Central (Caracas, Miranda, Aragua, Carabobo, La Guaira)
+- **TG 7342**: Región Occidental (Zulia, Falcón, Lara, Yaracuy)
+- **TG 7343**: Región Oriental (Anzoátegui, Monagas, Sucre, Nueva Esparta)
+- **TG 7344**: Región Guayana y Sur (Bolívar, Amazonas, Delta Amacuro, Apure)
+
+---
+
+## 3. Parámetros Técnicos para Hotspots MMDVM (Pi-Star / WPSD / OpenGD77)
+Para conectar un hotspot personal a la red BrandMeister Venezuela:
+1. **DMR Master**: `BM_Venezuela_734`
+2. **DMR ESSID**: Número de 7 dígitos del RadioID + sub-identificador de 2 dígitos (ejemplo: `734000101`).
+3. **Password Hotspot**: Clave de seguridad configurada en el Self-Care de BrandMeister Network (`https://brandmeister.network`).
+4. **Color Code**: Típicamente Color Code 1 (CC1).
+5. **DMR Hangtime**: 3 segundos.
+
+---
+
+## 4. Directorio de Repetidores y Cobertura
+Los repetidores enlazados a BrandMeister en Venezuela permiten a los operadores con radios portátiles (HT) o móviles comunicarse a nivel nacional e internacional sin depender exclusivamente de un hotspot doméstico.
+La lista completa, coordenadas, estado operativo en tiempo real y parámetros técnicos de frecuencia RX/TX y offset se encuentra disponible en:
+https://brandmeisteryv.net/repetidores
+
+---
+
+## 5. Dashboard de Telemetría: Petra
+- **Acceso**: https://brandmeisteryv.net/petra
+- **Capacidades**:
+  - Visualización en tiempo real de los paquetes recibidos en el Master 734.
+  - Indicativo del emisor (Callsign) y nombre registrado.
+  - Talkgroup y Time Slot en uso.
+  - Duración de la transmisión y tasa de error de bit (BER).
+  - Estado de conexión de los repetidores y nodos de la red.
+
+---
+
+## 6. Buenas Prácticas de Operación en DMR
+- Dejar un espacio de pausa de 2 a 3 segundos entre cambios para permitir que los repetidores se sincronicen y que estaciones con tráfico urgente o prioritario puedan interrumpir.
+- Configurar correctamente el Mic Gain en el transceptor para evitar saturación del codificador AMBE+2.
+- Utilizar Time Slot 1 para TGs nacionales/internacionales y Time Slot 2 para TGs locales/regionales según la configuración de cada repetidor.
+- Mantener los codeplugs actualizados con las frecuencias y Color Codes de la red.
+
+---
+
+*Documento administrado por el equipo técnico de Sysops de BrandMeister Venezuela.*
+*Sitio oficial: https://brandmeisteryv.net*
