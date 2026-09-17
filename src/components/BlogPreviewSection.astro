@@ -1,5 +1,83 @@
 ---
-// Últimas noticias en la portada. Se cargan desde /api/posts.php (MySQL) al abrir la página.
+// Últimas noticias en la portada. Se prerenderizan con datos base y se actualizan dinámicamente desde /api/posts.php (MySQL).
+
+interface PostPreview {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  category: string;
+  read_time: string;
+  featured: boolean;
+  image_url: string;
+  published_ts: number;
+  author_name: string;
+  author_callsign?: string;
+  url: string;
+}
+
+const DEFAULT_POSTS: PostPreview[] = [
+  {
+    id: 1,
+    title: 'Evolución y estado del sistema Petra para el TG 734 en Venezuela',
+    slug: 'petra-telemetria-tg734',
+    description: 'Descubre cómo funciona la plataforma comunitaria Petra, desarrollada por YY3BIG para medir la actividad, salud del anunciador y ocupación espectral en BrandMeister Venezuela.',
+    category: 'Innovación',
+    read_time: '5 min de lectura',
+    featured: true,
+    image_url: '/assets/petra-hero-bg.webp',
+    published_ts: 1789613553,
+    author_name: 'Yury',
+    author_callsign: 'YY3BIG',
+    url: '/blog/petra-telemetria-tg734'
+  },
+  {
+    id: 2,
+    title: 'Guía esencial: Configuración de Hotspots DMR en BrandMeister Venezuela',
+    slug: 'configuracion-hotspots-dmr-venezuela',
+    description: 'Paso a paso para configurar tu hotspot MMDVM (Pi-Star / WPSD) conectado a los servidores máster 3341 y 7301 con los parámetros oficiales recomendados.',
+    category: 'Guías Técnicas',
+    read_time: '6 min de lectura',
+    featured: false,
+    image_url: '/assets/services-dmr-composition.webp',
+    published_ts: 1789613553,
+    author_name: 'Severino Mastracci',
+    author_callsign: 'YV5OF',
+    url: '/blog/configuracion-hotspots-dmr-venezuela'
+  },
+  {
+    id: 3,
+    title: 'Protocolo de operación en emergencias con el TG 734911 y Radio Club Venezolano',
+    slug: 'red-emergencia-tg734911',
+    description: 'Directrices para el uso del canal de emergencias de BrandMeister Venezuela, coordinación con YV5RNE y recomendaciones de escucha activa en repetidores.',
+    category: 'Operación',
+    read_time: '4 min de lectura',
+    featured: false,
+    image_url: '/assets/repeaters-fieldwork.webp',
+    published_ts: 1789613553,
+    author_name: 'Arnaldo',
+    author_callsign: 'YV5ADM',
+    url: '/blog/red-emergencia-tg734911'
+  },
+  {
+    id: 4,
+    title: 'Actualización RadioID.net: Proceso anual de verificación y preservación de IDs DMR',
+    slug: 'verificacion-radioid-dmr',
+    description: 'Todo lo que necesitas saber sobre el proceso anual de confirmación de RadioID.net y cómo mantener tu identificador DMR activo para operar en BrandMeister.',
+    category: 'Comunidad',
+    read_time: '3 min de lectura',
+    featured: false,
+    image_url: '/assets/news-motorola-bg.webp',
+    published_ts: 1789613553,
+    author_name: 'Severino Mastracci',
+    author_callsign: 'YV5OF',
+    url: '/blog/verificacion-radioid-dmr'
+  }
+];
+
+const destacada = DEFAULT_POSTS.find((p) => p.featured) || DEFAULT_POSTS[0];
+const resto = DEFAULT_POSTS.filter((p) => p.id !== destacada.id).slice(0, 3);
+const formatDate = (ts: number, opts: Intl.DateTimeFormatOptions) => new Date(ts * 1000).toLocaleDateString('es-VE', opts);
 ---
 
 <section class="blog-preview-section section-padding">
@@ -17,15 +95,52 @@
       </a>
     </div>
 
-    <div class="editorial-blog-layout reveal-on-scroll" id="blog-preview-layout" aria-busy="true">
-      <article class="featured-post is-loading" aria-hidden="true">
-        <div class="post-meta-top"><span class="skeleton-chip"></span></div>
-        <h3 class="featured-title"><span class="skeleton-line"></span></h3>
-        <p class="featured-excerpt"><span class="skeleton-line short"></span></p>
+    <div class="editorial-blog-layout reveal-on-scroll" id="blog-preview-layout">
+      <article class={`featured-post ${destacada.image_url ? 'has-bg-image' : ''}`}>
+        {destacada.image_url && (
+          <div class="post-bg-layer" style={`background-image: url('${destacada.image_url}');`} aria-hidden="true" />
+        )}
+        <div class="post-meta-top">
+          <span class="post-cat">{destacada.category}</span>
+          <span class="post-date">{formatDate(destacada.published_ts, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          <span class="post-read">{destacada.read_time}</span>
+        </div>
+        <div class="featured-body">
+          <h3 class="featured-title"><a href={destacada.url}>{destacada.title}</a></h3>
+          <p class="featured-excerpt">{destacada.description}</p>
+        </div>
+        <div class="post-author-row">
+          <span class="author-badge">
+            <strong>{destacada.author_name}</strong>
+            {destacada.author_callsign && <span class="callsign-tag">{destacada.author_callsign}</span>}
+          </span>
+          <a href={destacada.url} class="read-more-link">
+            <span>Leer artículo completo</span>
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
       </article>
+
       <div class="articles-stream">
-        <article class="stream-article is-loading" aria-hidden="true"><span class="skeleton-line"></span></article>
-        <article class="stream-article is-loading" aria-hidden="true"><span class="skeleton-line"></span></article>
+        {resto.map((post) => (
+          <article class={`stream-article ${post.image_url ? 'has-bg-image' : ''}`}>
+            {post.image_url && (
+              <div class="post-bg-layer" style={`background-image: url('${post.image_url}');`} aria-hidden="true" />
+            )}
+            <div class="stream-content">
+              <div class="post-meta-top">
+                <span class="post-cat">{post.category}</span>
+                <span class="post-date">{formatDate(post.published_ts, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              </div>
+              <h4 class="stream-title"><a href={post.url}>{post.title}</a></h4>
+              <p class="stream-excerpt">{post.description}</p>
+              <div class="stream-footer">
+                <span class="stream-author">{post.author_callsign || post.author_name}</span>
+                <span class="stream-read">{post.read_time}</span>
+              </div>
+            </div>
+          </article>
+        ))}
       </div>
     </div>
   </div>
@@ -43,17 +158,16 @@
     let posts = [];
     try {
       const res = await fetch('/api/posts.php?limit=4', { headers: { Accept: 'application/json' } });
-      const data = await res.json();
-      posts = Array.isArray(data?.posts) ? data.posts : [];
+      if (res.ok) {
+        const data = await res.json();
+        posts = Array.isArray(data?.posts) ? data.posts : [];
+      }
     } catch {
       posts = [];
     }
 
-    layout.setAttribute('aria-busy', 'false');
-    if (!posts.length) {
-      layout.closest('.blog-preview-section').hidden = true;
-      return;
-    }
+    // Si la API no retorna noticias (ej. entorno de desarrollo estático), mantenemos las prerenderizadas
+    if (!posts || !posts.length) return;
 
     const destacada = posts.find((p) => p.featured) || posts[0];
     const resto = posts.filter((p) => p.id !== destacada.id).slice(0, 3);
