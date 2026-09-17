@@ -39,6 +39,24 @@ function detect_device_type(): string {
     return 'desktop';
 }
 
+// Detección geográfica gratuita por IP sin necesidad de API key (ip-api.com)
+function resolve_ip_location(string $ip): ?array {
+    if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+        return null;
+    }
+    $ctx = stream_context_create([
+        'http' => ['timeout' => 1.5, 'ignore_errors' => true]
+    ]);
+    $json = @file_get_contents("http://ip-api.com/json/{$ip}?fields=status,country,countryCode,city,lat,lon", false, $ctx);
+    if ($json) {
+        $res = json_decode($json, true);
+        if (($res['status'] ?? '') === 'success') {
+            return $res;
+        }
+    }
+    return null;
+}
+
 // Datos semilla de respaldo si la base de datos no está conectada o está vacía (entorno local)
 function get_fallback_stats(): array {
     $mapPoints = [
@@ -153,12 +171,24 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
     $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
     $referrer = substr($_SERVER['HTTP_REFERER'] ?? '', 0, 255);
 
-    // Detección de país (Cloudflare o header)
+    // Detección de país y coordenadas iniciales
     $countryCode = strtoupper(substr(trim($_SERVER['HTTP_CF_IPCOUNTRY'] ?? ($data['country_code'] ?? 'VE')), 0, 3));
     $countryName = trim((string)($data['country_name'] ?? 'Venezuela'));
     $city = trim((string)($data['city'] ?? 'Caracas'));
     $lat = isset($data['latitude']) ? (float)$data['latitude'] : 10.4806;
     $lng = isset($data['longitude']) ? (float)$data['longitude'] : -66.9036;
+
+    // Si es una IP pública de internet y no venían coordenadas del cliente, geolocalizar automáticamente sin API key
+    if (empty($data['latitude'])) {
+        $geo = resolve_ip_location($ipAddress);
+        if ($geo) {
+            $countryCode = strtoupper($geo['countryCode'] ?? $countryCode);
+            $countryName = $geo['country'] ?? $countryName;
+            $city = $geo['city'] ?? $city;
+            $lat = (float)($geo['lat'] ?? $lat);
+            $lng = (float)($geo['lon'] ?? $lng);
+        }
+    }
 
     $metadataJson = isset($data['metadata']) ? json_encode($data['metadata'], JSON_UNESCAPED_UNICODE) : null;
 
