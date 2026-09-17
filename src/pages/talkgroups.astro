@@ -159,6 +159,20 @@ const internationalChannels = [
   title="Talkgroups y Circuitos Regionales · BrandMeister Venezuela"
   description="Directorio completo de Talkgroups y Circuitos Regionales en BrandMeister Venezuela. Ranura 1 y 2, canal nacional TG 734, emergencias TG 734911 y frecuencias hotspot."
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "DefinedTermSet",
+      "name": "Talkgroups Oficiales BrandMeister Venezuela (MCC 734)",
+      "description": "Estructura canónica de grupos de conversación DMR para Venezuela en la red BrandMeister",
+      "hasDefinedTerm": nationalChannels.map(c => ({
+        "@type": "DefinedTerm",
+        "name": `TG ${c.tg} · ${c.name}`,
+        "termCode": c.tg,
+        "description": `${c.desc} (${c.slot}, ${c.colorCode})`
+      }))
+    })} />
+  </Fragment>
   <main class="tg-page">
     <!-- Hero 50vh con fondo services-dmr-composition.webp y tratamiento lateral -->
     <section class="tg-hero">

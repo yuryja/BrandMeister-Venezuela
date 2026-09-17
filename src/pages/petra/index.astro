@@ -11,6 +11,18 @@ const talkgroup = getPetraTalkgroup(DEFAULT_PETRA_TG)!;
   title="Conoce a Petra · Telemetría en vivo del TG 734 · BrandMeister Venezuela"
   description="Conoce a Petra, plataforma informativa y de telemetría de BrandMeister Venezuela: actividad en vivo de los TG 734, 73452 y 73473, balizas horarias y boletines sísmicos y meteorológicos."
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Petra · Telemetría y Monitor en Vivo BrandMeister Venezuela",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "url": "https://brandmeisteryv.net/petra",
+      "description": "Plataforma informativa y de telemetría de BrandMeister Venezuela: actividad en vivo de los TG 734, 73452 y 73473, balizas horarias y boletines sísmicos y meteorológicos.",
+      "browserRequirements": "Requires JavaScript. Requires HTML5."
+    })} />
+  </Fragment>
   <PetraDashboard talkgroup={talkgroup} />
 </Layout>
 

@@ -21,7 +21,7 @@ interface Props {
 const {
   title = "BrandMeister Venezuela · Red Digital DMR TG 734",
   description = "Comunidad oficial de radioaficionados en la red BrandMeister DMR en Venezuela. Talkgroups nacionales, circuitos, repetidores, Petra y voz digital.",
-  image = "/assets/logo.webp",
+  image = "/assets/og-brandmeister-dmr-con-radio.jpg",
   heroImage,
   chrome = true
 } = Astro.props;
@@ -29,10 +29,49 @@ const {
 const heroPreload = typeof heroImage === 'string' ? { desktop: heroImage, mobile: heroImage } : heroImage;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://brandmeisteryv.net');
+const siteOrigin = (Astro.site || 'https://brandmeisteryv.net').toString().replace(/\/$/, '');
+
+// Garantizar URL absoluta para og:image y twitter:image (indispensable para WhatsApp, Facebook, Telegram y Twitter)
+const ogImageURL = image.startsWith('http://') || image.startsWith('https://')
+  ? image
+  : new URL(image, siteOrigin).href;
+
+// Breadcrumbs Schema.org dinámico según la ruta
+const pathSegments = Astro.url.pathname.split('/').filter(Boolean);
+const breadcrumbsItems = [
+  {
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Inicio",
+    "item": siteOrigin + "/"
+  }
+];
+
+if (pathSegments.length > 0) {
+  const titlesMap: Record<string, string> = {
+    'repetidores': 'Repetidores DMR',
+    'talkgroups': 'Talkgroups DMR',
+    'galeria': 'Galería',
+    'comunidad': 'Comunidad',
+    'contacto': 'Contacto',
+    'petra': 'Dashboard Petra',
+    'blog': 'Noticias y Artículos'
+  };
+  let accumulatedPath = '';
+  pathSegments.forEach((segment, idx) => {
+    accumulatedPath += `/${segment}`;
+    breadcrumbsItems.push({
+      "@type": "ListItem",
+      "position": idx + 2,
+      "name": titlesMap[segment] || segment.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+      "item": `${siteOrigin}${accumulatedPath}`
+    });
+  });
+}
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="es" prefix="og: https://ogp.me/ns#">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -43,19 +82,45 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://brandmei
     <!-- Favicon Oficial BrandMeister -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#E8261C" />
+    <meta name="msapplication-TileColor" content="#E8261C" />
 
-    <!-- Open Graph / Redes Sociales -->
+    <!-- Metadatos de Indexación y Rastreo para Buscadores Tradicionales y Motores de IA -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="author" content="BrandMeister Venezuela" />
+    <meta name="publisher" content="BrandMeister Venezuela" />
+    <meta name="geo.region" content="VE" />
+    <meta name="geo.placename" content="Venezuela" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Alternates / Hreflang para localización e indexación internacional -->
+    <link rel="alternate" hreflang="es-VE" href={canonicalURL} />
+    <link rel="alternate" hreflang="es" href={canonicalURL} />
+    <link rel="alternate" hreflang="x-default" href={canonicalURL} />
+
+    <!-- Open Graph / Redes Sociales (Facebook, WhatsApp, Telegram, LinkedIn, Discord, iMessage) -->
+    <meta property="og:site_name" content="BrandMeister Venezuela" />
+    <meta property="og:locale" content="es_VE" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={image} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:secure_url" content={ogImageURL} />
+    <meta property="og:image:type" content={ogImageURL.endsWith('.webp') ? 'image/webp' : 'image/jpeg'} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="BrandMeister Venezuela · Red Digital DMR TG 734 · DMR con Radio" />
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={image} />
+    <!-- Twitter Cards (X) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@brandmeister_yv" />
+    <meta name="twitter:creator" content="@brandmeister_yv" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+    <meta name="twitter:image:alt" content="BrandMeister Venezuela · Red Digital DMR TG 734 · DMR con Radio" />
 
     <!-- Fuentes autoalojadas: se precargan para evitar el salto de tipografía -->
     <link rel="preload" href={jakartaFont} as="font" type="font/woff2" crossorigin />
@@ -70,23 +135,58 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://brandmei
       </>
     )}
 
-    <!-- JSON-LD Datos Estructurados -->
+    <!-- JSON-LD Datos Estructurados Schema.org (Google Rich Results & LLMs / AI Overviews) -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "BrandMeister Venezuela",
-      "url": "https://brandmeisteryv.net",
-      "logo": "https://brandmeisteryv.net/assets/logo.webp",
-      "sameAs": [
-        "https://www.instagram.com/brandmeister_yv/",
-        "https://t.me/+_NUvASaZZGxhYTkx",
-        "https://wiki.brandmeister.network/index.php/Venezuela"
-      ],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "email": "sysop@brandmeisteryv.net",
-        "contactType": "technical support"
-      }
+      "@graph": [
+        {
+          "@type": "AmateurRadioOrganization",
+          "@id": `${siteOrigin}/#organization`,
+          "name": "BrandMeister Venezuela",
+          "alternateName": ["BrandMeister DMR Venezuela", "BM Venezuela", "Red DMR TG 734", "BrandMeister YV"],
+          "url": siteOrigin,
+          "logo": {
+            "@type": "ImageObject",
+            "url": `${siteOrigin}/assets/og-brandmeister-dmr-con-radio-square.jpg`,
+            "width": 1024,
+            "height": 1024
+          },
+          "image": `${siteOrigin}/assets/og-brandmeister-dmr-con-radio.jpg`,
+          "description": "Comunidad oficial de radioaficionados en la red BrandMeister DMR Master 734 en Venezuela. Talkgroups nacionales, circuitos, repetidores activos, monitor Petra y voz digital para radioafición.",
+          "slogan": "DMR con Radio",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "VE"
+          },
+          "sameAs": [
+            "https://www.instagram.com/brandmeister_yv/",
+            "https://t.me/+_NUvASaZZGxhYTkx",
+            "https://wiki.brandmeister.network/index.php/Venezuela"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "sysop@brandmeisteryv.net",
+            "contactType": "technical support",
+            "availableLanguage": ["Spanish"]
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": `${siteOrigin}/#website`,
+          "url": siteOrigin,
+          "name": "BrandMeister Venezuela",
+          "description": "Portal oficial de la red digital DMR BrandMeister en Venezuela",
+          "publisher": {
+            "@id": `${siteOrigin}/#organization`
+          },
+          "inLanguage": "es-VE"
+        },
+        ...(breadcrumbsItems.length > 1 ? [{
+          "@type": "BreadcrumbList",
+          "@id": `${canonicalURL}#breadcrumb`,
+          "itemListElement": breadcrumbsItems
+        }] : [])
+      ]
     })} />
     <slot name="head" />
   </head>
