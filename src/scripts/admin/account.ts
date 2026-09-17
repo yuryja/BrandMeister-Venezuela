@@ -1,5 +1,6 @@
 // Panel · Pantallas públicas de cuenta: "¿Olvidaste tu contraseña?" y crear/restablecer contraseña (?clave=token)
 import { api, escapeHtml, withBusy, bindPasswordTools } from './api';
+import { recaptchaToken } from './recaptcha';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T | null;
 
@@ -32,7 +33,15 @@ export async function initAccount(): Promise<boolean> {
   $('forgot-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const identifier = ($('forgot-identifier') as HTMLInputElement).value.trim();
-    const res = await withBusy($('forgot-submit') as HTMLButtonElement, () => api('/api/auth.php?action=forgot', { identifier }));
+    const res = await withBusy($('forgot-submit') as HTMLButtonElement, async () => {
+      let recaptcha = '';
+      try {
+        recaptcha = await recaptchaToken('forgot');
+      } catch (err) {
+        return { ok: false, status: 0, data: { error: (err as Error).message } };
+      }
+      return api('/api/auth.php?action=forgot', { identifier, recaptcha_token: recaptcha });
+    });
     message('forgot-message', res.ok ? 'success' : 'error', res.data.message || res.data.error || 'No se pudo procesar la solicitud.');
   });
 
