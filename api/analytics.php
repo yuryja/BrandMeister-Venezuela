@@ -110,6 +110,8 @@ function get_empty_stats(): array {
             'link_clicks' => 0,
             'post_views' => 0,
             'post_shares' => 0,
+            'petra_views' => 0,
+            'petra_unique' => 0,
             'active_countries' => 0,
         ],
         'map_points' => [],
@@ -117,6 +119,15 @@ function get_empty_stats(): array {
             'countries' => [],
             'listeners' => [],
             'total_plays' => 0,
+        ],
+        'petra' => [
+            'total_views' => 0,
+            'unique_visitors' => 0,
+            'talkgroups' => [
+                ['id' => '734', 'name' => 'TG 734 Venezuela', 'badge' => 'Nacional', 'sub' => 'Canal principal nacional', 'views' => 0, 'unique_users' => 0, 'percent' => 0],
+                ['id' => '73452', 'name' => 'TG 73452 Emergencias y Eventos', 'badge' => 'Emergencias', 'sub' => 'Operaciones y contingencia', 'views' => 0, 'unique_users' => 0, 'percent' => 0],
+                ['id' => '73473', 'name' => 'TG 73473 Radio Club Venezolano', 'badge' => 'RCV', 'sub' => 'Boletín e institucional', 'views' => 0, 'unique_users' => 0, 'percent' => 0],
+            ],
         ],
         'links' => [],
         'posts' => [],
@@ -272,6 +283,8 @@ if ($action === 'stats' || $action === 'summary') {
             SUM(CASE WHEN event_type = 'link_click' THEN 1 ELSE 0 END) AS link_clicks,
             SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_views,
             SUM(CASE WHEN event_type = 'post_share' THEN 1 ELSE 0 END) AS post_shares,
+            SUM(CASE WHEN event_type = 'page_view' AND event_category = 'petra_view' THEN 1 ELSE 0 END) AS petra_views,
+            COUNT(DISTINCT CASE WHEN event_type = 'page_view' AND event_category = 'petra_view' THEN ip_address ELSE NULL END) AS petra_unique,
             COUNT(DISTINCT country_code) AS active_countries
             FROM bm_analytics_events
             WHERE 1 = 1 $since");
@@ -287,7 +300,8 @@ if ($action === 'stats' || $action === 'summary') {
             COUNT(*) AS count,
             SUM(CASE WHEN event_type = 'player_play' THEN 1 ELSE 0 END) AS audio_count,
             SUM(CASE WHEN event_type = 'link_click' THEN 1 ELSE 0 END) AS link_count,
-            SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_count
+            SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_count,
+            SUM(CASE WHEN event_type = 'page_view' AND event_category = 'petra_view' THEN 1 ELSE 0 END) AS petra_count
             FROM bm_analytics_events
             WHERE latitude IS NOT NULL AND longitude IS NOT NULL $since
             GROUP BY latitude, longitude, city, country_name, country_code
@@ -306,6 +320,7 @@ if ($action === 'stats' || $action === 'summary') {
                     'player_play' => (int)$row['audio_count'],
                     'link_click' => (int)$row['link_count'],
                     'post_view' => (int)$row['post_count'],
+                    'petra_view' => (int)($row['petra_count'] ?? 0),
                 ]
             ];
         }
@@ -428,6 +443,49 @@ if ($action === 'stats' || $action === 'summary') {
             ];
         }
 
+        // Telemetría del Sistema Petra (interacciones y distribución de Talkgroups)
+        $petraStmt = $pdo->query("SELECT
+            entity_id AS tg,
+            COUNT(*) AS views,
+            COUNT(DISTINCT ip_address) AS unique_users
+            FROM bm_analytics_events
+            WHERE event_type = 'page_view' AND event_category = 'petra_view' $since
+            GROUP BY entity_id");
+        $petraRows = $petraStmt->fetchAll() ?: [];
+        $petraMap = [];
+        foreach ($petraRows as $r) {
+            $tgKey = trim((string)($r['tg'] ?? ''));
+            $petraMap[$tgKey] = [
+                'views' => (int)$r['views'],
+                'unique_users' => (int)$r['unique_users'],
+            ];
+        }
+
+        $knownTgs = [
+            '734' => ['name' => 'TG 734 Venezuela', 'badge' => 'Nacional', 'sub' => 'Canal principal nacional'],
+            '73452' => ['name' => 'TG 73452 Emergencias y Eventos', 'badge' => 'Emergencias', 'sub' => 'Operaciones y contingencia'],
+            '73473' => ['name' => 'TG 73473 Radio Club Venezolano', 'badge' => 'RCV', 'sub' => 'Boletín e institucional'],
+        ];
+
+        $totalPetraViews = (int)($kpis['petra_views'] ?? 0);
+        $totalPetraUnique = (int)($kpis['petra_unique'] ?? 0);
+        $petraTalkgroups = [];
+
+        foreach ($knownTgs as $tgId => $meta) {
+            $views = $petraMap[$tgId]['views'] ?? 0;
+            $uniqueUsers = $petraMap[$tgId]['unique_users'] ?? 0;
+            $percent = $totalPetraViews > 0 ? round(($views / $totalPetraViews) * 100) : 0;
+            $petraTalkgroups[] = [
+                'id' => $tgId,
+                'name' => $meta['name'],
+                'badge' => $meta['badge'],
+                'sub' => $meta['sub'],
+                'views' => $views,
+                'unique_users' => $uniqueUsers,
+                'percent' => $percent,
+            ];
+        }
+
         if (!$days) {
             $kpis['post_views'] = max((int)($kpis['post_views'] ?? 0), (int)$pdo->query("SELECT COALESCE(SUM(views_count), 0) FROM bm_posts WHERE status = 'published'")->fetchColumn());
         }
@@ -441,6 +499,8 @@ if ($action === 'stats' || $action === 'summary') {
                 'link_clicks' => (int)($kpis['link_clicks'] ?? 0),
                 'post_views' => (int)($kpis['post_views'] ?? 0),
                 'post_shares' => (int)($kpis['post_shares'] ?? 0),
+                'petra_views' => $totalPetraViews,
+                'petra_unique' => $totalPetraUnique,
                 'active_countries' => (int)($kpis['active_countries'] ?? 0),
             ],
             'map_points' => $mapPoints,
@@ -448,6 +508,11 @@ if ($action === 'stats' || $action === 'summary') {
                 'countries' => $playerCountries,
                 'listeners' => $playerListeners,
                 'total_plays' => (int)($kpis['player_plays'] ?? 0),
+            ],
+            'petra' => [
+                'total_views' => $totalPetraViews,
+                'unique_visitors' => $totalPetraUnique,
+                'talkgroups' => $petraTalkgroups,
             ],
             'links' => $linkClicks,
             'posts' => $postViews,

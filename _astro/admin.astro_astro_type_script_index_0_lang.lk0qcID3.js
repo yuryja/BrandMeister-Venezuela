@@ -104,7 +104,7 @@ import{t as e}from"./preload-helper.B3nfOi5I.js";var t={admin:`Administrador`,ed
         ${i?`<div class="bm-popup-stat"><span>Clics en enlaces</span><strong>${Z(i)}</strong></div>`:``}
         ${a?`<div class="bm-popup-stat"><span>Lecturas del blog</span><strong>${Z(a)}</strong></div>`:``}
       </div>
-    `,s=L.divIcon({className:`bm-single-pin`,iconSize:[18,18],iconAnchor:[9,9],popupAnchor:[0,-10]}),c=L.marker([e.lat,e.lng],{icon:s}).bindPopup(o);J?J.addLayer(c):c.addTo(q)}),J&&q.addLayer(J))}function Ht(e){Lt=e,X(`kpi-player-plays`)&&(X(`kpi-player-plays`).textContent=Z(e.kpis?.player_plays)),X(`kpi-unique-listeners`)&&(X(`kpi-unique-listeners`).textContent=Z(e.kpis?.unique_listeners)),X(`kpi-link-clicks`)&&(X(`kpi-link-clicks`).textContent=Z(e.kpis?.link_clicks)),X(`kpi-post-views`)&&(X(`kpi-post-views`).textContent=Z(e.kpis?.post_views)),X(`kpi-post-shares`)&&(X(`kpi-post-shares`).textContent=Z(e.kpis?.post_shares)),X(`kpi-active-countries`)&&(X(`kpi-active-countries`).textContent=Z(e.kpis?.active_countries));let t=Array.from(new Set((e.map_points||[]).map(e=>e.code).filter(e=>/^[A-Z]{2}$/.test(e)))).slice(0,4);X(`kpi-top-countries`)&&(X(`kpi-top-countries`).textContent=t.length?t.join(`, `):`Sin datos aún`);let r=(e.shares?.platforms||[])[0];X(`kpi-top-platform`)&&(X(`kpi-top-platform`).textContent=r?`Más usado: ${r.name}`:`Sin compartidos aún`);let i={"7d":`Últimos 7 días`,"30d":`Últimos 30 días`,all:`Histórico`};document.querySelectorAll(`[data-range-label]`).forEach(e=>e.textContent=i[Y]??``),Vt();let a=X(`player-countries-list`);if(a){let t=e.player?.countries||[];a.innerHTML=t.length?t.map(e=>`
+    `,s=L.divIcon({className:`bm-single-pin`,iconSize:[18,18],iconAnchor:[9,9],popupAnchor:[0,-10]}),c=L.marker([e.lat,e.lng],{icon:s}).bindPopup(o);J?J.addLayer(c):c.addTo(q)}),J&&q.addLayer(J))}function Ht(e){Lt=e,X(`kpi-player-plays`)&&(X(`kpi-player-plays`).textContent=Z(e.kpis?.player_plays)),X(`kpi-unique-listeners`)&&(X(`kpi-unique-listeners`).textContent=Z(e.kpis?.unique_listeners)),X(`kpi-link-clicks`)&&(X(`kpi-link-clicks`).textContent=Z(e.kpis?.link_clicks)),X(`kpi-post-views`)&&(X(`kpi-post-views`).textContent=Z(e.kpis?.post_views)),X(`kpi-post-shares`)&&(X(`kpi-post-shares`).textContent=Z(e.kpis?.post_shares)),X(`kpi-active-countries`)&&(X(`kpi-active-countries`).textContent=Z(e.kpis?.active_countries)),X(`kpi-petra-views`)&&(X(`kpi-petra-views`).textContent=Z(e.kpis?.petra_views??e.petra?.total_views??0)),X(`kpi-petra-unique`)&&(X(`kpi-petra-unique`).textContent=Z(e.kpis?.petra_unique??e.petra?.unique_visitors??0));let t=Array.from(new Set((e.map_points||[]).map(e=>e.code).filter(e=>/^[A-Z]{2}$/.test(e)))).slice(0,4);X(`kpi-top-countries`)&&(X(`kpi-top-countries`).textContent=t.length?t.join(`, `):`Sin datos aún`);let r=(e.shares?.platforms||[])[0];X(`kpi-top-platform`)&&(X(`kpi-top-platform`).textContent=r?`Más usado: ${r.name}`:`Sin compartidos aún`);let i={"7d":`Últimos 7 días`,"30d":`Últimos 30 días`,all:`Histórico`};document.querySelectorAll(`[data-range-label]`).forEach(e=>e.textContent=i[Y]??``),Vt();let a=X(`player-countries-list`);if(a){let t=e.player?.countries||[];a.innerHTML=t.length?t.map(e=>`
             <div class="country-bar-item">
               <div class="country-bar-header">
                 <span class="country-name-wrap">
@@ -132,7 +132,44 @@ import{t as e}from"./preload-helper.B3nfOi5I.js";var t={admin:`Administrador`,ed
                 ${n(e.last_active)}
               </td>
             </tr>
-          `}).join(``):`<tr><td colspan="4" class="analytics-empty">Sin oyentes en este periodo.</td></tr>`}let s=X(`link-clicks-tbody`);if(s){let t=e.links||[];s.innerHTML=t.length?t.map(e=>`
+          `}).join(``):`<tr><td colspan="4" class="analytics-empty">Sin oyentes en este periodo.</td></tr>`}let s=X(`petra-talkgroups-container`);if(s){let t=e.petra?.talkgroups||[];s.innerHTML=t.length?t.map(e=>{let t=e.views||0,r=e.unique_users||0,i=Math.max(0,Math.min(100,Number(e.percent)||0)),a=e.id===`734`?`badge-tg-main`:e.id===`73452`?`badge-tg-alert`:`badge-tg-rcv`;return`
+            <div class="petra-tg-card">
+              <div class="petra-tg-head">
+                <div class="petra-tg-info">
+                  <span class="badge-tag-category ${a}">TG ${n(e.id)}</span>
+                  <span class="petra-tg-badge-meta">${n(e.badge)}</span>
+                </div>
+                <a href="/petra/${encodeURIComponent(e.id)}" target="_blank" rel="noopener" class="petra-tg-link" title="Ver monitoreo en vivo">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+              </div>
+              <div class="petra-tg-title">${n(e.name)}</div>
+              ${e.sub?`<div class="petra-tg-sub">${n(e.sub)}</div>`:``}
+              
+              <div class="petra-tg-metrics">
+                <div class="petra-metric-block">
+                  <span class="metric-val">${Z(t)}</span>
+                  <span class="metric-lbl">${t===1?`interacción`:`interacciones`}</span>
+                </div>
+                <div class="petra-metric-block">
+                  <span class="metric-val">${Z(r)}</span>
+                  <span class="metric-lbl">${r===1?`operador único`:`operadores únicos`}</span>
+                </div>
+                <div class="petra-metric-block petra-metric-right">
+                  <span class="metric-val">${i}%</span>
+                  <span class="metric-lbl">del interés</span>
+                </div>
+              </div>
+
+              <div class="petra-tg-progress">
+                <div class="petra-tg-progress-fill ${a}" style="width: ${i}%;"></div>
+              </div>
+            </div>
+          `}).join(``):`<p class="analytics-empty">Sin interacciones registradas en Petra en este periodo.</p>`}let c=X(`link-clicks-tbody`);if(c){let t=e.links||[];c.innerHTML=t.length?t.map(e=>`
             <tr>
               <td>
                 <div class="cell-strong">${n(e.title)}</div>
@@ -145,7 +182,7 @@ import{t as e}from"./preload-helper.B3nfOi5I.js";var t={admin:`Administrador`,ed
                 ${Z(e.clicks)}
               </td>
             </tr>
-          `).join(``):`<tr><td colspan="3" class="analytics-empty">Sin clics en enlaces en este periodo.</td></tr>`}let c=X(`social-shares-container`);if(c){let t=e.shares?.platforms||[];c.innerHTML=t.length?t.map(e=>`
+          `).join(``):`<tr><td colspan="3" class="analytics-empty">Sin clics en enlaces en este periodo.</td></tr>`}let l=X(`social-shares-container`);if(l){let t=e.shares?.platforms||[];l.innerHTML=t.length?t.map(e=>`
             <div class="share-platform-row">
               <div class="share-platform-header">
                 <span class="share-platform-name">${n(e.name)}</span>
@@ -157,7 +194,7 @@ import{t as e}from"./preload-helper.B3nfOi5I.js";var t={admin:`Administrador`,ed
                 <div class="share-fill" style="width: ${Math.max(0,Math.min(100,Number(e.percent)||0))}%;"></div>
               </div>
             </div>
-          `).join(``):`<p class="analytics-empty">Sin compartidos en este periodo.</p>`}let l=X(`posts-views-tbody`);if(l){let t=e.posts||[];if(!t.length)l.innerHTML=`<tr><td colspan="5" class="analytics-empty">Sin noticias publicadas.</td></tr>`;else{let e=Math.max(1,...t.map(e=>Number(e.views)||0));l.innerHTML=t.map(t=>{let r=Math.round((Number(t.views)||0)/e*100);return`
+          `).join(``):`<p class="analytics-empty">Sin compartidos en este periodo.</p>`}let u=X(`posts-views-tbody`);if(u){let t=e.posts||[];if(!t.length)u.innerHTML=`<tr><td colspan="5" class="analytics-empty">Sin noticias publicadas.</td></tr>`;else{let e=Math.max(1,...t.map(e=>Number(e.views)||0));u.innerHTML=t.map(t=>{let r=Math.round((Number(t.views)||0)/e*100);return`
             <tr>
               <td>
                 <div class="cell-strong">${t.slug?`<a href="/blog/${encodeURIComponent(t.slug)}" target="_blank" rel="noopener">${n(t.title)}</a>`:n(t.title)}</div>
