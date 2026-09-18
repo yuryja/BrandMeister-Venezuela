@@ -221,280 +221,176 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
-        <!-- 4. Agradecimientos y Reconocimientos Especiales -->
-        <div class="tribute-section">
-          <div class="tribute-intro-header">
-            <span class="sub-label">El Corazón de la Red</span>
-            <h2 class="tribute-intro-title">Agradecimientos y Reconocimiento Fraterno</h2>
-            <p class="tribute-intro-lead">
-              La Red BrandMeister Venezuela no es únicamente un conjunto de servidores o frecuencias: <strong>es su gente</strong>. Este proyecto es hoy una realidad gracias a radioaficionados extraordinarios que confiaron, pusieron sus estaciones a disposición y sumaron su conocimiento de forma generosa y desinteresada.
+        <!-- 4. Agradecimientos y Reconocimiento Fraterno -->
+        <div class="tribute-box">
+          <div class="tribute-header">
+            <span class="tribute-badge">El Corazón de la Red</span>
+            <h2 class="tribute-title">Un Sincero Reconocimiento a Toda la Comunidad</h2>
+            <p class="tribute-lead">
+              La Red BrandMeister Venezuela no es un servidor ni un conjunto de frecuencias: <strong>es su gente</strong>. Nada de esto sería posible sin el esfuerzo generoso, la constancia técnica y el desinteresado compromiso de personas excepcionales que dieron un paso al frente para marcar el rumbo.
             </p>
           </div>
 
-          <!-- 4.1 Concesionarios de Repetidores y Hotspots de Alta Potencia -->
-          <div class="recognition-block">
-            <div class="recognition-block-header">
-              <div class="recognition-badge">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                </svg>
-                <span>Infraestructura & Cobertura en el Terreno</span>
+          <!-- Concesionarios de repetidores y hotspots de alta potencia -->
+          <div class="tribute-group">
+            <h3 class="tribute-group-title">Concesionarios de Repetidores y Hotspots de Alta Potencia</h3>
+            <div class="tribute-items-list">
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YV5OF</span>
+                  <span class="tribute-name">Severino Mastracci</span>
+                  <span class="tribute-tag">147.240 MHz · Caracas</span>
+                </div>
+                <p class="tribute-row-body">
+                  El primer repetidor DMR siempre ha sido el 147.240 de Caracas, y su concesionario es YV5OF Severino Mastracci.
+                </p>
               </div>
-              <h3 class="recognition-block-title">Concesionarios de Repetidores y Hotspots de Alta Potencia</h3>
-              <p class="recognition-block-desc">
-                Custodios del espectro que han aportado sus repetidores, antenas, torres y recursos para irradiar la señal digital DMR en Venezuela:
-              </p>
-            </div>
 
-            <div class="recognition-grid">
-              <!-- YV5OF -->
-              <article class="recon-card recon-card--featured">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YV5OF</span>
-                    <span class="recon-pill-tag">Primer Repetidor DMR</span>
-                  </div>
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YV4EGG</span>
+                  <span class="tribute-name">Andrés Amadio</span>
+                  <span class="tribute-tag">146.700 MHz (Carabobo) & 147.090 MHz (Platillón)</span>
                 </div>
-                <div class="recon-freq-badge">
-                  <span>📍 147.240 MHz · Caracas</span>
-                </div>
-                <h4 class="recon-name">Severino Mastracci</h4>
-                <p class="recon-text">
-                  El primer repetidor DMR de Venezuela siempre ha sido el <strong>147.240 de Caracas</strong>, y su concesionario es <strong>YV5OF Severino Mastracci</strong>, pieza clave que encendió la chispa de la red en la capital.
+                <p class="tribute-row-body">
+                  Este agradecimiento es especial porque la primera persona que confió en este proyecto y aportó conocimiento, compromiso y equipos para marcar el rumbo fue el colega Andrés, hoy mantiene el repetidor 146.700 de Cerro El Café en Carabobo y participa en la 147.090 de Platillón.
                 </p>
-              </article>
+              </div>
 
-              <!-- YV4EGG -->
-              <article class="recon-card recon-card--special">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YV4EGG</span>
-                    <span class="recon-pill-tag">Pilar Fundacional</span>
-                  </div>
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YY5EHT & YY5CDT</span>
+                  <span class="tribute-name">Alexander Salazar & César Tovar</span>
+                  <span class="tribute-tag">439.600 MHz · Caracas</span>
                 </div>
-                <div class="recon-freq-badge">
-                  <span>📍 146.700 MHz (Carabobo) & 147.090 MHz (Platillón)</span>
-                </div>
-                <h4 class="recon-name">Andrés Amadio</h4>
-                <p class="recon-text">
-                  Este agradecimiento es especial porque la primera persona que confió en este proyecto y aportó conocimiento, compromiso y equipos para marcar el rumbo fue el colega <strong>Andrés</strong>. Hoy mantiene el repetidor <strong>146.700 de Cerro El Café</strong> en Carabobo y participa activamente en el <strong>147.090 de Platillón</strong>.
+                <p class="tribute-row-body">
+                  El colega Alexander es el propietario del sistema 439.600 de Caracas, pero además de ser el concesionario de este sistema ha sido el apoyo técnico invaluable gracias a sus conocimientos junto al colega César Tovar YY5CDT.
                 </p>
-              </article>
+              </div>
 
-              <!-- YY5EHT & YY5CDT -->
-              <article class="recon-card">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YY5EHT</span>
-                    <span class="recon-callsign-sec">& YY5CDT</span>
-                    <span class="recon-pill-tag">Soporte Técnico</span>
-                  </div>
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YV1GDQ</span>
+                  <span class="tribute-name">Carlos Zicardi</span>
+                  <span class="tribute-tag">439.600 MHz · Ciudad Ojeda</span>
                 </div>
-                <div class="recon-freq-badge">
-                  <span>📍 439.600 MHz · Caracas</span>
-                </div>
-                <h4 class="recon-name">Alexander Salazar <span class="recon-callsign-sec">& César</span></h4>
-                <p class="recon-text">
-                  El colega <strong>Alexander</strong> es el propietario del sistema <strong>439.600 de Caracas</strong>; pero además de ser el concesionario de este sistema, ha sido un apoyo técnico invaluable gracias a sus conocimientos junto al colega <strong>César YY5CDT</strong>.
+                <p class="tribute-row-body">
+                  El colega Carlos es el concesionario del repetidor de Ciudad Ojeda 439.600, agradecemos todo el esfuerzo a pesar de los inconvenientes que sabemos ha costado tener activo este repetidor, hoy día sigue activo gracias a su empeño y apoyo.
                 </p>
-              </article>
+              </div>
 
-              <!-- YV1GDQ -->
-              <article class="recon-card">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YV1GDQ</span>
-                    <span class="recon-pill-tag">Empeño & Constancia</span>
-                  </div>
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YV5CBO</span>
+                  <span class="tribute-name">Carlos Boschian</span>
+                  <span class="tribute-tag">147.150 MHz · La Guaira</span>
                 </div>
-                <div class="recon-freq-badge">
-                  <span>📍 439.600 MHz · Ciudad Ojeda (Zulia)</span>
-                </div>
-                <h4 class="recon-name">Carlos Zicardi</h4>
-                <p class="recon-text">
-                  El colega <strong>Carlos</strong> es el concesionario del repetidor de <strong>Ciudad Ojeda 439.600</strong>. Agradecemos todo el esfuerzo a pesar de los inconvenientes que sabemos ha costado tener activo este repetidor; hoy día sigue activo gracias a su empeño y apoyo.
+                <p class="tribute-row-body">
+                  Es el concesionario del repetidor de La Guaira 147.150, Carlos apoyó incluso en momentos muy lamentables de su vida personal, pero su constancia, disciplina y pasión por lo que hace, nos ha dado un sistema muy importante para este proyecto.
                 </p>
-              </article>
+              </div>
 
-              <!-- YV5CBO -->
-              <article class="recon-card">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YV5CBO</span>
-                    <span class="recon-pill-tag">Disciplina & Pasión</span>
-                  </div>
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YV5VE</span>
+                  <span class="tribute-name">William Fourneau</span>
+                  <span class="tribute-tag">147.390 MHz · Altagracia de Orituco</span>
                 </div>
-                <div class="recon-freq-badge">
-                  <span>📍 147.150 MHz · La Guaira</span>
-                </div>
-                <h4 class="recon-name">Carlos Boschian</h4>
-                <p class="recon-text">
-                  Es el concesionario del repetidor de <strong>La Guaira 147.150</strong>. Carlos apoyó incluso en momentos muy lamentables de su vida personal, pero su constancia, disciplina y pasión por lo que hace nos ha dado un sistema muy importante para este proyecto.
+                <p class="tribute-row-body">
+                  Es el concesionario del repetidor 147.390 de Altagracia de Orituco, agradecemos su apoyo con este sistema a nuestra red.
                 </p>
-              </article>
+              </div>
 
-              <!-- YV5VE -->
-              <article class="recon-card">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YV5VE</span>
-                    <span class="recon-pill-tag">Enlace Llanero</span>
-                  </div>
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YV4BHH & YV4KWT</span>
+                  <span class="tribute-name">Pedro Rodríguez & Ramón Girón</span>
+                  <span class="tribute-tag">147.090 MHz · Cerro Platillón</span>
                 </div>
-                <div class="recon-freq-badge">
-                  <span>📍 147.390 MHz · Altagracia de Orituco</span>
-                </div>
-                <h4 class="recon-name">William Fourneau</h4>
-                <p class="recon-text">
-                  Es el concesionario del repetidor <strong>147.390 de Altagracia de Orituco</strong>. Agradecemos profundamente su valioso respaldo y el aporte de este sistema estratégico a nuestra red.
+                <p class="tribute-row-body">
+                  Estos colegas junto a Andrés Amadio y William Fourneau mantienen el repetidor 147.090 de Platillón, agradecemos su dedicación y empeño para que este sistema ubicado en una difícil locación esté en funcionamiento.
                 </p>
-              </article>
-
-              <!-- YV4BHH & YV4KWT -->
-              <article class="recon-card">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YV4BHH</span>
-                    <span class="recon-callsign-sec">& YV4KWT</span>
-                    <span class="recon-pill-tag">Operación de Altura</span>
-                  </div>
-                </div>
-                <div class="recon-freq-badge">
-                  <span>📍 147.090 MHz · Cerro Platillón</span>
-                </div>
-                <h4 class="recon-name">Pedro Rodríguez & Ramón Girón</h4>
-                <p class="recon-text">
-                  Estos colegas, junto a <strong>Andrés Amadio</strong> y <strong>William Fourneau</strong>, mantienen el repetidor <strong>147.090 de Platillón</strong>. Agradecemos su dedicación y empeño para que este sistema ubicado en una difícil locación esté en funcionamiento.
-                </p>
-              </article>
+              </div>
             </div>
           </div>
 
-          <!-- 4.2 Equipo de Soporte y Apoyo Logístico -->
-          <div class="recognition-block">
-            <div class="recognition-block-header">
-              <div class="recognition-badge recognition-badge--tech">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                  <line x1="8" y1="21" x2="16" y2="21"></line>
-                  <line x1="12" y1="17" x2="12" y2="21"></line>
-                </svg>
-                <span>Tecnología, Operación & Logística</span>
-              </div>
-              <h3 class="recognition-block-title">Equipo de Soporte y Apoyo Logístico</h3>
-              <p class="recognition-block-desc">
-                Detrás de todo lo que ha sido la puesta en marcha del proyecto BrandMeister Venezuela existen personas que con su aporte invaluable logramos salir adelante:
-              </p>
-            </div>
-
-            <div class="recognition-grid">
-              <!-- YY3BIG -->
-              <article class="recon-card recon-card--tech">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YY3BIG</span>
-                    <span class="recon-pill-tag">Desarrollo & Sistemas</span>
-                  </div>
+          <!-- Equipo de soporte y apoyo logístico -->
+          <div class="tribute-group">
+            <h3 class="tribute-group-title">Equipo de Soporte y Apoyo Logístico</h3>
+            <p class="tribute-group-intro">
+              Detrás de todo lo que ha sido la puesta en marcha del proyecto BrandMeister Venezuela existen personas que con su aporte invaluable logramos salir adelante, ellos son:
+            </p>
+            <div class="tribute-items-list">
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YY3BIG</span>
+                  <span class="tribute-name">Yury Jajitzky</span>
+                  <span class="tribute-tag">Multimedia, Tecnología & Sistemas</span>
                 </div>
-                <div class="recon-freq-badge">
-                  <span>💻 Multimedia & Plataforma Tecnológica</span>
-                </div>
-                <h4 class="recon-name">Yury Jajitzky</h4>
-                <p class="recon-text">
+                <p class="tribute-row-body">
                   Es la pieza fundamental en todo este proyecto por darle vida a través de su experiencia, disciplina y gran compromiso a todo este entramado de sistemas que componen la multimedia y tecnología aplicada en cada una de las innovaciones presentadas para ustedes.
                 </p>
-              </article>
+              </div>
 
-              <!-- YY5FBP -->
-              <article class="recon-card recon-card--tech">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YY5FBP</span>
-                    <span class="recon-pill-tag">RadioID & Expansión</span>
-                  </div>
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YY5FBP</span>
+                  <span class="tribute-name">Federico Borrás</span>
+                  <span class="tribute-tag">Interconexión RadioID & Expansión</span>
                 </div>
-                <div class="recon-freq-badge">
-                  <span>🌐 Interconexión Oficial RadioID</span>
-                </div>
-                <h4 class="recon-name">Federico Borrás</h4>
-                <p class="recon-text">
-                  Federico es el encargado de la interacción de BrandMeister Venezuela con la plataforma <strong>Radio ID</strong>. Su apoyo ha sido total a cada implementación de la red además de ser parte de proyectos próximos que son ambiciosos para el crecimiento de la cobertura <strong>DMR CON RADIO</strong>.
+                <p class="tribute-row-body">
+                  Federico es el encargado de la interacción de BrandMeister Venezuela con la plataforma Radio ID, su apoyo ha sido total a cada implementación de la red además de ser parte de proyectos próximos que son ambiciosos para el crecimiento de la cobertura DMR CON RADIO.
                 </p>
-              </article>
+              </div>
 
-              <!-- YV5AEI & YY4ARH -->
-              <article class="recon-card recon-card--tech">
-                <div class="recon-card-header">
-                  <div class="recon-callsign-group">
-                    <span class="recon-callsign">YV5AEI</span>
-                    <span class="recon-callsign-sec">& YY4ARH</span>
-                    <span class="recon-pill-tag">Pioneros de Pruebas</span>
-                  </div>
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-callsign">YV5AEI & YY4ARH</span>
+                  <span class="tribute-name">Alexis González & Antonio Ramos</span>
+                  <span class="tribute-tag">Pruebas Iniciales & Señal</span>
                 </div>
-                <div class="recon-freq-badge">
-                  <span>📡 Pruebas Iniciales & Reportes de Señal</span>
-                </div>
-                <h4 class="recon-name">Alexis González & Antonio Ramos</h4>
-                <p class="recon-text">
-                  Estos colegas pueden relatar ellos solos la historia del comienzo de este proyecto porque cuando aún no había la interacción de hoy día, ellos fueron nuestro apoyo en cada prueba de sistema y en cada reporte de señal. <em>¡Gracias muchachos por todo su apoyo!</em>
+                <p class="tribute-row-body">
+                  Estos colegas pueden relatar ellos solos la historia del comienzo de este proyecto porque cuando aún no había la interacción de hoy día, ellos fueron nuestro apoyo en cada prueba de sistema, en cada reporte de señal, gracias muchachos por todo su apoyo.
                 </p>
-              </article>
+              </div>
             </div>
           </div>
 
-          <!-- 4.3 A los Colegas Usuarios y Operadores de la Red -->
-          <div class="recognition-block recognition-block--users">
-            <div class="recognition-block-header">
-              <div class="recognition-badge recognition-badge--users">
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="9" cy="7" r="4"></circle>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                </svg>
-                <span>La Voz y la Razón de Ser</span>
-              </div>
-              <h3 class="recognition-block-title">A Todos los Colegas Usuarios y Operadores de la Red</h3>
-              <p class="recognition-block-desc">
-                Sin quienes toman el micrófono cada día, ningún repetidor ni servidor tendría razón de ser:
-              </p>
-            </div>
-
-            <div class="users-tribute-grid">
-              <!-- Tarjeta 1: Los Operadores al Micrófono -->
-              <div class="user-recon-card">
-                <div class="user-recon-icon">🎙️</div>
-                <h4 class="user-recon-title">A los Colegas al Micrófono</h4>
-                <p class="user-recon-text">
-                  A cada operador que dentro de Venezuela o desde la diáspora activa el <strong>Talkgroup Nacional 734</strong> y sus salas asociadas con respeto, ética y espíritu de hermandad, manteniendo viva la llama de la radioafición venezolana dentro y fuera de nuestras fronteras.
+          <!-- A todos los usuarios y operadores de la red -->
+          <div class="tribute-group">
+            <h3 class="tribute-group-title">A Todos los Usuarios y Operadores de la Red</h3>
+            <div class="tribute-items-list">
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-name">A los Colegas al Micrófono</span>
+                </div>
+                <p class="tribute-row-body">
+                  A todos y cada uno de los colegas operadores que toman el micrófono con respeto, ética y espíritu de hermandad, manteniendo encendida la llama de la radioafición venezolana dentro y fuera de nuestras fronteras en el Talkgroup Nacional 734 y sus salas conectadas.
                 </p>
               </div>
 
-              <!-- Tarjeta 2: Constructores y Operadores de Hotspots -->
-              <div class="user-recon-card">
-                <div class="user-recon-icon">📡</div>
-                <h4 class="user-recon-title">Constructores y Operadores de Hotspots</h4>
-                <p class="user-recon-text">
-                  A los colegas que con esfuerzo propio adquieren, arman y operan sus puntos de acceso personales (MMDVM, Pi-Star, WPSD), tanto sencillos como de potencia, extendiendo la huella de cobertura digital en cada rincón, ciudad y pueblo del país.
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-name">Constructores y Operadores de Hotspots</span>
+                </div>
+                <p class="tribute-row-body">
+                  Tanto sencillos como de alta potencia, que extienden la huella de cobertura digital en cada ciudad, pueblo y rincón de Venezuela.
                 </p>
               </div>
 
-              <!-- Tarjeta 3: Radio Clubes e Instituciones -->
-              <div class="user-recon-card">
-                <div class="user-recon-icon">🤝</div>
-                <h4 class="user-recon-title">Radio Clubes e Instituciones</h4>
-                <p class="user-recon-text">
-                  A las asociaciones e instituciones que fomentan la capacitación técnica, promueven las buenas prácticas operativas y abren generosamente las puertas a las nuevas generaciones de radioaficionados.
+              <div class="tribute-row">
+                <div class="tribute-row-header">
+                  <span class="tribute-name">Radio Clubes e Instituciones</span>
+                </div>
+                <p class="tribute-row-body">
+                  Que fomentan la capacitación técnica, promueven las buenas prácticas y abren generosamente las puertas a las nuevas generaciones de radioaficionados.
                 </p>
               </div>
             </div>
+          </div>
 
-            <!-- Cierre con la Frase Fraterna -->
-            <div class="tribute-collective-banner">
-              <div class="tribute-quote-box">
-                <em>«La tecnología evoluciona, pero la esencia de la radioafición sigue siendo la misma: servir, experimentar y tender puentes de amistad.»</em>
-              </div>
-            </div>
+          <div class="tribute-footer-quote">
+            <em>«La tecnología evoluciona, pero la esencia de la radioafición sigue siendo la misma: servir, experimentar y tender puentes de amistad.»</em>
           </div>
         </div>
 
@@ -959,238 +855,154 @@ import Layout from '../layouts/Layout.astro';
     color: var(--text-muted);
   }
 
-  /* Agradecimientos y Homenaje */
-  .tribute-section {
-    margin-top: 2rem;
+  /* Homenaje y Agradecimiento */
+  .tribute-box {
+    background: linear-gradient(135deg, rgba(238, 108, 31, 0.04) 0%, rgba(232, 38, 28, 0.02) 100%);
+    border: 1px solid rgba(238, 108, 31, 0.25);
+    border-radius: var(--radius-lg);
+    padding: clamp(2rem, 5vw, 3.5rem);
+    margin-bottom: 0;
+    box-shadow: var(--shadow-sm);
   }
 
-  .tribute-intro-header {
-    text-align: center;
-    max-width: 820px;
-    margin: 0 auto 3rem auto;
+  .tribute-header {
+    margin-bottom: 2rem;
   }
 
-  .tribute-intro-header .sub-label {
-    margin-bottom: 0.6rem;
+  .tribute-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--bm-red);
+    background: rgba(232, 38, 28, 0.06);
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
-  .tribute-intro-title {
+  .tribute-title {
     font-family: var(--font-heading);
-    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
     font-weight: 800;
     color: var(--text-main);
-    line-height: 1.2;
     margin-bottom: 1rem;
+    line-height: 1.2;
   }
 
-  .tribute-intro-lead {
+  .tribute-lead {
     font-size: 1.05rem;
     line-height: 1.7;
     color: var(--text-muted);
   }
 
-  .recognition-block {
-    margin-bottom: 3.5rem;
+  .tribute-lead strong {
+    color: var(--text-main);
   }
 
-  .recognition-block-header {
-    margin-bottom: 1.75rem;
+  .tribute-group {
+    margin-top: 2.25rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgba(238, 108, 31, 0.2);
   }
 
-  .recognition-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    font-size: 0.76rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--bm-red);
-    background: rgba(232, 38, 28, 0.08);
-    border: 1px solid rgba(232, 38, 28, 0.2);
-    padding: 0.35rem 0.85rem;
-    border-radius: var(--radius-pill);
-    margin-bottom: 0.75rem;
-  }
-
-  .recognition-badge--tech {
-    color: #0284C7;
-    background: rgba(2, 132, 199, 0.08);
-    border-color: rgba(2, 132, 199, 0.2);
-  }
-
-  .recognition-block-title {
+  .tribute-group-title {
     font-family: var(--font-heading);
-    font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+    font-size: 1.22rem;
     font-weight: 800;
     color: var(--text-main);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
   }
 
-  .recognition-block-desc {
+  .tribute-group-intro {
     font-size: 0.95rem;
+    line-height: 1.6;
     color: var(--text-muted);
-    line-height: 1.5;
+    margin-bottom: 1rem;
   }
 
-  .recognition-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1.4rem;
-  }
-
-  .recon-card {
-    background: #FFFFFF;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: 1.5rem 1.4rem;
-    box-shadow: var(--shadow-sm);
+  .tribute-items-list {
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    position: relative;
   }
 
-  .recon-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-    border-color: rgba(238, 108, 31, 0.45);
+  .tribute-row {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 1.5rem;
+    align-items: baseline;
+    padding: 1.15rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
   }
 
-  .recon-card--featured {
-    border-top: 3px solid var(--bm-red);
+  .tribute-row:last-child {
+    border-bottom: none;
   }
 
-  .recon-card--special {
-    border-top: 3px solid var(--bm-orange);
-  }
-
-  .recon-card--tech {
-    border-top: 3px solid #0284C7;
-  }
-
-  .recon-card-header {
+  .tribute-row-header {
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-    flex-wrap: wrap;
+    gap: 0.35rem;
   }
 
-  .recon-callsign-group {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    flex-wrap: wrap;
-  }
-
-  .recon-callsign {
-    font-size: 0.85rem;
+  .tribute-callsign {
+    font-family: monospace;
+    font-size: 0.88rem;
     font-weight: 800;
     color: var(--bm-red);
     background: rgba(232, 38, 28, 0.08);
     border: 1px solid rgba(232, 38, 28, 0.2);
-    padding: 0.22rem 0.6rem;
-    border-radius: 6px;
-    letter-spacing: 0.03em;
+    padding: 0.18rem 0.55rem;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    display: inline-block;
   }
 
-  .recon-callsign-sec {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--text-main);
-  }
-
-  .recon-pill-tag {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #475569;
-    background: #F1F5F9;
-    padding: 0.2rem 0.55rem;
-    border-radius: var(--radius-pill);
-  }
-
-  .recon-freq-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #64748B;
-    background: #F8FAFC;
-    border: 1px solid #E2E8F0;
-    padding: 0.25rem 0.55rem;
-    border-radius: 6px;
-    margin-bottom: 0.65rem;
-    align-self: flex-start;
-  }
-
-  .recon-name {
+  .tribute-name {
     font-family: var(--font-heading);
-    font-size: 1.15rem;
-    font-weight: 800;
+    font-size: 1.05rem;
+    font-weight: 700;
     color: var(--text-main);
-    margin-bottom: 0.65rem;
     line-height: 1.25;
   }
 
-  .recon-text {
-    font-size: 0.92rem;
+  .tribute-tag {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #64748B;
+    background: #F1F5F9;
+    padding: 0.16rem 0.5rem;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  .tribute-row-body {
+    font-size: 0.94rem;
     line-height: 1.65;
     color: var(--text-muted);
     margin: 0;
-    flex-grow: 1;
   }
 
-  .recon-text strong {
-    color: var(--text-main);
-    font-weight: 700;
+  @media (max-width: 768px) {
+    .tribute-row {
+      grid-template-columns: 1fr;
+      gap: 0.45rem;
+      padding: 1rem 0;
+    }
   }
 
-  .tribute-collective-banner {
-    background: linear-gradient(135deg, rgba(238, 108, 31, 0.05) 0%, rgba(232, 38, 28, 0.03) 100%);
-    border: 1px solid rgba(238, 108, 31, 0.3);
-    border-radius: var(--radius-lg);
-    padding: clamp(1.75rem, 4vw, 2.5rem);
-    text-align: center;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .collective-badge {
-    display: inline-block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--bm-red);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
-  }
-
-  .collective-title {
-    font-family: var(--font-heading);
-    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
-    font-weight: 800;
-    color: var(--text-main);
-    margin-bottom: 0.75rem;
-  }
-
-  .collective-desc {
-    font-size: 0.98rem;
-    line-height: 1.7;
-    color: var(--text-muted);
-    max-width: 760px;
-    margin: 0 auto 1.5rem auto;
-  }
-
-  .tribute-quote-box {
-    padding-top: 1.25rem;
-    border-top: 1px solid rgba(238, 108, 31, 0.2);
+  .tribute-footer-quote {
+    margin-top: 2.5rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgba(238, 108, 31, 0.25);
     font-size: 1rem;
     color: var(--text-main);
     font-style: italic;
-    max-width: 680px;
-    margin: 0 auto;
+    text-align: center;
   }
 
   /* Servidores */
@@ -1238,63 +1050,6 @@ import Layout from '../layouts/Layout.astro';
 
   .server-desc strong {
     color: var(--text-main);
-  }
-
-  /* Tarjetas de Homenaje a los Usuarios y Operadores */
-  .recognition-badge--users {
-    color: #D97706;
-    background: rgba(217, 119, 6, 0.08);
-    border-color: rgba(217, 119, 6, 0.25);
-  }
-
-  .users-tribute-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-    gap: 1.4rem;
-    margin-bottom: 2rem;
-  }
-
-  .user-recon-card {
-    background: #FFFFFF;
-    border: 1px solid var(--border-subtle);
-    border-top: 3px solid #D97706;
-    border-radius: var(--radius-md);
-    padding: 1.5rem 1.4rem;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  }
-
-  .user-recon-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md);
-    border-color: rgba(217, 119, 6, 0.45);
-  }
-
-  .user-recon-icon {
-    font-size: 1.6rem;
-    margin-bottom: 0.6rem;
-    display: inline-block;
-  }
-
-  .user-recon-title {
-    font-family: var(--font-heading);
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--text-main);
-    margin-bottom: 0.6rem;
-    line-height: 1.3;
-  }
-
-  .user-recon-text {
-    font-size: 0.92rem;
-    line-height: 1.65;
-    color: var(--text-muted);
-    margin: 0;
-  }
-
-  .user-recon-text strong {
-    color: var(--text-main);
-    font-weight: 700;
   }
 
 </style>
