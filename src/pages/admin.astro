@@ -363,6 +363,21 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
                 <span class="kpi-subtext" id="kpi-top-countries">—</span>
               </div>
             </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-label">Sistema Petra</span>
+                <span class="kpi-icon-wrap icon-petra">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  </svg>
+                </span>
+              </div>
+              <div class="kpi-value" id="kpi-petra-views">--</div>
+              <div class="kpi-footer">
+                <span class="kpi-subtext"><strong id="kpi-petra-unique">--</strong> visitantes únicos</span>
+              </div>
+            </div>
           </div>
 
           <!-- 2. LARGE LEAFLET MAP WIDGET (With marker clusters) -->
@@ -448,7 +463,26 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             </div>
           </div>
 
-          <!-- 4. LINK CLICKS & SOCIAL SHARES ROW -->
+          <!-- 4. PETRA TELEMETRY & TALKGROUP ACTIVITY (TG 734, 73452, 73473) -->
+          <div class="wp-box" style="margin-top: 1.5rem;">
+            <div class="wp-box-head">
+              <div>
+                <h3>Telemetría de Petra: Interacciones por Talkgroup</h3>
+                <p class="box-sub">Interacción de operadores y visitas a los paneles de monitoreo en vivo (TG 734, TG 73452 y TG 73473)</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span class="badge-mini" data-range-label>Últimos 7 días</span>
+                <a href="/petra" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="text-decoration: none;">Ver Petra</a>
+              </div>
+            </div>
+            <div class="wp-box-body">
+              <div class="petra-tg-analytics-grid" id="petra-talkgroups-container">
+                <!-- Inyectado dinámicamente -->
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. LINK CLICKS & SOCIAL SHARES ROW -->
           <div class="analytics-row-grid" style="margin-top: 1.5rem;">
             <!-- Clics en Enlaces -->
             <div class="wp-box">

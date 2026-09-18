@@ -234,7 +234,7 @@ if (pathSegments.length > 0) {
         if (!link || !link.href) return;
         const href = link.getAttribute('href') || '';
         const isExternal = Boolean(link.host && link.host !== window.location.host);
-        const isResourceKey = href.includes('repetidores') || href.includes('talkgroups') || href.includes('radioid') || href.includes('brandmeister');
+        const isResourceKey = href.includes('repetidores') || href.includes('talkgroups') || href.includes('radioid') || href.includes('brandmeister') || (href.includes('petra') && !window.location.pathname.startsWith('/petra'));
         
         if (isExternal || isResourceKey) {
           const title = link.getAttribute('title') || link.getAttribute('aria-label') || link.textContent?.trim() || href;

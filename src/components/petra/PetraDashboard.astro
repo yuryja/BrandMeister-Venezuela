@@ -197,4 +197,28 @@ const has = (m: string) => talkgroup.modules.includes(m as any);
 <script>
   import { initPetraDashboard } from '../../scripts/petra-client';
   initPetraDashboard();
+
+  // Rastreo de telemetría: visita a Petra e interacción con talkgroups (TG 734, 73452, 73473)
+  try {
+    const dashboard = document.getElementById('petra-dashboard');
+    const tgId = dashboard?.getAttribute('data-tg') || '734';
+    const tgNames: Record<string, string> = {
+      '734': 'TG 734 Venezuela',
+      '73452': 'TG 73452 Emergencias y Eventos',
+      '73473': 'TG 73473 Radio Club Venezolano'
+    };
+    const tgTitle = tgNames[tgId] || `TG ${tgId}`;
+
+    fetch('/api/analytics.php?action=track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_type: 'page_view',
+        event_category: 'petra_view',
+        entity_id: tgId,
+        entity_title: tgTitle
+      }),
+      keepalive: true
+    }).catch(() => {});
+  } catch (_) {}
 </script>

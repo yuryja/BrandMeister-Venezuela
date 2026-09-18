@@ -27,6 +27,8 @@ interface AnalyticsData {
     link_clicks: number;
     post_views: number;
     post_shares: number;
+    petra_views?: number;
+    petra_unique?: number;
     active_countries: number;
   };
   map_points: MapPoint[];
@@ -34,6 +36,19 @@ interface AnalyticsData {
     countries: Array<{ country: string; code: string; plays: number; percent: number }>;
     listeners: Array<{ ip: string; country: string; code: string; city: string; plays: number; last_active: string; status: string }>;
     total_plays: number;
+  };
+  petra?: {
+    total_views: number;
+    unique_visitors: number;
+    talkgroups: Array<{
+      id: string;
+      name: string;
+      badge: string;
+      sub?: string;
+      views: number;
+      unique_users: number;
+      percent: number;
+    }>;
   };
   links: Array<{ title: string; url: string; category?: string; clicks: number }>;
   posts: Array<{ title: string; slug?: string; category: string; views: number; total_views?: number; shares?: number }>;
@@ -200,6 +215,8 @@ function renderDashboard(data: AnalyticsData) {
   if ($('kpi-post-views')) $('kpi-post-views')!.textContent = fmt(data.kpis?.post_views);
   if ($('kpi-post-shares')) $('kpi-post-shares')!.textContent = fmt(data.kpis?.post_shares);
   if ($('kpi-active-countries')) $('kpi-active-countries')!.textContent = fmt(data.kpis?.active_countries);
+  if ($('kpi-petra-views')) $('kpi-petra-views')!.textContent = fmt(data.kpis?.petra_views ?? data.petra?.total_views ?? 0);
+  if ($('kpi-petra-unique')) $('kpi-petra-unique')!.textContent = fmt(data.kpis?.petra_unique ?? data.petra?.unique_visitors ?? 0);
 
   // Países principales según las conexiones del periodo
   const topCountries = Array.from(new Set((data.map_points || []).map((p) => p.code).filter((c) => /^[A-Z]{2}$/.test(c)))).slice(0, 4);
@@ -266,6 +283,63 @@ function renderDashboard(data: AnalyticsData) {
                 ${escapeHtml(l.last_active)}
               </td>
             </tr>
+          `;
+        })
+        .join('');
+    }
+  }
+
+  // 4. Telemetría del Sistema Petra (TG 734, 73452, 73473)
+  const petraContainer = $('petra-talkgroups-container');
+  if (petraContainer) {
+    const talkgroups = data.petra?.talkgroups || [];
+    if (!talkgroups.length) {
+      petraContainer.innerHTML = '<p class="analytics-empty">Sin interacciones registradas en Petra en este periodo.</p>';
+    } else {
+      petraContainer.innerHTML = talkgroups
+        .map((tg) => {
+          const views = tg.views || 0;
+          const uniqueUsers = tg.unique_users || 0;
+          const percent = Math.max(0, Math.min(100, Number(tg.percent) || 0));
+          const badgeClass = tg.id === '734' ? 'badge-tg-main' : tg.id === '73452' ? 'badge-tg-alert' : 'badge-tg-rcv';
+
+          return `
+            <div class="petra-tg-card">
+              <div class="petra-tg-head">
+                <div class="petra-tg-info">
+                  <span class="badge-tag-category ${badgeClass}">TG ${escapeHtml(tg.id)}</span>
+                  <span class="petra-tg-badge-meta">${escapeHtml(tg.badge)}</span>
+                </div>
+                <a href="/petra/${encodeURIComponent(tg.id)}" target="_blank" rel="noopener" class="petra-tg-link" title="Ver monitoreo en vivo">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+              </div>
+              <div class="petra-tg-title">${escapeHtml(tg.name)}</div>
+              ${tg.sub ? `<div class="petra-tg-sub">${escapeHtml(tg.sub)}</div>` : ''}
+              
+              <div class="petra-tg-metrics">
+                <div class="petra-metric-block">
+                  <span class="metric-val">${fmt(views)}</span>
+                  <span class="metric-lbl">${views === 1 ? 'interacción' : 'interacciones'}</span>
+                </div>
+                <div class="petra-metric-block">
+                  <span class="metric-val">${fmt(uniqueUsers)}</span>
+                  <span class="metric-lbl">${uniqueUsers === 1 ? 'operador único' : 'operadores únicos'}</span>
+                </div>
+                <div class="petra-metric-block petra-metric-right">
+                  <span class="metric-val">${percent}%</span>
+                  <span class="metric-lbl">del interés</span>
+                </div>
+              </div>
+
+              <div class="petra-tg-progress">
+                <div class="petra-tg-progress-fill ${badgeClass}" style="width: ${percent}%;"></div>
+              </div>
+            </div>
           `;
         })
         .join('');
