@@ -129,6 +129,12 @@ function get_empty_stats(): array {
                 ['id' => '73473', 'name' => 'TG 73473 Radio Club Venezolano', 'badge' => 'RCV', 'sub' => 'Boletín e institucional', 'views' => 0, 'unique_users' => 0, 'percent' => 0],
             ],
         ],
+        'countries_detail' => [],
+        'live_audio' => [
+            'is_active' => false,
+            'total_listeners' => 0,
+            'countries' => [],
+        ],
         'links' => [],
         'posts' => [],
         'shares' => [
@@ -278,7 +284,7 @@ if ($action === 'stats' || $action === 'summary') {
 
         // KPIs
         $kpisStmt = $pdo->query("SELECT
-            SUM(CASE WHEN event_type = 'player_play' THEN 1 ELSE 0 END) AS player_plays,
+            SUM(CASE WHEN event_type = 'player_play' AND event_category != 'audio_heartbeat' THEN 1 ELSE 0 END) AS player_plays,
             COUNT(DISTINCT CASE WHEN event_type = 'player_play' THEN ip_address ELSE NULL END) AS unique_listeners,
             SUM(CASE WHEN event_type = 'link_click' THEN 1 ELSE 0 END) AS link_clicks,
             SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_views,
@@ -490,6 +496,71 @@ if ($action === 'stats' || $action === 'summary') {
             $kpis['post_views'] = max((int)($kpis['post_views'] ?? 0), (int)$pdo->query("SELECT COALESCE(SUM(views_count), 0) FROM bm_posts WHERE status = 'published'")->fetchColumn());
         }
 
+        // Detalle extendido de Países Conectados y Actividad Global
+        $globalCountriesStmt = $pdo->query("SELECT
+            country_name AS country,
+            country_code AS code,
+            COUNT(*) AS total_interactions,
+            COUNT(DISTINCT ip_address) AS unique_visitors,
+            SUM(CASE WHEN event_type = 'player_play' AND event_category != 'audio_heartbeat' THEN 1 ELSE 0 END) AS audio_plays,
+            SUM(CASE WHEN event_type = 'page_view' AND event_category = 'petra_view' THEN 1 ELSE 0 END) AS petra_views,
+            SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_views,
+            SUM(CASE WHEN event_type = 'link_click' THEN 1 ELSE 0 END) AS link_clicks,
+            MAX(created_at) AS last_active_ts
+            FROM bm_analytics_events
+            WHERE country_name IS NOT NULL AND country_code IS NOT NULL $since
+            GROUP BY country_name, country_code
+            ORDER BY total_interactions DESC
+            LIMIT 12");
+        $globalCountriesRaw = $globalCountriesStmt->fetchAll() ?: [];
+        $totalGlobalInteractions = max(1, (int)$pdo->query("SELECT COUNT(*) FROM bm_analytics_events WHERE country_name IS NOT NULL $since")->fetchColumn());
+
+        $countriesDetail = [];
+        foreach ($globalCountriesRaw as $row) {
+            $t = (int)$row['total_interactions'];
+            $countriesDetail[] = [
+                'country' => $row['country'],
+                'code' => $row['code'],
+                'total' => $t,
+                'unique_visitors' => (int)$row['unique_visitors'],
+                'percent' => round(($t / $totalGlobalInteractions) * 100, 1),
+                'audio_plays' => (int)$row['audio_plays'],
+                'petra_views' => (int)$row['petra_views'],
+                'post_views' => (int)$row['post_views'],
+                'link_clicks' => (int)$row['link_clicks'],
+                'last_active' => date('d/m H:i', strtotime($row['last_active_ts'])),
+            ];
+        }
+
+        // Telemetría en tiempo real: oyentes de audio en vivo activos (últimos 15 minutos)
+        $liveStmt = $pdo->query("SELECT
+            country_name AS country,
+            country_code AS code,
+            COUNT(DISTINCT ip_address) AS listeners
+            FROM bm_analytics_events
+            WHERE event_type = 'player_play'
+              AND created_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
+              AND country_name IS NOT NULL
+            GROUP BY country_name, country_code
+            ORDER BY listeners DESC");
+        $liveRows = $liveStmt->fetchAll() ?: [];
+        $totalLive = 0;
+        $liveCountriesList = [];
+        foreach ($liveRows as $lr) {
+            $cCount = (int)$lr['listeners'];
+            $totalLive += $cCount;
+            $liveCountriesList[] = [
+                'country' => $lr['country'],
+                'code' => $lr['code'],
+                'count' => $cCount,
+            ];
+        }
+        $liveAudio = [
+            'is_active' => $totalLive > 0,
+            'total_listeners' => $totalLive,
+            'countries' => $liveCountriesList,
+        ];
+
         send_json([
             'success' => true,
             'range' => $rangeKey,
@@ -514,6 +585,8 @@ if ($action === 'stats' || $action === 'summary') {
                 'unique_visitors' => $totalPetraUnique,
                 'talkgroups' => $petraTalkgroups,
             ],
+            'live_audio' => $liveAudio,
+            'countries_detail' => $countriesDetail,
             'links' => $linkClicks,
             'posts' => $postViews,
             'shares' => [
