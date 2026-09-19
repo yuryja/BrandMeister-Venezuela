@@ -147,6 +147,10 @@
 
   // Wire stop
   stopBtn?.addEventListener("click", () => {
+    if (isAudioActive) {
+      isAudioActive = false;
+      sendAudioStop();
+    }
     hoseline?.disconnect();
   });
 
@@ -264,7 +268,32 @@
     wave?.classList.add("is-idle");
   });
 
+  let isAudioActive = false;
   let audioHeartbeatTimer: any = null;
+
+  function sendAudioStop() {
+    stopAudioHeartbeat();
+    const payload = JSON.stringify({
+      event_type: 'player_play',
+      event_category: 'audio_stop',
+      entity_id: 'tg-734',
+      entity_title: 'TG 734 Hoseline Audio'
+    });
+    try {
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon('/api/analytics.php?action=track', blob);
+      } else {
+        fetch('/api/analytics.php?action=track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (_) {}
+  }
+
   function startAudioHeartbeat() {
     if (audioHeartbeatTimer) return;
     audioHeartbeatTimer = setInterval(() => {
@@ -281,9 +310,14 @@
           keepalive: true
         }).catch(() => {});
       } else {
-        stopAudioHeartbeat();
+        if (isAudioActive) {
+          isAudioActive = false;
+          sendAudioStop();
+        } else {
+          stopAudioHeartbeat();
+        }
       }
-    }, 45000);
+    }, 25000);
   }
 
   function stopAudioHeartbeat() {
@@ -294,11 +328,17 @@
   }
 
   window.addEventListener("beforeunload", () => {
-    stopAudioHeartbeat();
+    if (isAudioActive) {
+      isAudioActive = false;
+      sendAudioStop();
+    }
     hoseline?.disconnect();
   });
   window.addEventListener("pagehide", () => {
-    stopAudioHeartbeat();
+    if (isAudioActive) {
+      isAudioActive = false;
+      sendAudioStop();
+    }
     hoseline?.disconnect();
   });
 
@@ -306,9 +346,15 @@
   function updateAllButtons(state: string) {
     const isActive = state !== "idle" && state !== "error";
     if (isActive) {
+      isAudioActive = true;
       startAudioHeartbeat();
     } else {
-      stopAudioHeartbeat();
+      if (isAudioActive) {
+        isAudioActive = false;
+        sendAudioStop();
+      } else {
+        stopAudioHeartbeat();
+      }
     }
 
     // Header Hoseline Button
@@ -345,6 +391,7 @@
       const willStart = !hoseline || hoseline.getState() === "idle" || hoseline.getState() === "error";
       if (willStart) {
         unlockAudio();
+        isAudioActive = true;
         try {
           fetch('/api/analytics.php?action=track', {
             method: 'POST',
@@ -358,6 +405,11 @@
             keepalive: true
           }).catch(() => {});
         } catch (_) {}
+      } else {
+        if (isAudioActive) {
+          isAudioActive = false;
+          sendAudioStop();
+        }
       }
       loadHoseline().then((player) => player.toggle(734));
     }
