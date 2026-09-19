@@ -284,8 +284,8 @@ if ($action === 'stats' || $action === 'summary') {
 
         // KPIs
         $kpisStmt = $pdo->query("SELECT
-            SUM(CASE WHEN event_type = 'player_play' AND event_category != 'audio_heartbeat' THEN 1 ELSE 0 END) AS player_plays,
-            COUNT(DISTINCT CASE WHEN event_type = 'player_play' THEN ip_address ELSE NULL END) AS unique_listeners,
+            SUM(CASE WHEN event_type = 'player_play' AND event_category NOT IN ('audio_heartbeat', 'audio_stop') THEN 1 ELSE 0 END) AS player_plays,
+            COUNT(DISTINCT CASE WHEN event_type = 'player_play' AND event_category NOT IN ('audio_heartbeat', 'audio_stop') THEN ip_address ELSE NULL END) AS unique_listeners,
             SUM(CASE WHEN event_type = 'link_click' THEN 1 ELSE 0 END) AS link_clicks,
             SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_views,
             SUM(CASE WHEN event_type = 'post_share' THEN 1 ELSE 0 END) AS post_shares,
@@ -304,7 +304,7 @@ if ($action === 'stats' || $action === 'summary') {
             country_name AS country,
             country_code AS code,
             COUNT(*) AS count,
-            SUM(CASE WHEN event_type = 'player_play' THEN 1 ELSE 0 END) AS audio_count,
+            SUM(CASE WHEN event_type = 'player_play' AND event_category NOT IN ('audio_heartbeat', 'audio_stop') THEN 1 ELSE 0 END) AS audio_count,
             SUM(CASE WHEN event_type = 'link_click' THEN 1 ELSE 0 END) AS link_count,
             SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_count,
             SUM(CASE WHEN event_type = 'page_view' AND event_category = 'petra_view' THEN 1 ELSE 0 END) AS petra_count
@@ -337,7 +337,7 @@ if ($action === 'stats' || $action === 'summary') {
             country_code AS code,
             COUNT(*) AS plays
             FROM bm_analytics_events
-            WHERE event_type = 'player_play' AND country_name IS NOT NULL $since
+            WHERE event_type = 'player_play' AND event_category NOT IN ('audio_heartbeat', 'audio_stop') AND country_name IS NOT NULL $since
             GROUP BY country_name, country_code
             ORDER BY plays DESC LIMIT 6");
         $playerCountriesRaw = $countryStmt->fetchAll();
@@ -362,7 +362,7 @@ if ($action === 'stats' || $action === 'summary') {
             COUNT(*) AS plays,
             MAX(created_at) AS last_active_ts
             FROM bm_analytics_events
-            WHERE event_type = 'player_play' $since
+            WHERE event_type = 'player_play' AND event_category NOT IN ('audio_heartbeat', 'audio_stop') $since
             GROUP BY ip_address, country_name, country_code, city
             ORDER BY plays DESC LIMIT 10");
         $listenersRaw = $listenersStmt->fetchAll();
@@ -502,7 +502,7 @@ if ($action === 'stats' || $action === 'summary') {
             country_code AS code,
             COUNT(*) AS total_interactions,
             COUNT(DISTINCT ip_address) AS unique_visitors,
-            SUM(CASE WHEN event_type = 'player_play' AND event_category != 'audio_heartbeat' THEN 1 ELSE 0 END) AS audio_plays,
+            SUM(CASE WHEN event_type = 'player_play' AND event_category NOT IN ('audio_heartbeat', 'audio_stop') THEN 1 ELSE 0 END) AS audio_plays,
             SUM(CASE WHEN event_type = 'page_view' AND event_category = 'petra_view' THEN 1 ELSE 0 END) AS petra_views,
             SUM(CASE WHEN event_type = 'post_view' THEN 1 ELSE 0 END) AS post_views,
             SUM(CASE WHEN event_type = 'link_click' THEN 1 ELSE 0 END) AS link_clicks,
@@ -532,18 +532,32 @@ if ($action === 'stats' || $action === 'summary') {
             ];
         }
 
-        // Telemetría en tiempo real: oyentes de audio en vivo activos (últimos 15 minutos)
+        // Telemetría en tiempo real: oyentes de audio en vivo activos en este momento (últimos 60 segundos)
+        // Se toma el evento de audio más reciente por IP en la ventana de 60s.
+        // Si el último evento fue 'audio_stop' o ya expiró el latido, ya no se considera activo.
         $liveStmt = $pdo->query("SELECT
-            country_name AS country,
-            country_code AS code,
-            COUNT(DISTINCT ip_address) AS listeners
-            FROM bm_analytics_events
-            WHERE event_type = 'player_play'
-              AND created_at >= DATE_SUB(NOW(), INTERVAL 15 MINUTE)
-              AND country_name IS NOT NULL
-            GROUP BY country_name, country_code
+            COALESCE(latest.country_name, 'Venezuela') AS country,
+            COALESCE(latest.country_code, 'VE') AS code,
+            COUNT(*) AS listeners
+            FROM (
+                SELECT 
+                    e.ip_address,
+                    e.country_name,
+                    e.country_code,
+                    e.event_category
+                FROM bm_analytics_events e
+                INNER JOIN (
+                    SELECT ip_address, MAX(id) AS max_id
+                    FROM bm_analytics_events
+                    WHERE event_type = 'player_play'
+                      AND created_at >= DATE_SUB(NOW(), INTERVAL 60 SECOND)
+                    GROUP BY ip_address
+                ) m ON e.id = m.max_id
+                WHERE e.event_category != 'audio_stop'
+            ) latest
+            GROUP BY country, code
             ORDER BY listeners DESC");
-        $liveRows = $liveStmt->fetchAll() ?: [];
+        $liveRows = $liveStmt ? ($liveStmt->fetchAll() ?: []) : [];
         $totalLive = 0;
         $liveCountriesList = [];
         foreach ($liveRows as $lr) {
