@@ -50,6 +50,23 @@ interface AnalyticsData {
       percent: number;
     }>;
   };
+  live_audio?: {
+    is_active: boolean;
+    total_listeners: number;
+    countries: Array<{ country: string; code: string; count: number }>;
+  };
+  countries_detail?: Array<{
+    country: string;
+    code: string;
+    total: number;
+    unique_visitors: number;
+    percent: number;
+    audio_plays: number;
+    petra_views: number;
+    post_views: number;
+    link_clicks: number;
+    last_active: string;
+  }>;
   links: Array<{ title: string; url: string; category?: string; clicks: number }>;
   posts: Array<{ title: string; slug?: string; category: string; views: number; total_views?: number; shares?: number }>;
   shares: {
@@ -208,6 +225,29 @@ function renderMarkers() {
 function renderDashboard(data: AnalyticsData) {
   currentData = data;
 
+  // 0. Banner de Oyentes en Vivo
+  const liveBanner = $('live-listeners-banner');
+  const liveText = $('live-listeners-text');
+  if (liveBanner && liveText) {
+    const live = data.live_audio;
+    if (live && live.is_active && live.total_listeners > 0) {
+      liveBanner.classList.add('is-active-listening');
+      const count = live.total_listeners;
+      const countLabel = count === 1 ? '1 usuario escuchando' : `${fmt(count)} usuarios escuchando`;
+      const countriesList = (live.countries || [])
+        .map((c) => {
+          const flag = getFlagEmoji(c.code);
+          return `<span class="live-country-pill">${flag} ${escapeHtml(c.country)} <strong>(${fmt(c.count)})</strong></span>`;
+        })
+        .join('');
+
+      liveText.innerHTML = `Hay <strong>${countLabel}</strong> en este momento desde: <span class="live-status-countries-pills">${countriesList}</span>`;
+    } else {
+      liveBanner.classList.remove('is-active-listening');
+      liveText.textContent = 'No hay personas escuchando el audio en vivo en este momento.';
+    }
+  }
+
   // 1. KPIs
   if ($('kpi-player-plays')) $('kpi-player-plays')!.textContent = fmt(data.kpis?.player_plays);
   if ($('kpi-unique-listeners')) $('kpi-unique-listeners')!.textContent = fmt(data.kpis?.unique_listeners);
@@ -277,7 +317,7 @@ function renderDashboard(data: AnalyticsData) {
               <td><span class="ip-pill">${escapeHtml(l.ip)}</span></td>
               <td>${flag} ${escapeHtml(l.city)}, ${escapeHtml(l.code)}</td>
               <td class="cell-num">
-                <span class="badge-count">${l.plays} ${l.plays === 1 ? 'escucha' : 'escuchas'}</span>
+                <span class="badge-count">${l.plays} ${l.plays === 1 ? 'vez' : 'veces'}</span>
               </td>
               <td class="cell-right cell-muted">
                 ${escapeHtml(l.last_active)}
@@ -328,7 +368,7 @@ function renderDashboard(data: AnalyticsData) {
                 </div>
                 <div class="petra-metric-block">
                   <span class="metric-val">${fmt(uniqueUsers)}</span>
-                  <span class="metric-lbl">${uniqueUsers === 1 ? 'operador único' : 'operadores únicos'}</span>
+                  <span class="metric-lbl">${uniqueUsers === 1 ? 'usuario' : 'usuarios'}</span>
                 </div>
                 <div class="petra-metric-block petra-metric-right">
                   <span class="metric-val">${percent}%</span>
@@ -374,7 +414,50 @@ function renderDashboard(data: AnalyticsData) {
     }
   }
 
-  // 6. Compartidos en Redes
+  // 6. Países Conectados: Detalle de Actividad Global
+  const globalCountriesTbody = $('global-countries-tbody');
+  if (globalCountriesTbody) {
+    const countries = data.countries_detail || [];
+    if (!countries.length) {
+      globalCountriesTbody.innerHTML = '<tr><td colspan="4" class="analytics-empty">Sin conexiones registradas en este periodo.</td></tr>';
+    } else {
+      globalCountriesTbody.innerHTML = countries
+        .map((c) => {
+          const flag = getFlagEmoji(c.code);
+          const percent = Math.max(0, Math.min(100, Number(c.percent) || 0));
+          return `
+            <tr>
+              <td>
+                <div class="country-cell-info">
+                  <span class="country-flag-icon">${flag}</span>
+                  <div class="country-titles">
+                    <span class="country-name-text">${escapeHtml(c.country)}</span>
+                    <span class="country-code-pill">${escapeHtml(c.code)}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="cell-num">
+                <span class="badge-count">${fmt(c.unique_visitors)} ${c.unique_visitors === 1 ? 'usuario' : 'usuarios'}</span>
+              </td>
+              <td class="cell-num">
+                <span class="cell-strong">${fmt(c.total)}</span>
+              </td>
+              <td class="cell-interest">
+                <div class="interest-wrap">
+                  <div class="country-bar-track" style="flex: 1;">
+                    <div class="country-bar-fill" style="width: ${percent}%;"></div>
+                  </div>
+                  <span class="interest-val">${percent}%</span>
+                </div>
+              </td>
+            </tr>
+          `;
+        })
+        .join('');
+    }
+  }
+
+  // 7. Compartidos en Redes
   const sharesContainer = $('social-shares-container');
   if (sharesContainer) {
     const platforms = data.shares?.platforms || [];
@@ -456,6 +539,12 @@ const EMPTY_ANALYTICS: AnalyticsData = {
     listeners: [],
     total_plays: 0,
   },
+  live_audio: {
+    is_active: false,
+    total_listeners: 0,
+    countries: [],
+  },
+  countries_detail: [],
   links: [],
   posts: [],
   shares: {
@@ -540,4 +629,11 @@ export function initAnalytics() {
       }, 200);
     }
   });
+
+  // Refresco automático de telemetría y oyentes en vivo cada 30s mientras esté visible
+  setInterval(() => {
+    if (document.visibilityState === 'visible' && $('view-dashboard')?.classList.contains('is-active')) {
+      loadAnalytics(currentRange);
+    }
+  }, 30000);
 }

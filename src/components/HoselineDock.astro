@@ -264,17 +264,52 @@
     wave?.classList.add("is-idle");
   });
 
-  // Disconnect immediately upon page exit or browser close
+  let audioHeartbeatTimer: any = null;
+  function startAudioHeartbeat() {
+    if (audioHeartbeatTimer) return;
+    audioHeartbeatTimer = setInterval(() => {
+      if (hoseline && hoseline.getState() !== "idle" && hoseline.getState() !== "error") {
+        fetch('/api/analytics.php?action=track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event_type: 'player_play',
+            event_category: 'audio_heartbeat',
+            entity_id: 'tg-734',
+            entity_title: 'TG 734 Hoseline Audio'
+          }),
+          keepalive: true
+        }).catch(() => {});
+      } else {
+        stopAudioHeartbeat();
+      }
+    }, 45000);
+  }
+
+  function stopAudioHeartbeat() {
+    if (audioHeartbeatTimer) {
+      clearInterval(audioHeartbeatTimer);
+      audioHeartbeatTimer = null;
+    }
+  }
+
   window.addEventListener("beforeunload", () => {
+    stopAudioHeartbeat();
     hoseline?.disconnect();
   });
   window.addEventListener("pagehide", () => {
+    stopAudioHeartbeat();
     hoseline?.disconnect();
   });
 
   // Helper to update buttons across Header, Hero, and Navigation
   function updateAllButtons(state: string) {
     const isActive = state !== "idle" && state !== "error";
+    if (isActive) {
+      startAudioHeartbeat();
+    } else {
+      stopAudioHeartbeat();
+    }
 
     // Header Hoseline Button
     const headerBtn = document.querySelectorAll(".btn-hoseline-native");
