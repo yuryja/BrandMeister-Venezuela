@@ -297,22 +297,6 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
           <div class="analytics-kpi-grid">
             <div class="kpi-card">
               <div class="kpi-header">
-                <span class="kpi-label">Visitas al Sitio</span>
-                <span class="kpi-icon-wrap icon-visits">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </span>
-              </div>
-              <div class="kpi-value" id="kpi-page-views">--</div>
-              <div class="kpi-footer">
-                <span class="kpi-subtext"><strong id="kpi-unique-visitors">--</strong> personas distintas</span>
-              </div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-header">
                 <span class="kpi-label">Reproductor Audio</span>
                 <span class="kpi-icon-wrap icon-audio">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -362,25 +346,6 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
             <div class="kpi-card">
               <div class="kpi-header">
-                <span class="kpi-label">Compartidos</span>
-                <span class="kpi-icon-wrap icon-shares">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="18" cy="5" r="3"></circle>
-                    <circle cx="6" cy="12" r="3"></circle>
-                    <circle cx="18" cy="19" r="3"></circle>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                  </svg>
-                </span>
-              </div>
-              <div class="kpi-value" id="kpi-post-shares">--</div>
-              <div class="kpi-footer">
-                <span class="kpi-subtext" id="kpi-top-platform">—</span>
-              </div>
-            </div>
-
-            <div class="kpi-card">
-              <div class="kpi-header">
                 <span class="kpi-label">Países Conectados</span>
                 <span class="kpi-icon-wrap icon-geo">
                   <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -410,9 +375,80 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
                 <span class="kpi-subtext"><strong id="kpi-petra-unique">--</strong> visitantes únicos</span>
               </div>
             </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-label">Visitas al Sitio</span>
+                <span class="kpi-icon-wrap icon-visits">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </span>
+              </div>
+              <div class="kpi-value" id="kpi-page-views">--</div>
+              <div class="kpi-footer">
+                <span class="kpi-subtext"><strong id="kpi-unique-visitors">--</strong> personas distintas</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-label">Compartidos</span>
+                <span class="kpi-icon-wrap icon-shares">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                  </svg>
+                </span>
+              </div>
+              <div class="kpi-value" id="kpi-post-shares">--</div>
+              <div class="kpi-footer">
+                <span class="kpi-subtext" id="kpi-top-platform">—</span>
+              </div>
+            </div>
           </div>
 
-          <!-- 2. ORIGEN DE LAS VISITAS -->
+          <!-- 2. LARGE LEAFLET MAP WIDGET (With marker clusters) -->
+          <div class="wp-box analytics-map-card">
+            <div class="wp-box-head">
+              <div class="map-head-title">
+                <div class="map-title-row">
+                  <span class="status-dot"></span>
+                  <h3>Distribución Geográfica y Conexiones</h3>
+                </div>
+                <p class="map-subtitle">Oyentes, lectores y visitantes agrupados por ciudad. Los círculos juntan varias conexiones cercanas.</p>
+              </div>
+              <div class="map-controls">
+                <div class="map-filter-pills">
+                  <button type="button" class="map-pill is-active" data-map-filter="all">Todos</button>
+                  <button type="button" class="map-pill" data-map-filter="player_play">Reproductor</button>
+                  <button type="button" class="map-pill" data-map-filter="link_click">Enlaces</button>
+                  <button type="button" class="map-pill" data-map-filter="post_view">Publicaciones</button>
+                </div>
+                <button type="button" class="btn-map-reset" id="btn-reset-map" title="Centrar en Venezuela">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M3 12h3m12 0h3M12 3v3m0 12v3"></path>
+                  </svg>
+                  <span>Centrar</span>
+                </button>
+              </div>
+            </div>
+            <div class="wp-box-body" style="padding: 0; position: relative;">
+              <div id="analytics-leaflet-map" class="analytics-map"></div>
+              <div class="map-legend">
+                <span class="legend-item"><span class="cluster-sample sm"></span> 2–9</span>
+                <span class="legend-item"><span class="cluster-sample md"></span> 10–24</span>
+                <span class="legend-item"><span class="cluster-sample lg"></span> 25 o más conexiones</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. ORIGEN DE LAS VISITAS -->
           <div class="analytics-row-grid" style="margin-top: 1.5rem;">
             <div class="wp-box">
               <div class="wp-box-head">
@@ -462,43 +498,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             </div>
           </div>
 
-          <!-- 3. LARGE LEAFLET MAP WIDGET (With marker clusters) -->
-          <div class="wp-box analytics-map-card">
-            <div class="wp-box-head">
-              <div class="map-head-title">
-                <div class="map-title-row">
-                  <span class="status-dot"></span>
-                  <h3>Distribución Geográfica y Conexiones</h3>
-                </div>
-                <p class="map-subtitle">Oyentes, lectores y visitantes agrupados por ciudad. Los círculos juntan varias conexiones cercanas.</p>
-              </div>
-              <div class="map-controls">
-                <div class="map-filter-pills">
-                  <button type="button" class="map-pill is-active" data-map-filter="all">Todos</button>
-                  <button type="button" class="map-pill" data-map-filter="player_play">Reproductor</button>
-                  <button type="button" class="map-pill" data-map-filter="link_click">Enlaces</button>
-                  <button type="button" class="map-pill" data-map-filter="post_view">Publicaciones</button>
-                </div>
-                <button type="button" class="btn-map-reset" id="btn-reset-map" title="Centrar en Venezuela">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M3 12h3m12 0h3M12 3v3m0 12v3"></path>
-                  </svg>
-                  <span>Centrar</span>
-                </button>
-              </div>
-            </div>
-            <div class="wp-box-body" style="padding: 0; position: relative;">
-              <div id="analytics-leaflet-map" class="analytics-map"></div>
-              <div class="map-legend">
-                <span class="legend-item"><span class="cluster-sample sm"></span> 2–9</span>
-                <span class="legend-item"><span class="cluster-sample md"></span> 10–24</span>
-                <span class="legend-item"><span class="cluster-sample lg"></span> 25 o más conexiones</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3. AUDIO PLAYER TELEMETRY (Countries & IPs / Frequency) -->
+          <!-- 4. AUDIO PLAYER TELEMETRY (Countries & IPs / Frequency) -->
           <div class="analytics-row-grid">
             <!-- Left: Player Countries -->
             <div class="wp-box">
@@ -545,7 +545,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             </div>
           </div>
 
-          <!-- 4. PETRA TELEMETRY & TALKGROUP ACTIVITY (TG 734, 73452, 73473) -->
+          <!-- 5. PETRA TELEMETRY & TALKGROUP ACTIVITY (TG 734, 73452, 73473) -->
           <div class="wp-box" style="margin-top: 1.5rem;">
             <div class="wp-box-head">
               <div>
@@ -564,7 +564,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             </div>
           </div>
 
-          <!-- 5. LINK CLICKS & DETAILED COUNTRIES ROW -->
+          <!-- 6. LINK CLICKS & DETAILED COUNTRIES ROW -->
           <div class="analytics-row-grid" style="margin-top: 1.5rem;">
             <!-- Clics en Enlaces -->
             <div class="wp-box">
@@ -622,7 +622,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             </div>
           </div>
 
-          <!-- 6. PUBLICATIONS PERFORMANCE TABLE -->
+          <!-- 7. PUBLICATIONS PERFORMANCE TABLE -->
           <div class="wp-box" style="margin-top: 1.5rem;">
             <div class="wp-box-head">
               <div>
@@ -651,7 +651,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             </div>
           </div>
 
-          <!-- 7. DIFUSIÓN EN REDES SOCIALES (MOVIDO MÁS ABAJO) -->
+          <!-- 8. DIFUSIÓN EN REDES SOCIALES (MOVIDO MÁS ABAJO) -->
           <div class="wp-box" style="margin-top: 1.5rem;">
             <div class="wp-box-head">
               <div>
