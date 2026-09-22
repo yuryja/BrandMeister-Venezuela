@@ -47,6 +47,7 @@ const BM_TRAFFIC_LABELS = [
     'x' => 'X (Twitter)',
     'youtube' => 'YouTube',
     'correo' => 'Correo electrónico',
+    'compartido' => 'Enlace compartido',
     'enlace' => 'Otros sitios',
     'directo' => 'Directo',
 ];
@@ -96,6 +97,8 @@ function bm_traffic_source(string $referrer, string $hint, string $userAgent, st
         'youtube' => 'youtube', 'yt' => 'youtube',
         'email' => 'correo', 'correo' => 'correo', 'mail' => 'correo', 'newsletter' => 'correo',
         'google' => 'buscador', 'bing' => 'buscador', 'buscador' => 'buscador',
+        // Enlace copiado desde el botón "Copiar enlace" de una noticia
+        'compartido' => 'compartido', 'copiado' => 'compartido', 'copiar' => 'compartido',
     ];
     if ($hint !== '' && isset($hintMap[$hint])) {
         return [$hintMap[$hint], $externalHost];
@@ -282,15 +285,25 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
     // La procedencia la manda el navegador en el propio evento (document.referrer): la cabecera
     // Referer de esta petición siempre apunta a nuestra propia página, así que no sirve de origen.
     $referrer = substr(trim((string)($data['referrer'] ?? '')), 0, 255);
-    $ownHost = preg_replace('/^www\./', '', strtolower((string)(parse_url((string)getenv('SITE_URL'), PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? ''))));
-    $ownHost = preg_replace('/:\d+$/', '', $ownHost);
-    [$trafficSource, $referrerHost] = bm_traffic_source(
-        $referrer,
-        (string)($data['source_hint'] ?? ''),
-        $userAgent,
-        $ownHost
-    );
-    if ($trafficSource === 'interno') {
+
+    // Solo los avisos de visita informan de dónde viene la gente. Los demás (lecturas,
+    // reproducciones, clics) se guardan sin origen en vez de inventarles uno.
+    $informaOrigen = array_key_exists('referrer', $data) || array_key_exists('source_hint', $data);
+    $trafficSource = null;
+    $referrerHost = '';
+    if ($informaOrigen) {
+        $ownHost = preg_replace('/^www\./', '', strtolower((string)(parse_url((string)getenv('SITE_URL'), PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? ''))));
+        $ownHost = preg_replace('/:\d+$/', '', $ownHost);
+        [$trafficSource, $referrerHost] = bm_traffic_source(
+            $referrer,
+            (string)($data['source_hint'] ?? ''),
+            $userAgent,
+            $ownHost
+        );
+        if ($trafficSource === 'interno') {
+            $referrer = '';
+        }
+    } else {
         $referrer = '';
     }
 
