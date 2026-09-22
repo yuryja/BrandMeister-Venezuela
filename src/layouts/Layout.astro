@@ -228,6 +228,35 @@ if (pathSegments.length > 0) {
       document.addEventListener('DOMContentLoaded', initScrollObserver);
       initScrollObserver();
 
+      // Visita a la página, con el sitio de procedencia para saber por dónde llegó la gente.
+      // El navegador solo entrega la procedencia aquí, en la página: la petición al API viaja
+      // con nuestra propia dirección, así que el origen hay que mandarlo en el propio aviso.
+      (() => {
+        try {
+          // El panel y las plantillas del blog no son visitas del público
+          const ruta = window.location.pathname;
+          if (ruta.startsWith('/admin') || ruta.startsWith('/plantillas')) return;
+
+          const params = new URLSearchParams(window.location.search);
+          // De un enlace compartido por nosotros: ?utm_source=whatsapp o el más corto ?ref=whatsapp
+          const hint = (params.get('utm_source') || params.get('ref') || '').slice(0, 40);
+
+          fetch('/api/analytics.php?action=track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              event_type: 'page_view',
+              event_category: 'pagina',
+              entity_id: window.location.pathname.slice(0, 100),
+              entity_title: (document.title || '').slice(0, 120),
+              referrer: (document.referrer || '').slice(0, 250),
+              source_hint: hint,
+            }),
+            keepalive: true,
+          }).catch(() => {});
+        } catch (_) {}
+      })();
+
       // Rastreo discreto de clics en enlaces comunitarios y externos
       document.addEventListener('click', (e) => {
         const link = (e.target as HTMLElement | null)?.closest?.('a');

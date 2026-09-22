@@ -29,7 +29,16 @@ interface AnalyticsData {
     post_shares: number;
     petra_views?: number;
     petra_unique?: number;
+    page_views?: number;
+    unique_visitors?: number;
     active_countries: number;
+  };
+  traffic?: {
+    sources: Array<{ key: string; name: string; visits: number; people: number; percent: number }>;
+    sites: Array<{ host: string; source: string; visits: number; people: number }>;
+    total_visits: number;
+    page_views: number;
+    unique_visitors: number;
   };
   map_points: MapPoint[];
   player: {
@@ -255,6 +264,8 @@ function renderDashboard(data: AnalyticsData) {
   if ($('kpi-post-views')) $('kpi-post-views')!.textContent = fmt(data.kpis?.post_views);
   if ($('kpi-post-shares')) $('kpi-post-shares')!.textContent = fmt(data.kpis?.post_shares);
   if ($('kpi-active-countries')) $('kpi-active-countries')!.textContent = fmt(data.kpis?.active_countries);
+  if ($('kpi-page-views')) $('kpi-page-views')!.textContent = fmt(data.kpis?.page_views ?? 0);
+  if ($('kpi-unique-visitors')) $('kpi-unique-visitors')!.textContent = fmt(data.kpis?.unique_visitors ?? 0);
   if ($('kpi-petra-views')) $('kpi-petra-views')!.textContent = fmt(data.kpis?.petra_views ?? data.petra?.total_views ?? 0);
   if ($('kpi-petra-unique')) $('kpi-petra-unique')!.textContent = fmt(data.kpis?.petra_unique ?? data.petra?.unique_visitors ?? 0);
 
@@ -453,6 +464,59 @@ function renderDashboard(data: AnalyticsData) {
             </tr>
           `;
         })
+        .join('');
+    }
+  }
+
+  // Origen de las visitas: una barra por canal, ordenadas de mayor a menor
+  const trafficContainer = $('traffic-sources-container');
+  if (trafficContainer) {
+    const sources = data.traffic?.sources || [];
+    if (!sources.length) {
+      trafficContainer.innerHTML =
+        '<p class="analytics-empty">Todavía no hay visitas registradas en este periodo. Los datos empiezan a contarse desde que se publicó esta versión del sitio.</p>';
+    } else {
+      trafficContainer.innerHTML = sources
+        .map((s) => {
+          const percent = Math.max(0, Math.min(100, Number(s.percent) || 0));
+          const people = Number(s.people) || 0;
+          return `
+            <div class="share-platform-row">
+              <div class="share-platform-header">
+                <span class="share-platform-name">${escapeHtml(s.name)}</span>
+                <span class="share-platform-count">
+                  <strong>${fmt(s.visits)}</strong> <span>${percent}%</span>
+                </span>
+              </div>
+              <div class="share-track">
+                <div class="share-fill" style="width: ${percent}%;"></div>
+              </div>
+              <span class="share-platform-sub">${fmt(people)} ${people === 1 ? 'persona' : 'personas'}</span>
+            </div>
+          `;
+        })
+        .join('');
+    }
+  }
+
+  // Sitios concretos desde los que llegaron visitas
+  const sitesTbody = $('traffic-sites-tbody');
+  if (sitesTbody) {
+    const sites = data.traffic?.sites || [];
+    if (!sites.length) {
+      sitesTbody.innerHTML =
+        '<tr><td colspan="3" class="analytics-empty">Ningún sitio externo nos enlazó en este periodo.</td></tr>';
+    } else {
+      sitesTbody.innerHTML = sites
+        .map(
+          (site) => `
+            <tr>
+              <td><span class="cell-strong">${escapeHtml(site.host)}</span></td>
+              <td class="col-opt">${escapeHtml(site.source)}</td>
+              <td class="cell-right"><strong>${fmt(site.visits)}</strong></td>
+            </tr>
+          `
+        )
         .join('');
     }
   }
