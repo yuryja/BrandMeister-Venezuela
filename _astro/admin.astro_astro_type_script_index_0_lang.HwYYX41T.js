@@ -104,7 +104,7 @@ import{t as e}from"./preload-helper.B3nfOi5I.js";var t={admin:`Administrador`,ed
         ${i?`<div class="bm-popup-stat"><span>Clics en enlaces</span><strong>${X(i)}</strong></div>`:``}
         ${a?`<div class="bm-popup-stat"><span>Lecturas del blog</span><strong>${X(a)}</strong></div>`:``}
       </div>
-    `,s=L.divIcon({className:`bm-single-pin`,iconSize:[18,18],iconAnchor:[9,9],popupAnchor:[0,-10]}),c=L.marker([e.lat,e.lng],{icon:s}).bindPopup(o);q?q.addLayer(c):c.addTo(K)}),q&&K.addLayer(q))}function Ht(e){Rt=e;let t=Y(`live-listeners-banner`),r=Y(`live-listeners-text`);if(t&&r){let i=e.live_audio;if(i&&i.is_active&&i.total_listeners>0){t.classList.add(`is-active-listening`);let e=i.total_listeners;r.innerHTML=`Hay <strong>${e===1?`1 usuario escuchando`:`${X(e)} usuarios escuchando`}</strong> en este momento desde: <span class="live-status-countries-pills">${(i.countries||[]).map(e=>`<span class="live-country-pill">${Z(e.code)} ${n(e.country)} <strong>(${X(e.count)})</strong></span>`).join(``)}</span>`}else t.classList.remove(`is-active-listening`),r.textContent=`No hay personas escuchando el audio en vivo en este momento.`}Y(`kpi-player-plays`)&&(Y(`kpi-player-plays`).textContent=X(e.kpis?.player_plays)),Y(`kpi-unique-listeners`)&&(Y(`kpi-unique-listeners`).textContent=X(e.kpis?.unique_listeners)),Y(`kpi-link-clicks`)&&(Y(`kpi-link-clicks`).textContent=X(e.kpis?.link_clicks)),Y(`kpi-post-views`)&&(Y(`kpi-post-views`).textContent=X(e.kpis?.post_views)),Y(`kpi-post-shares`)&&(Y(`kpi-post-shares`).textContent=X(e.kpis?.post_shares)),Y(`kpi-active-countries`)&&(Y(`kpi-active-countries`).textContent=X(e.kpis?.active_countries)),Y(`kpi-petra-views`)&&(Y(`kpi-petra-views`).textContent=X(e.kpis?.petra_views??e.petra?.total_views??0)),Y(`kpi-petra-unique`)&&(Y(`kpi-petra-unique`).textContent=X(e.kpis?.petra_unique??e.petra?.unique_visitors??0));let i=Array.from(new Set((e.map_points||[]).map(e=>e.code).filter(e=>/^[A-Z]{2}$/.test(e)))).slice(0,4);Y(`kpi-top-countries`)&&(Y(`kpi-top-countries`).textContent=i.length?i.join(`, `):`Sin datos aún`);let a=(e.shares?.platforms||[])[0];Y(`kpi-top-platform`)&&(Y(`kpi-top-platform`).textContent=a?`Más usado: ${a.name}`:`Sin compartidos aún`);let o={"7d":`Últimos 7 días`,"30d":`Últimos 30 días`,all:`Histórico`};document.querySelectorAll(`[data-range-label]`).forEach(e=>e.textContent=o[J]??``),Vt();let s=Y(`player-countries-list`);if(s){let t=e.player?.countries||[];s.innerHTML=t.length?t.map(e=>`
+    `,s=L.divIcon({className:`bm-single-pin`,iconSize:[18,18],iconAnchor:[9,9],popupAnchor:[0,-10]}),c=L.marker([e.lat,e.lng],{icon:s}).bindPopup(o);q?q.addLayer(c):c.addTo(K)}),q&&K.addLayer(q))}function Ht(e){Rt=e;let t=Y(`live-listeners-banner`),r=Y(`live-listeners-text`);if(t&&r){let i=e.live_audio;if(i&&i.is_active&&i.total_listeners>0){t.classList.add(`is-active-listening`);let e=i.total_listeners;r.innerHTML=`Hay <strong>${e===1?`1 usuario escuchando`:`${X(e)} usuarios escuchando`}</strong> en este momento desde: <span class="live-status-countries-pills">${(i.countries||[]).map(e=>`<span class="live-country-pill">${Z(e.code)} ${n(e.country)} <strong>(${X(e.count)})</strong></span>`).join(``)}</span>`}else t.classList.remove(`is-active-listening`),r.textContent=`No hay personas escuchando el audio en vivo en este momento.`}Y(`kpi-player-plays`)&&(Y(`kpi-player-plays`).textContent=X(e.kpis?.player_plays)),Y(`kpi-unique-listeners`)&&(Y(`kpi-unique-listeners`).textContent=X(e.kpis?.unique_listeners)),Y(`kpi-link-clicks`)&&(Y(`kpi-link-clicks`).textContent=X(e.kpis?.link_clicks)),Y(`kpi-post-views`)&&(Y(`kpi-post-views`).textContent=X(e.kpis?.post_views)),Y(`kpi-post-shares`)&&(Y(`kpi-post-shares`).textContent=X(e.kpis?.post_shares)),Y(`kpi-active-countries`)&&(Y(`kpi-active-countries`).textContent=X(e.kpis?.active_countries)),Y(`kpi-page-views`)&&(Y(`kpi-page-views`).textContent=X(e.kpis?.page_views??0)),Y(`kpi-unique-visitors`)&&(Y(`kpi-unique-visitors`).textContent=X(e.kpis?.unique_visitors??0)),Y(`kpi-petra-views`)&&(Y(`kpi-petra-views`).textContent=X(e.kpis?.petra_views??e.petra?.total_views??0)),Y(`kpi-petra-unique`)&&(Y(`kpi-petra-unique`).textContent=X(e.kpis?.petra_unique??e.petra?.unique_visitors??0));let i=Array.from(new Set((e.map_points||[]).map(e=>e.code).filter(e=>/^[A-Z]{2}$/.test(e)))).slice(0,4);Y(`kpi-top-countries`)&&(Y(`kpi-top-countries`).textContent=i.length?i.join(`, `):`Sin datos aún`);let a=(e.shares?.platforms||[])[0];Y(`kpi-top-platform`)&&(Y(`kpi-top-platform`).textContent=a?`Más usado: ${a.name}`:`Sin compartidos aún`);let o={"7d":`Últimos 7 días`,"30d":`Últimos 30 días`,all:`Histórico`};document.querySelectorAll(`[data-range-label]`).forEach(e=>e.textContent=o[J]??``),Vt();let s=Y(`player-countries-list`);if(s){let t=e.player?.countries||[];s.innerHTML=t.length?t.map(e=>`
             <div class="country-bar-item">
               <div class="country-bar-header">
                 <span class="country-name-wrap">
@@ -208,7 +208,26 @@ import{t as e}from"./preload-helper.B3nfOi5I.js";var t={admin:`Administrador`,ed
                 </div>
               </td>
             </tr>
-          `}).join(``):`<tr><td colspan="4" class="analytics-empty">Sin conexiones registradas en este periodo.</td></tr>`}let f=Y(`social-shares-container`);if(f){let t=e.shares?.platforms||[];f.innerHTML=t.length?t.map(e=>`
+          `}).join(``):`<tr><td colspan="4" class="analytics-empty">Sin conexiones registradas en este periodo.</td></tr>`}let f=Y(`traffic-sources-container`);if(f){let t=e.traffic?.sources||[];f.innerHTML=t.length?t.map(e=>{let t=Math.max(0,Math.min(100,Number(e.percent)||0)),r=Number(e.people)||0;return`
+            <div class="share-platform-row">
+              <div class="share-platform-header">
+                <span class="share-platform-name">${n(e.name)}</span>
+                <span class="share-platform-count">
+                  <strong>${X(e.visits)}</strong> <span>${t}%</span>
+                </span>
+              </div>
+              <div class="share-track">
+                <div class="share-fill" style="width: ${t}%;"></div>
+              </div>
+              <span class="share-platform-sub">${X(r)} ${r===1?`persona`:`personas`}</span>
+            </div>
+          `}).join(``):`<p class="analytics-empty">Todavía no hay visitas registradas en este periodo. Los datos empiezan a contarse desde que se publicó esta versión del sitio.</p>`}let p=Y(`traffic-sites-tbody`);if(p){let t=e.traffic?.sites||[];p.innerHTML=t.length?t.map(e=>`
+            <tr>
+              <td><span class="cell-strong">${n(e.host)}</span></td>
+              <td class="col-opt">${n(e.source)}</td>
+              <td class="cell-right"><strong>${X(e.visits)}</strong></td>
+            </tr>
+          `).join(``):`<tr><td colspan="3" class="analytics-empty">Ningún sitio externo nos enlazó en este periodo.</td></tr>`}let m=Y(`social-shares-container`);if(m){let t=e.shares?.platforms||[];m.innerHTML=t.length?t.map(e=>`
             <div class="share-platform-row">
               <div class="share-platform-header">
                 <span class="share-platform-name">${n(e.name)}</span>
@@ -220,7 +239,7 @@ import{t as e}from"./preload-helper.B3nfOi5I.js";var t={admin:`Administrador`,ed
                 <div class="share-fill" style="width: ${Math.max(0,Math.min(100,Number(e.percent)||0))}%;"></div>
               </div>
             </div>
-          `).join(``):`<p class="analytics-empty">Sin compartidos en este periodo.</p>`}let p=Y(`posts-views-tbody`);if(p){let t=e.posts||[];if(!t.length)p.innerHTML=`<tr><td colspan="5" class="analytics-empty">Sin noticias publicadas.</td></tr>`;else{let e=Math.max(1,...t.map(e=>Number(e.views)||0));p.innerHTML=t.map(t=>{let r=Math.round((Number(t.views)||0)/e*100);return`
+          `).join(``):`<p class="analytics-empty">Sin compartidos en este periodo.</p>`}let h=Y(`posts-views-tbody`);if(h){let t=e.posts||[];if(!t.length)h.innerHTML=`<tr><td colspan="5" class="analytics-empty">Sin noticias publicadas.</td></tr>`;else{let e=Math.max(1,...t.map(e=>Number(e.views)||0));h.innerHTML=t.map(t=>{let r=Math.round((Number(t.views)||0)/e*100);return`
             <tr>
               <td>
                 <div class="cell-strong">${t.slug?`<a href="/blog/${encodeURIComponent(t.slug)}" target="_blank" rel="noopener">${n(t.title)}</a>`:n(t.title)}</div>

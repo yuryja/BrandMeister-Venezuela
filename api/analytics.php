@@ -34,6 +34,105 @@ function get_client_ip(): string {
     return $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 }
 
+/**
+ * Canales de origen que sabemos reconocer, con el nombre que se ve en el panel.
+ * El orden es el que se usa para mostrarlos cuando empatan.
+ */
+const BM_TRAFFIC_LABELS = [
+    'buscador' => 'Buscadores',
+    'whatsapp' => 'WhatsApp',
+    'telegram' => 'Telegram',
+    'facebook' => 'Facebook',
+    'instagram' => 'Instagram',
+    'x' => 'X (Twitter)',
+    'youtube' => 'YouTube',
+    'correo' => 'Correo electrónico',
+    'enlace' => 'Otros sitios',
+    'directo' => 'Directo',
+];
+
+/** Dominio de un enlace, en minúsculas y sin www. Cadena vacía si no es una URL usable. */
+function bm_url_host(string $url): string {
+    $url = trim($url);
+    if ($url === '' || strlen($url) > 500) {
+        return '';
+    }
+    $host = (string)parse_url($url, PHP_URL_HOST);
+    if ($host === '') {
+        // Enlaces de apps de Android: android-app://com.whatsapp
+        if (preg_match('#^android-app://([a-z0-9._-]+)#i', $url, $m)) {
+            return strtolower($m[1]);
+        }
+        return '';
+    }
+    return preg_replace('/^www\./', '', strtolower($host));
+}
+
+/**
+ * De dónde llega la visita. Se miran tres señales, de más a menos fiable:
+ *
+ *   1. utm_source / ref en la dirección: lo que ponemos nosotros al compartir un enlace
+ *      (p. ej. brandmeisteryv.net/?utm_source=whatsapp). Es lo único que funciona cuando
+ *      WhatsApp abre el enlace sin decir de dónde viene, que es lo habitual en el móvil.
+ *   2. El sitio de procedencia que informa el navegador.
+ *   3. El navegador integrado de la app (WhatsApp, Instagram y Facebook se identifican
+ *      en el user agent aunque no manden procedencia).
+ *
+ * Devuelve [canal, dominio de procedencia] ('interno' cuando solo es navegación por el sitio).
+ */
+function bm_traffic_source(string $referrer, string $hint, string $userAgent, string $ownHost): array {
+    $host = bm_url_host($referrer);
+    $isInternal = $host !== '' && ($host === $ownHost || substr($host, -strlen(".$ownHost")) === ".$ownHost");
+    $externalHost = $isInternal ? '' : $host;
+
+    // 1. Lo que indica la propia dirección del enlace compartido
+    $hint = strtolower(preg_replace('/[^a-z0-9_-]/i', '', $hint));
+    $hintMap = [
+        'whatsapp' => 'whatsapp', 'wa' => 'whatsapp', 'wsp' => 'whatsapp',
+        'telegram' => 'telegram', 'tg' => 'telegram',
+        'facebook' => 'facebook', 'fb' => 'facebook',
+        'instagram' => 'instagram', 'ig' => 'instagram',
+        'twitter' => 'x', 'x' => 'x',
+        'youtube' => 'youtube', 'yt' => 'youtube',
+        'email' => 'correo', 'correo' => 'correo', 'mail' => 'correo', 'newsletter' => 'correo',
+        'google' => 'buscador', 'bing' => 'buscador', 'buscador' => 'buscador',
+    ];
+    if ($hint !== '' && isset($hintMap[$hint])) {
+        return [$hintMap[$hint], $externalHost];
+    }
+
+    // 2. El sitio desde el que se hizo clic
+    if ($host !== '' && !$isInternal) {
+        $byHost = [
+            'buscador' => ['google.', 'bing.', 'duckduckgo.', 'yahoo.', 'ecosia.', 'search.brave.', 'yandex.', 'baidu.', 'search.marginalia.', 'startpage.'],
+            'whatsapp' => ['whatsapp.com', 'wa.me', 'com.whatsapp'],
+            'telegram' => ['t.me', 'telegram.me', 'telegram.org', 'org.telegram'],
+            'facebook' => ['facebook.com', 'fb.com', 'fb.me', 'com.facebook'],
+            'instagram' => ['instagram.com', 'com.instagram'],
+            'x' => ['twitter.com', 'x.com', 't.co'],
+            'youtube' => ['youtube.com', 'youtu.be'],
+            'correo' => ['mail.google.com', 'outlook.', 'mail.yahoo.', 'roundcube', 'webmail.', 'mail.proton'],
+        ];
+        foreach ($byHost as $key => $needles) {
+            foreach ($needles as $needle) {
+                if (strpos($host, $needle) !== false) {
+                    return [$key, $externalHost];
+                }
+            }
+        }
+        return ['enlace', $externalHost];
+    }
+
+    // 3. Navegador integrado de la app, cuando no hay procedencia
+    $ua = strtolower($userAgent);
+    if (strpos($ua, 'whatsapp') !== false) return ['whatsapp', ''];
+    if (strpos($ua, 'instagram') !== false) return ['instagram', ''];
+    if (strpos($ua, 'telegram') !== false) return ['telegram', ''];
+    if (strpos($ua, 'fban') !== false || strpos($ua, 'fbav') !== false || strpos($ua, 'fb_iab') !== false) return ['facebook', ''];
+
+    return [$isInternal ? 'interno' : 'directo', ''];
+}
+
 // Detectar tipo de dispositivo
 function detect_device_type(): string {
     $ua = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
@@ -112,7 +211,16 @@ function get_empty_stats(): array {
             'post_shares' => 0,
             'petra_views' => 0,
             'petra_unique' => 0,
+            'page_views' => 0,
+            'unique_visitors' => 0,
             'active_countries' => 0,
+        ],
+        'traffic' => [
+            'sources' => [],
+            'sites' => [],
+            'total_visits' => 0,
+            'page_views' => 0,
+            'unique_visitors' => 0,
         ],
         'map_points' => [],
         'player' => [
@@ -170,7 +278,21 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
     $ipAddress = get_client_ip();
     $deviceType = detect_device_type();
     $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
-    $referrer = substr($_SERVER['HTTP_REFERER'] ?? '', 0, 255);
+
+    // La procedencia la manda el navegador en el propio evento (document.referrer): la cabecera
+    // Referer de esta petición siempre apunta a nuestra propia página, así que no sirve de origen.
+    $referrer = substr(trim((string)($data['referrer'] ?? '')), 0, 255);
+    $ownHost = preg_replace('/^www\./', '', strtolower((string)(parse_url((string)getenv('SITE_URL'), PHP_URL_HOST) ?: ($_SERVER['HTTP_HOST'] ?? ''))));
+    $ownHost = preg_replace('/:\d+$/', '', $ownHost);
+    [$trafficSource, $referrerHost] = bm_traffic_source(
+        $referrer,
+        (string)($data['source_hint'] ?? ''),
+        $userAgent,
+        $ownHost
+    );
+    if ($trafficSource === 'interno') {
+        $referrer = '';
+    }
 
     // La ubicación nunca se toma del navegador (se podría falsear): solo de la IP.
     // Sin geolocalización se guarda sin coordenadas y no aparece en el mapa.
@@ -222,10 +344,10 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
 
     if ($pdo) {
         try {
-            $stmt = $pdo->prepare("INSERT INTO bm_analytics_events 
-                (event_type, event_category, entity_id, entity_title, platform, ip_address, country_code, country_name, city, latitude, longitude, user_agent, device_type, referrer, metadata)
-                VALUES 
-                (:event_type, :event_category, :entity_id, :entity_title, :platform, :ip_address, :country_code, :country_name, :city, :latitude, :longitude, :user_agent, :device_type, :referrer, :metadata)");
+            $stmt = $pdo->prepare("INSERT INTO bm_analytics_events
+                (event_type, event_category, entity_id, entity_title, platform, ip_address, country_code, country_name, city, latitude, longitude, user_agent, device_type, referrer, traffic_source, referrer_host, metadata)
+                VALUES
+                (:event_type, :event_category, :entity_id, :entity_title, :platform, :ip_address, :country_code, :country_name, :city, :latitude, :longitude, :user_agent, :device_type, :referrer, :traffic_source, :referrer_host, :metadata)");
             
             $stmt->execute([
                 ':event_type' => $eventType,
@@ -242,6 +364,8 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
                 ':user_agent' => $userAgent,
                 ':device_type' => $deviceType,
                 ':referrer' => $referrer ?: null,
+                ':traffic_source' => $trafficSource,
+                ':referrer_host' => $referrerHost ?: null,
                 ':metadata' => $metadataJson,
             ]);
 
@@ -291,6 +415,8 @@ if ($action === 'stats' || $action === 'summary') {
             SUM(CASE WHEN event_type = 'post_share' THEN 1 ELSE 0 END) AS post_shares,
             SUM(CASE WHEN event_type = 'page_view' AND event_category = 'petra_view' THEN 1 ELSE 0 END) AS petra_views,
             COUNT(DISTINCT CASE WHEN event_type = 'page_view' AND event_category = 'petra_view' THEN ip_address ELSE NULL END) AS petra_unique,
+            SUM(CASE WHEN event_type = 'page_view' AND event_category = 'pagina' THEN 1 ELSE 0 END) AS page_views,
+            COUNT(DISTINCT CASE WHEN event_type = 'page_view' AND event_category = 'pagina' THEN ip_address ELSE NULL END) AS unique_visitors,
             COUNT(DISTINCT country_code) AS active_countries
             FROM bm_analytics_events
             WHERE 1 = 1 $since");
@@ -532,6 +658,55 @@ if ($action === 'stats' || $action === 'summary') {
             ];
         }
 
+        // Origen de las visitas: por dónde llegó la gente al sitio.
+        // Solo cuentan las entradas (la primera página de cada visita); la navegación de una
+        // página a otra queda marcada como 'interno' y no se suma a ningún canal.
+        $sourcesStmt = $pdo->query("SELECT traffic_source AS source, COUNT(*) AS visits, COUNT(DISTINCT ip_address) AS people
+            FROM bm_analytics_events
+            WHERE event_type = 'page_view' AND event_category = 'pagina'
+              AND traffic_source IS NOT NULL AND traffic_source <> 'interno' $since
+            GROUP BY traffic_source
+            ORDER BY visits DESC");
+        $sourceRows = $sourcesStmt->fetchAll();
+        $totalEntries = array_sum(array_map(function ($r) { return (int)$r['visits']; }, $sourceRows));
+
+        $trafficSources = [];
+        foreach ($sourceRows as $row) {
+            $key = (string)$row['source'];
+            $visits = (int)$row['visits'];
+            $trafficSources[] = [
+                'key' => $key,
+                'name' => BM_TRAFFIC_LABELS[$key] ?? $key,
+                'visits' => $visits,
+                'people' => (int)$row['people'],
+                'percent' => $totalEntries > 0 ? round($visits * 100 / $totalEntries, 1) : 0,
+            ];
+        }
+
+        // Sitios concretos que nos enlazan (buscadores, foros, redes…)
+        $sitesStmt = $pdo->query("SELECT referrer_host AS host, traffic_source AS source, COUNT(*) AS visits, COUNT(DISTINCT ip_address) AS people
+            FROM bm_analytics_events
+            WHERE event_type = 'page_view' AND referrer_host IS NOT NULL AND referrer_host <> '' $since
+            GROUP BY referrer_host, traffic_source
+            ORDER BY visits DESC
+            LIMIT 10");
+        $trafficSites = array_map(function ($row) {
+            return [
+                'host' => (string)$row['host'],
+                'source' => BM_TRAFFIC_LABELS[(string)$row['source']] ?? (string)$row['source'],
+                'visits' => (int)$row['visits'],
+                'people' => (int)$row['people'],
+            ];
+        }, $sitesStmt->fetchAll());
+
+        $traffic = [
+            'sources' => $trafficSources,
+            'sites' => $trafficSites,
+            'total_visits' => $totalEntries,
+            'page_views' => (int)($kpis['page_views'] ?? 0),
+            'unique_visitors' => (int)($kpis['unique_visitors'] ?? 0),
+        ];
+
         // Telemetría en tiempo real: oyentes de audio en vivo activos en este momento (últimos 60 segundos)
         // Se toma el evento de audio más reciente por IP en la ventana de 60s.
         // Si el último evento fue 'audio_stop' o ya expiró el latido, ya no se considera activo.
@@ -586,8 +761,11 @@ if ($action === 'stats' || $action === 'summary') {
                 'post_shares' => (int)($kpis['post_shares'] ?? 0),
                 'petra_views' => $totalPetraViews,
                 'petra_unique' => $totalPetraUnique,
+                'page_views' => (int)($kpis['page_views'] ?? 0),
+                'unique_visitors' => (int)($kpis['unique_visitors'] ?? 0),
                 'active_countries' => (int)($kpis['active_countries'] ?? 0),
             ],
+            'traffic' => $traffic,
             'map_points' => $mapPoints,
             'player' => [
                 'countries' => $playerCountries,
