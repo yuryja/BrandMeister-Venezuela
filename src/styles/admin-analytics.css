@@ -595,6 +595,27 @@
   font-weight: 700;
 }
 
+/* Cuántas personas distintas hay detrás de esas visitas */
+.share-platform-sub {
+  font-size: 0.78rem;
+  color: #64748B;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Nota sobre las etiquetas utm_source, bajo el desglose de orígenes */
+.traffic-note {
+  margin-top: 1rem;
+  line-height: 1.5;
+}
+
+.traffic-note code {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border-radius: 4px;
+  padding: 0.05rem 0.3rem;
+  font-size: 0.82em;
+}
+
 
 
 /* Responsive */
