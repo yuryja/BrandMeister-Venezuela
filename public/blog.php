@@ -85,6 +85,11 @@ function blog_head(&$html, $title, $description, $canonical, $image = null) {
     $html = preg_replace('#(<meta property="og:type" content=")[^"]*(")#', '${1}article${2}', $html, 1);
 }
 
+/** Enlace de la noticia con la etiqueta del canal por el que se comparte */
+function blog_url_compartir($url, $canal) {
+    return $url . (strpos($url, '?') === false ? '?' : '&') . 'utm_source=' . rawurlencode($canal);
+}
+
 function blog_fecha_larga($ts) {
     $meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
     return (int)date('j', $ts) . ' de ' . $meses[(int)date('n', $ts) - 1] . ' de ' . date('Y', $ts);
@@ -162,6 +167,14 @@ if ($slug !== '') {
         'URL_CODIFICADA' => rawurlencode($url),
         'TITULO_URL' => rawurlencode($post['title']),
         'COMPARTIR_TEXTO_URL' => rawurlencode($post['title'] . ' - ' . $url),
+        // Cada botón de compartir lleva su etiqueta: así el panel sabe por qué vía
+        // llegó cada visita, incluso cuando la app no informa de dónde viene (WhatsApp)
+        'URL_WHATSAPP' => rawurlencode(blog_url_compartir($url, 'whatsapp')),
+        'TEXTO_WHATSAPP' => rawurlencode($post['title'] . ' - ' . blog_url_compartir($url, 'whatsapp')),
+        'URL_TELEGRAM' => rawurlencode(blog_url_compartir($url, 'telegram')),
+        'URL_X' => rawurlencode(blog_url_compartir($url, 'x')),
+        'URL_FACEBOOK' => rawurlencode(blog_url_compartir($url, 'facebook')),
+        'URL_COPIAR' => e(blog_url_compartir($url, 'compartido')),
     ]);
 
     // La etiqueta del indicativo se oculta si el autor no tiene
