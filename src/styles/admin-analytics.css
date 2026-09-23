@@ -1321,3 +1321,31 @@
 
 
 
+
+/* ---------------------------------------------------------
+   Refresco del escritorio (Escritorio, la casa o el nombre de la barra)
+   Los datos se atenúan mientras llegan: así se nota que se actualizaron
+   aunque los números sean los mismos.
+   --------------------------------------------------------- */
+#view-dashboard > :not(.view-header) {
+  transition: opacity 0.2s ease;
+}
+
+#view-dashboard.is-refreshing > :not(.view-header) {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.dashboard-updated {
+  margin: 0.35rem 0 0;
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  min-height: 1.1em; /* reserva el hueco: el texto aparece sin mover la página */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-dashboard > :not(.view-header) {
+    transition: none;
+  }
+}
