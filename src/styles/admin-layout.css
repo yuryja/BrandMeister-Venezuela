@@ -194,10 +194,19 @@ html[data-rol="author"] #menu-gallery-item {
   }
 
   .wp-admin-app .adminbar-site-link .site-name,
-  .wp-admin-app .adminbar-site-link .visit-label,
   .wp-admin-app .greeting-word,
   .wp-admin-app .logout-label {
     display: none;
+  }
+
+  /* La flecha al sitio público sigue en móvil: la casa ya no sale del panel */
+  .wp-admin-app .adminbar-visit-site {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 38px;
+    padding: 0;
   }
 
   .wp-admin-app .adminbar-site-link {

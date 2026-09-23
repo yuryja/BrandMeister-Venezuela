@@ -892,6 +892,7 @@ export async function loadAnalytics(range = '7d') {
       const data = await res.json();
       if (data && data.kpis) {
         renderDashboard(data);
+        markUpdated();
         return;
       }
     }
@@ -899,6 +900,40 @@ export async function loadAnalytics(range = '7d') {
   } catch (err) {
     renderDashboard(EMPTY_ANALYTICS);
   }
+}
+
+/** "Actualizado a las 18:42" bajo el título: dice de cuándo son los datos que se ven */
+function markUpdated() {
+  const stamp = $('dashboard-updated');
+  if (!stamp) return;
+  const hora = new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+  stamp.textContent = `Actualizado a las ${hora}`;
+}
+
+/**
+ * Refresco visible del escritorio: lo usan "Escritorio" en el menú, la casa y el nombre de la
+ * barra superior. Antes los datos se volvían a pedir pero sin ninguna señal, y como casi siempre
+ * llegaban los mismos números, parecía que no había pasado nada.
+ */
+export async function refreshDashboard() {
+  const view = $('view-dashboard');
+  if (!view || document.documentElement.dataset.panel !== 'app') return;
+  if (view.classList.contains('is-refreshing')) return; // un refresco a la vez
+
+  view.classList.add('is-refreshing');
+  view.setAttribute('aria-busy', 'true');
+  const stamp = $('dashboard-updated');
+  if (stamp) stamp.textContent = 'Actualizando…';
+
+  const inicio = performance.now();
+  await loadAnalytics(currentRange);
+  // Un mínimo visible: si la respuesta llega en 50 ms, el cambio no se llega a percibir
+  const restante = 450 - (performance.now() - inicio);
+  if (restante > 0) await new Promise((r) => setTimeout(r, restante));
+
+  mapInstance?.setView([8.5, -66.0], 5);
+  view.classList.remove('is-refreshing');
+  view.removeAttribute('aria-busy');
 }
 
 // --------------------------------------------------------------------
@@ -943,7 +978,7 @@ export function initAnalytics() {
         initMap();
         mapInstance?.invalidateSize();
       }, 100);
-      loadAnalytics(currentRange);
+      refreshDashboard();
     }
   });
 
