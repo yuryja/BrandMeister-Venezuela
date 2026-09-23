@@ -155,7 +155,7 @@ const repeaters = [
             "addressLocality": r.location,
             "addressCountry": "VE"
           },
-          "description": `${r.type} en banda ${r.band}, RX ${r.freqRx}, TX ${r.freqTx}, offset ${r.offset}, ${r.colorCode}. ${r.notes}`
+          "description": `${r.type} en banda ${r.band}, TX ${r.freqTx}, RX ${r.freqRx}, offset ${r.offset}, ${r.colorCode}. ${r.notes}`
         }
       }))
     })} />
@@ -227,7 +227,7 @@ const repeaters = [
                   <th>Indicativo</th>
                   <th>Ubicación y Cobertura</th>
                   <th>Banda</th>
-                  <th>RX / TX (Shift)</th>
+                  <th>TX / RX (Shift)</th>
                   <th>Ranuras y CC</th>
                   <th>Estado</th>
                   <th>Telemetría</th>
@@ -254,8 +254,8 @@ const repeaters = [
                       <span class="std-pill">{r.band}</span>
                     </td>
                     <td class="col-freqs">
-                      <div class="freq-line"><strong>RX:</strong> {r.freqRx}</div>
                       <div class="freq-line"><strong>TX:</strong> {r.freqTx}</div>
+                      <div class="freq-line"><strong>RX:</strong> {r.freqRx}</div>
                       <span class="offset-pill">{r.offset}</span>
                     </td>
                     <td class="col-slots">
