@@ -251,7 +251,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
   </div>
 
   <!-- PANEL DE ADMINISTRACIÓN (ESTILO WORDPRESS) -->
-  <div id="wp-app" class="wp-admin-app" style="display: none;">
+  <div id="wp-app" class="wp-admin-app">
     <!-- TOP WP ADMIN BAR -->
     <header class="wp-adminbar">
       <div class="adminbar-left">
@@ -2259,6 +2259,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
 
   const setSession = (user: SessionUser) => {
     currentUser = user;
+    document.documentElement.dataset.rol = user.role;
     document.dispatchEvent(new CustomEvent("bm:session", { detail: user }));
   };
 
@@ -2291,6 +2292,18 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
     return false;
   };
 
+  // Sesión que admin.php comprobó en el servidor al enviar la página (bloque JSON, no ejecutable)
+  const leerSesionInicial = (): SessionUser | null => {
+    const bloque = document.getElementById("bm-sesion-inicial");
+    if (!bloque) return null;
+    try {
+      const usuario = JSON.parse(bloque.textContent || "");
+      return usuario && usuario.id && usuario.role ? (usuario as SessionUser) : null;
+    } catch {
+      return null;
+    }
+  };
+
   const checkAuth = async () => {
     try {
       const res = await fetch("/api/auth.php?action=status", {
@@ -2310,6 +2323,8 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
   };
 
   const showLogin = (message = "") => {
+    document.documentElement.dataset.panel = "login";
+    delete document.documentElement.dataset.rol;
     document.getElementById("wp-login-screen")!.style.display = "flex";
     // v3 puntúa mejor si el script lleva unos segundos cargado antes de enviar
     preloadRecaptcha().catch(() => {});
@@ -2324,6 +2339,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
   };
 
   const showApp = () => {
+    document.documentElement.dataset.panel = "app";
     document.getElementById("wp-login-screen")!.style.display = "none";
     document.getElementById("wp-app")!.style.display = "flex";
     applyACL();
@@ -2358,8 +2374,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
 
   // Verificación proactiva de sesión al recuperar el foco o visibilidad de la pestaña
   const verifySessionAlive = async () => {
-    const appEl = document.getElementById("wp-app");
-    if (!appEl || appEl.style.display === "none") return;
+    if (document.documentElement.dataset.panel !== "app") return;
     try {
       const res = await fetch("/api/auth.php?action=status", {
         credentials: "same-origin",
@@ -2499,6 +2514,17 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
   initNav();
   initAnalytics();
   initAccount().then((handledToken) => {
-    if (!handledToken) checkAuth();
+    if (handledToken) return;
+    const sesionInicial = leerSesionInicial();
+    if (sesionInicial) {
+      setSession(sesionInicial);
+      showApp();
+    } else if (document.documentElement.dataset.panel === "login") {
+      // admin.php ya comprobó que no hay sesión
+      showLogin();
+    } else {
+      // Página servida sin admin.php (p. ej. en desarrollo): se pregunta al API
+      checkAuth();
+    }
   });
 </script>

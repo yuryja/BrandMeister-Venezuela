@@ -879,6 +879,9 @@ const EMPTY_ANALYTICS: AnalyticsData = {
 // --------------------------------------------------------------------
 export async function loadAnalytics(range = '7d') {
   currentRange = range;
+  // Solo con el escritorio a la vista. En la pantalla de login no hay sesión: pedir las
+  // estadísticas daba 401 y ese 401 mostraba "Tu sesión ha expirado" a quien acababa de llegar.
+  if (document.documentElement.dataset.panel !== 'app') return;
   try {
     const res = await fetch(`/api/analytics.php?action=stats&range=${encodeURIComponent(range)}`, { credentials: 'same-origin' });
     if (res.status === 401) {
@@ -944,16 +947,8 @@ export function initAnalytics() {
     }
   });
 
-  // Carga inicial al cargar el panel
-  loadAnalytics(currentRange).then(() => {
-    // Inicializar mapa si el dashboard ya está visible
-    if ($('view-dashboard')?.classList.contains('is-active')) {
-      setTimeout(() => {
-        initMap();
-        mapInstance?.invalidateSize();
-      }, 200);
-    }
-  });
+  // La carga inicial la dispara showApp() al abrir el escritorio (evento bm:view 'dashboard'):
+  // cargar también aquí pedía las estadísticas dos veces en cada entrada al panel.
 
   // Refresco automático de telemetría y oyentes en vivo cada 30s mientras esté visible
   setInterval(() => {

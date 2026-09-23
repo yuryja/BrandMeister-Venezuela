@@ -4,6 +4,28 @@
    ========================================================= */
 
 /* ---------------------------------------------------------
+   Pantalla inicial: la decide admin.php en el servidor (data-panel en <html>),
+   así el navegador pinta el login o el escritorio correcto desde el primer momento,
+   sin esperar a que el JavaScript pregunte por la sesión.
+   Sin data-panel (página estática, p. ej. en desarrollo) se ve el login, como antes.
+   --------------------------------------------------------- */
+html:not([data-panel="app"]) #wp-app {
+  display: none;
+}
+
+html[data-panel="app"] #wp-login-screen {
+  display: none;
+}
+
+/* Menús según el rol, también desde el primer pintado (applyACL los mantiene después) */
+html[data-rol]:not([data-rol="admin"]) #menu-users-item,
+html[data-rol="admin"] #menu-profile-item,
+html[data-rol="author"] #menu-site-content-item,
+html[data-rol="author"] #menu-gallery-item {
+  display: none;
+}
+
+/* ---------------------------------------------------------
    Menú lateral: submenús plegables
    --------------------------------------------------------- */
 .wp-admin-app .wp-menu-item.has-submenu {

@@ -16,6 +16,10 @@ Options -Indexes
   # En /media/ solo hay fotos y videos: nada que el servidor deba ejecutar o mostrar como página
   RewriteRule ^media/.*\.(php[0-9]?|phtml|phar|cgi|pl|py|sh|s?html?|xml|svg)$ - [F]
 
+  # Panel: admin.php comprueba la sesión antes de enviar la página, para que al
+  # refrescar no se vea el login un instante antes del escritorio
+  RewriteRule ^admin(/|/index\.html)?$ /admin.php [L,QSA]
+
   # Proxy /api/petra to petra.php
   RewriteRule ^api/petra/(.*)$ api/petra.php?endpoint=$1 [QSA,L]
 
