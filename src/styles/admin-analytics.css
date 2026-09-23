@@ -964,4 +964,360 @@
   }
 }
 
+/* ====================================================================
+   WIDGET DE AUDIENCIA: DISPOSITIVOS, DÍAS Y HORAS PICO
+   ==================================================================== */
+.audience-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1040px) {
+  .audience-grid {
+    grid-template-columns: 1fr 1fr 1.25fr;
+  }
+}
+
+.audience-subcard {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.audience-subcard:hover {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.06);
+}
+
+.audience-subcard-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.audience-subcard-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0F172A;
+  margin: 0;
+}
+
+.audience-subcard-desc {
+  font-size: 0.78rem;
+  color: #64748B;
+  margin: 0.15rem 0 0;
+}
+
+/* Gráfico Circular / Donut SVG */
+.audience-pie-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.audience-pie-svg-container {
+  position: relative;
+  width: 136px;
+  height: 136px;
+  margin: 0.25rem auto;
+}
+
+.audience-pie-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  border-radius: 50%;
+}
+
+.audience-pie-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.audience-pie-center-val {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.audience-pie-center-lbl {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+
+.audience-devices-legend {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.audience-legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  background: #FFFFFF;
+  border: 1px solid #F1F5F9;
+}
+
+.audience-legend-name {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.audience-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.audience-legend-metrics {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.audience-legend-metrics strong {
+  color: #0F172A;
+  font-variant-numeric: tabular-nums;
+}
+
+.audience-legend-metrics span {
+  color: #64748B;
+  font-size: 0.74rem;
+}
+
+/* Gráfico de Barras: Días de la Semana */
+.audience-bars-chart {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.day-bars-track-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 125px;
+  padding: 0.5rem 0;
+  gap: 6px;
+  border-bottom: 1px solid #E2E8F0;
+  margin-bottom: 0.75rem;
+}
+
+.day-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+}
+
+.day-bar-value {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748B;
+  margin-bottom: 3px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 1;
+}
+
+.day-bar-slot {
+  width: 100%;
+  max-width: 28px;
+  height: 95px;
+  background: #F1F5F9;
+  border-radius: 4px 4px 0 0;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  position: relative;
+}
+
+.day-bar-fill {
+  width: 100%;
+  background: var(--bm-orange, #EE6C1F);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.day-bar-item.is-peak .day-bar-fill {
+  background: linear-gradient(180deg, var(--bm-red, #E8261C) 0%, var(--bm-orange, #EE6C1F) 100%);
+  box-shadow: 0 0 8px rgba(232, 38, 28, 0.35);
+}
+
+.day-bar-item.is-peak .day-bar-value {
+  color: var(--bm-red, #E8261C);
+  font-weight: 800;
+}
+
+.day-bar-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #64748B;
+  margin-top: 0.4rem;
+}
+
+.day-bar-item.is-peak .day-bar-label {
+  color: #0F172A;
+  font-weight: 800;
+}
+
+/* Gráfico de Barras: Horas (24h) */
+.hour-bars-track-area {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 125px;
+  padding: 0.5rem 0;
+  gap: 2px;
+  border-bottom: 1px solid #E2E8F0;
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+.hour-bar-item {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.hour-bar-slot {
+  width: 100%;
+  height: 95px;
+  background: #F1F5F9;
+  border-radius: 2px 2px 0 0;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.hour-bar-fill {
+  width: 100%;
+  background: #F4A26B;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.5s ease, background-color 0.15s ease;
+}
+
+.hour-bar-item:hover .hour-bar-fill {
+  background: var(--bm-orange, #EE6C1F);
+}
+
+.hour-bar-item.is-peak .hour-bar-fill {
+  background: var(--bm-red, #E8261C);
+  box-shadow: 0 0 6px rgba(232, 38, 28, 0.4);
+}
+
+.hour-bar-item .hour-tooltip {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #0F172A;
+  color: #FFFFFF;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: all 0.18s ease;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hour-bar-item .hour-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px;
+  border-style: solid;
+  border-color: #0F172A transparent transparent transparent;
+}
+
+.hour-bar-item:hover .hour-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.hour-bars-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #94A3B8;
+  font-weight: 600;
+  margin-top: 0.4rem;
+}
+
+.audience-summary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  background: #FFF7ED;
+  color: #C2410C;
+  border: 1px solid #FFEDD5;
+  margin-top: 0.85rem;
+  width: fit-content;
+}
+
+.audience-summary-pill strong {
+  color: #9A3412;
+}
+
+.audience-summary-pill svg {
+  color: var(--bm-orange, #EE6C1F);
+  flex-shrink: 0;
+}
+
+
 

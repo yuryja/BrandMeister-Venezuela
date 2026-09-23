@@ -1,17 +1,17 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import UsersView from '../components/admin/UsersView.astro';
-import ProfileView from '../components/admin/ProfileView.astro';
-import GalleryView from '../components/admin/GalleryView.astro';
-import PostsView from '../components/admin/PostsView.astro';
-import '../styles/admin-accounts.css';
-import '../styles/admin-gallery.css';
-import '../styles/admin-posts.css';
-import '../styles/admin-layout.css';
-import '../styles/admin-analytics.css';
+import Layout from "../layouts/Layout.astro";
+import UsersView from "../components/admin/UsersView.astro";
+import ProfileView from "../components/admin/ProfileView.astro";
+import GalleryView from "../components/admin/GalleryView.astro";
+import PostsView from "../components/admin/PostsView.astro";
+import "../styles/admin-accounts.css";
+import "../styles/admin-gallery.css";
+import "../styles/admin-posts.css";
+import "../styles/admin-layout.css";
+import "../styles/admin-analytics.css";
 
 // Clave pública de reCAPTCHA v3 (GitHub → Variables → PUBLIC_RECAPTCHA_SITE_KEY). Sin clave, el login funciona sin él
-const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
+const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
 ---
 
 <Layout
@@ -19,65 +19,141 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   description="Panel de administración de BrandMeister Venezuela: noticias, galería y usuarios."
   chrome={false}
 >
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" slot="head" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" slot="head" />
-  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" slot="head"></script>
-  <script is:inline src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js" slot="head"></script>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+    slot="head"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+    slot="head"
+  />
+  <script
+    is:inline
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+    slot="head"></script>
+  <script
+    is:inline
+    src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"
+    slot="head"></script>
   <!-- WP LOGIN SCREEN (Shown if not authenticated) -->
-  <div id="wp-login-screen" class="wp-login-wrapper" data-recaptcha-site-key={recaptchaSiteKey}>
+  <div
+    id="wp-login-screen"
+    class="wp-login-wrapper"
+    data-recaptcha-site-key={recaptchaSiteKey}
+  >
     <div class="wp-login-card">
       <div class="wp-login-logo">
-        <img src="/assets/logo.webp" alt="BrandMeister Venezuela" width="220" height="55" />
+        <img
+          src="/assets/logo.webp"
+          alt="BrandMeister Venezuela"
+          width="220"
+          height="55"
+        />
       </div>
-      
+
       <div data-account-panel="login" id="account-panel-login">
-      <div class="wp-login-header">
-        <h2>Iniciar sesión</h2>
-        <p>Acceso administrativo para Sysops y colaboradores autorizados</p>
-      </div>
-
-      <form id="login-form" class="wp-login-form">
-        <div class="form-group">
-          <label for="login-username">Usuario o Indicativo</label>
-          <input type="text" id="login-username" class="form-input" placeholder="ej: YV5OF o yy3big" autocomplete="username" required />
+        <div class="wp-login-header">
+          <h2>Iniciar sesión</h2>
+          <p>Acceso administrativo para Sysops y colaboradores autorizados</p>
         </div>
 
-        <div class="form-group">
-          <label for="login-password">Contraseña</label>
-          <input type="password" id="login-password" class="form-input" placeholder="••••••••" autocomplete="current-password" required />
-        </div>
+        <form id="login-form" class="wp-login-form">
+          <div class="form-group">
+            <label for="login-username">Usuario o Indicativo</label>
+            <input
+              type="text"
+              id="login-username"
+              class="form-input"
+              placeholder="ej: YV5OF o yy3big"
+              autocomplete="username"
+              required
+            />
+          </div>
 
-        <p id="login-error" class="wp-login-error" role="alert" hidden></p>
+          <div class="form-group">
+            <label for="login-password">Contraseña</label>
+            <input
+              type="password"
+              id="login-password"
+              class="form-input"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+          </div>
 
-        <button type="submit" id="login-submit" class="btn btn-primary wp-login-btn">
-          <span>Acceder al Escritorio</span>
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-        </button>
-      </form>
-      <p class="wp-login-links"><a href="#" data-show-panel="forgot">¿Olvidaste tu contraseña?</a></p>
+          <p id="login-error" class="wp-login-error" role="alert" hidden></p>
+
+          <button
+            type="submit"
+            id="login-submit"
+            class="btn btn-primary wp-login-btn"
+          >
+            <span>Acceder al Escritorio</span>
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </form>
+        <p class="wp-login-links">
+          <a href="#" data-show-panel="forgot">¿Olvidaste tu contraseña?</a>
+        </p>
       </div>
 
       <!-- ¿Olvidaste tu contraseña? -->
       <div data-account-panel="forgot" id="account-panel-forgot" hidden>
         <div class="wp-login-header">
           <h2>Restablecer contraseña</h2>
-          <p>Escribe tu usuario, indicativo o correo y te enviaremos un enlace.</p>
+          <p>
+            Escribe tu usuario, indicativo o correo y te enviaremos un enlace.
+          </p>
         </div>
         <form id="forgot-form" class="wp-login-form">
           <div class="form-group">
             <label for="forgot-identifier">Usuario, indicativo o correo</label>
-            <input type="text" id="forgot-identifier" class="form-input" autocomplete="username" maxlength="120" required />
+            <input
+              type="text"
+              id="forgot-identifier"
+              class="form-input"
+              autocomplete="username"
+              maxlength="120"
+              required
+            />
           </div>
-          <p id="forgot-message" class="wp-login-error" role="status" hidden></p>
-          <button type="submit" id="forgot-submit" class="btn btn-primary wp-login-btn">Enviar enlace</button>
+          <p id="forgot-message" class="wp-login-error" role="status" hidden>
+          </p>
+          <button
+            type="submit"
+            id="forgot-submit"
+            class="btn btn-primary wp-login-btn">Enviar enlace</button
+          >
         </form>
-        <p class="wp-login-links"><a href="#" data-show-panel="login">← Volver a iniciar sesión</a></p>
+        <p class="wp-login-links">
+          <a href="#" data-show-panel="login">← Volver a iniciar sesión</a>
+        </p>
       </div>
 
       <!-- Crear / restablecer contraseña desde el enlace del correo (?clave=) -->
-      <div data-account-panel="set-password" id="account-panel-set-password" hidden>
+      <div
+        data-account-panel="set-password"
+        id="account-panel-set-password"
+        hidden
+      >
         <div class="wp-login-header">
           <h2 id="set-password-title">Comprobando enlace…</h2>
           <p id="set-password-intro"></p>
@@ -87,32 +163,89 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
           <div class="form-group">
             <label for="sp-password">Nueva contraseña</label>
             <div class="password-field">
-              <input type="password" id="sp-password" class="form-input" autocomplete="new-password" minlength="10" maxlength="200" required />
-              <button type="button" class="btn btn-secondary btn-sm" data-toggle-password="sp-password">Mostrar</button>
+              <input
+                type="password"
+                id="sp-password"
+                class="form-input"
+                autocomplete="new-password"
+                minlength="10"
+                maxlength="200"
+                required
+              />
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                data-toggle-password="sp-password">Mostrar</button
+              >
             </div>
             <span class="field-hint">Mínimo 10 caracteres.</span>
           </div>
           <div class="form-group">
             <label for="sp-password-confirm">Repite la contraseña</label>
-            <input type="password" id="sp-password-confirm" class="form-input" autocomplete="new-password" minlength="10" maxlength="200" required />
+            <input
+              type="password"
+              id="sp-password-confirm"
+              class="form-input"
+              autocomplete="new-password"
+              minlength="10"
+              maxlength="200"
+              required
+            />
           </div>
-          <p id="set-password-message" class="wp-login-error" role="alert" hidden></p>
-          <button type="submit" id="set-password-submit" class="btn btn-primary wp-login-btn">Guardar contraseña</button>
+          <p
+            id="set-password-message"
+            class="wp-login-error"
+            role="alert"
+            hidden
+          >
+          </p>
+          <button
+            type="submit"
+            id="set-password-submit"
+            class="btn btn-primary wp-login-btn">Guardar contraseña</button
+          >
         </form>
-        <p class="wp-login-links"><a href="#" data-show-panel="login">Ir a iniciar sesión</a></p>
+        <p class="wp-login-links">
+          <a href="#" data-show-panel="login">Ir a iniciar sesión</a>
+        </p>
       </div>
 
-      {recaptchaSiteKey && (
-        <p class="wp-login-recaptcha">
-          Protegido por reCAPTCHA de Google:
-          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Privacidad</a> ·
-          <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">Términos</a>
-        </p>
-      )}
+      {
+        recaptchaSiteKey && (
+          <p class="wp-login-recaptcha">
+            Protegido por reCAPTCHA de Google:
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Privacidad
+            </a>{" "}
+            ·
+            <a
+              href="https://policies.google.com/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Términos
+            </a>
+          </p>
+        )
+      }
     </div>
 
     <a href="/" class="wp-login-back">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg
+      >
       Volver a BrandMeister Venezuela
     </a>
   </div>
@@ -122,15 +255,45 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     <!-- TOP WP ADMIN BAR -->
     <header class="wp-adminbar">
       <div class="adminbar-left">
-        <button type="button" class="btn-menu-toggle" id="btn-menu-toggle" aria-controls="wp-sidebar" aria-expanded="false" aria-label="Abrir menú">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <button
+          type="button"
+          class="btn-menu-toggle"
+          id="btn-menu-toggle"
+          aria-controls="wp-sidebar"
+          aria-expanded="false"
+          aria-label="Abrir menú"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
             <line x1="4" y1="7" x2="20" y2="7"></line>
             <line x1="4" y1="12" x2="20" y2="12"></line>
             <line x1="4" y1="17" x2="20" y2="17"></line>
           </svg>
         </button>
-        <a href="/" class="adminbar-site-link" target="_blank" title="Ver sitio público">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--bm-orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <a
+          href="/"
+          class="adminbar-site-link"
+          target="_blank"
+          title="Ver sitio público"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="var(--bm-orange)"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
@@ -141,10 +304,31 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
       <div class="adminbar-right">
         <div class="user-profile-menu">
-          <button type="button" class="greeting greeting-link" data-view="profile" title="Editar tu perfil"><span class="greeting-word">Hola, </span><strong id="bar-user-name"></strong></button>
+          <button
+            type="button"
+            class="greeting greeting-link"
+            data-view="profile"
+            title="Editar tu perfil"
+            ><span class="greeting-word">Hola, </span><strong id="bar-user-name"
+            ></strong></button
+          >
           <span id="bar-user-role" class="role-badge"></span>
-          <button id="btn-logout" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <button
+            id="btn-logout"
+            class="btn-logout"
+            title="Cerrar sesión"
+            aria-label="Cerrar sesión"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -162,7 +346,16 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
         <ul class="wp-menu">
           <li class="wp-menu-item">
             <button class="menu-link is-active" data-view="dashboard">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <rect x="3" y="3" width="7" height="7"></rect>
                 <rect x="14" y="3" width="7" height="7"></rect>
                 <rect x="14" y="14" width="7" height="7"></rect>
@@ -174,8 +367,19 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
           <li class="wp-menu-item has-submenu">
             <button class="menu-link" data-view="posts">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                ></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
                 <line x1="16" y1="13" x2="8" y2="13"></line>
                 <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -184,20 +388,56 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <span>Noticias</span>
               <span class="count-pill" id="menu-posts-count" hidden></span>
             </button>
-            <button type="button" class="submenu-toggle" aria-expanded="false" aria-controls="submenu-posts" aria-label="Mostrar opciones de Noticias">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            <button
+              type="button"
+              class="submenu-toggle"
+              aria-expanded="false"
+              aria-controls="submenu-posts"
+              aria-label="Mostrar opciones de Noticias"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                ><polyline points="6 9 12 15 18 9"></polyline></svg
+              >
             </button>
             <ul class="wp-submenu" id="submenu-posts" hidden>
-              <li><button class="submenu-link" data-view="posts">Todas las noticias</button></li>
-              <li><button class="submenu-link" data-view="new-post">Añadir nueva</button></li>
+              <li>
+                <button class="submenu-link" data-view="posts"
+                  >Todas las noticias</button>
+              </li>
+              <li>
+                <button class="submenu-link" data-view="new-post"
+                  >Añadir nueva</button>
+              </li>
             </ul>
           </li>
 
           <li class="wp-menu-item" id="menu-site-content-item">
             <button class="menu-link" data-view="site-content">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                ></path>
+                <path
+                  d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                ></path>
               </svg>
               <span>Textos del Portal</span>
             </button>
@@ -205,26 +445,67 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
           <li class="wp-menu-item has-submenu" id="menu-gallery-item">
             <button class="menu-link" data-view="gallery">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"
+                ></path>
                 <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
               </svg>
               <span>Galería</span>
             </button>
-            <button type="button" class="submenu-toggle" aria-expanded="false" aria-controls="submenu-gallery" aria-label="Mostrar opciones de Galería">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            <button
+              type="button"
+              class="submenu-toggle"
+              aria-expanded="false"
+              aria-controls="submenu-gallery"
+              aria-label="Mostrar opciones de Galería"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                ><polyline points="6 9 12 15 18 9"></polyline></svg
+              >
             </button>
             <ul class="wp-submenu" id="submenu-gallery" hidden>
-              <li><button class="submenu-link" data-view="gallery">Todas</button></li>
-              <li><button class="submenu-link" data-view="gallery-edit">Añadir publicación</button></li>
+              <li>
+                <button class="submenu-link" data-view="gallery">Todas</button>
+              </li>
+              <li>
+                <button class="submenu-link" data-view="gallery-edit"
+                  >Añadir publicación</button>
+              </li>
             </ul>
           </li>
 
           <!-- Usuarios (solo Administrador) -->
           <li class="wp-menu-item has-submenu" id="menu-users-item">
             <button class="menu-link" data-view="users">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -232,27 +513,60 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               </svg>
               <span>Usuarios</span>
             </button>
-            <button type="button" class="submenu-toggle" aria-expanded="false" aria-controls="submenu-users" aria-label="Mostrar opciones de Usuarios">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            <button
+              type="button"
+              class="submenu-toggle"
+              aria-expanded="false"
+              aria-controls="submenu-users"
+              aria-label="Mostrar opciones de Usuarios"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                ><polyline points="6 9 12 15 18 9"></polyline></svg
+              >
             </button>
             <ul class="wp-submenu" id="submenu-users" hidden>
-              <li><button class="submenu-link" data-view="users">Todos los usuarios</button></li>
-              <li><button class="submenu-link" data-view="user-new">Añadir nuevo</button></li>
-              <li><button class="submenu-link" data-view="profile">Perfil</button></li>
+              <li>
+                <button class="submenu-link" data-view="users"
+                  >Todos los usuarios</button>
+              </li>
+              <li>
+                <button class="submenu-link" data-view="user-new"
+                  >Añadir nuevo</button>
+              </li>
+              <li>
+                <button class="submenu-link" data-view="profile">Perfil</button>
+              </li>
             </ul>
           </li>
 
           <!-- Perfil (Editor y Autor; el Administrador lo tiene dentro de Usuarios) -->
           <li class="wp-menu-item" id="menu-profile-item">
             <button class="menu-link" data-view="profile">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
               <span>Perfil</span>
             </button>
           </li>
-
         </ul>
       </aside>
 
@@ -268,12 +582,27 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
           <div class="view-header">
             <div>
               <h1 class="view-title">Escritorio y Analíticas</h1>
-              <p class="view-subtitle">Métricas de oyentes, clics en enlaces, lectura de publicaciones y compartidos.</p>
+              <p class="view-subtitle">
+                Métricas de oyentes, clics en enlaces, lectura de publicaciones
+                y compartidos.
+              </p>
             </div>
-            <div class="analytics-time-filter" role="group" aria-label="Periodo de las estadísticas">
-              <button type="button" class="btn-time-range is-active" data-range="7d">7 días</button>
-              <button type="button" class="btn-time-range" data-range="30d">30 días</button>
-              <button type="button" class="btn-time-range" data-range="all">Histórico</button>
+            <div
+              class="analytics-time-filter"
+              role="group"
+              aria-label="Periodo de las estadísticas"
+            >
+              <button
+                type="button"
+                class="btn-time-range is-active"
+                data-range="7d">7 días</button
+              >
+              <button type="button" class="btn-time-range" data-range="30d"
+                >30 días</button
+              >
+              <button type="button" class="btn-time-range" data-range="all"
+                >Histórico</button
+              >
             </div>
           </div>
 
@@ -299,8 +628,18 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="kpi-header">
                 <span class="kpi-label">Reproductor Audio</span>
                 <span class="kpi-icon-wrap icon-audio">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"
+                    ></polygon>
                     <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                     <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
                   </svg>
@@ -308,7 +647,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               </div>
               <div class="kpi-value" id="kpi-player-plays">--</div>
               <div class="kpi-footer">
-                <span class="kpi-subtext"><strong id="kpi-unique-listeners">--</strong> oyentes únicos</span>
+                <span class="kpi-subtext"
+                  ><strong id="kpi-unique-listeners">--</strong> oyentes únicos</span
+                >
               </div>
             </div>
 
@@ -316,9 +657,22 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="kpi-header">
                 <span class="kpi-label">Clics en Enlaces</span>
                 <span class="kpi-icon-wrap icon-links">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"
+                    ></path>
+                    <path
+                      d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+                    ></path>
                   </svg>
                 </span>
               </div>
@@ -332,9 +686,20 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="kpi-header">
                 <span class="kpi-label">Lectura de Noticias</span>
                 <span class="kpi-icon-wrap icon-posts">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    <path
+                      d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                    ></path>
                   </svg>
                 </span>
               </div>
@@ -348,10 +713,21 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="kpi-header">
                 <span class="kpi-label">Países Conectados</span>
                 <span class="kpi-icon-wrap icon-geo">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="2" y1="12" x2="22" y2="12"></line>
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    <path
+                      d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                    ></path>
                   </svg>
                 </span>
               </div>
@@ -365,14 +741,26 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="kpi-header">
                 <span class="kpi-label">Sistema Petra</span>
                 <span class="kpi-icon-wrap icon-petra">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"
+                    ></polyline>
                   </svg>
                 </span>
               </div>
               <div class="kpi-value" id="kpi-petra-views">--</div>
               <div class="kpi-footer">
-                <span class="kpi-subtext"><strong id="kpi-petra-unique">--</strong> visitantes únicos</span>
+                <span class="kpi-subtext"
+                  ><strong id="kpi-petra-unique">--</strong> visitantes únicos</span
+                >
               </div>
             </div>
 
@@ -380,15 +768,27 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="kpi-header">
                 <span class="kpi-label">Visitas al Sitio</span>
                 <span class="kpi-icon-wrap icon-visits">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"
+                    ></path>
                     <circle cx="12" cy="12" r="3"></circle>
                   </svg>
                 </span>
               </div>
               <div class="kpi-value" id="kpi-page-views">--</div>
               <div class="kpi-footer">
-                <span class="kpi-subtext"><strong id="kpi-unique-visitors">--</strong> personas distintas</span>
+                <span class="kpi-subtext"
+                  ><strong id="kpi-unique-visitors">--</strong> personas distintas</span
+                >
               </div>
             </div>
 
@@ -396,7 +796,16 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="kpi-header">
                 <span class="kpi-label">Compartidos</span>
                 <span class="kpi-icon-wrap icon-shares">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
                     <circle cx="18" cy="5" r="3"></circle>
                     <circle cx="6" cy="12" r="3"></circle>
                     <circle cx="18" cy="19" r="3"></circle>
@@ -420,17 +829,48 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
                   <span class="status-dot"></span>
                   <h3>Distribución Geográfica y Conexiones</h3>
                 </div>
-                <p class="map-subtitle">Oyentes, lectores y visitantes agrupados por ciudad. Los círculos juntan varias conexiones cercanas.</p>
+                <p class="map-subtitle">
+                  Oyentes, lectores y visitantes agrupados por ciudad. Los
+                  círculos juntan varias conexiones cercanas.
+                </p>
               </div>
               <div class="map-controls">
                 <div class="map-filter-pills">
-                  <button type="button" class="map-pill is-active" data-map-filter="all">Todos</button>
-                  <button type="button" class="map-pill" data-map-filter="player_play">Reproductor</button>
-                  <button type="button" class="map-pill" data-map-filter="link_click">Enlaces</button>
-                  <button type="button" class="map-pill" data-map-filter="post_view">Publicaciones</button>
+                  <button
+                    type="button"
+                    class="map-pill is-active"
+                    data-map-filter="all">Todos</button
+                  >
+                  <button
+                    type="button"
+                    class="map-pill"
+                    data-map-filter="player_play">Reproductor</button
+                  >
+                  <button
+                    type="button"
+                    class="map-pill"
+                    data-map-filter="link_click">Enlaces</button
+                  >
+                  <button
+                    type="button"
+                    class="map-pill"
+                    data-map-filter="post_view">Publicaciones</button
+                  >
                 </div>
-                <button type="button" class="btn-map-reset" id="btn-reset-map" title="Centrar en Venezuela">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <button
+                  type="button"
+                  class="btn-map-reset"
+                  id="btn-reset-map"
+                  title="Centrar en Venezuela"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <circle cx="12" cy="12" r="3"></circle>
                     <path d="M3 12h3m12 0h3M12 3v3m0 12v3"></path>
                   </svg>
@@ -441,9 +881,15 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             <div class="wp-box-body" style="padding: 0; position: relative;">
               <div id="analytics-leaflet-map" class="analytics-map"></div>
               <div class="map-legend">
-                <span class="legend-item"><span class="cluster-sample sm"></span> 2–9</span>
-                <span class="legend-item"><span class="cluster-sample md"></span> 10–24</span>
-                <span class="legend-item"><span class="cluster-sample lg"></span> 25 o más conexiones</span>
+                <span class="legend-item"
+                  ><span class="cluster-sample sm"></span> 2–9</span
+                >
+                <span class="legend-item"
+                  ><span class="cluster-sample md"></span> 10–24</span
+                >
+                <span class="legend-item"
+                  ><span class="cluster-sample lg"></span> 25 o más conexiones</span
+                >
               </div>
             </div>
           </div>
@@ -454,7 +900,10 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="wp-box-head">
                 <div>
                   <h3>Origen de las Visitas</h3>
-                  <p class="box-sub">Por dónde llegó la gente al sitio: buscadores, mensajería o enlaces compartidos</p>
+                  <p class="box-sub">
+                    Por dónde llegó la gente al sitio: buscadores, mensajería o
+                    enlaces compartidos
+                  </p>
                 </div>
                 <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
@@ -463,9 +912,10 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
                   <!-- Inyectado dinámicamente -->
                 </div>
                 <p class="field-hint traffic-note">
-                  <strong>Directo</strong> son las visitas de quien escribió la dirección, la tenía guardada
-                  o llegó desde una app que no dice de dónde viene. Para que esas se cuenten en su canal,
-                  añade al enlace que compartas <code>?utm_source=whatsapp</code> (o <code>telegram</code>,
+                  <strong>Directo</strong> son las visitas de quien escribió la dirección,
+                  la tenía guardada o llegó desde una app que no dice de dónde viene.
+                  Para que esas se cuenten en su canal, añade al enlace que compartas
+                  <code>?utm_source=whatsapp</code> (o <code>telegram</code>,
                   <code>instagram</code>…).
                 </p>
               </div>
@@ -475,7 +925,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="wp-box-head">
                 <div>
                   <h3>Sitios que nos Enlazan</h3>
-                  <p class="box-sub">Páginas concretas desde las que llegaron visitas</p>
+                  <p class="box-sub">
+                    Páginas concretas desde las que llegaron visitas
+                  </p>
                 </div>
                 <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
@@ -498,6 +950,78 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             </div>
           </div>
 
+          <!-- 4. PATRONES DE AUDIENCIA: DISPOSITIVOS, DÍAS Y HORAS PICO -->
+          <div class="wp-box" style="margin-top: 1.5rem;">
+            <div class="wp-box-head">
+              <div>
+                <h3>Hábitos de Visita</h3>
+                <p class="box-sub">
+                  Distribución por tipo de dispositivo, días de la semana y
+                  curva horaria de mayor concurrencia
+                </p>
+              </div>
+              <span class="badge-mini" data-range-label>Últimos 7 días</span>
+            </div>
+            <div class="wp-box-body">
+              <div class="audience-grid">
+                <!-- Columna 1: Dispositivos (Pie / Donut Chart) -->
+                <div class="audience-subcard">
+                  <div class="audience-subcard-head">
+                    <div>
+                      <h4 class="audience-subcard-title">Dispositivos</h4>
+                      <p class="audience-subcard-desc">
+                        Plataforma usada para visitar el portal
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="audience-pie-wrap"
+                    id="audience-devices-container"
+                  >
+                    <!-- Inyectado dinámicamente -->
+                  </div>
+                </div>
+
+                <!-- Columna 2: Días de la Semana (Barras) -->
+                <div class="audience-subcard">
+                  <div class="audience-subcard-head">
+                    <div>
+                      <h4 class="audience-subcard-title">
+                        Días de Mayor Tráfico
+                      </h4>
+                      <p class="audience-subcard-desc">
+                        Concurrencia según día de la semana
+                      </p>
+                    </div>
+                  </div>
+                  <div class="audience-bars-chart" id="audience-days-container">
+                    <!-- Inyectado dinámicamente -->
+                  </div>
+                </div>
+
+                <!-- Columna 3: Horas del Día (Barras 24h) -->
+                <div class="audience-subcard">
+                  <div class="audience-subcard-head">
+                    <div>
+                      <h4 class="audience-subcard-title">
+                        Horas de Mayor Tráfico
+                      </h4>
+                      <p class="audience-subcard-desc">
+                        Curva de visitas en formato 24 horas
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="audience-bars-chart"
+                    id="audience-hours-container"
+                  >
+                    <!-- Inyectado dinámicamente -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- 4. AUDIO PLAYER TELEMETRY (Countries & IPs / Frequency) -->
           <div class="analytics-row-grid">
             <!-- Left: Player Countries -->
@@ -505,7 +1029,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="wp-box-head">
                 <div>
                   <h3>Reproductor: Oyentes por País</h3>
-                  <p class="box-sub">Distribución porcentual de reproducciones en TG 734</p>
+                  <p class="box-sub">
+                    Distribución porcentual de reproducciones en TG 734
+                  </p>
                 </div>
                 <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
@@ -521,7 +1047,10 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="wp-box-head">
                 <div>
                   <h3>Registro de Oyentes (IPs y Frecuencia)</h3>
-                  <p class="box-sub">Direcciones IP, ciudad y cuántas veces han reproducido el audio</p>
+                  <p class="box-sub">
+                    Direcciones IP, ciudad y cuántas veces han reproducido el
+                    audio
+                  </p>
                 </div>
                 <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
@@ -550,15 +1079,27 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             <div class="wp-box-head">
               <div>
                 <h3>Telemetría de Petra: Interacciones por Talkgroup</h3>
-                <p class="box-sub">Interacción de usuarios y visitas a los paneles de monitoreo en vivo (TG 734, TG 73452 y TG 73473)</p>
+                <p class="box-sub">
+                  Interacción de usuarios y visitas a los paneles de monitoreo
+                  en vivo (TG 734, TG 73452 y TG 73473)
+                </p>
               </div>
               <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <span class="badge-mini" data-range-label>Últimos 7 días</span>
-                <a href="/petra" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="text-decoration: none;">Ver Petra</a>
+                <a
+                  href="/petra"
+                  target="_blank"
+                  rel="noopener"
+                  class="btn btn-secondary btn-sm"
+                  style="text-decoration: none;">Ver Petra</a
+                >
               </div>
             </div>
             <div class="wp-box-body">
-              <div class="petra-tg-analytics-grid" id="petra-talkgroups-container">
+              <div
+                class="petra-tg-analytics-grid"
+                id="petra-talkgroups-container"
+              >
                 <!-- Inyectado dinámicamente -->
               </div>
             </div>
@@ -571,7 +1112,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="wp-box-head">
                 <div>
                   <h3>Clics en Enlaces y Recursos</h3>
-                  <p class="box-sub">Destinos más consultados por los usuarios</p>
+                  <p class="box-sub">
+                    Destinos más consultados por los usuarios
+                  </p>
                 </div>
                 <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
@@ -598,7 +1141,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
               <div class="wp-box-head">
                 <div>
                   <h3>Países Conectados: Actividad Global</h3>
-                  <p class="box-sub">Tráfico por país, usuarios y distribución de uso</p>
+                  <p class="box-sub">
+                    Tráfico por país, usuarios y distribución de uso
+                  </p>
                 </div>
                 <span class="badge-mini" data-range-label>Últimos 7 días</span>
               </div>
@@ -627,9 +1172,15 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             <div class="wp-box-head">
               <div>
                 <h3>Rendimiento de Publicaciones y Artículos</h3>
-                <p class="box-sub">Noticias con mayor lectura e interés de los usuarios</p>
+                <p class="box-sub">
+                  Noticias con mayor lectura e interés de los usuarios
+                </p>
               </div>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="window.switchView('posts')">Ver Noticias</button>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                onclick="window.switchView('posts')">Ver Noticias</button
+              >
             </div>
             <div class="wp-box-body" style="padding: 0;">
               <div class="table-responsive-minimal">
@@ -656,7 +1207,10 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
             <div class="wp-box-head">
               <div>
                 <h3>Difusión en Redes Sociales</h3>
-                <p class="box-sub">Publicaciones y noticias compartidas por plataforma hacia la comunidad</p>
+                <p class="box-sub">
+                  Publicaciones y noticias compartidas por plataforma hacia la
+                  comunidad
+                </p>
               </div>
               <span class="badge-mini" data-range-label>Últimos 7 días</span>
             </div>
@@ -699,11 +1253,21 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
                 <div class="wp-box-body">
                   <div class="form-group">
                     <label>Titular Principal</label>
-                    <input type="text" id="sett-hero-title" class="form-input" value="La voz digital que une a los radioaficionados de Venezuela y el mundo." />
+                    <input
+                      type="text"
+                      id="sett-hero-title"
+                      class="form-input"
+                      value="La voz digital que une a los radioaficionados de Venezuela y el mundo."
+                    />
                   </div>
                   <div class="form-group" style="margin-top: 1rem;">
                     <label>Descripción Principal</label>
-                    <textarea id="sett-hero-desc" class="form-input" rows="3">Infraestructura abierta y 100% digital basada en el estándar DMR. Conectamos repetidores, puntos de acceso de alta potencia y operadores en todo el territorio nacional con acceso directo a la red global BrandMeister.</textarea>
+                    <textarea id="sett-hero-desc" class="form-input" rows="3"
+                      >Infraestructura abierta y 100% digital basada en el
+                      estándar DMR. Conectamos repetidores, puntos de acceso de
+                      alta potencia y operadores en todo el territorio nacional
+                      con acceso directo a la red global BrandMeister.</textarea
+                    >
                   </div>
                 </div>
               </div>
@@ -715,7 +1279,13 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
                 <div class="wp-box-body">
                   <div class="form-group">
                     <label>Texto de la Alerta EMCOM / YV5RNE</label>
-                    <textarea id="sett-alert-text" class="form-input" rows="3">Reservado exclusivamente para prevención, boletines por fenómenos meteorológicos, alertas sísmicas o contingencias mayores. Se recomienda a todos los radioaficionados mantenerlo programado en su lista de recepción (RX List) bajo el Slot 1 en todos los repetidores del país.</textarea>
+                    <textarea id="sett-alert-text" class="form-input" rows="3"
+                      >Reservado exclusivamente para prevención, boletines por
+                      fenómenos meteorológicos, alertas sísmicas o contingencias
+                      mayores. Se recomienda a todos los radioaficionados
+                      mantenerlo programado en su lista de recepción (RX List)
+                      bajo el Slot 1 en todos los repetidores del país.</textarea
+                    >
                   </div>
                 </div>
               </div>
@@ -729,11 +1299,21 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
                 <div class="wp-box-body">
                   <div class="form-group">
                     <label>Frecuencia VHF Hotspot</label>
-                    <input type="text" id="sett-freq-vhf" class="form-input select-sm" value="146.550 MHz (Alterna: 146.490 MHz)" />
+                    <input
+                      type="text"
+                      id="sett-freq-vhf"
+                      class="form-input select-sm"
+                      value="146.550 MHz (Alterna: 146.490 MHz)"
+                    />
                   </div>
                   <div class="form-group" style="margin-top: 0.75rem;">
                     <label>Frecuencia UHF Hotspot</label>
-                    <input type="text" id="sett-freq-uhf" class="form-input select-sm" value="436.550 MHz (Alterna: 436.490 MHz)" />
+                    <input
+                      type="text"
+                      id="sett-freq-uhf"
+                      class="form-input select-sm"
+                      value="436.550 MHz (Alterna: 436.490 MHz)"
+                    />
                   </div>
                 </div>
               </div>
@@ -743,9 +1323,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
         <!-- ========================================================= -->
         <GalleryView />
-
       </main>
-
     </div>
   </div>
 </Layout>
@@ -783,11 +1361,13 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     padding: 0.7rem 0.9rem;
     border: 1px solid var(--border-medium);
     border-radius: var(--radius-sm);
-    background: #FFFFFF;
+    background: #ffffff;
     color: var(--text-main);
     font-size: 0.92rem;
     line-height: 1.4;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
   }
 
   .form-input::placeholder {
@@ -825,14 +1405,14 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #F1F5F9;
+    background: #f1f5f9;
     padding: 2rem 1.5rem;
   }
 
   .wp-login-card {
     width: 100%;
     max-width: 440px;
-    background: #FFFFFF;
+    background: #ffffff;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 2.5rem;
@@ -884,9 +1464,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     margin: 0;
     padding: 0.65rem 0.85rem;
     border-radius: var(--radius-sm);
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
-    color: #B91C1C;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
     font-size: 0.85rem;
   }
 
@@ -895,12 +1475,12 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #F1F5F9;
+    background: #f1f5f9;
   }
 
   .wp-adminbar {
     height: 46px;
-    background: #FFFFFF;
+    background: #ffffff;
     border-bottom: 1px solid var(--border-subtle);
     display: flex;
     align-items: center;
@@ -937,7 +1517,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     gap: 0.45rem;
     font-size: 0.78rem;
     color: var(--text-muted);
-    background: #F8FAFC;
+    background: #f8fafc;
     padding: 0.2rem 0.65rem;
     border-radius: var(--radius-pill);
     border: 1px solid var(--border-subtle);
@@ -947,7 +1527,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #16A34A;
+    background: #16a34a;
     box-shadow: 0 0 6px rgba(22, 163, 74, 0.6);
   }
 
@@ -975,9 +1555,18 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     text-transform: uppercase;
   }
 
-  .role-admin { background: var(--bm-red-light); color: var(--bm-red); }
-  .role-editor { background: var(--bm-orange-light); color: var(--bm-orange); }
-  .role-author { background: var(--bm-yellow-light); color: #B45309; }
+  .role-admin {
+    background: var(--bm-red-light);
+    color: var(--bm-red);
+  }
+  .role-editor {
+    background: var(--bm-orange-light);
+    color: var(--bm-orange);
+  }
+  .role-author {
+    background: var(--bm-yellow-light);
+    color: #b45309;
+  }
 
   .btn-logout {
     display: inline-flex;
@@ -1007,7 +1596,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
   .wp-sidebar {
     width: 210px;
-    background: #FFFFFF;
+    background: #ffffff;
     border-right: 1px solid var(--border-subtle);
     flex-shrink: 0;
   }
@@ -1038,7 +1627,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   }
 
   .menu-link:hover {
-    background: #F8FAFC;
+    background: #f8fafc;
     color: var(--bm-orange);
   }
 
@@ -1052,7 +1641,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     margin-left: auto;
     font-size: 0.72rem;
     font-weight: 700;
-    background: #E2E8F0;
+    background: #e2e8f0;
     color: var(--text-main);
     padding: 0.1rem 0.45rem;
     border-radius: var(--radius-pill);
@@ -1060,7 +1649,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
   .wp-submenu {
     list-style: none;
-    background: #F8FAFC;
+    background: #f8fafc;
     padding: 0.35rem 0;
   }
 
@@ -1077,7 +1666,8 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     cursor: pointer;
   }
 
-  .submenu-link:hover, .submenu-link.is-active {
+  .submenu-link:hover,
+  .submenu-link.is-active {
     color: var(--bm-red);
   }
 
@@ -1111,7 +1701,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
   /* Welcome Panel */
   .wp-welcome-panel {
-    background: #FFFFFF;
+    background: #ffffff;
     border: 1px solid var(--border-subtle);
     border-left: 4px solid var(--bm-orange);
     border-radius: var(--radius-sm);
@@ -1135,7 +1725,6 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     color: var(--text-muted);
   }
 
-
   /* Dashboard Widgets */
   .dashboard-widgets-grid {
     display: grid;
@@ -1150,7 +1739,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   }
 
   .wp-box {
-    background: #FFFFFF;
+    background: #ffffff;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-sm);
@@ -1159,14 +1748,15 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
   .wp-box-head {
     padding: 0.95rem 1.35rem;
-    background: #F8FAFC;
+    background: #f8fafc;
     border-bottom: 1px solid var(--border-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
 
-  .wp-box-head h3, .wp-box-head h4 {
+  .wp-box-head h3,
+  .wp-box-head h4 {
     font-size: 1rem;
     font-weight: 700;
     color: var(--text-main);
@@ -1194,7 +1784,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
   .db-info-line {
     font-size: 0.78rem;
-    color: #15803D;
+    color: #15803d;
     padding-top: 0.85rem;
     border-top: 1px solid var(--border-subtle);
   }
@@ -1228,7 +1818,8 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     align-items: center;
   }
 
-  .select-bulk, .select-filter {
+  .select-bulk,
+  .select-filter {
     padding: 0.35rem 0.65rem;
     font-size: 0.82rem;
     width: auto;
@@ -1245,7 +1836,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   }
 
   .table-container {
-    background: #FFFFFF;
+    background: #ffffff;
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     overflow-x: auto;
@@ -1260,7 +1851,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
   .wp-list-table th {
     padding: 0.75rem 1rem;
-    background: #F8FAFC;
+    background: #f8fafc;
     font-size: 0.78rem;
     font-weight: 700;
     color: var(--text-faint);
@@ -1274,7 +1865,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     vertical-align: middle;
   }
 
-  .col-cb { width: 35px; }
+  .col-cb {
+    width: 35px;
+  }
 
   .cell-title strong a {
     color: var(--text-main);
@@ -1311,8 +1904,8 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   .status-badge-pub {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #15803D;
-    background: #DCFCE7;
+    color: #15803d;
+    background: #dcfce7;
     padding: 0.15rem 0.5rem;
     border-radius: var(--radius-pill);
   }
@@ -1358,7 +1951,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     display: flex;
     gap: 4px;
     padding: 0.5rem 0.75rem;
-    background: #F8FAFC;
+    background: #f8fafc;
     border: 1px solid var(--border-subtle);
     border-bottom: none;
     border-radius: var(--radius-sm) var(--radius-sm) 0 0;
@@ -1368,7 +1961,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     padding: 0.25rem 0.55rem;
     font-size: 0.78rem;
     font-weight: 700;
-    background: #FFFFFF;
+    background: #ffffff;
     border: 1px solid var(--border-subtle);
     border-radius: 4px;
     cursor: pointer;
@@ -1388,7 +1981,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
   .wp-live-preview-box {
     padding: 1.5rem;
-    background: #FFFFFF;
+    background: #ffffff;
     border: 1px solid var(--border-subtle);
     border-top: none;
     border-radius: 0 0 var(--radius-sm) var(--radius-sm);
@@ -1444,7 +2037,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    background: #FFFFFF;
+    background: #ffffff;
     border: 1px solid var(--border-subtle);
     border-left: 4px solid var(--bm-orange);
     padding: 1rem 1.5rem;
@@ -1466,7 +2059,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #16A34A;
+    background: #16a34a;
     margin-right: 0.3rem;
   }
 
@@ -1477,7 +2070,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   }
 
   .matrix-table th {
-    background: #F8FAFC;
+    background: #f8fafc;
     padding: 0.75rem 1rem;
     text-align: center;
     border-bottom: 1px solid var(--border-subtle);
@@ -1500,13 +2093,13 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   }
 
   .check-yes {
-    color: #16A34A;
+    color: #16a34a;
     font-weight: 800;
     font-size: 1.1rem;
   }
 
   .check-no {
-    color: #DC2626;
+    color: #dc2626;
     font-weight: 800;
     font-size: 1.1rem;
   }
@@ -1576,7 +2169,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   .wp-modal-dialog {
     position: relative;
     z-index: 1;
-    background: #FFFFFF;
+    background: #ffffff;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-xl);
     width: 100%;
@@ -1593,7 +2186,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #F8FAFC;
+    background: #f8fafc;
   }
 
   .wp-modal-header h3 {
@@ -1625,7 +2218,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   .wp-modal-footer {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--border-subtle);
-    background: #F8FAFC;
+    background: #f8fafc;
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
@@ -1633,48 +2226,57 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 </style>
 
 <script>
-  import { ROLE_LABELS, type SessionUser } from '../scripts/admin/api';
-  import { initUsers } from '../scripts/admin/users';
-  import { initProfile } from '../scripts/admin/profile';
-  import { initGallery } from '../scripts/admin/gallery';
-  import { initPosts } from '../scripts/admin/posts';
-  import { initNav } from '../scripts/admin/nav';
-  import { preloadRecaptcha, recaptchaToken } from '../scripts/admin/recaptcha';
-  import { initAccount, showAccountPanel } from '../scripts/admin/account';
-  import { initAnalytics } from '../scripts/admin/analytics';
+  import { ROLE_LABELS, type SessionUser } from "../scripts/admin/api";
+  import { initUsers } from "../scripts/admin/users";
+  import { initProfile } from "../scripts/admin/profile";
+  import { initGallery } from "../scripts/admin/gallery";
+  import { initPosts } from "../scripts/admin/posts";
+  import { initNav } from "../scripts/admin/nav";
+  import { preloadRecaptcha, recaptchaToken } from "../scripts/admin/recaptcha";
+  import { initAccount, showAccountPanel } from "../scripts/admin/account";
+  import { initAnalytics } from "../scripts/admin/analytics";
 
   // Usuario autenticado según la sesión PHP (nunca desde localStorage)
-  let currentUser: SessionUser = { id: 0, username: '', callsign: '', full_name: '', email: '', role: 'author' };
+  let currentUser: SessionUser = {
+    id: 0,
+    username: "",
+    callsign: "",
+    full_name: "",
+    email: "",
+    role: "author",
+  };
 
   // Vistas que requieren un rol concreto (el servidor también lo exige)
-  const VIEW_ROLES: Record<string, SessionUser['role'][]> = {
-    users: ['admin'],
-    'user-new': ['admin'],
-    'site-content': ['admin', 'editor'],
-    posts: ['admin', 'editor', 'author'],
-    'new-post': ['admin', 'editor', 'author'],
-    gallery: ['admin', 'editor'],
-    'gallery-edit': ['admin', 'editor'],
+  const VIEW_ROLES: Record<string, SessionUser["role"][]> = {
+    users: ["admin"],
+    "user-new": ["admin"],
+    "site-content": ["admin", "editor"],
+    posts: ["admin", "editor", "author"],
+    "new-post": ["admin", "editor", "author"],
+    gallery: ["admin", "editor"],
+    "gallery-edit": ["admin", "editor"],
   };
 
   const setSession = (user: SessionUser) => {
     currentUser = user;
-    document.dispatchEvent(new CustomEvent('bm:session', { detail: user }));
+    document.dispatchEvent(new CustomEvent("bm:session", { detail: user }));
   };
 
   const escapeHtml = (value: unknown): string =>
-    String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
 
   // Solo permite URLs http(s); cualquier otra cosa (javascript:, data:...) se sustituye
-  const safeUrl = (value: unknown, fallback = '#'): string => {
+  const safeUrl = (value: unknown, fallback = "#"): string => {
     try {
-      const url = new URL(String(value ?? ''), window.location.origin);
-      return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : fallback;
+      const url = new URL(String(value ?? ""), window.location.origin);
+      return url.protocol === "http:" || url.protocol === "https:"
+        ? url.href
+        : fallback;
     } catch {
       return fallback;
     }
@@ -1683,7 +2285,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   // Si el servidor responde 401 la sesión expiró: volver al login
   const handleUnauthorized = (res: Response): boolean => {
     if (res.status === 401) {
-      showLogin('Tu sesión expiró. Inicia sesión nuevamente.');
+      showLogin("Tu sesión expiró. Inicia sesión nuevamente.");
       return true;
     }
     return false;
@@ -1691,7 +2293,9 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
 
   const checkAuth = async () => {
     try {
-      const res = await fetch('/api/auth.php?action=status', { credentials: 'same-origin' });
+      const res = await fetch("/api/auth.php?action=status", {
+        credentials: "same-origin",
+      });
       const data = await res.json();
       if (data?.logged_in && data.user) {
         setSession(data.user);
@@ -1699,37 +2303,37 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
         return;
       }
     } catch (e) {
-      showLogin('No fue posible contactar al servidor de autenticación.');
+      showLogin("No fue posible contactar al servidor de autenticación.");
       return;
     }
     showLogin();
   };
 
-  const showLogin = (message = '') => {
-    document.getElementById('wp-login-screen')!.style.display = 'flex';
+  const showLogin = (message = "") => {
+    document.getElementById("wp-login-screen")!.style.display = "flex";
     // v3 puntúa mejor si el script lleva unos segundos cargado antes de enviar
     preloadRecaptcha().catch(() => {});
-    document.getElementById('wp-app')!.style.display = 'none';
-    showAccountPanel('login');
-    const errorEl = document.getElementById('login-error');
+    document.getElementById("wp-app")!.style.display = "none";
+    showAccountPanel("login");
+    const errorEl = document.getElementById("login-error");
     if (errorEl) {
-      errorEl.className = 'wp-login-error';
+      errorEl.className = "wp-login-error";
       errorEl.textContent = message;
       errorEl.hidden = !message;
     }
   };
 
   const showApp = () => {
-    document.getElementById('wp-login-screen')!.style.display = 'none';
-    document.getElementById('wp-app')!.style.display = 'flex';
+    document.getElementById("wp-login-screen")!.style.display = "none";
+    document.getElementById("wp-app")!.style.display = "flex";
     applyACL();
-    window.switchView('dashboard');
+    window.switchView("dashboard");
   };
 
   // Apply Role-Based Access Control (ACL)
   const applyACL = () => {
-    const barName = document.getElementById('bar-user-name');
-    const barRole = document.getElementById('bar-user-role');
+    const barName = document.getElementById("bar-user-name");
+    const barRole = document.getElementById("bar-user-role");
     if (barName) barName.textContent = currentUser.callsign;
     if (barRole) {
       barRole.textContent = ROLE_LABELS[currentUser.role];
@@ -1739,81 +2343,126 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
     const show = (id: string, visible: boolean) => {
       const el = document.getElementById(id);
       // '' devuelve el control al CSS (los grupos con submenú usan grid)
-      if (el) el.style.display = visible ? '' : 'none';
+      if (el) el.style.display = visible ? "" : "none";
     };
-    show('menu-users-item', currentUser.role === 'admin');
-    show('menu-profile-item', currentUser.role !== 'admin');
-    show('menu-site-content-item', currentUser.role !== 'author');
-    show('menu-gallery-item', currentUser.role !== 'author');
+    show("menu-users-item", currentUser.role === "admin");
+    show("menu-profile-item", currentUser.role !== "admin");
+    show("menu-site-content-item", currentUser.role !== "author");
+    show("menu-gallery-item", currentUser.role !== "author");
   };
 
-  document.addEventListener('bm:session', applyACL);
-  document.addEventListener('bm:unauthorized', () => showLogin('Tu sesión expiró. Inicia sesión nuevamente.'));
+  document.addEventListener("bm:session", applyACL);
+  document.addEventListener("bm:unauthorized", () =>
+    showLogin("Tu sesión ha expirado. Por favor, inicia sesión nuevamente."),
+  );
+
+  // Verificación proactiva de sesión al recuperar el foco o visibilidad de la pestaña
+  const verifySessionAlive = async () => {
+    const appEl = document.getElementById("wp-app");
+    if (!appEl || appEl.style.display === "none") return;
+    try {
+      const res = await fetch("/api/auth.php?action=status", {
+        credentials: "same-origin",
+      });
+      const data = await res.json().catch(() => null);
+      if (!data?.logged_in) {
+        showLogin(
+          "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+        );
+      }
+    } catch (_) {}
+  };
+
+  window.addEventListener("focus", verifySessionAlive);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      verifySessionAlive();
+    }
+  });
 
   // View Switching: cada módulo escucha `bm:view` para cargar sus datos
   window.switchView = (viewName: string) => {
     const allowed = VIEW_ROLES[viewName];
     if (allowed && !allowed.includes(currentUser.role)) {
-      viewName = 'dashboard';
+      viewName = "dashboard";
     }
 
-    document.querySelectorAll('.wp-view').forEach(el => el.classList.remove('is-active'));
-    document.querySelectorAll('.menu-link, .submenu-link').forEach(el => el.classList.remove('is-active'));
+    document
+      .querySelectorAll(".wp-view")
+      .forEach((el) => el.classList.remove("is-active"));
+    document
+      .querySelectorAll(".menu-link, .submenu-link")
+      .forEach((el) => el.classList.remove("is-active"));
 
     const targetView = document.getElementById(`view-${viewName}`);
-    if (targetView) targetView.classList.add('is-active');
+    if (targetView) targetView.classList.add("is-active");
 
     // Resaltar el enlace del menú (y su menú padre si es un submenú)
-    document.querySelectorAll(`.wp-sidebar [data-view="${viewName}"]`).forEach(btn => {
-      btn.classList.add('is-active');
-      btn.closest('.has-submenu')?.querySelector(':scope > .menu-link')?.classList.add('is-active');
-    });
+    document
+      .querySelectorAll(`.wp-sidebar [data-view="${viewName}"]`)
+      .forEach((btn) => {
+        btn.classList.add("is-active");
+        btn
+          .closest(".has-submenu")
+          ?.querySelector(":scope > .menu-link")
+          ?.classList.add("is-active");
+      });
 
-    document.dispatchEvent(new CustomEvent('bm:view', { detail: viewName }));
+    document.dispatchEvent(new CustomEvent("bm:view", { detail: viewName }));
     window.scrollTo({ top: 0 });
   };
 
-  document.querySelectorAll('[data-view]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const v = btn.getAttribute('data-view');
+  document.querySelectorAll("[data-view]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const v = btn.getAttribute("data-view");
       if (v) window.switchView(v);
     });
   });
 
   // Login Handler
-  const loginForm = document.getElementById('login-form');
+  const loginForm = document.getElementById("login-form");
   if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const usernameInput = document.getElementById('login-username') as HTMLInputElement;
-      const passwordInput = document.getElementById('login-password') as HTMLInputElement;
-      const submitBtn = document.getElementById('login-submit') as HTMLButtonElement | null;
+      const usernameInput = document.getElementById(
+        "login-username",
+      ) as HTMLInputElement;
+      const passwordInput = document.getElementById(
+        "login-password",
+      ) as HTMLInputElement;
+      const submitBtn = document.getElementById(
+        "login-submit",
+      ) as HTMLButtonElement | null;
       if (submitBtn) submitBtn.disabled = true;
 
       try {
-        let recaptcha = '';
+        let recaptcha = "";
         try {
-          recaptcha = await recaptchaToken('login');
+          recaptcha = await recaptchaToken("login");
         } catch (err) {
           showLogin((err as Error).message);
           return;
         }
-        const res = await fetch('/api/auth.php?action=login', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value, recaptcha_token: recaptcha })
+        const res = await fetch("/api/auth.php?action=login", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: usernameInput.value,
+            password: passwordInput.value,
+            recaptcha_token: recaptcha,
+          }),
         });
         const data = await res.json().catch(() => null);
         if (res.ok && data?.success && data.user) {
           setSession(data.user);
-          passwordInput.value = '';
+          passwordInput.value = "";
           showApp();
         } else {
-          showLogin(data?.error || 'No fue posible iniciar sesión.');
+          showLogin(data?.error || "No fue posible iniciar sesión.");
         }
       } catch (err) {
-        showLogin('No fue posible contactar al servidor de autenticación.');
+        showLogin("No fue posible contactar al servidor de autenticación.");
       } finally {
         if (submitBtn) submitBtn.disabled = false;
       }
@@ -1821,9 +2470,12 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   }
 
   // Logout Handler
-  document.getElementById('btn-logout')?.addEventListener('click', async () => {
+  document.getElementById("btn-logout")?.addEventListener("click", async () => {
     try {
-      await fetch('/api/auth.php?action=logout', { method: 'POST', credentials: 'same-origin' });
+      await fetch("/api/auth.php?action=logout", {
+        method: "POST",
+        credentials: "same-origin",
+      });
     } catch (e) {
       // Aunque falle la red, se oculta el panel
     }
@@ -1831,9 +2483,13 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || '';
   });
 
   // Site text save
-  document.getElementById('btn-save-site-texts')?.addEventListener('click', () => {
-    alert('Los textos del portal todavía no se guardan: pendiente en la siguiente fase.');
-  });
+  document
+    .getElementById("btn-save-site-texts")
+    ?.addEventListener("click", () => {
+      alert(
+        "Los textos del portal todavía no se guardan: pendiente en la siguiente fase.",
+      );
+    });
 
   // Initialize
   initUsers();

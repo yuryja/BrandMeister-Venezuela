@@ -40,6 +40,45 @@ interface AnalyticsData {
     page_views: number;
     unique_visitors: number;
   };
+  audience?: {
+    devices: Array<{
+      type: string;
+      name: string;
+      color: string;
+      visits: number;
+      people: number;
+      percent: number;
+    }>;
+    total_device_visits: number;
+    days: Array<{
+      day_idx: number;
+      name: string;
+      short: string;
+      visits: number;
+      people: number;
+    }>;
+    max_day_visits: number;
+    peak_day?: {
+      day_idx: number;
+      name: string;
+      short: string;
+      visits: number;
+    } | null;
+    hours: Array<{
+      hour: number;
+      label: string;
+      short_label: string;
+      visits: number;
+      people: number;
+    }>;
+    max_hour_visits: number;
+    peak_hour?: {
+      hour: number;
+      label: string;
+      short_label: string;
+      visits: number;
+    } | null;
+  };
   map_points: MapPoint[];
   player: {
     countries: Array<{ country: string; code: string; plays: number; percent: number }>;
@@ -279,6 +318,9 @@ function renderDashboard(data: AnalyticsData) {
 
   // 2. Mapa
   renderMarkers();
+
+  // 2.1. Audiencia (Dispositivos, Días y Horas pico)
+  renderAudienceWidget(data.audience);
 
   // 3. Reproductor: Países
   const countriesList = $('player-countries-list');
@@ -585,6 +627,213 @@ function renderDashboard(data: AnalyticsData) {
         .join('');
     }
   }
+
+  // 8. Audiencia (Dispositivos, Días y Horas)
+  renderAudienceWidget(data.audience);
+}
+
+// --------------------------------------------------------------------
+// Render del Widget de Audiencia
+// --------------------------------------------------------------------
+function renderAudienceWidget(audience?: AnalyticsData['audience']) {
+  // 1. Dispositivos (Pie / Donut SVG)
+  const devicesContainer = $('audience-devices-container');
+  if (devicesContainer) {
+    const devices = audience?.devices || [];
+    const totalVisits = audience?.total_device_visits || 0;
+
+    if (!devices.length || totalVisits === 0) {
+      devicesContainer.innerHTML = `
+        <div class="audience-pie-svg-container">
+          <svg viewBox="0 0 140 140" class="audience-pie-svg">
+            <circle cx="70" cy="70" r="52" fill="none" stroke="#F1F5F9" stroke-width="16" />
+          </svg>
+          <div class="audience-pie-center">
+            <span class="audience-pie-center-val">0</span>
+            <span class="audience-pie-center-lbl">Sin datos</span>
+          </div>
+        </div>
+        <p class="analytics-empty" style="padding: 0.5rem 0 !important;">Sin visitas en este periodo.</p>
+      `;
+    } else {
+      const R = 52;
+      const C = 2 * Math.PI * R;
+      let accumulated = 0;
+
+      const slicesHtml = devices
+        .map((d) => {
+          const pct = Math.max(0, Math.min(100, Number(d.percent) || 0));
+          if (pct === 0) return '';
+          const dash = (pct / 100) * C;
+          const offset = accumulated;
+          accumulated += dash;
+          return `<circle class="pie-slice" cx="70" cy="70" r="${R}" fill="none" stroke="${d.color}" stroke-width="16" stroke-dasharray="${dash} ${C - dash}" stroke-dashoffset="${-offset}" />`;
+        })
+        .join('');
+
+      const legendHtml = devices
+        .map((d) => {
+          return `
+            <div class="audience-legend-row">
+              <div class="audience-legend-name">
+                <span class="audience-legend-dot" style="background-color: ${d.color};"></span>
+                <span>${escapeHtml(d.name)}</span>
+              </div>
+              <div class="audience-legend-metrics">
+                <strong>${fmt(d.visits)}</strong>
+                <span>(${d.percent}%)</span>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      devicesContainer.innerHTML = `
+        <div class="audience-pie-svg-container">
+          <svg viewBox="0 0 140 140" class="audience-pie-svg">
+            <circle cx="70" cy="70" r="${R}" fill="none" stroke="#F1F5F9" stroke-width="16" />
+            ${slicesHtml}
+          </svg>
+          <div class="audience-pie-center">
+            <span class="audience-pie-center-val">${fmt(totalVisits)}</span>
+            <span class="audience-pie-center-lbl">Visitas</span>
+          </div>
+        </div>
+        <div class="audience-devices-legend">
+          ${legendHtml}
+        </div>
+      `;
+    }
+  }
+
+  // 2. Días de la semana (7 barras)
+  const daysContainer = $('audience-days-container');
+  if (daysContainer) {
+    const days = audience?.days || [];
+    const maxVisits = audience?.max_day_visits || 0;
+    const peak = audience?.peak_day;
+
+    if (!days.length || maxVisits === 0) {
+      daysContainer.innerHTML = `
+        <div class="day-bars-track-area">
+          ${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(d => `
+            <div class="day-bar-item">
+              <div class="day-bar-slot"><div class="day-bar-fill" style="height: 4px;"></div></div>
+              <span class="day-bar-label">${d}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="audience-summary-pill" style="background: #F8FAFC; color: #64748B; border-color: #E2E8F0;">
+          <span>Sin actividad registrada en este periodo</span>
+        </div>
+      `;
+    } else {
+      const barsHtml = days
+        .map((d) => {
+          const isPeak = Boolean(peak && peak.day_idx === d.day_idx && d.visits > 0);
+          const heightPct = d.visits > 0 ? Math.max(8, Math.round((d.visits / maxVisits) * 100)) : 4;
+          return `
+            <div class="day-bar-item ${isPeak ? 'is-peak' : ''}" title="${escapeHtml(d.name)}: ${fmt(d.visits)} visitas (${fmt(d.people)} personas)">
+              <span class="day-bar-value">${d.visits > 0 ? fmt(d.visits) : ''}</span>
+              <div class="day-bar-slot">
+                <div class="day-bar-fill" style="height: ${heightPct}%;"></div>
+              </div>
+              <span class="day-bar-label">${escapeHtml(d.short)}</span>
+            </div>
+          `;
+        })
+        .join('');
+
+      const pillHtml = peak && peak.visits > 0
+        ? `
+          <div class="audience-summary-pill">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span>Día pico: <strong>${escapeHtml(peak.name)}</strong> (${fmt(peak.visits)} visitas)</span>
+          </div>
+        `
+        : `
+          <div class="audience-summary-pill" style="background: #F8FAFC; color: #64748B; border-color: #E2E8F0;">
+            <span>Sin visitas en este periodo</span>
+          </div>
+        `;
+
+      daysContainer.innerHTML = `
+        <div class="day-bars-track-area">
+          ${barsHtml}
+        </div>
+        ${pillHtml}
+      `;
+    }
+  }
+
+  // 3. Horas del día (24 barras)
+  const hoursContainer = $('audience-hours-container');
+  if (hoursContainer) {
+    const hours = audience?.hours || [];
+    const maxVisits = audience?.max_hour_visits || 0;
+    const peak = audience?.peak_hour;
+
+    if (!hours.length || maxVisits === 0) {
+      hoursContainer.innerHTML = `
+        <div class="hour-bars-track-area">
+          ${Array.from({ length: 24 }).map(() => `
+            <div class="hour-bar-item">
+              <div class="hour-bar-slot"><div class="hour-bar-fill" style="height: 4px;"></div></div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="hour-bars-axis">
+          <span>00h</span><span>04h</span><span>08h</span><span>12h</span><span>16h</span><span>20h</span><span>23h</span>
+        </div>
+        <div class="audience-summary-pill" style="background: #F8FAFC; color: #64748B; border-color: #E2E8F0;">
+          <span>Sin actividad registrada en este periodo</span>
+        </div>
+      `;
+    } else {
+      const barsHtml = hours
+        .map((h) => {
+          const isPeak = Boolean(peak && peak.hour === h.hour && h.visits > 0);
+          const heightPct = h.visits > 0 ? Math.max(8, Math.round((h.visits / maxVisits) * 100)) : 4;
+          return `
+            <div class="hour-bar-item ${isPeak ? 'is-peak' : ''}">
+              <div class="hour-tooltip">${escapeHtml(h.label)}: <strong>${fmt(h.visits)}</strong> visitas</div>
+              <div class="hour-bar-slot">
+                <div class="hour-bar-fill" style="height: ${heightPct}%;"></div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+
+      const pillHtml = peak && peak.visits > 0
+        ? `
+          <div class="audience-summary-pill">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Hora pico: <strong>${escapeHtml(peak.label)}</strong> (${fmt(peak.visits)} visitas)</span>
+          </div>
+        `
+        : `
+          <div class="audience-summary-pill" style="background: #F8FAFC; color: #64748B; border-color: #E2E8F0;">
+            <span>Sin visitas en este periodo</span>
+          </div>
+        `;
+
+      hoursContainer.innerHTML = `
+        <div class="hour-bars-track-area">
+          ${barsHtml}
+        </div>
+        <div class="hour-bars-axis">
+          <span>00h</span><span>04h</span><span>08h</span><span>12h</span><span>16h</span><span>20h</span><span>23h</span>
+        </div>
+        ${pillHtml}
+      `;
+    }
+  }
 }
 
 // --------------------------------------------------------------------
@@ -615,6 +864,14 @@ const EMPTY_ANALYTICS: AnalyticsData = {
     platforms: [],
     total: 0,
   },
+  audience: {
+    devices: [],
+    total_device_visits: 0,
+    days: [],
+    max_day_visits: 0,
+    hours: [],
+    max_hour_visits: 0,
+  },
 };
 
 // --------------------------------------------------------------------
@@ -624,6 +881,10 @@ export async function loadAnalytics(range = '7d') {
   currentRange = range;
   try {
     const res = await fetch(`/api/analytics.php?action=stats&range=${encodeURIComponent(range)}`, { credentials: 'same-origin' });
+    if (res.status === 401) {
+      document.dispatchEvent(new CustomEvent('bm:unauthorized'));
+      return;
+    }
     if (res.ok) {
       const data = await res.json();
       if (data && data.kpis) {
