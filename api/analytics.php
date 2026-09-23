@@ -225,6 +225,20 @@ function get_empty_stats(): array {
             'page_views' => 0,
             'unique_visitors' => 0,
         ],
+        'audience' => [
+            'devices' => [
+                ['type' => 'mobile', 'name' => 'Móvil', 'color' => '#E8261C', 'visits' => 0, 'people' => 0, 'percent' => 0],
+                ['type' => 'desktop', 'name' => 'Escritorio', 'color' => '#EE6C1F', 'visits' => 0, 'people' => 0, 'percent' => 0],
+                ['type' => 'tablet', 'name' => 'Tablet', 'color' => '#F2A93B', 'visits' => 0, 'people' => 0, 'percent' => 0],
+            ],
+            'total_device_visits' => 0,
+            'days' => [],
+            'max_day_visits' => 0,
+            'peak_day' => null,
+            'hours' => [],
+            'max_hour_visits' => 0,
+            'peak_hour' => null,
+        ],
         'map_points' => [],
         'player' => [
             'countries' => [],
@@ -720,6 +734,145 @@ if ($action === 'stats' || $action === 'summary') {
             'unique_visitors' => (int)($kpis['unique_visitors'] ?? 0),
         ];
 
+        // Audiencia: Dispositivos, Días de mayor concurrencia y Distribución horaria (24h)
+        // 1. Dispositivos (desktop, mobile, tablet)
+        $devicesStmt = $pdo->query("SELECT 
+            COALESCE(device_type, 'desktop') AS device, 
+            COUNT(*) AS visits, 
+            COUNT(DISTINCT ip_address) AS people
+            FROM bm_analytics_events
+            WHERE event_type = 'page_view' AND event_category <> 'petra_view' $since
+            GROUP BY device
+            ORDER BY visits DESC");
+        $deviceRows = $devicesStmt ? ($devicesStmt->fetchAll() ?: []) : [];
+        $totalDeviceVisits = array_sum(array_map(function ($r) { return (int)$r['visits']; }, $deviceRows));
+
+        $deviceMeta = [
+            'mobile' => ['name' => 'Móvil', 'color' => '#E8261C'],
+            'desktop' => ['name' => 'Escritorio', 'color' => '#EE6C1F'],
+            'tablet' => ['name' => 'Tablet', 'color' => '#F2A93B'],
+        ];
+
+        $audienceDevices = [];
+        foreach (['mobile', 'desktop', 'tablet'] as $dt) {
+            $found = null;
+            foreach ($deviceRows as $dr) {
+                if (strtolower((string)$dr['device']) === $dt) {
+                    $found = $dr;
+                    break;
+                }
+            }
+            $v = $found ? (int)$found['visits'] : 0;
+            $p = $found ? (int)$found['people'] : 0;
+            $audienceDevices[] = [
+                'type' => $dt,
+                'name' => $deviceMeta[$dt]['name'],
+                'color' => $deviceMeta[$dt]['color'],
+                'visits' => $v,
+                'people' => $p,
+                'percent' => $totalDeviceVisits > 0 ? round(($v * 100) / $totalDeviceVisits, 1) : 0,
+            ];
+        }
+
+        // 2. Días de la semana (Lunes = 0 .. Domingo = 6)
+        $daysStmt = $pdo->query("SELECT 
+            WEEKDAY(created_at) AS day_idx, 
+            COUNT(*) AS visits, 
+            COUNT(DISTINCT ip_address) AS people
+            FROM bm_analytics_events
+            WHERE event_type = 'page_view' AND event_category <> 'petra_view' $since
+            GROUP BY day_idx
+            ORDER BY day_idx ASC");
+        $dayRows = $daysStmt ? ($daysStmt->fetchAll() ?: []) : [];
+        $dayMap = [];
+        foreach ($dayRows as $dr) {
+            $dayMap[(int)$dr['day_idx']] = [
+                'visits' => (int)$dr['visits'],
+                'people' => (int)$dr['people'],
+            ];
+        }
+
+        $dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        $dayShort = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+        $audienceDays = [];
+        $maxDayVisits = 0;
+        $peakDayIdx = 0;
+
+        for ($i = 0; $i < 7; $i++) {
+            $v = $dayMap[$i]['visits'] ?? 0;
+            $p = $dayMap[$i]['people'] ?? 0;
+            if ($v > $maxDayVisits) {
+                $maxDayVisits = $v;
+                $peakDayIdx = $i;
+            }
+            $audienceDays[] = [
+                'day_idx' => $i,
+                'name' => $dayNames[$i],
+                'short' => $dayShort[$i],
+                'visits' => $v,
+                'people' => $p,
+            ];
+        }
+
+        // 3. Horas del día (00 a 23)
+        $hoursStmt = $pdo->query("SELECT 
+            HOUR(created_at) AS hour_idx, 
+            COUNT(*) AS visits, 
+            COUNT(DISTINCT ip_address) AS people
+            FROM bm_analytics_events
+            WHERE event_type = 'page_view' AND event_category <> 'petra_view' $since
+            GROUP BY hour_idx
+            ORDER BY hour_idx ASC");
+        $hourRows = $hoursStmt ? ($hoursStmt->fetchAll() ?: []) : [];
+        $hourMap = [];
+        foreach ($hourRows as $hr) {
+            $hourMap[(int)$hr['hour_idx']] = [
+                'visits' => (int)$hr['visits'],
+                'people' => (int)$hr['people'],
+            ];
+        }
+
+        $audienceHours = [];
+        $maxHourVisits = 0;
+        $peakHourIdx = 0;
+
+        for ($h = 0; $h < 24; $h++) {
+            $v = $hourMap[$h]['visits'] ?? 0;
+            $p = $hourMap[$h]['people'] ?? 0;
+            if ($v > $maxHourVisits) {
+                $maxHourVisits = $v;
+                $peakHourIdx = $h;
+            }
+            $audienceHours[] = [
+                'hour' => $h,
+                'label' => sprintf('%02d:00', $h),
+                'short_label' => sprintf('%02dh', $h),
+                'visits' => $v,
+                'people' => $p,
+            ];
+        }
+
+        $audience = [
+            'devices' => $audienceDevices,
+            'total_device_visits' => $totalDeviceVisits,
+            'days' => $audienceDays,
+            'max_day_visits' => $maxDayVisits,
+            'peak_day' => $maxDayVisits > 0 ? [
+                'day_idx' => $peakDayIdx,
+                'name' => $dayNames[$peakDayIdx],
+                'short' => $dayShort[$peakDayIdx],
+                'visits' => $maxDayVisits,
+            ] : null,
+            'hours' => $audienceHours,
+            'max_hour_visits' => $maxHourVisits,
+            'peak_hour' => $maxHourVisits > 0 ? [
+                'hour' => $peakHourIdx,
+                'label' => sprintf('%02d:00 - %02d:59', $peakHourIdx, $peakHourIdx),
+                'short_label' => sprintf('%02dh', $peakHourIdx),
+                'visits' => $maxHourVisits,
+            ] : null,
+        ];
+
         // Telemetría en tiempo real: oyentes de audio en vivo activos en este momento (últimos 60 segundos)
         // Se toma el evento de audio más reciente por IP en la ventana de 60s.
         // Si el último evento fue 'audio_stop' o ya expiró el latido, ya no se considera activo.
@@ -779,6 +932,7 @@ if ($action === 'stats' || $action === 'summary') {
                 'active_countries' => (int)($kpis['active_countries'] ?? 0),
             ],
             'traffic' => $traffic,
+            'audience' => $audience,
             'map_points' => $mapPoints,
             'player' => [
                 'countries' => $playerCountries,
