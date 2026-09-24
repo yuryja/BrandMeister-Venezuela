@@ -15,12 +15,15 @@ const UPLOAD_MAX_CHUNK_BYTES = 6 * 1024 * 1024;
 
 /**
  * Tipos de archivo admitidos: límites de tamaño en píxeles por cada uno.
- * 'poster' es la portada de un video; 'post-image' la imagen destacada de una noticia.
+ * 'poster' es la portada de un video; 'post-image' la imagen destacada de una noticia;
+ * 'post-inline' una imagen insertada dentro del texto de una noticia.
  */
 const UPLOAD_KINDS = [
     'image' => ['max_width' => 1500, 'max_height' => 1500],
     'poster' => ['max_width' => 1500, 'max_height' => 1500],
     'post-image' => ['max_width' => 1920, 'max_height' => 1280],
+    // Imagen dentro del texto de una noticia: cabe en 1600×1600, horizontal o vertical
+    'post-inline' => ['max_width' => 1600, 'max_height' => 1600],
     'video' => [],
 ];
 
