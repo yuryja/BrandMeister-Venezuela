@@ -3,11 +3,15 @@
  * Conversor de Markdown a HTML, reducido a lo que usa el editor de noticias.
  * Todo el texto se escapa primero: el HTML que venga en el contenido nunca se ejecuta.
  *
- * Soporta: encabezados (##, ###), negrita, cursiva, código, enlaces, imágenes,
+ * Soporta: encabezados (##, ###), negrita, cursiva, código, enlaces, imágenes (con pie de foto:
+ * ![descripción](url "Pie de foto"), que sola en su párrafo se convierte en <figure>),
  * listas con viñetas y numeradas, citas, líneas horizontales, bloques de código y párrafos.
  */
 
 if (!function_exists('bm_markdown')) {
+
+    /** ![alt](url) o ![alt](url "pie de foto"), sobre texto ya escapado: las comillas llegan como &quot; */
+    define('BM_MARKDOWN_IMAGE', '/!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;(.*?)&quot;)?\)/');
 
     function bm_markdown($markdown) {
         $text = str_replace(["\r\n", "\r"], "\n", (string)$markdown);
@@ -25,7 +29,10 @@ if (!function_exists('bm_markdown')) {
 
         $flushParagraph = function () use (&$paragraph, &$html) {
             if ($paragraph) {
-                $html[] = '<p>' . bm_markdown_inline(implode(' ', $paragraph)) . '</p>';
+                $texto = trim(implode(' ', $paragraph));
+                // Una imagen sola en su párrafo es una figura, con su pie de foto si lo tiene
+                $figura = bm_markdown_figure($texto);
+                $html[] = $figura !== null ? $figura : '<p>' . bm_markdown_inline($texto) . '</p>';
                 $paragraph = [];
             }
         };
@@ -111,15 +118,15 @@ if (!function_exists('bm_markdown')) {
             return "\x01" . (count($codes) - 1) . "\x01";
         }, $out);
 
-        // Imágenes y enlaces: solo http(s), mailto y rutas del propio sitio
-        $safeUrl = function ($url) {
-            $url = html_entity_decode($url, ENT_QUOTES, 'UTF-8');
-            $ok = preg_match('#^(https?://|mailto:|/|\#)#i', $url) && !preg_match('/^\s*javascript:/i', $url);
-            return $ok ? htmlspecialchars($url, ENT_QUOTES, 'UTF-8') : '#';
-        };
-        $out = preg_replace_callback('/!\[([^\]]*)\]\(([^)\s]+)\)/', function ($m) use ($safeUrl) {
-            return '<img src="' . $safeUrl($m[2]) . '" alt="' . $m[1] . '" loading="lazy" />';
+        // Imágenes: se apartan ya convertidas para que la negrita o la cursiva no toquen sus atributos
+        $safeUrl = 'bm_markdown_safe_url';
+        $images = [];
+        $out = preg_replace_callback(BM_MARKDOWN_IMAGE, function ($m) use (&$images) {
+            $images[] = bm_markdown_img($m[1], $m[2], '')['img'];
+            return "\x02" . (count($images) - 1) . "\x02";
         }, $out);
+
+        // Enlaces: solo http(s), mailto y rutas del propio sitio
         $out = preg_replace_callback('/\[([^\]]+)\]\(([^)\s]+)\)/', function ($m) use ($safeUrl) {
             $url = $safeUrl($m[2]);
             $external = preg_match('#^https?://#i', html_entity_decode($url, ENT_QUOTES, 'UTF-8'))
@@ -131,9 +138,68 @@ if (!function_exists('bm_markdown')) {
         $out = preg_replace('/(?<![\w*])\*([^*\n]+)\*(?![\w*])/', '<em>$1</em>', $out);
         $out = preg_replace('/(?<![\w_])_([^_\n]+)_(?![\w_])/', '<em>$1</em>', $out);
 
+        $out = preg_replace_callback('/\x02(\d+)\x02/', function ($m) use ($images) {
+            return $images[(int)$m[1]];
+        }, $out);
         return preg_replace_callback('/\x01(\d+)\x01/', function ($m) use ($codes) {
             return $codes[(int)$m[1]];
         }, $out);
+    }
+
+    /** Solo http(s), mailto y rutas del propio sitio. Recibe y devuelve texto ya escapado. */
+    function bm_markdown_safe_url($url) {
+        $url = html_entity_decode($url, ENT_QUOTES, 'UTF-8');
+        $ok = preg_match('#^(https?://|mailto:|/|\#)#i', $url) && !preg_match('/^\s*javascript:/i', $url);
+        return $ok ? htmlspecialchars($url, ENT_QUOTES, 'UTF-8') : '#';
+    }
+
+    /** Ruta en disco de una imagen de /media/ (para leer su tamaño), o '' si no es de este sitio */
+    function bm_markdown_media_path($url) {
+        if (strpos($url, '/media/') !== 0) {
+            return '';
+        }
+        $root = realpath(rtrim(getenv('GALLERY_MEDIA_DIR') ?: dirname(__DIR__) . '/media', '/'));
+        $path = realpath(($root ?: '') . substr($url, strlen('/media')));
+        return ($root && $path && strpos($path, $root . DIRECTORY_SEPARATOR) === 0 && is_file($path)) ? $path : '';
+    }
+
+    /**
+     * <img> a partir de ![alt](url "pie de foto"), con las partes ya escapadas.
+     * Un #mediana al final de la URL la muestra más estrecha y centrada (lo pone el editor).
+     * Con imágenes del propio sitio se añaden ancho y alto: la página no salta al cargarlas.
+     *
+     * @return array{img: string, caption: string, size: string}
+     */
+    function bm_markdown_img($alt, $escapedUrl, $caption) {
+        $size = '';
+        $url = html_entity_decode($escapedUrl, ENT_QUOTES, 'UTF-8');
+        if (preg_match('/#mediana$/', $url)) {
+            $size = 'mediana';
+            $url = substr($url, 0, -strlen('#mediana'));
+        }
+        $src = bm_markdown_safe_url(htmlspecialchars($url, ENT_QUOTES, 'UTF-8'));
+
+        $dims = '';
+        $path = bm_markdown_media_path($url);
+        if ($path !== '' && ($info = @getimagesize($path))) {
+            $dims = ' width="' . (int)$info[0] . '" height="' . (int)$info[1] . '"';
+        }
+        $img = '<img src="' . $src . '" alt="' . $alt . '"' . $dims . ' loading="lazy" decoding="async"'
+            . ($size ? ' class="img-' . $size . '"' : '') . ' />';
+        return ['img' => $img, 'caption' => $caption, 'size' => $size];
+    }
+
+    /** Figura si el párrafo es solo una imagen; null si no lo es */
+    function bm_markdown_figure($text) {
+        $escaped = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+        if (!preg_match('/^' . trim(BM_MARKDOWN_IMAGE, '/') . '$/', $escaped, $m)) {
+            return null;
+        }
+        $parts = bm_markdown_img($m[1], $m[2], $m[3] ?? '');
+        $clase = 'post-figure' . ($parts['size'] ? ' post-figure-' . $parts['size'] : '');
+        return '<figure class="' . $clase . '">' . $parts['img']
+            . ($parts['caption'] !== '' ? '<figcaption>' . $parts['caption'] . '</figcaption>' : '')
+            . '</figure>';
     }
 
     /** Resumen en texto plano (para meta descripciones) */
