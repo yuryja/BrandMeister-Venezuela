@@ -1,6 +1,6 @@
 // Panel · Noticias: listado con filtros, papelera y editor con vista previa
-import { api, escapeHtml, notice, showFieldErrors, withBusy, type SessionUser } from './api';
-import { processImage, uploadInChunks, formatBytes, POST_IMAGE_MAX, type ProcessedImage } from './media';
+import { api, escapeHtml, notice, showFieldErrors, withBusy, openModal, closeModal, type SessionUser } from './api';
+import { processImage, uploadInChunks, formatBytes, POST_IMAGE_MAX, POST_INLINE_MAX, type ProcessedImage } from './media';
 
 type PostRow = {
   id: number;
@@ -271,14 +271,41 @@ function updateCounters() {
   $('pf-description-count')!.textContent = String(($('pf-description') as HTMLTextAreaElement).value.length);
 }
 
+/** ![alt](url "pie de foto") sobre texto ya escapado (las comillas llegan como &quot;) */
+const IMAGEN_MD = /!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;(.*?)&quot;)?\)/;
+
+/** Solo http(s), mailto y rutas del propio sitio; recibe texto ya escapado */
+const urlSegura = (url: string) => (/^(https?:\/\/|mailto:|\/|#)/i.test(url) ? url : '#');
+
+/** <img> de la vista previa. Un #mediana al final de la URL la muestra más estrecha */
+function imagenMd(alt: string, url: string) {
+  const mediana = url.endsWith('#mediana');
+  const src = urlSegura(mediana ? url.slice(0, -'#mediana'.length) : url);
+  return { mediana, img: `<img src="${src}" alt="${alt}" loading="lazy"${mediana ? ' class="img-mediana"' : ''} />` };
+}
+
 /** Vista previa del Markdown (la versión definitiva la genera PHP al publicar) */
 function markdownToHtml(md: string) {
-  const inline = (text: string) =>
-    escapeHtml(text)
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, label, url) => `<a href="${escapeHtml(url)}">${label}</a>`)
+  const inline = (text: string) => {
+    // Código e imágenes se apartan ya convertidos: la negrita o la cursiva no tocan sus atributos
+    const apartados: string[] = [];
+    const apartar = (html: string) => `\u0002${apartados.push(html) - 1}\u0002`;
+    return escapeHtml(text)
+      .replace(/`([^`]+)`/g, (_m, codigo) => apartar(`<code>${codigo}</code>`))
+      .replace(new RegExp(IMAGEN_MD.source, 'g'), (_m, alt, url) => apartar(imagenMd(alt, url).img))
+      .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, label, url) => `<a href="${urlSegura(url)}">${label}</a>`)
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/(?<![\w*])\*([^*\n]+)\*(?![\w*])/g, '<em>$1</em>');
+      .replace(/(?<![\w*])\*([^*\n]+)\*(?![\w*])/g, '<em>$1</em>')
+      .replace(/\u0002(\d+)\u0002/g, (_m, i) => apartados[Number(i)]);
+  };
+
+  // Una imagen sola en su línea es una figura, con su pie de foto si lo tiene
+  const figura = (line: string) => {
+    const m = escapeHtml(line).match(new RegExp(`^${IMAGEN_MD.source}$`));
+    if (!m) return null;
+    const { mediana, img } = imagenMd(m[1], m[2]);
+    return `<figure class="post-figure${mediana ? ' post-figure-mediana' : ''}">${img}${m[3] ? `<figcaption>${m[3]}</figcaption>` : ''}</figure>`;
+  };
 
   const html: string[] = [];
   let list: 'ul' | 'ol' | null = null;
@@ -298,10 +325,139 @@ function markdownToHtml(md: string) {
     else if (quote) { closeList(); html.push(`<blockquote><p>${inline(quote[1])}</p></blockquote>`); }
     else if (bullet) { if (list !== 'ul') { closeList(); html.push('<ul>'); list = 'ul'; } html.push(`<li>${inline(bullet[1])}</li>`); }
     else if (numbered) { if (list !== 'ol') { closeList(); html.push('<ol>'); list = 'ol'; } html.push(`<li>${inline(numbered[1])}</li>`); }
+    else if (figura(line)) { closeList(); html.push(figura(line)!); }
     else { closeList(); html.push(`<p>${inline(line)}</p>`); }
   }
   closeList();
   return html.join('\n');
+}
+
+// --------------------------------------------------------------------
+// Imágenes dentro del texto (estilo "Añadir medio" de WordPress)
+// La imagen se optimiza a WebP en el navegador, se sube por partes y se publica al momento;
+// luego se inserta como ![descripción](url "pie de foto") donde estaba el cursor.
+// --------------------------------------------------------------------
+let cursorImagen = 0;
+let imagenSubida: { url: string; width: number | null; height: number | null } | null = null;
+let vistaImagenUrl = '';
+let turnoImagen = 0; // si se elige otra imagen a mitad de subida, la anterior se ignora
+
+function reiniciarDialogoImagen() {
+  turnoImagen++;
+  imagenSubida = null;
+  if (vistaImagenUrl) URL.revokeObjectURL(vistaImagenUrl);
+  vistaImagenUrl = '';
+  $('pi-details')!.hidden = true;
+  $('pi-drop')!.hidden = false;
+  ($('pi-thumb') as HTMLImageElement).removeAttribute('src');
+  $('pi-status')!.textContent = '';
+  ($('pi-alt') as HTMLInputElement).value = '';
+  ($('pi-caption') as HTMLInputElement).value = '';
+  ($('post-image-form')!.querySelector('input[name="pi-size"][value="completo"]') as HTMLInputElement).checked = true;
+  ($('pi-insert') as HTMLButtonElement).disabled = true;
+  $('post-image-notice')!.innerHTML = '';
+}
+
+function abrirDialogoImagen(file?: File | null) {
+  const area = $('pf-content') as HTMLTextAreaElement;
+  cursorImagen = area.selectionStart ?? area.value.length;
+  reiniciarDialogoImagen();
+  openModal($('modal-post-image')!);
+  if (file) subirImagenEnTexto(file);
+}
+
+async function subirImagenEnTexto(file: File) {
+  const turno = ++turnoImagen;
+  const estado = $('pi-status')!;
+  const insertar = $('pi-insert') as HTMLButtonElement;
+  $('post-image-notice')!.innerHTML = '';
+
+  if (!file.type.startsWith('image/') && !/\.(hei[cf])$/i.test(file.name)) {
+    notice($('post-image-notice'), 'error', 'Ese archivo no es una imagen.');
+    return;
+  }
+  $('pi-drop')!.hidden = true;
+  $('pi-details')!.hidden = false;
+  insertar.disabled = true;
+  estado.textContent = 'Optimizando imagen…';
+
+  try {
+    const procesada = await processImage(file, {
+      maxWidth: POST_INLINE_MAX.width,
+      maxHeight: POST_INLINE_MAX.height,
+      mode: 'ultra',
+    });
+    if (turno !== turnoImagen) return;
+    vistaImagenUrl = URL.createObjectURL(procesada.blob);
+    ($('pi-thumb') as HTMLImageElement).src = vistaImagenUrl;
+
+    estado.textContent = 'Subiendo… 0 %';
+    const uploadId = await uploadInChunks(
+      procesada.blob,
+      'post-inline',
+      (ratio) => { if (turno === turnoImagen) estado.textContent = `Subiendo… ${Math.round(ratio * 100)} %`; },
+      '/api/posts.php?action=upload_chunk'
+    );
+    if (turno !== turnoImagen) return;
+
+    const res = await api<{ url: string; width: number | null; height: number | null }>(
+      '/api/posts.php?action=inline_image',
+      { upload_id: uploadId }
+    );
+    if (turno !== turnoImagen) return;
+    if (!res.ok) throw new Error(res.data.error || 'No se pudo guardar la imagen.');
+
+    imagenSubida = res.data;
+    estado.textContent = `Lista · ${procesada.width}×${procesada.height} px · ${formatBytes(procesada.blob.size)}`;
+    insertar.disabled = false;
+    ($('pi-alt') as HTMLInputElement).focus();
+  } catch (err) {
+    if (turno !== turnoImagen) return;
+    const mensaje = /hei[cf]$/i.test(file.name)
+      ? 'HEIC solo se puede leer en Safari: conviértela a JPG antes de subirla.'
+      : (err as Error).message || 'No se pudo preparar esa imagen.';
+    notice($('post-image-notice'), 'error', mensaje);
+    $('pi-details')!.hidden = true;
+    $('pi-drop')!.hidden = false;
+    estado.textContent = '';
+  }
+}
+
+function insertarImagenEnTexto(e: Event) {
+  e.preventDefault();
+  if (!imagenSubida) return;
+  // Los corchetes cerrarían la descripción y las comillas el pie de foto antes de tiempo
+  const limpio = (valor: string) => valor.replace(/[\r\n]+/g, ' ').trim();
+  const alt = limpio(($('pi-alt') as HTMLInputElement).value).replace(/[[\]]/g, '');
+  const pie = limpio(($('pi-caption') as HTMLInputElement).value).replace(/"/g, '\u201D');
+  const mediana = ($('post-image-form')!.querySelector('input[name="pi-size"]:checked') as HTMLInputElement)?.value === 'mediana';
+  const md = `![${alt}](${imagenSubida.url}${mediana ? '#mediana' : ''}${pie ? ` "${pie}"` : ''})`;
+
+  // Siempre en su propio párrafo: así se publica como figura, con su pie de foto
+  const area = $('pf-content') as HTMLTextAreaElement;
+  const antes = area.value.slice(0, cursorImagen);
+  const despues = area.value.slice(cursorImagen);
+  const separarAntes = antes === '' || antes.endsWith('\n\n') ? '' : antes.endsWith('\n') ? '\n' : '\n\n';
+  const separarDespues = despues.startsWith('\n\n') ? '' : despues.startsWith('\n') ? '\n' : '\n\n';
+  area.setRangeText(separarAntes + md + separarDespues, cursorImagen, cursorImagen, 'end');
+
+  imagenSubida = null;
+  closeModal($('modal-post-image')!);
+  updateCounters();
+  const vistaPrevia = $('pf-preview')!;
+  if (vistaPrevia.style.display !== 'none') {
+    vistaPrevia.innerHTML = `<div class="prose-preview">${markdownToHtml(area.value)}</div>`;
+  } else {
+    area.focus();
+  }
+}
+
+/** Archivo de imagen de un evento de arrastrar o pegar, si lo hay */
+function imagenDe(items: DataTransferItemList | undefined | null): File | null {
+  for (const item of Array.from(items ?? [])) {
+    if (item.kind === 'file' && item.type.startsWith('image/')) return item.getAsFile();
+  }
+  return null;
 }
 
 /** Inserta formato Markdown alrededor de la selección */
@@ -469,6 +625,49 @@ export function initPosts() {
   document.querySelectorAll<HTMLElement>('[data-md]').forEach((btn) =>
     btn.addEventListener('click', () => applyFormat(btn.dataset.md!))
   );
+
+  // Imágenes dentro del texto: botón, arrastrar al texto o pegar con Ctrl+V
+  $('pf-insert-image')!.addEventListener('click', () => abrirDialogoImagen());
+  const contenido = $('pf-content') as HTMLTextAreaElement;
+  contenido.addEventListener('dragover', (e) => {
+    if (Array.from(e.dataTransfer?.items ?? []).some((i) => i.kind === 'file')) {
+      e.preventDefault();
+      contenido.classList.add('is-dragging');
+    }
+  });
+  contenido.addEventListener('dragleave', () => contenido.classList.remove('is-dragging'));
+  contenido.addEventListener('drop', (e) => {
+    contenido.classList.remove('is-dragging');
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) return;
+    e.preventDefault();
+    abrirDialogoImagen(file);
+  });
+  contenido.addEventListener('paste', (e) => {
+    const file = imagenDe(e.clipboardData?.items);
+    if (!file) return; // texto normal: se pega como siempre
+    e.preventDefault();
+    abrirDialogoImagen(file);
+  });
+
+  const archivoImagen = $('pi-file') as HTMLInputElement;
+  archivoImagen.addEventListener('change', () => {
+    if (archivoImagen.files?.[0]) subirImagenEnTexto(archivoImagen.files[0]);
+    archivoImagen.value = '';
+  });
+  const zonaImagen = $('pi-drop')!;
+  ['dragenter', 'dragover'].forEach((tipo) => zonaImagen.addEventListener(tipo, (e) => {
+    e.preventDefault();
+    zonaImagen.classList.add('is-dragging');
+  }));
+  ['dragleave', 'drop'].forEach((tipo) => zonaImagen.addEventListener(tipo, () => zonaImagen.classList.remove('is-dragging')));
+  zonaImagen.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const file = (e as DragEvent).dataTransfer?.files?.[0];
+    if (file) subirImagenEnTexto(file);
+  });
+  $('pi-change')!.addEventListener('click', () => reiniciarDialogoImagen());
+  $('post-image-form')!.addEventListener('submit', insertarImagenEnTexto);
   $('pf-preview-toggle')!.addEventListener('click', () => {
     const box = $('pf-preview')!;
     const area = $('pf-content') as HTMLTextAreaElement;

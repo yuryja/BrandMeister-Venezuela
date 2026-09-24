@@ -359,6 +359,36 @@ import Layout from '../../layouts/Layout.astro';
     color: #1E293B;
   }
 
+  /* Imágenes insertadas desde el editor: nunca más anchas que el texto */
+  .article-page .prose-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    vertical-align: middle;
+  }
+
+  .article-page .prose-content .post-figure {
+    margin: 2.25rem 0;
+  }
+
+  .article-page .prose-content .post-figure img {
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.28);
+  }
+
+  .article-page .prose-content .post-figure-mediana img {
+    max-width: min(100%, 560px);
+  }
+
+  .article-page .prose-content .post-figure figcaption {
+    margin-top: 0.75rem;
+    text-align: center;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: #64748B;
+  }
+
   .article-page .prose-content h2 {
     font-size: 1.85rem;
     margin-top: 2.75rem;

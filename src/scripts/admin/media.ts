@@ -6,6 +6,8 @@
 export const MAX_IMAGE_SIDE = 1500;
 // Imagen destacada de una noticia: más grande pero exprimida al máximo
 export const POST_IMAGE_MAX = { width: 1920, height: 1280 };
+/** Imágenes dentro del texto de una noticia: caben en 1600×1600, horizontales o verticales */
+export const POST_INLINE_MAX = { width: 1600, height: 1600 };
 const WEBP_QUALITY = 0.82;
 const WEBP_QUALITY_ULTRA = 0.68;
 const VIDEO_MAX_LONG_SIDE = 1920;
@@ -310,7 +312,7 @@ function newUploadId() {
 /** Sube un Blob en partes de 4 MB y devuelve el upload_id que usa gallery.php?action=save */
 export async function uploadInChunks(
   blob: Blob,
-  kind: 'image' | 'poster' | 'video' | 'post-image',
+  kind: 'image' | 'poster' | 'video' | 'post-image' | 'post-inline',
   onProgress?: (ratio: number) => void,
   endpoint = '/api/gallery.php?action=upload_chunk'
 ): Promise<string> {

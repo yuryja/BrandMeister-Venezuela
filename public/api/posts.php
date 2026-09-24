@@ -12,6 +12,8 @@
  *   POST ?action=status       {id, status: published|draft|trash}
  *   POST ?action=delete       {id} (borrado definitivo)
  *   POST ?action=bulk         {ids[], operation: publish|draft|trash|restore|delete}
+ *   POST ?action=upload_chunk subida por partes (imagen destacada o dentro del texto)
+ *   POST ?action=inline_image {upload_id} publica una imagen para insertarla en el texto
  *
  * Los autores solo ven y editan sus propias noticias y no pueden publicar.
  */
@@ -79,6 +81,29 @@ function post_unique_slug(PDO $pdo, $slug, $title, $ignoreId = 0) {
         $candidate = "$base-$i";
     }
     return $base . '-' . substr(bin2hex(random_bytes(3)), 0, 4);
+}
+
+/** Imágenes subidas desde el editor que aparecen dentro del texto de una noticia */
+function post_inline_images($content) {
+    preg_match_all('#/media/noticias/[A-Za-z0-9/_-]+\.webp#', (string)$content, $m);
+    return array_values(array_unique($m[0]));
+}
+
+/**
+ * Borra del disco las imágenes que ya no usa ninguna noticia, ni como destacada ni dentro del
+ * texto. Una misma imagen puede estar en varias noticias si alguien copió el texto de otra.
+ */
+function posts_delete_unused_images(PDO $pdo, array $urls) {
+    $check = $pdo->prepare("SELECT COUNT(*) FROM bm_posts WHERE image_url = :u OR content LIKE :l ESCAPE '\\\\'");
+    $unused = [];
+    foreach (array_unique(array_filter($urls)) as $url) {
+        $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $url) . '%';
+        $check->execute([':u' => $url, ':l' => $like]);
+        if ((int)$check->fetchColumn() === 0) {
+            $unused[] = $url;
+        }
+    }
+    upload_delete_files($unused);
 }
 
 function post_can_edit(array $user, array $post) {
@@ -184,6 +209,25 @@ if ($action === 'upload_chunk') {
 }
 
 $input = json_input();
+
+// --------------------------------------------------------------------
+// Imagen dentro del texto: se publica al momento para poder insertarla en el editor
+// --------------------------------------------------------------------
+if ($action === 'inline_image') {
+    try {
+        $url = upload_commit((string)($input['upload_id'] ?? ''), ['post-inline'], 'noticias');
+    } catch (Exception $e) {
+        send_json(['success' => false, 'error' => $e->getMessage()], 422);
+    }
+    $info = @getimagesize(media_root() . substr($url, strlen('/media')));
+    log_activity($user['id'], 'post_inline_image', ['url' => $url]);
+    send_json([
+        'success' => true,
+        'url' => $url,
+        'width' => $info ? (int)$info[0] : null,
+        'height' => $info ? (int)$info[1] : null,
+    ]);
+}
 
 // --------------------------------------------------------------------
 // Crear / editar
@@ -346,12 +390,18 @@ if ($action === 'delete' || ($action === 'bulk' && ($input['operation'] ?? '') =
         send_json(['success' => false, 'error' => 'Los autores no pueden borrar definitivamente: usa la papelera.'], 403);
     }
     $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $images = $pdo->prepare("SELECT image_url FROM bm_posts WHERE id IN ($placeholders)");
+    $images = $pdo->prepare("SELECT image_url, content FROM bm_posts WHERE id IN ($placeholders)");
     $images->execute($ids);
-    upload_delete_files($images->fetchAll(PDO::FETCH_COLUMN));
+    $urls = [];
+    foreach ($images->fetchAll() as $row) {
+        $urls[] = $row['image_url'];
+        $urls = array_merge($urls, post_inline_images($row['content']));
+    }
 
     $stmt = $pdo->prepare("DELETE FROM bm_posts WHERE id IN ($placeholders)");
     $stmt->execute($ids);
+    // Después de borrar, para saber qué imágenes ya no usa ninguna otra noticia
+    posts_delete_unused_images($pdo, $urls);
     log_activity($user['id'], 'post_deleted', ['ids' => $ids]);
     send_json(['success' => true, 'message' => $stmt->rowCount() . ' noticia(s) eliminada(s) definitivamente.']);
 }

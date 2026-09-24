@@ -160,3 +160,142 @@
 .posts-table .row-actions {
   overflow: hidden;
 }
+
+/* ---------------------------------------------------------
+   Imágenes dentro del texto (botón "Añadir imagen" y su diálogo)
+   --------------------------------------------------------- */
+
+/* Botón destacado, como "Añadir medio" en WordPress */
+.wp-admin-app .wp-tool-btn.wp-tool-media {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--bm-orange);
+  border-color: rgba(238, 108, 31, 0.45);
+  background: var(--bm-orange-light);
+}
+
+.wp-admin-app .wp-tool-btn.wp-tool-media:hover {
+  background: var(--bm-orange);
+  color: #ffffff;
+}
+
+/* Arrastrar una imagen sobre el texto */
+.wp-admin-app .wp-content-area.is-dragging {
+  outline: 2px dashed var(--bm-orange);
+  outline-offset: -4px;
+  background: #fffaf5;
+}
+
+/* Diálogo más ancho: cabe la vista previa junto a los datos */
+.wp-admin-app .wp-modal-dialog.wp-modal-media {
+  max-width: 760px;
+}
+
+.pi-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.pi-details[hidden] {
+  display: none;
+}
+
+.pi-preview {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pi-preview img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  background: #f1f5f9;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.pi-preview img:not([src]) {
+  aspect-ratio: 4 / 3;
+}
+
+.pi-preview figcaption {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pi-fields .form-group {
+  margin-bottom: 0.9rem;
+}
+
+.pi-fields .optional {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.pi-size {
+  border: 0;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+}
+
+.pi-size legend {
+  width: 100%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  padding: 0;
+}
+
+.pi-size .radio-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .pi-details {
+    grid-template-columns: 1fr;
+  }
+
+  .pi-preview img {
+    max-height: 200px;
+  }
+}
+
+/* Imágenes en la vista previa, igual que en la noticia publicada */
+.prose-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.prose-preview .post-figure {
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.prose-preview .post-figure img {
+  display: block;
+  margin: 0 auto;
+}
+
+.prose-preview .post-figure-mediana img {
+  max-width: min(100%, 520px);
+}
+
+.prose-preview .post-figure figcaption {
+  margin-top: 0.55rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

@@ -102,11 +102,15 @@
         <button type="button" class="wp-tool-btn" data-md="ol" title="Lista numerada">1. Lista</button>
         <button type="button" class="wp-tool-btn" data-md="link" title="Enlace">🔗</button>
         <button type="button" class="wp-tool-btn" data-md="quote" title="Cita">❝</button>
+        <button type="button" class="wp-tool-btn wp-tool-media" id="pf-insert-image" title="Insertar una imagen en el texto">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          Añadir imagen
+        </button>
         <button type="button" class="wp-tool-btn" id="pf-preview-toggle" title="Vista previa">Vista previa</button>
       </div>
 
       <label for="pf-content" class="screen-reader-text">Contenido</label>
-      <textarea id="pf-content" name="content" class="form-input wp-content-area" rows="20" placeholder="Escribe aquí la noticia. Puedes usar **negrita**, ## títulos, listas y [enlaces](https://…)." required></textarea>
+      <textarea id="pf-content" name="content" class="form-input wp-content-area" rows="20" placeholder="Escribe aquí la noticia. Puedes usar **negrita**, ## títulos, listas y [enlaces](https://…). Para una imagen, usa «Añadir imagen», arrástrala aquí o pégala con Ctrl+V." required></textarea>
       <div id="pf-preview" class="wp-live-preview-box" style="display: none;"></div>
       <span class="field-hint" id="pf-content-stats"></span>
     </div>
@@ -187,3 +191,58 @@
     </aside>
   </form>
 </section>
+
+<!-- ========================================================= -->
+<!-- NOTICIAS: INSERTAR IMAGEN EN EL TEXTO (estilo "Añadir medio") -->
+<!-- ========================================================= -->
+<div id="modal-post-image" class="wp-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-post-image-title">
+  <div class="wp-modal-backdrop" data-close-modal></div>
+  <div class="wp-modal-dialog wp-modal-media">
+    <div class="wp-modal-header">
+      <h3 id="modal-post-image-title">Insertar imagen</h3>
+      <button type="button" class="btn-close-modal" data-close-modal aria-label="Cerrar">&times;</button>
+    </div>
+    <form id="post-image-form" novalidate>
+      <div class="wp-modal-body">
+        <div id="post-image-notice"></div>
+
+        <!-- Paso 1: elegir la imagen -->
+        <label class="drop-zone" id="pi-drop" for="pi-file">
+          <input type="file" id="pi-file" accept="image/*" class="screen-reader-text" />
+          <strong>Elegir imagen</strong>
+          <span>o arrástrala aquí</span>
+          <span class="drop-zone-rules">Se optimiza a WebP y cabe en 1600×1600 px. Horizontales y verticales.</span>
+        </label>
+
+        <!-- Paso 2: vista previa, progreso y datos de la imagen -->
+        <div class="pi-details" id="pi-details" hidden>
+          <figure class="pi-preview">
+            <img id="pi-thumb" alt="" />
+            <figcaption id="pi-status" aria-live="polite"></figcaption>
+          </figure>
+          <div class="pi-fields">
+            <div class="form-group">
+              <label for="pi-alt">Descripción de la imagen</label>
+              <input type="text" id="pi-alt" class="form-input" maxlength="160" placeholder="Ej.: Antena del repetidor en el cerro El Ávila" />
+              <span class="field-hint">La leen los lectores de pantalla y Google. Describe qué se ve.</span>
+            </div>
+            <div class="form-group">
+              <label for="pi-caption">Pie de foto <span class="optional">(opcional)</span></label>
+              <input type="text" id="pi-caption" class="form-input" maxlength="200" placeholder="Ej.: Instalación del repetidor, septiembre de 2026" />
+            </div>
+            <fieldset class="form-group pi-size">
+              <legend>Tamaño</legend>
+              <label class="radio-inline"><input type="radio" name="pi-size" value="completo" checked /> Ancho completo</label>
+              <label class="radio-inline"><input type="radio" name="pi-size" value="mediana" /> Mediana, centrada</label>
+            </fieldset>
+            <button type="button" class="btn btn-secondary btn-sm" id="pi-change">Elegir otra imagen</button>
+          </div>
+        </div>
+      </div>
+      <div class="wp-modal-footer">
+        <button type="button" class="btn btn-secondary" data-close-modal>Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="pi-insert" disabled>Insertar en la noticia</button>
+      </div>
+    </form>
+  </div>
+</div>
