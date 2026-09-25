@@ -293,12 +293,196 @@ function get_talkgroups_list(): array {
 }
 
 /**
+ * Helper HTTP resiliente con cURL y fallback a stream
+ */
+function http_get_contents(string $url, int $timeout = 30): string|false {
+    if (function_exists('curl_init')) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Accept: application/json, text/csv, */*',
+            'User-Agent: Mozilla/5.0 (compatible; BrandMeister-Venezuela/1.0; +https://brandmeisteryv.net)'
+        ]);
+        $res = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($res !== false && $code >= 200 && $code < 300) {
+            return $res;
+        }
+    }
+    $ctx = stream_context_create([
+        'http' => [
+            'method' => 'GET',
+            'timeout' => $timeout,
+            'header' => "User-Agent: Mozilla/5.0 (compatible; BrandMeister-Venezuela/1.0)\r\nAccept: */*\r\n"
+        ]
+    ]);
+    return @file_get_contents($url, false, $ctx);
+}
+
+/**
+ * Consulta todos los usuarios de Venezuela a través de la API paginada de RadioID
+ */
+function fetch_all_venezuela_users_api(): array {
+    $results = [];
+    $page = 1;
+    $maxPages = 20; // Hasta 4.000 usuarios
+    while ($page <= $maxPages) {
+        $url = "https://database.radioid.net/api/dmr/user/?country=Venezuela&page={$page}";
+        $raw = http_get_contents($url, 10);
+        if ($raw === false) break;
+        $json = json_decode($raw, true);
+        if (empty($json['results'])) break;
+        foreach ($json['results'] as $u) {
+            $results[] = $u;
+        }
+        $count = (int)($json['count'] ?? 0);
+        if (count($results) >= $count || count($json['results']) < 20) {
+            break;
+        }
+        $page++;
+    }
+    return $results;
+}
+
+/**
+ * Procesa y particiona CSV oficial de RadioID (user.csv)
+ */
+function parse_and_cache_csv(string $csvContent, string $cacheDir): bool {
+    $lines = preg_split("/\r\n|\n|\r/", $csvContent);
+    if (empty($lines)) return false;
+
+    $headerLine = array_shift($lines);
+    $header = str_getcsv($headerLine);
+    $map = [];
+    foreach ($header as $idx => $col) {
+        $map[strtolower(trim($col))] = $idx;
+    }
+
+    $idCol = $map['radio_id'] ?? $map['id'] ?? 0;
+    $callCol = $map['callsign'] ?? 1;
+    $fnameCol = $map['first_name'] ?? $map['fname'] ?? 2;
+    $surnameCol = $map['last_name'] ?? $map['surname'] ?? 3;
+    $cityCol = $map['city'] ?? 4;
+    $stateCol = $map['state'] ?? 5;
+    $countryCol = $map['country'] ?? 6;
+
+    $veList = [];
+    $latamList = [];
+    $allList = [];
+
+    $latamCountries = [
+        'venezuela' => true, 'colombia' => true, 'mexico' => true, 'spain' => true, 'españa' => true,
+        'chile' => true, 'argentina' => true, 'peru' => true, 'perú' => true, 'ecuador' => true,
+        'panama' => true, 'panamá' => true, 'costa rica' => true, 'guatemala' => true, 'honduras' => true,
+        'el salvador' => true, 'nicaragua' => true, 'uruguay' => true, 'paraguay' => true, 'bolivia' => true,
+        'dominican republic' => true, 'república dominicana' => true, 'puerto rico' => true, 'cuba' => true,
+        'brazil' => true, 'brasil' => true, 'portugal' => true
+    ];
+
+    foreach ($lines as $line) {
+        if (trim($line) === '') continue;
+        $row = str_getcsv($line);
+        if (count($row) < 3) continue;
+
+        $id = $row[$idCol] ?? '';
+        $call = $row[$callCol] ?? '';
+        $fname = $row[$fnameCol] ?? '';
+        $surname = $row[$surnameCol] ?? '';
+        $city = $row[$cityCol] ?? '';
+        $state = $row[$stateCol] ?? '';
+        $country = $row[$countryCol] ?? '';
+
+        $item = [
+            'id' => $id,
+            'callsign' => $call,
+            'fname' => $fname,
+            'surname' => $surname,
+            'city' => $city,
+            'state' => $state,
+            'country' => $country
+        ];
+
+        $cLower = strtolower(trim($country));
+        $sId = (string)$id;
+        if ($cLower === 'venezuela' || str_starts_with($sId, '734')) {
+            $veList[] = $item;
+            $latamList[] = $item;
+        } elseif (isset($latamCountries[$cLower]) || str_starts_with($sId, '732') || str_starts_with($sId, '730') || str_starts_with($sId, '722') || str_starts_with($sId, '724') || str_starts_with($sId, '334') || str_starts_with($sId, '214')) {
+            $latamList[] = $item;
+        }
+        $allList[] = $item;
+    }
+
+    if (!empty($veList)) {
+        @file_put_contents($cacheDir . '/users_ve.json', json_encode($veList, JSON_UNESCAPED_UNICODE));
+        @file_put_contents($cacheDir . '/users_latam.json', json_encode($latamList, JSON_UNESCAPED_UNICODE));
+        @file_put_contents($cacheDir . '/users_dump.json', json_encode($allList, JSON_UNESCAPED_UNICODE));
+        @file_put_contents($cacheDir . '/sync_meta.json', json_encode([
+            'updated_at' => date('Y-m-d H:i:s'),
+            'total_global_users' => count($allList),
+            'venezuela_users' => count($veList),
+            'latam_users' => count($latamList)
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Sincroniza la caché descargando el archivo user.csv o consultando la API
+ */
+function sync_radioid_cache(string $cacheDir): bool {
+    if (!is_dir($cacheDir)) {
+        @mkdir($cacheDir, 0755, true);
+    }
+
+    $veFile = $cacheDir . '/users_ve.json';
+    $latamFile = $cacheDir . '/users_latam.json';
+    $dumpFile = $cacheDir . '/users_dump.json';
+    $metaFile = $cacheDir . '/sync_meta.json';
+
+    // 1. Intentar primero user.csv (17MB, mucho más liviano y rápido que users.json de 85MB)
+    $csvUrl = 'https://database.radioid.net/static/user.csv';
+    $rawCsv = http_get_contents($csvUrl, 45);
+    if ($rawCsv !== false && strlen($rawCsv) > 1000) {
+        if (parse_and_cache_csv($rawCsv, $cacheDir)) {
+            return true;
+        }
+    }
+
+    // 2. Si falla el CSV, asegurar al menos Venezuela por API paginada
+    $veUsers = fetch_all_venezuela_users_api();
+    if (!empty($veUsers)) {
+        @file_put_contents($veFile, json_encode($veUsers, JSON_UNESCAPED_UNICODE));
+        @file_put_contents($metaFile, json_encode([
+            'updated_at' => date('Y-m-d H:i:s'),
+            'total_global_users' => count($veUsers),
+            'venezuela_users' => count($veUsers),
+            'latam_users' => count($veUsers)
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * 2. Cargar contactos de RadioID según el alcance
+ * Prioridad: 1) Caché viva en /tmp -> 2) Base de datos empaquetada en repo -> 3) API directa
  */
 function get_contacts_list(string $scope, string $cacheDir): array {
     $veFile = $cacheDir . '/users_ve.json';
     $latamFile = $cacheDir . '/users_latam.json';
     $dumpFile = $cacheDir . '/users_dump.json';
+
+    $bundledVe = dirname(__DIR__) . '/data/radioid_venezuela.json';
+    $bundledLatam = dirname(__DIR__) . '/data/radioid_latam.json';
 
     $targetFile = match ($scope) {
         'latam' => $latamFile,
@@ -306,44 +490,84 @@ function get_contacts_list(string $scope, string $cacheDir): array {
         default => $veFile
     };
 
-    if (file_exists($targetFile)) {
+    // 1. Verificar si existe en la caché viva del sistema
+    if (file_exists($targetFile) && filesize($targetFile) > 1000) {
         $content = @file_get_contents($targetFile);
         if ($content !== false) {
             $data = json_decode($content, true);
-            if (isset($data['users']) && is_array($data['users'])) return $data['users'];
-            if (isset($data['results']) && is_array($data['results'])) return $data['results'];
-            if (is_array($data)) return $data;
-        }
-    }
-
-    // Si el archivo en caché no existe todavía, intentar consulta rápida a RadioID API para Venezuela
-    if ($scope === 'venezuela') {
-        $url = 'https://database.radioid.net/api/dmr/user/?country=Venezuela';
-        $ctx = stream_context_create([
-            'http' => [
-                'method' => 'GET',
-                'timeout' => 8,
-                'header' => "User-Agent: BM-Venezuela-Codeplug/1.0\r\nAccept: application/json\r\n"
-            ]
-        ]);
-        $res = @file_get_contents($url, false, $ctx);
-        if ($res !== false) {
-            $json = json_decode($res, true);
-            if (!empty($json['results'])) {
-                if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
-                @file_put_contents($veFile, json_encode($json['results'], JSON_UNESCAPED_UNICODE));
-                return $json['results'];
+            if (is_array($data) && count($data) > 10) {
+                return $data;
             }
         }
     }
 
-    // Datos semilla de emergencia de operadores conocidos si aún no hay conexión
-    return [
-        ['id' => 734001, 'callsign' => 'YV5OF', 'fname' => 'Sysop', 'surname' => 'BM-YV', 'city' => 'Caracas', 'state' => 'Miranda', 'country' => 'Venezuela'],
-        ['id' => 7341003, 'callsign' => 'YV5VE', 'fname' => 'William', 'surname' => 'Fourneau', 'city' => 'Altagracia', 'state' => 'Guárico', 'country' => 'Venezuela'],
-        ['id' => 7340520, 'callsign' => 'YV5RNE', 'fname' => 'Red Nal', 'surname' => 'Emergencia', 'city' => 'Caracas', 'state' => 'DC', 'country' => 'Venezuela'],
-        ['id' => 7340003, 'callsign' => 'YY3BIG', 'fname' => 'Big', 'surname' => 'Radio', 'city' => 'Caracas', 'state' => 'DC', 'country' => 'Venezuela']
-    ];
+    // 2. Si la caché aún no está lista, usar la base de datos empaquetada en el proyecto (CERO latencia)
+    if ($scope === 'venezuela' && file_exists($bundledVe) && filesize($bundledVe) > 1000) {
+        $content = @file_get_contents($bundledVe);
+        if ($content !== false) {
+            $data = json_decode($content, true);
+            if (is_array($data) && count($data) > 10) {
+                // Copiar a la caché temporal para próximas peticiones ultra rápidas
+                if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+                @file_put_contents($veFile, $content);
+                return $data;
+            }
+        }
+    }
+
+    if ($scope === 'latam' && file_exists($bundledLatam) && filesize($bundledLatam) > 1000) {
+        $content = @file_get_contents($bundledLatam);
+        if ($content !== false) {
+            $data = json_decode($content, true);
+            if (is_array($data) && count($data) > 10) {
+                if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+                @file_put_contents($latamFile, $content);
+                return $data;
+            }
+        }
+    }
+
+    // 3. Si se pidió Venezuela y no hay bundle, consultar la API en vivo
+    if ($scope === 'venezuela') {
+        $apiUsers = fetch_all_venezuela_users_api();
+        if (!empty($apiUsers) && count($apiUsers) > 10) {
+            if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+            @file_put_contents($veFile, json_encode($apiUsers, JSON_UNESCAPED_UNICODE));
+            return $apiUsers;
+        }
+    }
+
+    // 4. Intentar sincronización completa en segundo plano/on-the-fly
+    sync_radioid_cache($cacheDir);
+
+    if (file_exists($targetFile) && filesize($targetFile) > 1000) {
+        $content = @file_get_contents($targetFile);
+        if ($content !== false) {
+            $data = json_decode($content, true);
+            if (is_array($data) && count($data) > 10) {
+                return $data;
+            }
+        }
+    }
+
+    // 5. Último fallback: Bundles empaquetados
+    if (file_exists($bundledLatam) && filesize($bundledLatam) > 1000) {
+        $content = @file_get_contents($bundledLatam);
+        if ($content !== false) {
+            $data = json_decode($content, true);
+            if (is_array($data) && count($data) > 10) return $data;
+        }
+    }
+
+    if (file_exists($bundledVe) && filesize($bundledVe) > 1000) {
+        $content = @file_get_contents($bundledVe);
+        if ($content !== false) {
+            $data = json_decode($content, true);
+            if (is_array($data) && count($data) > 10) return $data;
+        }
+    }
+
+    return [];
 }
 
 /**
