@@ -33,6 +33,19 @@ interface AnalyticsData {
     unique_visitors?: number;
     active_countries: number;
   };
+  codeplug?: {
+    total: number;
+    people: number;
+    models: Array<{ key: string; name: string; count: number; percent: number }>;
+    scopes: Array<{ key: string; name: string; count: number; percent: number }>;
+  };
+  lookups?: {
+    total: number;
+    people: number;
+    found: number;
+    found_percent: number;
+    top: Array<{ query: string; type: string; count: number; found: boolean }>;
+  };
   traffic?: {
     sources: Array<{ key: string; name: string; visits: number; people: number; percent: number }>;
     sites: Array<{ host: string; source: string; visits: number; people: number }>;
@@ -89,7 +102,7 @@ interface AnalyticsData {
     total_views: number;
     unique_visitors: number;
     talkgroups: Array<{
-      id: string;
+      id: string | number; // el API lo envía como número
       name: string;
       badge: string;
       sub?: string;
@@ -394,7 +407,10 @@ function renderDashboard(data: AnalyticsData) {
           const views = tg.views || 0;
           const uniqueUsers = tg.unique_users || 0;
           const percent = Math.max(0, Math.min(100, Number(tg.percent) || 0));
-          const badgeClass = tg.id === '734' ? 'badge-tg-main' : tg.id === '73452' ? 'badge-tg-alert' : tg.id === '73473' ? 'badge-tg-rcv' : 'badge-tg-rvr';
+          // El API envía el TG como número (734), no como texto: se compara como texto para que
+          // cada talkgroup reciba su color (antes los cuatro caían en el color por defecto)
+          const tgId = String(tg.id);
+          const badgeClass = tgId === '734' ? 'badge-tg-main' : tgId === '73452' ? 'badge-tg-alert' : tgId === '73473' ? 'badge-tg-rcv' : 'badge-tg-rvr';
 
           return `
             <div class="petra-tg-card">
@@ -561,6 +577,65 @@ function renderDashboard(data: AnalyticsData) {
         )
         .join('');
     }
+  }
+
+  // Herramientas: generador de codeplugs y buscador de indicativos
+  const barras = (lista: Array<{ name: string; count: number; percent: number }>, vacio: string) =>
+    lista.length
+      ? lista
+          .map((fila) => {
+            const pct = Math.max(0, Math.min(100, Number(fila.percent) || 0));
+            return `
+              <div class="tool-bar-row">
+                <div class="tool-bar-head">
+                  <span class="tool-bar-name">${escapeHtml(fila.name)}</span>
+                  <span class="tool-bar-count"><strong>${fmt(fila.count)}</strong> ${pct}%</span>
+                </div>
+                <div class="share-track"><div class="share-fill" style="width: ${pct}%;"></div></div>
+              </div>`;
+          })
+          .join('')
+      : `<p class="analytics-empty">${vacio}</p>`;
+
+  const codeplug = data.codeplug;
+  // "1 descarga · 1 persona distinta" / "3 descargas · 2 personas distintas"
+  const plural = (n: number, uno: string, varios: string) => (n === 1 ? uno : varios);
+  const personas = (n: number) => `<strong>${fmt(n)}</strong> ${plural(n, 'persona distinta', 'personas distintas')}`;
+  const totalCodeplug = codeplug?.total ?? 0;
+  if ($('codeplug-total')) $('codeplug-total')!.textContent = fmt(totalCodeplug);
+  if ($('codeplug-label')) {
+    $('codeplug-label')!.innerHTML = `${plural(totalCodeplug, 'descarga', 'descargas')} · ${personas(codeplug?.people ?? 0)}`;
+  }
+  const modelos = $('codeplug-models');
+  if (modelos) modelos.innerHTML = barras(codeplug?.models || [], 'Sin descargas en este periodo.');
+  const alcances = $('codeplug-scopes');
+  if (alcances) alcances.innerHTML = barras(codeplug?.scopes || [], 'Sin descargas en este periodo.');
+
+  const lookups = data.lookups;
+  const totalConsultas = lookups?.total ?? 0;
+  if ($('lookups-total')) $('lookups-total')!.textContent = fmt(totalConsultas);
+  if ($('lookups-label')) {
+    $('lookups-label')!.innerHTML = `${plural(totalConsultas, 'consulta', 'consultas')} · ${personas(lookups?.people ?? 0)}`
+      + (totalConsultas ? ` · <strong>${Number(lookups?.found_percent) || 0} %</strong> con resultado` : '');
+  }
+  const topConsultas = $('lookups-top-tbody');
+  if (topConsultas) {
+    const top = lookups?.top || [];
+    topConsultas.innerHTML = top.length
+      ? top
+          .map(
+            (fila) => `
+              <tr>
+                <td>
+                  <a class="cell-strong" href="/radioid?q=${encodeURIComponent(fila.query)}" target="_blank" rel="noopener">${escapeHtml(fila.query)}</a>
+                  ${fila.found ? '' : '<span class="badge-mini badge-sin-resultado">Sin resultado</span>'}
+                </td>
+                <td class="col-opt">${escapeHtml(fila.type)}</td>
+                <td class="cell-right"><strong>${fmt(fila.count)}</strong></td>
+              </tr>`
+          )
+          .join('')
+      : '<tr><td colspan="3" class="analytics-empty">Sin consultas en este periodo.</td></tr>';
   }
 
   // 7. Compartidos en Redes

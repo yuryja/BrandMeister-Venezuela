@@ -550,9 +550,34 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
     `;
   }
 
+  // Estadística del Escritorio. La búsqueda se lanza sola mientras se escribe, así que una
+  // consulta solo cuenta cuando su resultado queda a la vista 2 s sin que la persona siga
+  // escribiendo: "YV5VE" cuenta una vez, no como "YV", "YV5", "YV5V" y "YV5VE".
+  let registroPendiente = 0;
+  let ultimaRegistrada = '';
+  function registrarConsulta(q: string, encontrado: boolean) {
+    window.clearTimeout(registroPendiente);
+    if (q.length < 3) return;
+    registroPendiente = window.setTimeout(() => {
+      if (q !== lastExecutedQuery || q === ultimaRegistrada) return;
+      ultimaRegistrada = q;
+      fetch('/api/analytics.php?action=track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'callsign_lookup',
+          event_category: encontrado ? 'encontrado' : 'no_encontrado',
+          entity_id: q,
+        }),
+        keepalive: true,
+      }).catch(() => {});
+    }, 2000);
+  }
+
   async function executeSearch(query: string, updateUrl = true) {
     const q = query.trim().toUpperCase();
     if (!q) {
+      window.clearTimeout(registroPendiente);
       setViewState('initial');
       if (resultsContainer) resultsContainer.innerHTML = '';
       if (updateUrl) {
@@ -565,6 +590,7 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
 
     if (q === lastExecutedQuery) return;
     lastExecutedQuery = q;
+    window.clearTimeout(registroPendiente);
 
     if (updateUrl) {
       const url = new URL(window.location.href);
@@ -637,6 +663,7 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
           notFoundMsg.innerHTML = `No se encontró ningún registro activo para <strong>${escapeHtml(q)}</strong> en RadioID.net.`;
         }
         setViewState('notfound');
+        registrarConsulta(q, false);
         return;
       }
 
@@ -661,18 +688,7 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
 
       setViewState('results');
 
-      // Analítica de búsqueda
-      fetch('/api/analytics.php?action=track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event_type: 'search',
-          event_category: 'radioid_search',
-          entity_id: q,
-          entity_title: `Búsqueda RadioID: ${q}`
-        }),
-        keepalive: true
-      }).catch(() => {});
+      registrarConsulta(q, true);
 
     } catch (err: any) {
       if (err.name === 'AbortError') return;
