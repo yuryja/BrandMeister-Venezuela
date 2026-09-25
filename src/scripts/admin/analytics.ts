@@ -382,7 +382,7 @@ function renderDashboard(data: AnalyticsData) {
     }
   }
 
-  // 4. Telemetría del Sistema Petra (TG 734, 73452, 73473)
+  // 4. Telemetría del Sistema Petra (TG 734, 73452, 73473, 73411)
   const petraContainer = $('petra-talkgroups-container');
   if (petraContainer) {
     const talkgroups = data.petra?.talkgroups || [];
@@ -394,7 +394,7 @@ function renderDashboard(data: AnalyticsData) {
           const views = tg.views || 0;
           const uniqueUsers = tg.unique_users || 0;
           const percent = Math.max(0, Math.min(100, Number(tg.percent) || 0));
-          const badgeClass = tg.id === '734' ? 'badge-tg-main' : tg.id === '73452' ? 'badge-tg-alert' : 'badge-tg-rcv';
+          const badgeClass = tg.id === '734' ? 'badge-tg-main' : tg.id === '73452' ? 'badge-tg-alert' : tg.id === '73473' ? 'badge-tg-rcv' : 'badge-tg-rvr';
 
           return `
             <div class="petra-tg-card">

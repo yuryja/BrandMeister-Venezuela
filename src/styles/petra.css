@@ -104,7 +104,7 @@
 
 .pt-tabs {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.5rem;
   margin-bottom: clamp(1rem, 2vw, 1.5rem);
   padding: 0.4rem;
@@ -153,14 +153,38 @@
   color: rgba(255, 255, 255, 0.9);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 960px) and (min-width: 641px) {
   .pt-tab {
-    align-items: center;
-    padding: 0.6rem 0.4rem;
+    padding: 0.6rem 0.6rem;
+  }
+
+  .pt-tab__id {
+    font-size: 0.92rem;
   }
 
   .pt-tab__name {
-    display: none;
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .pt-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .pt-tab {
+    align-items: flex-start;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .pt-tab__id {
+    font-size: 0.95rem;
+  }
+
+  .pt-tab__name {
+    display: block;
+    font-size: 0.75rem;
   }
 }
 

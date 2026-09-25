@@ -654,7 +654,7 @@
   white-space: nowrap;
 }
 
-/* 5. Telemetría de Petra y Talkgroups (734, 73452, 73473) */
+/* 5. Telemetría de Petra y Talkgroups (734, 73452, 73473, 73411) */
 .petra-tg-analytics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -791,6 +791,10 @@
   background: linear-gradient(90deg, #059669, #10B981);
 }
 
+.petra-tg-progress-fill.badge-tg-rvr {
+  background: linear-gradient(90deg, #7C3AED, #8B5CF6);
+}
+
 .badge-tg-main {
   background: rgba(37, 99, 235, 0.1);
   color: #1D4ED8;
@@ -806,6 +810,12 @@
 .badge-tg-rcv {
   background: rgba(5, 150, 105, 0.1);
   color: #047857;
+  font-weight: 700;
+}
+
+.badge-tg-rvr {
+  background: rgba(124, 58, 237, 0.1);
+  color: #6D28D9;
   font-weight: 700;
 }
 

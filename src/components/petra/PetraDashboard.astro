@@ -168,7 +168,7 @@ const has = (m: string) => talkgroup.modules.includes(m as any);
           <article class="pt-card pt-span-full">
             <header class="pt-card__head">
               <div>
-                <p class="pt-eyebrow">Emisión YV5RNE</p>
+                <p class="pt-eyebrow">{talkgroup.id === '73452' ? 'Emisión YV5RNE' : talkgroup.name}</p>
                 <h3 class="pt-card__title">Promedio de estaciones por día entre las 19:30 y las 20:30</h3>
               </div>
             </header>
@@ -198,14 +198,15 @@ const has = (m: string) => talkgroup.modules.includes(m as any);
   import { initPetraDashboard } from '../../scripts/petra-client';
   initPetraDashboard();
 
-  // Rastreo de telemetría: visita a Petra e interacción con talkgroups (TG 734, 73452, 73473)
+  // Rastreo de telemetría: visita a Petra e interacción con talkgroups (TG 734, 73452, 73473, 73411)
   try {
     const dashboard = document.getElementById('petra-dashboard');
     const tgId = dashboard?.getAttribute('data-tg') || '734';
     const tgNames: Record<string, string> = {
       '734': 'TG 734 Venezuela',
       '73452': 'TG 73452 Emergencias y Eventos',
-      '73473': 'TG 73473 Radio Club Venezolano'
+      '73473': 'TG 73473 Radio Club Venezolano',
+      '73411': 'TG 73411 Red Venezolana de Radiodifusión'
     };
     const tgTitle = tgNames[tgId] || `TG ${tgId}`;
 

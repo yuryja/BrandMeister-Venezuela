@@ -9,7 +9,7 @@ const talkgroup = getPetraTalkgroup(DEFAULT_PETRA_TG)!;
 <Layout
   heroImage={{ desktop: '/assets/petra-hero-bg.webp', mobile: '/assets/petra-hero-bg-m.webp' }}
   title="Conoce a Petra · Telemetría en vivo del TG 734 · BrandMeister Venezuela"
-  description="Conoce a Petra, plataforma informativa y de telemetría de BrandMeister Venezuela: actividad en vivo de los TG 734, 73452 y 73473, balizas horarias y boletines sísmicos y meteorológicos."
+  description="Conoce a Petra, plataforma informativa y de telemetría de BrandMeister Venezuela: actividad en vivo de los TG 734, 73452, 73473 y 73411, balizas horarias y boletines sísmicos y meteorológicos."
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify({
@@ -19,7 +19,7 @@ const talkgroup = getPetraTalkgroup(DEFAULT_PETRA_TG)!;
       "applicationCategory": "UtilitiesApplication",
       "operatingSystem": "All",
       "url": "https://brandmeisteryv.net/petra",
-      "description": "Plataforma informativa y de telemetría de BrandMeister Venezuela: actividad en vivo de los TG 734, 73452 y 73473, balizas horarias y boletines sísmicos y meteorológicos.",
+      "description": "Plataforma informativa y de telemetría de BrandMeister Venezuela: actividad en vivo de los TG 734, 73452, 73473 y 73411, balizas horarias y boletines sísmicos y meteorológicos.",
       "browserRequirements": "Requires JavaScript. Requires HTML5."
     })} />
   </Fragment>
@@ -30,6 +30,6 @@ const talkgroup = getPetraTalkgroup(DEFAULT_PETRA_TG)!;
   // Compatibilidad con los enlaces antiguos /petra?tg=73452
   (function () {
     var tg = new URLSearchParams(window.location.search).get('tg');
-    if (tg === '73452' || tg === '73473') window.location.replace('/petra/' + tg);
+    if (tg === '73452' || tg === '73473' || tg === '73411') window.location.replace('/petra/' + tg);
   })();
 </script>

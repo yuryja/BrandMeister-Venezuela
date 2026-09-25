@@ -151,6 +151,13 @@ export const PETRA_TALKGROUPS: PetraTalkgroup[] = [
     short: 'RCV',
     description: 'Frecuencia institucional del Radio Club Venezolano para ruedas temáticas, eventos y enlaces.',
     modules: [...BASE_MODULES]
+  },
+  {
+    id: '73411',
+    name: 'Red Venezolana de Radiodifusión',
+    short: 'RVR',
+    description: 'Frecuencia y rueda temática de la Red Venezolana de Radiodifusión en BrandMeister Venezuela, con estadísticas de participación e intervenciones en vivo.',
+    modules: [...BASE_MODULES, 'rne-stats', 'rne-report']
   }
 ];
 
