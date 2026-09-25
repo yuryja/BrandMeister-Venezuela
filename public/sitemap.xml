@@ -63,6 +63,18 @@
     </image:image>
   </url>
 
+  <!-- Generador de Archivos CSV y Codeplugs para Radios -->
+  <url>
+    <loc>https://brandmeisteryv.net/generador-csv</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/news-motorola-bg.webp</image:loc>
+      <image:title>Generador de Archivos CSV para Radios DMR - BrandMeister Venezuela</image:title>
+    </image:image>
+  </url>
+
   <!-- Galería Multimedia y Actividades de la Red -->
   <url>
     <loc>https://brandmeisteryv.net/galeria</loc>

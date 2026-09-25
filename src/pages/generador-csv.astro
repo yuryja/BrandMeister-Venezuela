@@ -1,0 +1,533 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/generador-csv.css';
+
+const metaTitle = "Generador de CSV y Codeplugs DMR · BrandMeister Venezuela";
+const metaDescription = "Genera y descarga archivos CSV formateados para programar tu radio DMR (AnyTone, OpenGD77, TYT, Radioddity, Motorola). Incluye Talkgroups oficiales de Venezuela y base de contactos de RadioID.";
+---
+
+<Layout
+  heroImage={{ desktop: '/assets/news-motorola-bg.webp', mobile: '/assets/news-motorola-bg-m.webp' }}
+  title={metaTitle}
+  description={metaDescription}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Generador de CSV para Radios DMR · BrandMeister Venezuela",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "url": "https://brandmeisteryv.net/generador-csv",
+      "description": metaDescription,
+      "browserRequirements": "Requires JavaScript. Requires HTML5."
+    })} />
+  </Fragment>
+
+  <main class="codeplug-page">
+    <!-- Hero Section con la imagen Motorola del post de RadioID -->
+    <section class="codeplug-hero">
+      <div class="container">
+        <div class="codeplug-hero__content">
+          <div class="codeplug-hero__badge">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Herramientas de Programación DMR</span>
+          </div>
+          <h1 class="codeplug-hero__title">Generador de Archivos CSV para Radios</h1>
+          <p class="codeplug-hero__subtitle">
+            Exporta al instante los Talkgroups oficiales de Venezuela (Plan 734) y la libreta de contactos digitales de RadioID en el formato exacto que exige el CPS de tu modelo de radio.
+          </p>
+          <div class="codeplug-hero__meta">
+            <span>AnyTone · OpenGD77 · TYT · Motorola</span>
+            <i class="codeplug-hero__dot" aria-hidden="true"></i>
+            <span>Formato Nativo CPS</span>
+            <i class="codeplug-hero__dot" aria-hidden="true"></i>
+            <span>Datos Oficiales RadioID</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Franja con degradado BrandMeister -->
+    <div class="codeplug-stripe" aria-hidden="true"></div>
+
+    <!-- Cuerpo del Generador -->
+    <section class="codeplug-body">
+      <div class="container">
+        <div class="codeplug-main-card">
+
+          <!-- PASO 1: Seleccionar Modelo de Radio -->
+          <div class="config-step">
+            <div class="step-header">
+              <span class="step-number">1</span>
+              <div>
+                <h2 class="step-title">Selecciona el modelo o software de tu radio</h2>
+                <p class="step-subtitle">El generador adaptará los encabezados y columnas al formato que espera tu software de programación (CPS).</p>
+              </div>
+            </div>
+
+            <div class="radios-grid" id="radios-grid">
+              <!-- AnyTone -->
+              <div class="radio-card active" data-model="anytone">
+                <span class="radio-card__badge">Más Popular</span>
+                <div class="radio-card__icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="3"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                </div>
+                <div class="radio-card__name">AnyTone</div>
+                <div class="radio-card__models">AT-D878UV, D878UVII, AT-D578UV, D868</div>
+                <div class="radio-card__format">TalkGroups.csv / DigitalContactList.csv</div>
+              </div>
+
+              <!-- OpenGD77 -->
+              <div class="radio-card" data-model="opengd77">
+                <span class="radio-card__badge">Open Source</span>
+                <div class="radio-card__icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                </div>
+                <div class="radio-card__name">OpenGD77 / OpenUV380</div>
+                <div class="radio-card__models">Radioddity GD-77, Baofeng DM-1801, RD-5R, TYT UV380</div>
+                <div class="radio-card__format">Contacts.csv (Group Call + TS)</div>
+              </div>
+
+              <!-- TYT / Retevis -->
+              <div class="radio-card" data-model="tyt">
+                <span class="radio-card__badge">Clásico DMR</span>
+                <div class="radio-card__icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                  </svg>
+                </div>
+                <div class="radio-card__name">TYT / Retevis</div>
+                <div class="radio-card__models">MD-380, MD-390, MD-9600, RT3, RT3S, RT82</div>
+                <div class="radio-card__format">Contact.csv (Call Name / 16 chars)</div>
+              </div>
+
+              <!-- Radioddity Oficial -->
+              <div class="radio-card" data-model="radioddity">
+                <div class="radio-card__icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 11a9 9 0 0 1 9 9"></path>
+                    <path d="M4 4a16 16 0 0 1 16 16"></path>
+                    <circle cx="5" cy="19" r="1"></circle>
+                  </svg>
+                </div>
+                <div class="radio-card__name">Radioddity CPS</div>
+                <div class="radio-card__models">GD-77 (CPS original de fábrica), DB25-D</div>
+                <div class="radio-card__format">DigitalContacts.csv</div>
+              </div>
+
+              <!-- Motorola MOTOTRBO -->
+              <div class="radio-card" data-model="motorola">
+                <span class="radio-card__badge">Profesional</span>
+                <div class="radio-card__icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                </div>
+                <div class="radio-card__name">Motorola MOTOTRBO</div>
+                <div class="radio-card__models">Serie DGP (8550/5550), DGM, DP, XPR</div>
+                <div class="radio-card__format">Contacts.csv (Group Call / Private)</div>
+              </div>
+
+              <!-- Universal / Excel -->
+              <div class="radio-card" data-model="universal">
+                <span class="radio-card__badge">Genérico</span>
+                <div class="radio-card__icon">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                  </svg>
+                </div>
+                <div class="radio-card__name">Universal / Excel</div>
+                <div class="radio-card__models">Chirp, Planillas de cálculo, respaldos y otros CPS</div>
+                <div class="radio-card__format">CSV completo con todos los metadatos</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PASO 2: Opciones de Contenido y Alcance -->
+          <div class="config-step">
+            <div class="step-header">
+              <span class="step-number">2</span>
+              <div>
+                <h2 class="step-title">Personaliza el contenido y la libreta de contactos</h2>
+                <p class="step-subtitle">Elige qué datos necesitas y el tamaño de la base de contactos según la memoria de tu radio.</p>
+              </div>
+            </div>
+
+            <div class="options-row">
+              <!-- Tipo de Contenido -->
+              <div class="option-group">
+                <label class="option-group__label">Contenido del archivo:</label>
+                <div class="pill-selector" id="type-selector">
+                  <button type="button" class="pill-btn active" data-type="all">
+                    <div class="pill-btn__info">
+                      <span class="pill-btn__title">Pack Completo (Recomendado)</span>
+                      <span class="pill-btn__desc">Talkgroups venezolanos + Libreta de contactos</span>
+                    </div>
+                    <span class="pill-btn__count">TGs + IDs</span>
+                  </button>
+                  <button type="button" class="pill-btn" data-type="talkgroups">
+                    <div class="pill-btn__info">
+                      <span class="pill-btn__title">Solo Talkgroups (TGs)</span>
+                      <span class="pill-btn__desc">Nacionales 734, circuitos y canales mundiales</span>
+                    </div>
+                    <span class="pill-btn__count">22 TGs</span>
+                  </button>
+                  <button type="button" class="pill-btn" data-type="contacts">
+                    <div class="pill-btn__info">
+                      <span class="pill-btn__title">Solo Directorio de Contactos</span>
+                      <span class="pill-btn__desc">Identificación de operadores por indicativo y DMR ID</span>
+                    </div>
+                    <span class="pill-btn__count">IDs</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Alcance Geográfico (Memoria del Radio) -->
+              <div class="option-group">
+                <label class="option-group__label">Alcance de contactos (Capacidad del radio):</label>
+                <div class="pill-selector" id="scope-selector">
+                  <button type="button" class="pill-btn active" data-scope="venezuela">
+                    <div class="pill-btn__info">
+                      <span class="pill-btn__title">Venezuela (MCC 734)</span>
+                      <span class="pill-btn__desc">Cabe en cualquier radio DMR sin límites</span>
+                    </div>
+                    <span class="pill-btn__count">~1.800 IDs</span>
+                  </button>
+                  <button type="button" class="pill-btn" data-scope="latam">
+                    <div class="pill-btn__info">
+                      <span class="pill-btn__title">Iberoamérica / Latam</span>
+                      <span class="pill-btn__desc">Venezuela, Colombia, México, Chile, España, etc.</span>
+                    </div>
+                    <span class="pill-btn__count">~45.000 IDs</span>
+                  </button>
+                  <button type="button" class="pill-btn" data-scope="global">
+                    <div class="pill-btn__info">
+                      <span class="pill-btn__title">Mundial Completo (Global)</span>
+                      <span class="pill-btn__desc">Para radios de 200k+ contactos (AnyTone 878 / OpenGD77)</span>
+                    </div>
+                    <span class="pill-btn__count">~260.000 IDs</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel de Acción y Descarga -->
+          <div class="download-action-card">
+            <div class="download-summary">
+              <div class="download-summary__icon">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </div>
+              <div>
+                <h3 class="download-summary__title" id="summary-title">AnyTone · Pack Completo (Venezuela)</h3>
+                <p class="download-summary__details" id="summary-desc">Generará archivo ZIP con TalkGroups.csv y DigitalContactList.csv listos para importar.</p>
+              </div>
+            </div>
+
+            <div class="download-btn-group">
+              <button type="button" class="btn-preview-toggle" id="btn-toggle-preview">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span>Ver Previa</span>
+              </button>
+
+              <a href="/api/codeplug-generator.php?model=anytone&type=all&scope=venezuela" id="btn-download" class="btn-codeplug-download">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Descargar Archivos</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Previsualizador de Filas CSV -->
+          <div class="preview-drawer" id="preview-drawer" style="display: none;">
+            <div class="preview-drawer__header">
+              <span class="preview-drawer__title">Estructura del archivo para tu radio:</span>
+              <span id="preview-format-tag" style="font-size: 0.76rem; color: #f87171; font-family: monospace;">AnyTone CPS</span>
+            </div>
+            <div class="preview-table-container">
+              <table class="preview-table" id="preview-table">
+                <!-- Se llena dinámicamente con JavaScript -->
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Guía de Importación en CPS -->
+        <div class="codeplug-guide-section">
+          <h2 class="guide-section-title">Instrucciones de Importación en el CPS</h2>
+          <p class="guide-section-desc">Sigue estos sencillos pasos para cargar los archivos descargados directamente en la memoria de tu radio.</p>
+
+          <div class="guide-cards-grid">
+            <!-- AnyTone -->
+            <div class="guide-card">
+              <div class="guide-card__header">
+                <h3 class="guide-card__title">AnyTone (D878 / D578)</h3>
+              </div>
+              <ul class="guide-card__steps">
+                <li>Abre el software <strong>AnyTone CPS</strong> y conecta tu equipo.</li>
+                <li>Ve al menú superior <strong>Tool → Import</strong>.</li>
+                <li>Selecciona <strong>TalkGroups</strong> e importa <code>TalkGroups.csv</code>.</li>
+                <li>Selecciona <strong>Digital Contact List</strong> e importa <code>DigitalContactList.csv</code>.</li>
+                <li>Haz clic en <strong>Write to Radio</strong> para transferir la programación.</li>
+              </ul>
+            </div>
+
+            <!-- OpenGD77 -->
+            <div class="guide-card">
+              <div class="guide-card__header">
+                <h3 class="guide-card__title">OpenGD77 / OpenUV380</h3>
+              </div>
+              <ul class="guide-card__steps">
+                <li>Inicia la aplicación <strong>OpenGD77 CPS</strong>.</li>
+                <li>Dirígete a la pestaña <strong>Contacts</strong> en el árbol de navegación.</li>
+                <li>Presiona <strong>CSV Import</strong> y selecciona el archivo <code>OpenGD77_Contacts.csv</code>.</li>
+                <li>Revisa que los Talkgroups tengan asignados sus ranuras (TS1 / TS2).</li>
+                <li>Presiona <strong>Write Codeplug</strong> para actualizar tu radio.</li>
+              </ul>
+            </div>
+
+            <!-- TYT MD-380 / Retevis -->
+            <div class="guide-card">
+              <div class="guide-card__header">
+                <h3 class="guide-card__title">TYT / Retevis (MD-380 / RT3)</h3>
+              </div>
+              <ul class="guide-card__steps">
+                <li>Abre el <strong>CPS oficial de TYT o Retevis</strong>.</li>
+                <li>Selecciona <strong>Contacts → Digital Contacts</strong>.</li>
+                <li>Usa la opción de importación masiva CSV y elige <code>TYT_MD380_Contacts.csv</code>.</li>
+                <li>Guarda una copia de seguridad (<code>.rdx</code>) de tu codeplug original.</li>
+                <li>Transfiere la nueva libreta a tu radio con <strong>Write Data</strong>.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Nota Aclaratoria sobre Marcas y Protocolos -->
+          <div class="brands-protocol-notice">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div>
+              <strong>¿Por qué no están Icom o Yaesu en los formatos nativos?</strong>
+              <br />
+              Los equipos de <strong>Yaesu</strong> utilizan el protocolo <strong>System Fusion (C4FM/WIRES-X)</strong> y los de <strong>Icom</strong> operan bajo <strong>D-STAR (o IDAS)</strong>, por lo que no emplean codeplugs DMR de forma nativa. Si deseas consultar o cargar estas frecuencias y contactos como canales analógicos o listas de referencia en radios Yaesu, Icom o Kenwood, utiliza la opción <strong>Universal / Excel</strong> para exportar todos los datos a una planilla de cálculo.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  // Estado actual del generador
+  let currentModel = 'anytone';
+  let currentType = 'all';
+  let currentScope = 'venezuela';
+
+  // Elementos DOM
+  const radioCards = document.querySelectorAll('.radio-card');
+  const typeButtons = document.querySelectorAll('#type-selector .pill-btn');
+  const scopeButtons = document.querySelectorAll('#scope-selector .pill-btn');
+  const downloadBtn = document.getElementById('btn-download') as HTMLAnchorElement | null;
+  const summaryTitle = document.getElementById('summary-title');
+  const summaryDesc = document.getElementById('summary-desc');
+  const btnTogglePreview = document.getElementById('btn-toggle-preview');
+  const previewDrawer = document.getElementById('preview-drawer');
+  const previewTable = document.getElementById('preview-table');
+  const previewFormatTag = document.getElementById('preview-format-tag');
+
+  // Nombres descriptivos para la tarjeta de resumen
+  const modelNames: Record<string, string> = {
+    anytone: 'AnyTone (D878 / D578)',
+    opengd77: 'OpenGD77 / OpenUV380',
+    tyt: 'TYT / Retevis (MD-380 / 9600)',
+    radioddity: 'Radioddity CPS',
+    motorola: 'Motorola MOTOTRBO',
+    universal: 'Universal / Excel'
+  };
+
+  const scopeNames: Record<string, string> = {
+    venezuela: 'Venezuela (734)',
+    latam: 'Iberoamérica / Latam',
+    global: 'Mundial Completo'
+  };
+
+  const typeNames: Record<string, string> = {
+    all: 'Pack Completo (TGs + Contactos)',
+    talkgroups: 'Solo Talkgroups (22 TGs)',
+    contacts: 'Solo Contactos Digitales'
+  };
+
+  // Muestras de previsualización por modelo
+  const previewData: Record<string, { headers: string[]; rows: string[][] }> = {
+    anytone: {
+      headers: ['No.', 'Radio ID', 'Callsign', 'Name', 'City', 'State', 'Country', 'Call Type', 'Call Alert'],
+      rows: [
+        ['1', '734', 'TG 734 VE', 'Venezuela Canal Principal', 'Venezuela', 'Nacional', 'Venezuela', 'Group Call', 'None'],
+        ['2', '73411', 'TG 73411', 'Red Venezolana Radioafic', 'Venezuela', 'Nacional', 'Venezuela', 'Group Call', 'None'],
+        ['3', '734001', 'YV5OF', 'Sysop BM-YV', 'Caracas', 'Miranda', 'Venezuela', 'Private Call', 'None'],
+        ['4', '7341003', 'YV5VE', 'William Fourneau', 'Altagracia', 'Guárico', 'Venezuela', 'Private Call', 'None']
+      ]
+    },
+    opengd77: {
+      headers: ['Contact Name', 'ID', 'Type', 'Timeslot'],
+      rows: [
+        ['TG 734 Venezuela', '734', 'Group Call', 'TS1'],
+        ['TG 73411 Red Vzla', '73411', 'Group Call', 'TS2'],
+        ['TG 73452 YVRNE', '73452', 'Group Call', 'TS2'],
+        ['YV5VE William', '7341003', 'Private Call', 'TS1'],
+        ['YV5OF Sysop', '734001', 'Private Call', 'TS1']
+      ]
+    },
+    tyt: {
+      headers: ['Contact Name (máx 16 chars)', 'Call Type', 'Call ID', 'Call Receive Tone'],
+      rows: [
+        ['TG 734 Venezuela', 'Group Call', '734', 'No'],
+        ['TG 73411 Red Vz', 'Group Call', '73411', 'No'],
+        ['YV5VE William', 'Private Call', '7341003', 'No'],
+        ['YY3BIG Big Radio', 'Private Call', '7340003', 'No']
+      ]
+    },
+    radioddity: {
+      headers: ['Name', 'City/Callsign', 'Call ID', 'Call Type'],
+      rows: [
+        ['TG 734 Venezuela', 'Venezuela', '734', 'Group Call'],
+        ['TG 73411 Red Vzla', 'Venezuela', '73411', 'Group Call'],
+        ['YV5VE', 'William Fourneau', '7341003', 'Private Call'],
+        ['YV5OF', 'Sysop BM-YV', '734001', 'Private Call']
+      ]
+    },
+    motorola: {
+      headers: ['Call Type', 'Call Name', 'Call ID'],
+      rows: [
+        ['Group Call', 'TG 734 VE', '734'],
+        ['Group Call', 'TG 73411 Red Vz', '73411'],
+        ['Group Call', 'TG 73452 YVRNE', '73452'],
+        ['Private Call', 'YV5VE William', '7341003'],
+        ['Private Call', 'YV5OF Sysop', '734001']
+      ]
+    },
+    universal: {
+      headers: ['Indice', 'Tipo', 'ID / Talkgroup', 'Indicativo', 'Nombre', 'Ciudad', 'Estado', 'País', 'Ranura', 'Notas'],
+      rows: [
+        ['1', 'Talkgroup', '734', 'TG 734', 'Venezuela Canal Principal', 'Caracas', 'Distrito Capital', 'Venezuela', 'Slot 1', 'Canal Principal'],
+        ['2', 'Talkgroup', '73411', 'TG 73411', 'Red Venezolana Radioaficionados', 'Venezuela', 'Nacional', 'Venezuela', 'Slot 2', 'Comunidad y Rueda'],
+        ['3', 'Contacto', '7341003', 'YV5VE', 'William Fourneau', 'Altagracia', 'Guárico', 'Venezuela', 'Slot 1/2', 'RadioID Validado']
+      ]
+    }
+  };
+
+  function updateState() {
+    // Actualizar URL de descarga directa
+    if (downloadBtn) {
+      downloadBtn.href = `/api/codeplug-generator.php?model=${currentModel}&type=${currentType}&scope=${currentScope}&include_tgs=1`;
+    }
+
+    // Actualizar textos informativos
+    if (summaryTitle) {
+      summaryTitle.textContent = `${modelNames[currentModel] || 'AnyTone'} · ${typeNames[currentType] || 'Pack'}`;
+    }
+    if (summaryDesc) {
+      const scopeText = scopeNames[currentScope] || 'Venezuela';
+      summaryDesc.textContent = `Generará archivo adaptado para ${modelNames[currentModel]} con alcance: ${scopeText}.`;
+    }
+
+    // Actualizar Previa
+    renderPreview();
+  }
+
+  function renderPreview() {
+    if (!previewTable || !previewFormatTag) return;
+    const data = previewData[currentModel] || previewData.anytone;
+    previewFormatTag.textContent = modelNames[currentModel] || 'Formato CSV';
+
+    let html = '<thead><tr>';
+    data.headers.forEach(h => {
+      html += `<th>${h}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    data.rows.forEach(r => {
+      html += '<tr>';
+      r.forEach(col => {
+        html += `<td>${col}</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody>';
+
+    previewTable.innerHTML = html;
+  }
+
+  // Event Listeners: Selección de Radios
+  radioCards.forEach(card => {
+    card.addEventListener('click', () => {
+      radioCards.forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      currentModel = card.getAttribute('data-model') || 'anytone';
+      updateState();
+    });
+  });
+
+  // Event Listeners: Tipo de contenido
+  typeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      typeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentType = btn.getAttribute('data-type') || 'all';
+      updateState();
+    });
+  });
+
+  // Event Listeners: Alcance
+  scopeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      scopeButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentScope = btn.getAttribute('data-scope') || 'venezuela';
+      updateState();
+    });
+  });
+
+  // Toggle de Previsualización
+  if (btnTogglePreview && previewDrawer) {
+    btnTogglePreview.addEventListener('click', () => {
+      const isVisible = previewDrawer.style.display !== 'none';
+      previewDrawer.style.display = isVisible ? 'none' : 'block';
+      const label = btnTogglePreview.querySelector('span');
+      if (label) {
+        label.textContent = isVisible ? 'Ver Previa' : 'Ocultar Previa';
+      }
+    });
+  }
+
+  // Inicializar estado
+  updateState();
+</script>

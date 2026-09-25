@@ -1,0 +1,594 @@
+/* ==========================================================================
+   ESTILOS PARA EL GENERADOR DE CSV Y CODEPLUGS DMR
+   BrandMeister Venezuela · Estética Premium Glassmorphism
+   ========================================================================== */
+
+.codeplug-page {
+  position: relative;
+  min-height: 100vh;
+  color: var(--color-text, #e2e8f0);
+}
+
+/* ── Hero Section ────────────────────────────────────────────────────────── */
+.codeplug-hero {
+  position: relative;
+  padding: 5rem 0 3.5rem;
+  background-color: #0b1120;
+  background-image: 
+    radial-gradient(ellipse at 50% 0%, rgba(220, 38, 38, 0.15) 0%, transparent 70%),
+    linear-gradient(to bottom, rgba(11, 17, 32, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%),
+    url('/assets/news-motorola-bg.webp');
+  background-size: cover;
+  background-position: center top;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .codeplug-hero {
+    padding: 3.5rem 0 2.5rem;
+    background-image: 
+      radial-gradient(ellipse at 50% 0%, rgba(220, 38, 38, 0.18) 0%, transparent 70%),
+      linear-gradient(to bottom, rgba(11, 17, 32, 0.85) 0%, rgba(15, 23, 42, 0.98) 100%),
+      url('/assets/news-motorola-bg-m.webp');
+  }
+}
+
+.codeplug-hero__content {
+  max-width: 820px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.codeplug-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #fca5a5;
+  margin-bottom: 1.25rem;
+  text-transform: uppercase;
+}
+
+.codeplug-hero__title {
+  font-size: clamp(2rem, 4vw, 2.85rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.codeplug-hero__subtitle {
+  font-size: clamp(0.98rem, 1.8vw, 1.12rem);
+  line-height: 1.6;
+  color: #94a3b8;
+  margin: 0 auto 1.5rem;
+  max-width: 680px;
+}
+
+.codeplug-hero__meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.codeplug-hero__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #475569;
+}
+
+/* Franja tricolor sutil */
+.codeplug-stripe {
+  height: 3px;
+  background: linear-gradient(90deg, #facc15 0%, #2563eb 50%, #dc2626 100%);
+  width: 100%;
+}
+
+/* ── Cuerpo Principal ────────────────────────────────────────────────────── */
+.codeplug-body {
+  padding: 3.5rem 0 5rem;
+}
+
+.codeplug-main-card {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 20px;
+  padding: 2.25rem;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.5);
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 640px) {
+  .codeplug-main-card {
+    padding: 1.5rem 1.1rem;
+    border-radius: 16px;
+  }
+}
+
+/* Paso de configuración */
+.config-step {
+  margin-bottom: 2.5rem;
+}
+
+.config-step:last-of-type {
+  margin-bottom: 1.75rem;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+}
+
+.step-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.step-subtitle {
+  font-size: 0.84rem;
+  color: #94a3b8;
+  margin: 0.15rem 0 0;
+}
+
+/* ── Grid de Radios ──────────────────────────────────────────────────────── */
+.radios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.radio-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.2rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: inherit;
+  user-select: none;
+}
+
+.radio-card:hover {
+  background: rgba(51, 65, 85, 0.7);
+  border-color: rgba(220, 38, 38, 0.4);
+  transform: translateY(-2px);
+}
+
+.radio-card.active {
+  background: rgba(220, 38, 38, 0.12);
+  border-color: #dc2626;
+  box-shadow: 0 0 0 1px #dc2626, 0 8px 20px -4px rgba(220, 38, 38, 0.25);
+}
+
+.radio-card__badge {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+.radio-card.active .radio-card__badge {
+  background: rgba(220, 38, 38, 0.25);
+  color: #fca5a5;
+}
+
+.radio-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.9rem;
+  color: #f87171;
+}
+
+.radio-card.active .radio-card__icon {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.radio-card__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.35rem;
+}
+
+.radio-card__models {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.radio-card__format {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ── Selectores de Alcance y Contenido ───────────────────────────────────── */
+.options-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.option-group {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 1.2rem;
+}
+
+.option-group__label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 0.85rem;
+}
+
+.pill-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.pill-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.pill-btn:hover {
+  background: rgba(51, 65, 85, 0.5);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.pill-btn.active {
+  background: rgba(220, 38, 38, 0.12);
+  border-color: #dc2626;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.pill-btn__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.pill-btn__title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.pill-btn__desc {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+.pill-btn__count {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #94a3b8;
+}
+
+.pill-btn.active .pill-btn__count {
+  background: rgba(220, 38, 38, 0.25);
+  color: #fca5a5;
+}
+
+/* ── Panel de Descarga y Previsualización ────────────────────────────────── */
+.download-action-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.download-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.download-summary__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(220, 38, 38, 0.15);
+  color: #f87171;
+  flex-shrink: 0;
+}
+
+.download-summary__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.download-summary__details {
+  font-size: 0.84rem;
+  color: #94a3b8;
+  margin: 0.2rem 0 0;
+}
+
+.download-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-codeplug-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1.75rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(220, 38, 38, 0.4);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-codeplug-download:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 14px 28px -5px rgba(220, 38, 38, 0.55);
+  transform: translateY(-2px);
+}
+
+.btn-preview-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-preview-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Previsualizador de CSV ──────────────────────────────────────────────── */
+.preview-drawer {
+  margin-top: 1.5rem;
+  background: rgba(11, 17, 32, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.25rem;
+  overflow: hidden;
+}
+
+.preview-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.preview-drawer__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.preview-table-container {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  text-align: left;
+}
+
+.preview-table th {
+  background: rgba(30, 41, 59, 0.9);
+  padding: 0.65rem 0.85rem;
+  color: #f87171;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.preview-table td {
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
+}
+
+.preview-table tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ── Guía de Importación y FAQ ───────────────────────────────────────────── */
+.codeplug-guide-section {
+  margin-top: 4rem;
+}
+
+.guide-section-title {
+  text-align: center;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.guide-section-desc {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #94a3b8;
+  max-width: 620px;
+  margin: 0 auto 2.5rem;
+}
+
+.guide-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.guide-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.guide-card__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.guide-card__steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-size: 0.86rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.guide-card__steps li {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.guide-card__steps li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* Alerta especial sobre marcas y protocolos */
+.brands-protocol-notice {
+  margin-top: 2rem;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  font-size: 0.86rem;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.brands-protocol-notice strong {
+  color: #f1f5f9;
+}
+
+.brands-protocol-notice svg {
+  flex-shrink: 0;
+  color: #f59e0b;
+  margin-top: 0.15rem;
+}
