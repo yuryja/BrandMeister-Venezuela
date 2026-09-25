@@ -1,6 +1,6 @@
 /* ==========================================================================
    ESTILOS: GENERADOR DE CSV Y CODEPLUGS DMR
-   BrandMeister Venezuela · Tema Claro Oficial & Paleta Institucional
+   BrandMeister Venezuela · Paleta Petra / Analytics (Violet & Slate)
    ========================================================================== */
 
 .codeplug-page {
@@ -50,9 +50,9 @@
   gap: 0.5rem;
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--bm-red, #E8261C);
-  border: 1px solid rgba(232, 38, 28, 0.45);
-  background: rgba(232, 38, 28, 0.04);
+  color: #7C3AED;
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  background: rgba(124, 58, 237, 0.08);
   padding: 0.35rem 0.9rem;
   border-radius: var(--radius-pill, 9999px);
   margin-bottom: 1.1rem;
@@ -93,7 +93,7 @@
 .codeplug-hero__dot {
   width: 4px;
   height: 4px;
-  background: var(--bm-orange, #EE6C1F);
+  background: #7C3AED;
   border-radius: 50%;
   display: inline-block;
 }
@@ -113,9 +113,9 @@
 
 .codeplug-main-card {
   background: var(--bg-surface, #FFFFFF);
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-  border-radius: var(--radius-lg, 18px);
-  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-subtle, #E2E8F0);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
   padding: clamp(1.5rem, 3.5vw, 2.5rem);
   margin-top: 2.75rem;
   margin-bottom: 3.5rem;
@@ -151,11 +151,11 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: var(--bm-gradient);
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
   color: #FFFFFF;
   font-weight: 800;
   font-size: 0.92rem;
-  box-shadow: 0 4px 12px rgba(232, 38, 28, 0.25);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
 }
 
 .step-title {
@@ -168,11 +168,11 @@
 
 .step-subtitle {
   font-size: 0.88rem;
-  color: var(--text-muted, #475569);
+  color: #64748B;
   margin: 0.15rem 0 0;
 }
 
-/* ── Grid de Radios (Filas de 3 Columnas) ────────────────────────────────── */
+/* ── Grid de Radios (Filas de 3 Columnas · Estilo Petra Cards) ─────────────── */
 .radios-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -196,10 +196,10 @@
   display: flex;
   flex-direction: column;
   background: #FFFFFF;
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-  border-radius: var(--radius-md, 12px);
-  box-shadow: var(--shadow-sm);
-  padding: 1.35rem 1.25rem;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 1.15rem 1.25rem;
   cursor: pointer;
   text-align: left;
   transition: all 0.2s ease;
@@ -207,37 +207,80 @@
 }
 
 .radio-card:hover {
-  border-color: rgba(238, 108, 31, 0.4);
-  box-shadow: var(--shadow-md);
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.06);
   transform: translateY(-2px);
 }
 
 .radio-card.active {
-  background: rgba(232, 38, 28, 0.03);
-  border-color: var(--bm-red, #E8261C);
-  box-shadow: 0 0 0 1.5px var(--bm-red, #E8261C), var(--shadow-md);
+  background: #FFFFFF;
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 1.5px #7C3AED, 0 4px 14px -2px rgba(124, 58, 237, 0.12);
+}
+
+.radio-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+
+.badge-tag-category {
+  display: inline-block;
+  background: rgba(124, 58, 237, 0.1);
+  color: #7C3AED;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  line-height: 1.2;
+}
+
+.radio-card-meta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748B;
+  letter-spacing: 0.04em;
 }
 
 .radio-card__name {
   font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  color: var(--text-main, #0F172A);
-  margin-bottom: 0.4rem;
+  color: #0F172A;
+  margin-bottom: 0.3rem;
 }
 
 .radio-card__models {
-  font-size: 0.85rem;
-  color: var(--text-muted, #475569);
-  line-height: 1.5;
+  font-size: 0.8rem;
+  color: #64748B;
+  line-height: 1.45;
   margin-bottom: 0.75rem;
 }
 
 .radio-card__format {
-  font-size: 0.78rem;
-  color: var(--bm-red, #E8261C);
-  font-weight: 700;
+  border-top: 1px dashed #E2E8F0;
+  padding-top: 0.65rem;
   margin-top: auto;
+  font-size: 0.75rem;
+  color: #7C3AED;
+  font-weight: 700;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.radio-card__bar {
+  height: 4px;
+  background: #E2E8F0;
+  border-radius: 999px;
+  margin-top: 0.65rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.radio-card.active .radio-card__bar {
+  background: linear-gradient(90deg, #7C3AED, #8B5CF6);
 }
 
 /* ── Selectores de Alcance y Contenido ───────────────────────────────────── */
@@ -248,9 +291,9 @@
 }
 
 .option-group {
-  background: var(--bg-subtle, #F1F5F9);
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-  border-radius: var(--radius-md, 12px);
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
   padding: 1.25rem;
 }
 
@@ -258,7 +301,7 @@
   display: block;
   font-size: 0.92rem;
   font-weight: 700;
-  color: var(--text-main, #0F172A);
+  color: #0F172A;
   margin-bottom: 0.85rem;
 }
 
@@ -275,22 +318,22 @@
   padding: 0.85rem 1.1rem;
   border-radius: 10px;
   background: #FFFFFF;
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-  color: var(--text-main, #0F172A);
+  border: 1px solid #E2E8F0;
+  color: #0F172A;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .pill-btn:hover {
-  border-color: rgba(238, 108, 31, 0.4);
+  border-color: #CBD5E1;
 }
 
 .pill-btn.active {
-  background: rgba(232, 38, 28, 0.04);
-  border-color: var(--bm-red, #E8261C);
-  box-shadow: 0 0 0 1px var(--bm-red, #E8261C);
+  background: #FFFFFF;
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 1.5px #7C3AED;
 }
 
 .pill-btn__info {
@@ -301,27 +344,27 @@
 .pill-btn__title {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--text-main, #0F172A);
+  color: #0F172A;
 }
 
 .pill-btn__desc {
   font-size: 0.78rem;
-  color: var(--text-muted, #475569);
+  color: #64748B;
   margin-top: 0.15rem;
 }
 
 .pill-btn__count {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   padding: 0.2rem 0.6rem;
   border-radius: var(--radius-pill, 9999px);
-  background: var(--bg-subtle, #F1F5F9);
-  color: var(--text-muted, #475569);
+  background: #F1F5F9;
+  color: #64748B;
   font-weight: 600;
 }
 
 .pill-btn.active .pill-btn__count {
-  background: var(--bm-red-light, #FEE2E2);
-  color: var(--bm-red, #E8261C);
+  background: rgba(124, 58, 237, 0.12);
+  color: #7C3AED;
   font-weight: 700;
 }
 
@@ -331,9 +374,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  background: var(--bg-subtle, #F1F5F9);
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-  border-radius: var(--radius-lg, 18px);
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
   padding: 1.5rem 1.75rem;
   margin-top: 2rem;
   flex-wrap: wrap;
@@ -352,8 +395,8 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: var(--bm-red-light, #FEE2E2);
-  color: var(--bm-red, #E8261C);
+  background: rgba(124, 58, 237, 0.1);
+  color: #7C3AED;
   flex-shrink: 0;
 }
 
@@ -361,13 +404,13 @@
   font-family: var(--font-heading);
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--text-main, #0F172A);
+  color: #0F172A;
   margin: 0;
 }
 
 .download-summary__details {
   font-size: 0.86rem;
-  color: var(--text-muted, #475569);
+  color: #64748B;
   margin: 0.2rem 0 0;
 }
 
@@ -383,22 +426,22 @@
   align-items: center;
   gap: 0.65rem;
   padding: 0.85rem 1.75rem;
-  border-radius: var(--radius-md, 12px);
-  background: var(--bm-gradient);
+  border-radius: 10px;
+  background: linear-gradient(90deg, #7C3AED 0%, #8B5CF6 100%);
   color: #FFFFFF;
   font-size: 0.95rem;
   font-weight: 700;
   text-decoration: none;
   border: none;
   cursor: pointer;
-  box-shadow: var(--shadow-warm);
+  box-shadow: 0 8px 20px -4px rgba(124, 58, 237, 0.35);
   transition: all 0.2s ease;
 }
 
 .btn-codeplug-download:hover {
   opacity: 0.95;
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px -5px rgba(238, 108, 31, 0.28);
+  box-shadow: 0 12px 25px -4px rgba(124, 58, 237, 0.45);
 }
 
 .btn-preview-toggle {
@@ -406,30 +449,30 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.85rem 1.25rem;
-  border-radius: var(--radius-md, 12px);
+  border-radius: 10px;
   background: #FFFFFF;
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-  color: var(--text-main, #0F172A);
+  border: 1px solid #E2E8F0;
+  color: #0F172A;
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .btn-preview-toggle:hover {
-  border-color: rgba(238, 108, 31, 0.4);
+  border-color: #CBD5E1;
 }
 
 /* ── Previsualizador de CSV ──────────────────────────────────────────────── */
 .preview-drawer {
   margin-top: 1.5rem;
   background: #FFFFFF;
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-  border-radius: var(--radius-md, 12px);
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
   padding: 1.25rem;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .preview-drawer__header {
@@ -442,7 +485,7 @@
 .preview-drawer__title {
   font-size: 0.88rem;
   font-weight: 700;
-  color: var(--text-muted, #475569);
+  color: #64748B;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin: 0;
@@ -450,7 +493,7 @@
 
 .preview-table-container {
   overflow-x: auto;
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+  border: 1px solid #E2E8F0;
   border-radius: 8px;
 }
 
@@ -458,28 +501,28 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.82rem;
-  color: var(--text-main, #0F172A);
+  color: #0F172A;
   text-align: left;
 }
 
 .preview-table th {
-  background: var(--bg-subtle, #F1F5F9);
+  background: #F8FAFC;
   padding: 0.65rem 0.85rem;
-  color: var(--bm-red, #E8261C);
+  color: #7C3AED;
   font-weight: 700;
-  border-bottom: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+  border-bottom: 1px solid #E2E8F0;
   white-space: nowrap;
 }
 
 .preview-table td {
   padding: 0.6rem 0.85rem;
-  border-bottom: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
+  border-bottom: 1px solid #F1F5F9;
   white-space: nowrap;
-  color: var(--text-muted, #475569);
+  color: #64748B;
 }
 
 .preview-table tr:hover td {
-  background: rgba(238, 108, 31, 0.04);
+  background: rgba(124, 58, 237, 0.03);
 }
 
 /* ── Guía de Importación y FAQ ───────────────────────────────────────────── */
@@ -492,14 +535,14 @@
   font-family: var(--font-heading);
   font-size: clamp(1.8rem, 3.5vw, 2.3rem);
   font-weight: 800;
-  color: var(--text-main, #0F172A);
+  color: #0F172A;
   margin-bottom: 0.5rem;
 }
 
 .guide-section-desc {
   text-align: center;
   font-size: 0.98rem;
-  color: var(--text-muted, #475569);
+  color: #64748B;
   max-width: 640px;
   margin: 0 auto 2.5rem;
 }
@@ -512,12 +555,12 @@
 
 .guide-card {
   background: #FFFFFF;
-  border: 1px solid var(--border-subtle, rgba(15, 23, 42, 0.08));
-  border-radius: var(--radius-lg, 18px);
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
   padding: 1.75rem;
   display: flex;
   flex-direction: column;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .guide-card__header {
@@ -528,7 +571,7 @@
   font-family: var(--font-heading);
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--text-main, #0F172A);
+  color: #0F172A;
   margin: 0;
 }
 
@@ -540,7 +583,7 @@
   flex-direction: column;
   gap: 0.65rem;
   font-size: 0.88rem;
-  color: var(--text-muted, #475569);
+  color: #64748B;
   line-height: 1.55;
 }
 
@@ -553,7 +596,7 @@
   content: "→";
   position: absolute;
   left: 0;
-  color: var(--bm-red, #E8261C);
+  color: #7C3AED;
   font-weight: 800;
 }
 
@@ -561,24 +604,24 @@
 .brands-protocol-notice {
   margin-top: 2rem;
   background: #FFFFFF;
-  border: 1px solid var(--border-warm, rgba(238, 108, 31, 0.2));
-  border-radius: var(--radius-md, 12px);
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
   padding: 1.35rem 1.5rem;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
   font-size: 0.88rem;
-  color: var(--text-muted, #475569);
+  color: #64748B;
   line-height: 1.6;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .brands-protocol-notice strong {
-  color: var(--text-main, #0F172A);
+  color: #0F172A;
 }
 
 .brands-protocol-notice svg {
   flex-shrink: 0;
-  color: var(--bm-orange, #EE6C1F);
+  color: #7C3AED;
   margin-top: 0.15rem;
 }
