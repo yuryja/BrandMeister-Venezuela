@@ -252,7 +252,7 @@ function get_empty_stats(): array {
                 ['id' => '734', 'name' => 'TG 734 Venezuela', 'badge' => 'Nacional', 'sub' => 'Canal principal nacional', 'views' => 0, 'unique_users' => 0, 'percent' => 0],
                 ['id' => '73452', 'name' => 'TG 73452 Emergencias y Eventos', 'badge' => 'Emergencias', 'sub' => 'Operaciones y contingencia', 'views' => 0, 'unique_users' => 0, 'percent' => 0],
                 ['id' => '73473', 'name' => 'TG 73473 Radio Club Venezolano', 'badge' => 'RCV', 'sub' => 'Boletín e institucional', 'views' => 0, 'unique_users' => 0, 'percent' => 0],
-                ['id' => '73411', 'name' => 'TG 73411 Red Venezolana de Radiodifusión', 'badge' => 'RVR', 'sub' => 'Difusión y ruedas temáticas', 'views' => 0, 'unique_users' => 0, 'percent' => 0],
+                ['id' => '73411', 'name' => 'TG 73411 Red Venezolana de Radioaficionados', 'badge' => 'RVR', 'sub' => 'Ruedas y enlaces', 'views' => 0, 'unique_users' => 0, 'percent' => 0],
             ],
         ],
         'countries_detail' => [],
@@ -625,7 +625,7 @@ if ($action === 'stats' || $action === 'summary') {
             '734' => ['name' => 'TG 734 Venezuela', 'badge' => 'Nacional', 'sub' => 'Canal principal nacional'],
             '73452' => ['name' => 'TG 73452 Emergencias y Eventos', 'badge' => 'Emergencias', 'sub' => 'Operaciones y contingencia'],
             '73473' => ['name' => 'TG 73473 Radio Club Venezolano', 'badge' => 'RCV', 'sub' => 'Boletín e institucional'],
-            '73411' => ['name' => 'TG 73411 Red Venezolana de Radiodifusión', 'badge' => 'RVR', 'sub' => 'Difusión y ruedas temáticas'],
+            '73411' => ['name' => 'TG 73411 Red Venezolana de Radioaficionados', 'badge' => 'RVR', 'sub' => 'Ruedas y enlaces'],
         ];
 
         $totalPetraViews = (int)($kpis['petra_views'] ?? 0);
