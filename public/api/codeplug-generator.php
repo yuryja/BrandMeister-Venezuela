@@ -490,44 +490,33 @@ function get_contacts_list(string $scope, string $cacheDir): array {
         default => $veFile
     };
 
-    // 1. Verificar si existe en la caché viva del sistema
+    // 1. Cargar el paquete empaquetado correspondiente si existe
+    $bundledData = [];
+    if ($scope === 'venezuela' && file_exists($bundledVe) && filesize($bundledVe) > 1000) {
+        $bundledData = json_decode(@file_get_contents($bundledVe), true) ?: [];
+    } elseif (($scope === 'latam' || $scope === 'global') && file_exists($bundledLatam) && filesize($bundledLatam) > 1000) {
+        $bundledData = json_decode(@file_get_contents($bundledLatam), true) ?: [];
+    }
+
+    // 2. Verificar si existe en la caché viva del sistema y contiene tantos o más registros que el bundle
     if (file_exists($targetFile) && filesize($targetFile) > 1000) {
         $content = @file_get_contents($targetFile);
         if ($content !== false) {
-            $data = json_decode($content, true);
-            if (is_array($data) && count($data) > 10) {
-                return $data;
+            $cachedData = json_decode($content, true);
+            if (is_array($cachedData) && count($cachedData) >= count($bundledData) && count($cachedData) > 500) {
+                return $cachedData;
             }
         }
     }
 
-    // 2. Si la caché aún no está lista, usar la base de datos empaquetada en el proyecto (CERO latencia)
-    if ($scope === 'venezuela' && file_exists($bundledVe) && filesize($bundledVe) > 1000) {
-        $content = @file_get_contents($bundledVe);
-        if ($content !== false) {
-            $data = json_decode($content, true);
-            if (is_array($data) && count($data) > 10) {
-                // Copiar a la caché temporal para próximas peticiones ultra rápidas
-                if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
-                @file_put_contents($veFile, $content);
-                return $data;
-            }
-        }
+    // 3. Si el bundle tiene datos completos, usarlo y refrescar la caché
+    if (!empty($bundledData) && count($bundledData) > 10) {
+        if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+        @file_put_contents($targetFile, json_encode($bundledData, JSON_UNESCAPED_UNICODE));
+        return $bundledData;
     }
 
-    if ($scope === 'latam' && file_exists($bundledLatam) && filesize($bundledLatam) > 1000) {
-        $content = @file_get_contents($bundledLatam);
-        if ($content !== false) {
-            $data = json_decode($content, true);
-            if (is_array($data) && count($data) > 10) {
-                if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
-                @file_put_contents($latamFile, $content);
-                return $data;
-            }
-        }
-    }
-
-    // 3. Si se pidió Venezuela y no hay bundle, consultar la API en vivo
+    // 4. Si se pidió Venezuela y no hay bundle o caché, consultar la API en vivo
     if ($scope === 'venezuela') {
         $apiUsers = fetch_all_venezuela_users_api();
         if (!empty($apiUsers) && count($apiUsers) > 10) {
