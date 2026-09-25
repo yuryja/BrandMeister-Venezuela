@@ -779,43 +779,21 @@
   transition: width 0.4s ease;
 }
 
-.petra-tg-progress-fill.badge-tg-main {
-  background: linear-gradient(90deg, #2563EB, #3B82F6);
-}
-
-.petra-tg-progress-fill.badge-tg-alert {
-  background: linear-gradient(90deg, #DC2626, #EF4444);
-}
-
-.petra-tg-progress-fill.badge-tg-rcv {
-  background: linear-gradient(90deg, #059669, #10B981);
-}
-
+/* Talkgroups de Petra: paleta BrandMeister. Cada tarjeta lleva el nombre de su TG, así que
+   no hace falta un color por talkgroup: todas usan el naranja de marca, como el resto del panel */
+.petra-tg-progress-fill.badge-tg-main,
+.petra-tg-progress-fill.badge-tg-alert,
+.petra-tg-progress-fill.badge-tg-rcv,
 .petra-tg-progress-fill.badge-tg-rvr {
-  background: linear-gradient(90deg, #7C3AED, #8B5CF6);
+  background: linear-gradient(90deg, #E8261C, #EE6C1F);
 }
 
-.badge-tg-main {
-  background: rgba(37, 99, 235, 0.1);
-  color: #1D4ED8;
-  font-weight: 700;
-}
-
-.badge-tg-alert {
-  background: rgba(220, 38, 38, 0.1);
-  color: #B91C1C;
-  font-weight: 700;
-}
-
-.badge-tg-rcv {
-  background: rgba(5, 150, 105, 0.1);
-  color: #047857;
-  font-weight: 700;
-}
-
+.badge-tg-main,
+.badge-tg-alert,
+.badge-tg-rcv,
 .badge-tg-rvr {
-  background: rgba(124, 58, 237, 0.1);
-  color: #6D28D9;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
   font-weight: 700;
 }
 
@@ -1358,4 +1336,79 @@
   #view-dashboard > :not(.view-header) {
     transition: none;
   }
+}
+
+/* ---------------------------------------------------------
+   Herramientas: generador de codeplugs y buscador de indicativos
+   --------------------------------------------------------- */
+.tool-stat-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.tool-stat-value {
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.tool-stat-label {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+}
+
+.tool-stat-label strong {
+  color: var(--ink-strong);
+}
+
+.tool-stat-subtitle {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.tool-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.tool-bar-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+}
+
+.tool-bar-name {
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.tool-bar-count {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tool-bar-count strong {
+  color: var(--ink-strong);
+}
+
+.badge-mini.badge-sin-resultado {
+  margin-left: 0.4rem;
+  background: #F1F5F9;
+  color: var(--ink-muted);
+  font-weight: 600;
 }

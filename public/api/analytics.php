@@ -52,6 +52,21 @@ const BM_TRAFFIC_LABELS = [
     'directo' => 'Directo',
 ];
 
+/** Radios y alcances del generador de codeplugs, con el nombre que se ve en el panel */
+const BM_CODEPLUG_MODELOS = [
+    'anytone' => 'AnyTone',
+    'opengd77' => 'OpenGD77',
+    'tyt' => 'TYT / Retevis',
+    'radioddity' => 'Radioddity',
+    'motorola' => 'Motorola MOTOTRBO',
+    'universal' => 'Universal / Excel',
+];
+const BM_CODEPLUG_ALCANCES = [
+    'venezuela' => 'Venezuela',
+    'latam' => 'Iberoamérica / Latam',
+    'global' => 'Mundial',
+];
+
 /** Dominio de un enlace, en minúsculas y sin www. Cadena vacía si no es una URL usable. */
 function bm_url_host(string $url): string {
     $url = trim($url);
@@ -218,6 +233,8 @@ function get_empty_stats(): array {
             'unique_visitors' => 0,
             'active_countries' => 0,
         ],
+        'codeplug' => ['total' => 0, 'people' => 0, 'models' => [], 'scopes' => []],
+        'lookups' => ['total' => 0, 'people' => 0, 'found' => 0, 'found_percent' => 0, 'top' => []],
         'traffic' => [
             'sources' => [],
             'sites' => [],
@@ -280,7 +297,7 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
     $data = json_decode($rawInput, true) ?: $_POST;
 
     $eventType = trim((string)($data['event_type'] ?? ''));
-    $validTypes = ['player_play', 'link_click', 'post_view', 'post_share', 'page_view'];
+    $validTypes = ['player_play', 'link_click', 'post_view', 'post_share', 'page_view', 'codeplug_download', 'callsign_lookup'];
     if (!in_array($eventType, $validTypes, true)) {
         send_json(['error' => 'Tipo de evento no válido'], 400);
     }
@@ -292,6 +309,21 @@ if ($action === 'track' || $_SERVER['REQUEST_METHOD'] === 'POST' && empty($actio
     $entityTitle = mb_substr(trim(preg_replace('/\s+/', ' ', strip_tags((string)($data['entity_title'] ?? '')))), 0, 255);
     $platform = strtolower(preg_replace('/[^a-z0-9_-]/i', '', (string)($data['platform'] ?? 'web')));
     $platform = substr($platform ?: 'web', 0, 50);
+
+    // Los dos eventos de herramientas solo aceptan valores conocidos: así las estadísticas no se
+    // llenan de basura si alguien envía datos a mano
+    if ($eventType === 'codeplug_download') {
+        $eventCategory = array_key_exists($eventCategory, BM_CODEPLUG_MODELOS) ? $eventCategory : 'universal';
+        $entityId = array_key_exists($entityId, BM_CODEPLUG_ALCANCES) ? $entityId : 'venezuela';
+        $entityTitle = in_array($entityTitle, ['all', 'talkgroups', 'contacts'], true) ? $entityTitle : 'all';
+    } elseif ($eventType === 'callsign_lookup') {
+        $entityId = substr(preg_replace('/[^A-Z0-9\/]/', '', strtoupper($entityId)), 0, 20);
+        if ($entityId === '') {
+            send_json(['success' => true, 'logged' => false]);
+        }
+        $eventCategory = $eventCategory === 'encontrado' ? 'encontrado' : 'no_encontrado';
+        $entityTitle = ctype_digit($entityId) ? 'dmr_id' : 'indicativo';
+    }
 
     $ipAddress = get_client_ip();
     $deviceType = detect_device_type();
@@ -875,6 +907,71 @@ if ($action === 'stats' || $action === 'summary') {
             ] : null,
         ];
 
+        // Generador de codeplugs: descargas por radio y por alcance
+        $codeplugRows = $pdo->query("SELECT event_category AS modelo, entity_id AS alcance, COUNT(*) AS n
+            FROM bm_analytics_events
+            WHERE event_type = 'codeplug_download' $since
+            GROUP BY event_category, entity_id")->fetchAll();
+        $codeplugPeople = (int)$pdo->query("SELECT COUNT(DISTINCT ip_address) FROM bm_analytics_events
+            WHERE event_type = 'codeplug_download' $since")->fetchColumn();
+        $codeplugTotal = 0;
+        $porModelo = [];
+        $porAlcance = [];
+        foreach ($codeplugRows as $row) {
+            $n = (int)$row['n'];
+            $codeplugTotal += $n;
+            $porModelo[$row['modelo']] = ($porModelo[$row['modelo']] ?? 0) + $n;
+            $porAlcance[$row['alcance']] = ($porAlcance[$row['alcance']] ?? 0) + $n;
+        }
+        $repartir = function (array $conteos, array $nombres) use ($codeplugTotal) {
+            arsort($conteos);
+            $lista = [];
+            foreach ($conteos as $clave => $n) {
+                $lista[] = [
+                    'key' => (string)$clave,
+                    'name' => $nombres[$clave] ?? (string)$clave,
+                    'count' => $n,
+                    'percent' => $codeplugTotal > 0 ? round($n * 100 / $codeplugTotal, 1) : 0,
+                ];
+            }
+            return $lista;
+        };
+        $codeplug = [
+            'total' => $codeplugTotal,
+            'people' => $codeplugPeople,
+            'models' => $repartir($porModelo, BM_CODEPLUG_MODELOS),
+            'scopes' => $repartir($porAlcance, BM_CODEPLUG_ALCANCES),
+        ];
+
+        // Buscador de indicativos: consultas, cuántas encontraron algo y las más buscadas
+        $lookupTotals = $pdo->query("SELECT COUNT(*) AS total, COUNT(DISTINCT ip_address) AS people,
+                SUM(CASE WHEN event_category = 'encontrado' THEN 1 ELSE 0 END) AS found
+            FROM bm_analytics_events
+            WHERE event_type = 'callsign_lookup' $since")->fetch() ?: [];
+        $lookupTop = $pdo->query("SELECT entity_id AS q, entity_title AS tipo, COUNT(*) AS n,
+                MAX(CASE WHEN event_category = 'encontrado' THEN 1 ELSE 0 END) AS found
+            FROM bm_analytics_events
+            WHERE event_type = 'callsign_lookup' $since
+            GROUP BY entity_id, entity_title
+            ORDER BY n DESC, q ASC
+            LIMIT 10")->fetchAll();
+        $lookupTotal = (int)($lookupTotals['total'] ?? 0);
+        $lookupFound = (int)($lookupTotals['found'] ?? 0);
+        $lookups = [
+            'total' => $lookupTotal,
+            'people' => (int)($lookupTotals['people'] ?? 0),
+            'found' => $lookupFound,
+            'found_percent' => $lookupTotal > 0 ? round($lookupFound * 100 / $lookupTotal) : 0,
+            'top' => array_map(function ($row) {
+                return [
+                    'query' => (string)$row['q'],
+                    'type' => $row['tipo'] === 'dmr_id' ? 'DMR ID' : 'Indicativo',
+                    'count' => (int)$row['n'],
+                    'found' => (bool)$row['found'],
+                ];
+            }, $lookupTop),
+        ];
+
         // Telemetría en tiempo real: oyentes de audio en vivo activos en este momento (últimos 60 segundos)
         // Se toma el evento de audio más reciente por IP en la ventana de 60s.
         // Si el último evento fue 'audio_stop' o ya expiró el latido, ya no se considera activo.
@@ -934,6 +1031,8 @@ if ($action === 'stats' || $action === 'summary') {
                 'active_countries' => (int)($kpis['active_countries'] ?? 0),
             ],
             'traffic' => $traffic,
+            'codeplug' => $codeplug,
+            'lookups' => $lookups,
             'audience' => $audience,
             'map_points' => $mapPoints,
             'player' => [

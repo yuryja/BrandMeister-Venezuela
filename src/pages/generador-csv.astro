@@ -580,6 +580,20 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
       const { nombre, blob } = generarArchivo(currentModel as Modelo, currentType as Tipo, alcance, contactos);
       guardarArchivo(blob, nombre);
       mostrarProgreso(100, `Listo: ${nombre} (${megas(blob.size)}).`);
+
+      // Estadística del Escritorio: el archivo se arma aquí, así que el servidor no se entera solo
+      fetch('/api/analytics.php?action=track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'codeplug_download',
+          event_category: currentModel,
+          entity_id: currentScope,
+          entity_title: currentType,
+          metadata: { contactos: contactos.length },
+        }),
+        keepalive: true,
+      }).catch(() => {});
     } catch (err) {
       mostrarProgreso(
         100,

@@ -1232,6 +1232,59 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
               </div>
             </div>
           </div>
+
+          <!-- 9. HERRAMIENTAS: GENERADOR DE CODEPLUGS Y BUSCADOR DE INDICATIVOS -->
+          <div class="analytics-row-grid" style="margin-top: 1.5rem;">
+            <div class="wp-box">
+              <div class="wp-box-head">
+                <div>
+                  <h3>Generador de Codeplugs</h3>
+                  <p class="box-sub">Archivos descargados para programar radios, por modelo y alcance</p>
+                </div>
+                <span class="badge-mini" data-range-label>Últimos 7 días</span>
+              </div>
+              <div class="wp-box-body">
+                <div class="tool-stat-head">
+                  <span class="tool-stat-value" id="codeplug-total">--</span>
+                  <span class="tool-stat-label" id="codeplug-label">descargas</span>
+                </div>
+                <h4 class="tool-stat-subtitle">Por radio</h4>
+                <div class="tool-bars" id="codeplug-models"></div>
+                <h4 class="tool-stat-subtitle">Por alcance de contactos</h4>
+                <div class="tool-bars" id="codeplug-scopes"></div>
+              </div>
+            </div>
+
+            <div class="wp-box">
+              <div class="wp-box-head">
+                <div>
+                  <h3>Consultas de Indicativos</h3>
+                  <p class="box-sub">Búsquedas en el buscador de RadioID del sitio</p>
+                </div>
+                <span class="badge-mini" data-range-label>Últimos 7 días</span>
+              </div>
+              <div class="wp-box-body" style="padding-bottom: 0;">
+                <div class="tool-stat-head">
+                  <span class="tool-stat-value" id="lookups-total">--</span>
+                  <span class="tool-stat-label" id="lookups-label">consultas</span>
+                </div>
+              </div>
+              <div class="table-responsive-minimal">
+                <table class="analytics-table">
+                  <thead>
+                    <tr>
+                      <th>Más consultados</th>
+                      <th class="col-opt">Tipo</th>
+                      <th class="cell-right">Consultas</th>
+                    </tr>
+                  </thead>
+                  <tbody id="lookups-top-tbody">
+                    <!-- Inyectado dinámicamente -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- ========================================================= -->
