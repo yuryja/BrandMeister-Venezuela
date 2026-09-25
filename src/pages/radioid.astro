@@ -4,7 +4,7 @@ import '../styles/radioid.css';
 import '../styles/petra.css'; // Contiene las clases de banderas .fi y .fi-*
 
 const metaTitle = "Consulta de Indicativos y RadioID · BrandMeister Venezuela";
-const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en Venezuela y el mundo. Consulta tu identificador de 7 dígitos, estado de validación y telemetría sin recargar la página.";
+const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en Venezuela y el mundo. Consulta tu identificador de 7 dígitos, estado de validación y telemetría.";
 ---
 
 <Layout
@@ -49,8 +49,6 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
             <i class="radioid-hero__dot" aria-hidden="true"></i>
             <span>Prefijo 734 Venezuela</span>
             <i class="radioid-hero__dot" aria-hidden="true"></i>
-            <span>Sin recargar la página</span>
-            <i class="radioid-hero__dot" aria-hidden="true"></i>
             <span>Datos Oficiales RadioID</span>
           </div>
         </div>
@@ -75,7 +73,7 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
                 type="text"
                 id="radioid-search-input"
                 class="radioid-input"
-                placeholder="Escribe un indicativo (ej: YY3BIG, YV5RNE, YV4DMR) o DMR ID (ej: 7340520)..."
+                placeholder="Escribe un indicativo (ej: YV5VE, YY3BIG, YV5RNE) o DMR ID (ej: 734014)..."
                 autocomplete="off"
                 spellcheck="false"
                 aria-label="Buscar por indicativo o DMR ID"
@@ -94,11 +92,11 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
             <div class="search-actions-row">
               <div class="search-chips-container">
                 <span class="search-chips-label">Ejemplos rápidos:</span>
+                <button type="button" class="search-chip" data-query="YV5VE">YV5VE</button>
+                <button type="button" class="search-chip" data-query="734014">734014 (Repetidor)</button>
                 <button type="button" class="search-chip" data-query="YY3BIG">YY3BIG</button>
                 <button type="button" class="search-chip" data-query="YV5RNE">YV5RNE</button>
-                <button type="button" class="search-chip" data-query="YV4DMR">YV4DMR</button>
                 <button type="button" class="search-chip" data-query="7340520">7340520</button>
-                <button type="button" class="search-chip" data-query="734001">734001</button>
               </div>
 
               <button type="submit" id="btn-search-submit" class="btn-search-submit">
@@ -151,8 +149,9 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
               Ingresa tu indicativo de llamada (Callsign) o tu número de RadioID para visualizar al instante tus datos oficiales registrados, ciudad, estado de validación y telemetría de red.
             </p>
             <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+              <button type="button" class="btn btn-secondary search-chip-btn" data-query="YV5VE">Probar con YV5VE</button>
+              <button type="button" class="btn btn-secondary search-chip-btn" data-query="734014">Probar con 734014 (Repetidor)</button>
               <button type="button" class="btn btn-secondary search-chip-btn" data-query="YY3BIG">Probar con YY3BIG</button>
-              <button type="button" class="btn btn-secondary search-chip-btn" data-query="YV5RNE">Probar con YV5RNE</button>
             </div>
           </div>
 
