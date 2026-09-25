@@ -1,0 +1,770 @@
+---
+import Layout from '../layouts/Layout.astro';
+import '../styles/radioid.css';
+import '../styles/petra.css'; // Contiene las clases de banderas .fi y .fi-*
+
+const metaTitle = "Consulta de Indicativos y RadioID · BrandMeister Venezuela";
+const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en Venezuela y el mundo. Consulta tu identificador de 7 dígitos, estado de validación y telemetría sin recargar la página.";
+---
+
+<Layout
+  heroImage={{ desktop: '/assets/news-motorola-bg.webp', mobile: '/assets/news-motorola-bg-m.webp' }}
+  title={metaTitle}
+  description={metaDescription}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Consulta RadioID · BrandMeister Venezuela",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "url": "https://brandmeisteryv.net/radioid",
+      "description": metaDescription,
+      "browserRequirements": "Requires JavaScript. Requires HTML5."
+    })} />
+  </Fragment>
+
+  <main class="radioid-page">
+    <!-- Hero con imagen Motorola oficial del post de RadioID -->
+    <section class="radioid-hero">
+      <div class="container">
+        <div class="radioid-hero__content">
+          <div class="radioid-hero__badge">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="16" rx="3"></rect>
+              <circle cx="9" cy="10" r="2"></circle>
+              <line x1="15" y1="8" x2="17" y2="8"></line>
+              <line x1="15" y1="12" x2="17" y2="12"></line>
+              <line x1="7" y1="16" x2="17" y2="16"></line>
+            </svg>
+            <span>Directorio Global DMR · RadioID.net</span>
+          </div>
+          <h1 class="radioid-hero__title">Consulta de Indicativos y RadioID</h1>
+          <p class="radioid-hero__subtitle">
+            Verifica en tiempo real el registro oficial de indicativos, identificadores DMR de 7 dígitos, repetidores y telemetría de última actividad en BrandMeister.
+          </p>
+          <div class="radioid-hero__meta">
+            <span>Búsqueda Instantánea</span>
+            <i class="radioid-hero__dot" aria-hidden="true"></i>
+            <span>Prefijo 734 Venezuela</span>
+            <i class="radioid-hero__dot" aria-hidden="true"></i>
+            <span>Sin recargar la página</span>
+            <i class="radioid-hero__dot" aria-hidden="true"></i>
+            <span>Datos Oficiales RadioID</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Franja con degradado BrandMeister -->
+    <div class="radioid-stripe" aria-hidden="true"></div>
+
+    <!-- Contenido y Buscador Interactivo -->
+    <section class="radioid-body">
+      <div class="container">
+        <!-- Tarjeta Principal del Buscador Flotante -->
+        <div class="radioid-search-panel">
+          <form id="radioid-search-form" class="search-form-group" role="search" onsubmit="return false;">
+            <div class="search-input-wrapper">
+              <svg class="search-input-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <input
+                type="text"
+                id="radioid-search-input"
+                class="radioid-input"
+                placeholder="Escribe un indicativo (ej: YY3BIG, YV5RNE, YV4DMR) o DMR ID (ej: 7340520)..."
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="Buscar por indicativo o DMR ID"
+              />
+              <button
+                type="button"
+                id="search-clear-btn"
+                class="search-clear-btn"
+                title="Limpiar búsqueda"
+                aria-label="Limpiar campo de búsqueda"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div class="search-actions-row">
+              <div class="search-chips-container">
+                <span class="search-chips-label">Ejemplos rápidos:</span>
+                <button type="button" class="search-chip" data-query="YY3BIG">YY3BIG</button>
+                <button type="button" class="search-chip" data-query="YV5RNE">YV5RNE</button>
+                <button type="button" class="search-chip" data-query="YV4DMR">YV4DMR</button>
+                <button type="button" class="search-chip" data-query="7340520">7340520</button>
+                <button type="button" class="search-chip" data-query="734001">734001</button>
+              </div>
+
+              <button type="submit" id="btn-search-submit" class="btn-search-submit">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span>Consultar</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Área de Resultados Dinámicos (Sin refrescar la página) -->
+        <div id="radioid-results-area" class="radioid-results-area" aria-live="polite">
+          <!-- Skeleton Loading (visible durante la petición) -->
+          <div id="radioid-skel" class="radioid-skel-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+              <div style="display:flex; align-items:center; gap:1rem;">
+                <div class="radioid-skel-bar" style="width:52px; height:38px;"></div>
+                <div>
+                  <div class="radioid-skel-bar" style="width:180px; height:32px; margin-bottom:0.4rem;"></div>
+                  <div class="radioid-skel-bar" style="width:140px; height:18px;"></div>
+                </div>
+              </div>
+              <div class="radioid-skel-bar" style="width:120px; height:36px;"></div>
+            </div>
+            <div class="radioid-skel-bar" style="width:60%; height:20px; margin-bottom:1.75rem;"></div>
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem;">
+              <div class="radioid-skel-bar" style="height:70px;"></div>
+              <div class="radioid-skel-bar" style="height:70px;"></div>
+              <div class="radioid-skel-bar" style="height:70px;"></div>
+              <div class="radioid-skel-bar" style="height:70px;"></div>
+            </div>
+          </div>
+
+          <!-- Contenedor donde se inyectan las tarjetas de resultados -->
+          <div id="radioid-results-container"></div>
+
+          <!-- Estado Inicial (Sin búsqueda activa) -->
+          <div id="radioid-initial-state" class="radioid-state-card">
+            <div class="state-icon-wrap state-icon-wrap--info">
+              <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
+            <h2 class="state-title">Consulta cualquier Indicativo o ID DMR</h2>
+            <p class="state-desc">
+              Ingresa tu indicativo de llamada (Callsign) o tu número de RadioID para visualizar al instante tus datos oficiales registrados, ciudad, estado de validación y telemetría de red.
+            </p>
+            <div style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+              <button type="button" class="btn btn-secondary search-chip-btn" data-query="YY3BIG">Probar con YY3BIG</button>
+              <button type="button" class="btn btn-secondary search-chip-btn" data-query="YV5RNE">Probar con YV5RNE</button>
+            </div>
+          </div>
+
+          <!-- Estado No Encontrado -->
+          <div id="radioid-notfound-state" class="radioid-state-card" style="display:none;">
+            <div class="state-icon-wrap state-icon-wrap--notfound">
+              <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <h2 class="state-title">No se encontraron registros</h2>
+            <p class="state-desc" id="notfound-message">
+              No encontramos ningún operador o repetidor asociado a este término en la base de datos de RadioID.net.
+            </p>
+            <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+              <a href="https://radioid.net/account/register" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                Registrar nuevo ID en RadioID.net ↗
+              </a>
+              <a href="/blog/verificacion-radioid-dmr" class="btn btn-secondary">
+                Guía de Verificación Anual
+              </a>
+            </div>
+          </div>
+
+          <!-- Estado Error de Conexión -->
+          <div id="radioid-error-state" class="radioid-state-card" style="display:none;">
+            <div class="state-icon-wrap state-icon-wrap--error">
+              <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <h2 class="state-title">Error al consultar el servidor</h2>
+            <p class="state-desc" id="error-message">
+              No fue posible conectar con los servidores de RadioID.net. Por favor verifica tu conexión o intenta nuevamente en unos segundos.
+            </p>
+            <button type="button" id="btn-retry-search" class="btn btn-secondary">
+              Reintentar Consulta
+            </button>
+          </div>
+        </div>
+
+        <!-- Sección de Ayuda y Guía sobre RadioID -->
+        <div class="radioid-guide-section reveal-on-scroll">
+          <div class="guide-section-header">
+            <span class="guide-tag">Información y Normativa</span>
+            <h2 class="guide-title">Todo sobre tu identificador DMR en Venezuela</h2>
+          </div>
+
+          <div class="guide-grid">
+            <!-- Tarjeta 1: Estructura MCC 734 -->
+            <div class="guide-card">
+              <div class="guide-card-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path>
+                  <path d="M12 6v6l4 2"></path>
+                </svg>
+              </div>
+              <h3 class="guide-card-title">Estructura del Prefijo 734</h3>
+              <p class="guide-card-desc">
+                Todos los operadores de Venezuela tienen un ID de 7 dígitos que inicia con <strong>734</strong> (código de país UIT). Los repetidores físicos y puntos de acceso utilizan identificadores en las series <strong>7340xx</strong> y <strong>7345xx</strong>.
+              </p>
+              <a href="/talkgroups" class="guide-card-link">
+                <span>Ver Talkgroups nacionales</span>
+                <span>→</span>
+              </a>
+            </div>
+
+            <!-- Tarjeta 2: Verificación Anual -->
+            <div class="guide-card">
+              <div class="guide-card-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+              </div>
+              <h3 class="guide-card-title">Confirmación Anual Obligatoria</h3>
+              <p class="guide-card-desc">
+                RadioID.net exige confirmar tu cuenta una vez al año para preservar los números asignados y evitar cuentas inactivas. Si tu estatus cambia a "no validado", podrías perder tráfico en másteres BrandMeister.
+              </p>
+              <a href="/blog/verificacion-radioid-dmr" class="guide-card-link">
+                <span>Leer artículo completo</span>
+                <span>→</span>
+              </a>
+            </div>
+
+            <!-- Tarjeta 3: Requisitos Oficiales -->
+            <div class="guide-card">
+              <div class="guide-card-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <h3 class="guide-card-title">Requisitos para tu Registro</h3>
+              <p class="guide-card-desc">
+                Para solicitar tu ID requieres certificado oficial de radioaficionado vigente (YV o YY) emitido por CONATEL. El registro es gratuito y se gestiona directamente en la plataforma internacional.
+              </p>
+              <a href="https://radioid.net/account/register" target="_blank" rel="noopener noreferrer" class="guide-card-link">
+                <span>Registrarte en RadioID.net ↗</span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  import { callsignToCountry } from '../lib/callsign-country';
+
+  // Referencias del DOM
+  const searchInput = document.getElementById('radioid-search-input') as HTMLInputElement | null;
+  const clearBtn = document.getElementById('search-clear-btn');
+  const searchForm = document.getElementById('radioid-search-form');
+  const skelLoader = document.getElementById('radioid-skel');
+  const resultsContainer = document.getElementById('radioid-results-container');
+  const initialState = document.getElementById('radioid-initial-state');
+  const notFoundState = document.getElementById('radioid-notfound-state');
+  const notFoundMsg = document.getElementById('notfound-message');
+  const errorState = document.getElementById('radioid-error-state');
+  const errorMsg = document.getElementById('error-message');
+  const retryBtn = document.getElementById('btn-retry-search');
+
+  let debounceTimer: number | undefined;
+  let activeAbortController: AbortController | null = null;
+  let lastExecutedQuery = '';
+
+  function escapeHtml(str: unknown): string {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function setViewState(state: 'initial' | 'loading' | 'results' | 'notfound' | 'error') {
+    if (skelLoader) skelLoader.style.display = state === 'loading' ? 'block' : 'none';
+    if (initialState) initialState.style.display = state === 'initial' ? 'block' : 'none';
+    if (notFoundState) notFoundState.style.display = state === 'notfound' ? 'block' : 'none';
+    if (errorState) errorState.style.display = state === 'error' ? 'block' : 'none';
+    if (resultsContainer) resultsContainer.style.display = state === 'results' ? 'block' : 'none';
+  }
+
+  function formatRelativeDate(dateStr: string | null): string {
+    if (!dateStr) return 'Sin registro reciente';
+    const ts = new Date(dateStr).getTime();
+    if (Number.isNaN(ts)) return dateStr;
+    const diffSec = Math.floor((Date.now() - ts) / 1000);
+    if (diffSec < 60) return 'Hace unos segundos';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `Hace ${diffMin} min`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `Hace ${diffHours} h`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays === 1) return 'Ayer';
+    if (diffDays < 30) return `Hace ${diffDays} días`;
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths < 12) return `Hace ${diffMonths} ${diffMonths === 1 ? 'mes' : 'meses'}`;
+    return new Date(ts).toLocaleDateString('es-VE', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  function copyTextToClipboard(text: string, button: HTMLButtonElement) {
+    if (!navigator.clipboard) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showCopiedFeedback(button);
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      showCopiedFeedback(button);
+    }).catch(() => {});
+  }
+
+  function showCopiedFeedback(button: HTMLButtonElement) {
+    const originalText = button.innerHTML;
+    button.classList.add('is-copied');
+    button.innerHTML = `
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span>¡Copiado!</span>
+    `;
+    setTimeout(() => {
+      button.classList.remove('is-copied');
+      button.innerHTML = originalText;
+    }, 1800);
+  }
+
+  function renderUserCard(item: any): string {
+    const callsign = (item.callsign || '').trim().toUpperCase();
+    const id = item.id || item.radio_id || '';
+    const fullName = [item.fname, item.surname].filter(Boolean).join(' ') || item.name || 'Operador DMR';
+    const city = item.city || '';
+    const state = item.state || '';
+    const country = item.country || 'Venezuela';
+    const locationStr = [city, state, country].filter(Boolean).join(', ') || 'Ubicación no especificada';
+
+    const countryCode = callsignToCountry(callsign) || (country.toLowerCase().includes('venezuela') ? 've' : null);
+    const flagHtml = countryCode
+      ? `<span class="fi fi-${escapeHtml(countryCode)} result-flag-wrap" role="img" aria-label="${escapeHtml(country)}"></span>`
+      : `<span class="result-flag-wrap" style="background:#E2E8F0; display:flex; align-items:center; justify-content:center; font-weight:800; color:#64748B;">DMR</span>`;
+
+    const isValidated = String(item.account_validation_status || '').toLowerCase() === 'validated';
+    const statusBadge = isValidated
+      ? `<span class="badge-status-validated"><span class="badge-status-dot"></span>Cuenta Validada</span>`
+      : `<span class="badge-status-pending"><span class="badge-status-dot"></span>Validación Pendiente</span>`;
+
+    const lastHeardRel = formatRelativeDate(item.lastheard);
+    const lastHeardExact = item.lastheard ? new Date(item.lastheard).toLocaleString('es-VE') : '';
+    const master = item.lastmaster ? `Master ${escapeHtml(item.lastmaster)}` : 'No disponible';
+    const tg = item.lasttg ? `TG ${escapeHtml(item.lasttg)}` : 'Ninguno';
+    const source = item.lastsource || (id ? `${id}01` : 'Directo');
+
+    // Enlace directo a Petra si el último TG es nacional monitoreado
+    const isPetraTg = ['734', '73452', '73473', '73411'].includes(String(item.lasttg || ''));
+    const tgLinkHtml = isPetraTg
+      ? `<a href="/petra/${encodeURIComponent(item.lasttg)}" class="telemetry-val telemetry-val--highlight" title="Ver actividad en Petra">${tg} ↗</a>`
+      : `<span class="telemetry-val">${tg}</span>`;
+
+    return `
+      <article class="radioid-result-card" data-callsign="${escapeHtml(callsign)}" data-id="${escapeHtml(id)}">
+        <header class="result-card-header">
+          <div class="result-operator-meta">
+            ${flagHtml}
+            <div>
+              <div class="result-callsign-title">
+                <a href="https://www.qrz.com/db/${encodeURIComponent(callsign)}" target="_blank" rel="noopener noreferrer" title="Ver en QRZ.com">
+                  ${escapeHtml(callsign)}
+                </a>
+              </div>
+              <div class="result-name-text">${escapeHtml(fullName)}</div>
+            </div>
+          </div>
+
+          <div class="result-header-badges">
+            ${statusBadge}
+            <div class="result-dmrid-box">
+              <span class="dmrid-label">DMR ID</span>
+              <span class="dmrid-value">${escapeHtml(id)}</span>
+              <button type="button" class="btn-copy-id js-copy-id" data-copy="${escapeHtml(id)}" title="Copiar ID al portapapeles">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Copiar</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div class="result-card-body">
+          <div class="result-location-row">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>${escapeHtml(locationStr)}</span>
+          </div>
+
+          <div class="result-telemetry-grid">
+            <div class="telemetry-item">
+              <div class="telemetry-label">Último Escuchado</div>
+              <div class="telemetry-val">${escapeHtml(lastHeardRel)}</div>
+              ${lastHeardExact ? `<div class="telemetry-sub" title="${escapeHtml(lastHeardExact)}">${escapeHtml(lastHeardExact)}</div>` : ''}
+            </div>
+
+            <div class="telemetry-item">
+              <div class="telemetry-label">Servidor Máster</div>
+              <div class="telemetry-val">${master}</div>
+              <div class="telemetry-sub">Red BrandMeister DMR</div>
+            </div>
+
+            <div class="telemetry-item">
+              <div class="telemetry-label">Último Talkgroup</div>
+              ${tgLinkHtml}
+              <div class="telemetry-sub">Canal de transmisión</div>
+            </div>
+
+            <div class="telemetry-item">
+              <div class="telemetry-label">Fuente / ESSID</div>
+              <div class="telemetry-val">${escapeHtml(source)}</div>
+              <div class="telemetry-sub">Dispositivo emisor</div>
+            </div>
+          </div>
+
+          <div class="result-actions-bar">
+            <a href="https://www.qrz.com/db/${encodeURIComponent(callsign)}" target="_blank" rel="noopener noreferrer" class="btn-ext">
+              <span>QRZ.com ↗</span>
+            </a>
+            <a href="https://brandmeister.network/?page=profile&id=${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer" class="btn-ext">
+              <span>Perfil BrandMeister ↗</span>
+            </a>
+            <a href="https://radioid.net/" target="_blank" rel="noopener noreferrer" class="btn-ext">
+              <span>Ficha RadioID.net ↗</span>
+            </a>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  function renderRepeaterCard(item: any): string {
+    const callsign = (item.callsign || '').trim().toUpperCase();
+    const id = item.locator || item.id || item.radio_id || '';
+    const city = item.city || '';
+    const state = item.state || '';
+    const country = item.country || 'Venezuela';
+    const locationStr = [city, state, country].filter(Boolean).join(', ');
+    const freq = item.frequency ? `${item.frequency} MHz` : 'No indicada';
+    const offset = item.offset ? `${item.offset} MHz` : 'Simplex';
+    const cc = item.color_code !== undefined ? `CC${item.color_code}` : 'CC1';
+    const status = item.status === 'on-air' ? 'Activo en el aire' : (item.status || 'Registrado');
+    const trustee = Array.isArray(item.trustee) ? item.trustee.join(', ') : (item.trustee || 'No especificado');
+
+    return `
+      <article class="radioid-result-card" data-callsign="${escapeHtml(callsign)}" data-id="${escapeHtml(id)}">
+        <header class="result-card-header">
+          <div class="result-operator-meta">
+            <div class="result-flag-wrap" style="background:#4338CA; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.75rem;">RPT</div>
+            <div>
+              <div class="result-callsign-title">
+                <span>${escapeHtml(callsign)}</span>
+                <span class="result-repeater-badge">Repetidor DMR</span>
+              </div>
+              <div class="result-name-text">Repetidor / Estación de Enlace Fija</div>
+            </div>
+          </div>
+
+          <div class="result-header-badges">
+            <span class="badge-status-validated"><span class="badge-status-dot"></span>${escapeHtml(status)}</span>
+            <div class="result-dmrid-box">
+              <span class="dmrid-label">ID Repetidor</span>
+              <span class="dmrid-value">${escapeHtml(id)}</span>
+              <button type="button" class="btn-copy-id js-copy-id" data-copy="${escapeHtml(id)}" title="Copiar ID al portapapeles">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Copiar</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div class="result-card-body">
+          <div class="result-location-row">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>${escapeHtml(locationStr)}</span>
+          </div>
+
+          <div class="result-telemetry-grid">
+            <div class="telemetry-item">
+              <div class="telemetry-label">Frecuencia</div>
+              <div class="telemetry-val">${escapeHtml(freq)}</div>
+              <div class="telemetry-sub">Offset: ${escapeHtml(offset)}</div>
+            </div>
+
+            <div class="telemetry-item">
+              <div class="telemetry-label">Código de Color</div>
+              <div class="telemetry-val">${escapeHtml(cc)}</div>
+              <div class="telemetry-sub">Slot 1 y Slot 2</div>
+            </div>
+
+            <div class="telemetry-item">
+              <div class="telemetry-label">Administrador / Trustee</div>
+              <div class="telemetry-val">${escapeHtml(trustee)}</div>
+              <div class="telemetry-sub">Responsable técnico</div>
+            </div>
+
+            <div class="telemetry-item">
+              <div class="telemetry-label">Red y Cobertura</div>
+              <div class="telemetry-val">${escapeHtml(item.coverage || 'BrandMeister')}</div>
+              <div class="telemetry-sub">Interconexión digital</div>
+            </div>
+          </div>
+
+          <div class="result-actions-bar">
+            <a href="/repetidores" class="btn-ext">
+              <span>Directorio de Repetidores ↗</span>
+            </a>
+            <a href="https://brandmeister.network/?page=repeater&id=${encodeURIComponent(id)}" target="_blank" rel="noopener noreferrer" class="btn-ext">
+              <span>Ficha en BrandMeister ↗</span>
+            </a>
+          </div>
+        </div>
+      </article>
+    `;
+  }
+
+  async function executeSearch(query: string, updateUrl = true) {
+    const q = query.trim().toUpperCase();
+    if (!q) {
+      setViewState('initial');
+      if (resultsContainer) resultsContainer.innerHTML = '';
+      if (updateUrl) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('q');
+        window.history.replaceState({}, '', url.toString());
+      }
+      return;
+    }
+
+    if (q === lastExecutedQuery) return;
+    lastExecutedQuery = q;
+
+    if (updateUrl) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('q', q);
+      window.history.replaceState({}, '', url.toString());
+    }
+
+    // Cancelar consulta en vuelo
+    activeAbortController?.abort();
+    activeAbortController = new AbortController();
+
+    setViewState('loading');
+
+    try {
+      const isNum = /^\d+$/.test(q);
+      const param = isNum ? `id=${encodeURIComponent(q)}` : `callsign=${encodeURIComponent(q)}`;
+
+      let data: any = null;
+
+      // 1. Probar proxy PHP (servidor de producción Apache + PHP)
+      try {
+        const res = await fetch(`/api/radioid.php?q=${encodeURIComponent(q)}`, {
+          headers: { accept: 'application/json' },
+          signal: activeAbortController.signal
+        });
+        if (res.ok) {
+          data = await res.json();
+        }
+      } catch (err: any) {
+        if (err.name === 'AbortError') return;
+      }
+
+      // 2. Si no respondió el script PHP (ej. entorno de desarrollo Vite), usar el proxy Vite directo
+      if (!data) {
+        try {
+          const resDev = await fetch(`/api/radioid/user/?${param}`, {
+            headers: { accept: 'application/json' },
+            signal: activeAbortController.signal
+          });
+          if (resDev.ok) {
+            data = await resDev.json();
+            // Si la búsqueda de usuario no arrojó resultados, verificar repetidores
+            if (data && (!data.results || !data.results.length)) {
+              const resRep = await fetch(`/api/radioid/repeater/?${param}`, {
+                headers: { accept: 'application/json' },
+                signal: activeAbortController.signal
+              });
+              if (resRep.ok) {
+                const repData = await resRep.json();
+                if (repData && repData.results && repData.results.length) {
+                  repData.results.forEach((r: any) => { r._entity_type = 'repeater'; });
+                  data = repData;
+                }
+              }
+            }
+          }
+        } catch (err: any) {
+          if (err.name === 'AbortError') return;
+        }
+      }
+
+      if (!data) {
+        throw new Error('No se pudo obtener respuesta del servidor');
+      }
+
+      const results = Array.isArray(data.results) ? data.results : [];
+
+      if (!results.length) {
+        if (notFoundMsg) {
+          notFoundMsg.innerHTML = `No se encontró ningún registro activo para <strong>${escapeHtml(q)}</strong> en RadioID.net.`;
+        }
+        setViewState('notfound');
+        return;
+      }
+
+      // Renderizar resultados encontrados
+      if (resultsContainer) {
+        resultsContainer.innerHTML = results.map((item: any) => {
+          if (item._entity_type === 'repeater' || item.locator) {
+            return renderRepeaterCard(item);
+          }
+          return renderUserCard(item);
+        }).join('');
+
+        // Activar botones de copiar ID
+        resultsContainer.querySelectorAll<HTMLButtonElement>('.js-copy-id').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const textToCopy = btn.dataset.copy || '';
+            if (textToCopy) copyTextToClipboard(textToCopy, btn);
+          });
+        });
+      }
+
+      setViewState('results');
+
+      // Analítica de búsqueda
+      fetch('/api/analytics.php?action=track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'search',
+          event_category: 'radioid_search',
+          entity_id: q,
+          entity_title: `Búsqueda RadioID: ${q}`
+        }),
+        keepalive: true
+      }).catch(() => {});
+
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
+      if (errorMsg) {
+        errorMsg.textContent = 'No pudimos conectar con los servidores de RadioID.net. Intente nuevamente en unos instantes.';
+      }
+      setViewState('error');
+    }
+  }
+
+  // Event Listeners del buscador
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const val = searchInput.value.trim();
+      if (clearBtn) {
+        clearBtn.classList.toggle('is-visible', Boolean(val));
+      }
+      window.clearTimeout(debounceTimer);
+      if (!val) {
+        executeSearch('');
+        return;
+      }
+      debounceTimer = window.setTimeout(() => {
+        executeSearch(val);
+      }, 400);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        window.clearTimeout(debounceTimer);
+        executeSearch(searchInput.value);
+      }
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+      }
+      clearBtn.classList.remove('is-visible');
+      executeSearch('');
+    });
+  }
+
+  if (searchForm) {
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (searchInput) {
+        window.clearTimeout(debounceTimer);
+        executeSearch(searchInput.value);
+      }
+    });
+  }
+
+  // Preset chips
+  document.querySelectorAll<HTMLButtonElement>('[data-query]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const q = btn.dataset.query || '';
+      if (searchInput) {
+        searchInput.value = q;
+        if (clearBtn) clearBtn.classList.add('is-visible');
+        searchInput.focus();
+      }
+      executeSearch(q);
+    });
+  });
+
+  if (retryBtn) {
+    retryBtn.addEventListener('click', () => {
+      if (searchInput) {
+        executeSearch(searchInput.value);
+      }
+    });
+  }
+
+  // Carga inicial: leer ?q= de los parámetros URL
+  const initialParams = new URLSearchParams(window.location.search);
+  const initialQ = initialParams.get('q') || initialParams.get('callsign') || initialParams.get('id') || '';
+  if (initialQ && searchInput) {
+    searchInput.value = initialQ;
+    if (clearBtn) clearBtn.classList.add('is-visible');
+    executeSearch(initialQ, false);
+  }
+</script>

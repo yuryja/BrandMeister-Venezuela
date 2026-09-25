@@ -23,6 +23,10 @@ Options -Indexes
   # Proxy /api/petra to petra.php
   RewriteRule ^api/petra/(.*)$ api/petra.php?endpoint=$1 [QSA,L]
 
+  # Proxy /api/radioid to radioid.php
+  RewriteRule ^api/radioid/?$ api/radioid.php [QSA,L]
+  RewriteRule ^api/radioid/(.*)$ api/radioid.php?endpoint=$1 [QSA,L]
+
   # Blog dinámico: las noticias salen de MySQL a través de blog.php
   RewriteRule ^plantillas(/|$) - [F]
   RewriteRule ^blog/?$ /blog.php [L]

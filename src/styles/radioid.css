@@ -1,0 +1,698 @@
+/* ==========================================================================
+   ESTILOS: CONSULTA RADIOID · BRANDMEISTER VENEZUELA
+   ========================================================================== */
+
+.radioid-page {
+  background: var(--bg-page);
+  min-height: 100vh;
+}
+
+/* ── Hero Principal con imagen Motorola del post de RadioID ─────────────── */
+.radioid-hero {
+  background-color: #0F172A;
+  background-image:
+    linear-gradient(90deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.88) 50%, rgba(15, 23, 42, 0.75) 100%),
+    url('/assets/news-motorola-bg.webp');
+  background-position: center right;
+  background-size: cover;
+  background-repeat: no-repeat;
+  color: #FFFFFF;
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .radioid-hero {
+    background-image:
+      linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.85) 100%),
+      url('/assets/news-motorola-bg-m.webp');
+    background-position: top center;
+    padding: 3rem 0;
+  }
+}
+
+.radioid-hero__content {
+  max-width: 780px;
+}
+
+.radioid-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(238, 108, 31, 0.18);
+  border: 1px solid rgba(238, 108, 31, 0.45);
+  color: #FFA552;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-pill);
+  margin-bottom: 1.15rem;
+  letter-spacing: 0.03em;
+}
+
+.radioid-hero__title {
+  color: #FFFFFF;
+  font-size: clamp(2.2rem, 4.8vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.radioid-hero__subtitle {
+  color: #CBD5E1;
+  font-size: clamp(1.05rem, 1.8vw, 1.22rem);
+  line-height: 1.65;
+  margin-bottom: 1.5rem;
+}
+
+.radioid-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  color: #94A3B8;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.radioid-hero__meta span {
+  color: #F1F5F9;
+}
+
+.radioid-hero__dot {
+  width: 4px;
+  height: 4px;
+  background: var(--bm-orange);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ── Franja divisoria ─────────────────────────────────────────────────── */
+.radioid-stripe {
+  height: 4px;
+  background: var(--bm-gradient);
+}
+
+/* ── Cuerpo y Buscador ─────────────────────────────────────────────────── */
+.radioid-body {
+  padding-top: clamp(2.5rem, 5vw, 4rem);
+  padding-bottom: clamp(4rem, 8vw, 6rem);
+}
+
+.radioid-search-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: clamp(1.5rem, 3.5vw, 2.25rem);
+  margin-top: -3.5rem;
+  position: relative;
+  z-index: 10;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 640px) {
+  .radioid-search-panel {
+    margin-top: -2.5rem;
+    padding: 1.25rem;
+  }
+}
+
+.search-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 1.25rem;
+  color: var(--text-faint);
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.radioid-input {
+  width: 100%;
+  height: 60px;
+  padding: 0 4.2rem 0 3.4rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-main);
+  background: #F8FAFC;
+  border: 2px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.02em;
+}
+
+.radioid-input:focus {
+  background: #FFFFFF;
+  border-color: var(--bm-orange);
+  box-shadow: 0 0 0 4px rgba(238, 108, 31, 0.15);
+}
+
+.radioid-input:focus + .search-input-icon {
+  color: var(--bm-orange);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 1.25rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: all 0.15s ease;
+}
+
+.search-clear-btn:hover {
+  background: var(--bm-red-light);
+  color: var(--bm-red);
+}
+
+.search-clear-btn.is-visible {
+  display: flex;
+}
+
+.search-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.search-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-chips-label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.search-chip {
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: 'Montserrat', system-ui, sans-serif;
+}
+
+.search-chip:hover {
+  background: var(--bm-orange-light);
+  color: var(--bm-orange-hover);
+  border-color: rgba(238, 108, 31, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-search-submit {
+  background: var(--bm-gradient);
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 14px rgba(238, 108, 31, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-search-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(238, 108, 31, 0.45);
+}
+
+/* ── Contenedor de Resultados ─────────────────────────────────────────── */
+.radioid-results-area {
+  min-height: 240px;
+}
+
+/* Skeleton Loading */
+.radioid-skel-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  display: none;
+}
+
+.radioid-skel-card.is-active {
+  display: block;
+}
+
+.radioid-skel-bar {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: 1.4s ease-in-out infinite skel-shimmer;
+}
+
+@keyframes skel-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Tarjeta de Operador Encontrado ───────────────────────────────────── */
+.radioid-result-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 2rem;
+}
+
+.result-card-header {
+  background: var(--bm-gradient-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.result-operator-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.result-flag-wrap {
+  width: 52px;
+  height: 38px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.15);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+}
+
+.result-callsign-title {
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: clamp(1.8rem, 3.8vw, 2.5rem);
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.result-name-text {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+.result-header-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .result-header-badges {
+    align-items: flex-start;
+    width: 100%;
+  }
+}
+
+.badge-status-validated {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.badge-status-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.badge-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* DMR ID Destacado */
+.result-dmrid-box {
+  display: inline-flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1.5px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 0.35rem 0.6rem 0.35rem 0.9rem;
+  gap: 0.6rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.dmrid-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--bm-orange);
+}
+
+.dmrid-value {
+  font-family: 'Montserrat', monospace, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: 0.05em;
+}
+
+.btn-copy-id {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.15s ease;
+}
+
+.btn-copy-id:hover {
+  background: var(--bm-orange-light);
+  color: var(--bm-orange-hover);
+}
+
+.btn-copy-id.is-copied {
+  background: #DCFCE7;
+  color: #15803D;
+  border-color: #BBF7D0;
+}
+
+/* Cuerpo de la tarjeta */
+.result-card-body {
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.result-location-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.98rem;
+  font-weight: 600;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.result-location-row svg {
+  color: var(--bm-red);
+  flex-shrink: 0;
+}
+
+/* Cuadrícula de telemetría de red */
+.result-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.telemetry-item {
+  background: #F8FAFC;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.95rem 1.15rem;
+}
+
+.telemetry-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.telemetry-val {
+  font-family: 'Montserrat', system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.telemetry-val--highlight {
+  color: var(--bm-orange-hover);
+}
+
+.telemetry-sub {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  margin-top: 0.25rem;
+}
+
+/* Enlaces externos */
+.result-actions-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 600px) {
+  .result-actions-bar {
+    justify-content: stretch;
+  }
+  .result-actions-bar .btn {
+    width: 100%;
+  }
+}
+
+.btn-ext {
+  padding: 0.6rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-medium);
+  background: #FFFFFF;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all 0.18s ease;
+}
+
+.btn-ext:hover {
+  background: var(--bg-warm);
+  border-color: var(--bm-orange);
+  color: var(--bm-orange);
+  transform: translateY(-1px);
+}
+
+/* ── Tarjeta de Repetidor Encontrado ─────────────────────────────────── */
+.result-repeater-badge {
+  background: #EEF2FF;
+  color: #4338CA;
+  border: 1px solid #C7D2FE;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ── Estados Vacíos y de Error ─────────────────────────────────────────── */
+.radioid-state-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: clamp(2rem, 5vw, 3.5rem);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2.5rem;
+}
+
+.state-icon-wrap {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.state-icon-wrap--info {
+  background: rgba(238, 108, 31, 0.12);
+  color: var(--bm-orange);
+}
+
+.state-icon-wrap--notfound {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.state-icon-wrap--error {
+  background: var(--bm-red-light);
+  color: var(--bm-red);
+}
+
+.state-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 0.65rem;
+}
+
+.state-desc {
+  max-width: 580px;
+  margin: 0 auto 1.5rem;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* ── Sección Educativa / Informativa Inferior ──────────────────────────── */
+.radioid-guide-section {
+  margin-top: 3.5rem;
+}
+
+.guide-section-header {
+  margin-bottom: 2rem;
+}
+
+.guide-tag {
+  color: var(--bm-orange);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.guide-title {
+  font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.guide-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.guide-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(238, 108, 31, 0.3);
+}
+
+.guide-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--bm-orange-light);
+  color: var(--bm-orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.guide-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.65rem;
+}
+
+.guide-card-desc {
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 1.1rem;
+}
+
+.guide-card-link {
+  color: var(--bm-orange);
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: color 0.15s ease;
+}
+
+.guide-card-link:hover {
+  color: var(--bm-red);
+}

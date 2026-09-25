@@ -51,6 +51,18 @@
     </image:image>
   </url>
 
+  <!-- Consulta de Indicativos y RadioID -->
+  <url>
+    <loc>https://brandmeisteryv.net/radioid</loc>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/news-motorola-bg.webp</image:loc>
+      <image:title>Consulta de Indicativos y RadioID DMR - BrandMeister Venezuela</image:title>
+    </image:image>
+  </url>
+
   <!-- Galería Multimedia y Actividades de la Red -->
   <url>
     <loc>https://brandmeisteryv.net/galeria</loc>

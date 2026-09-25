@@ -56,6 +56,11 @@ export default defineConfig({
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/petra/, '')
         },
+        '/api/radioid': {
+          target: 'https://database.radioid.net/api/dmr',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/radioid/, '')
+        },
         '/api': {
           target: 'http://127.0.0.1:8088',
           changeOrigin: true
