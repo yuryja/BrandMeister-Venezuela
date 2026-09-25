@@ -21,7 +21,8 @@ BrandMeister Venezuela es la plataforma y comunidad oficial de radioaficionados 
 | :--- | :--- | :--- | :--- | :--- |
 | **734** | **Venezuela Nacional** | Slot 1 | Estático / Primario | Llamadas generales y tráfico nacional de toda Venezuela |
 | **73452** | **Emergencias y Eventos** | Slot 1 / Slot 2 | Operativo | Red de emergencia, protección civil y eventos especiales |
-| **73473** | **Región Los Andes** | Slot 2 | Regional | Táchira, Mérida, Trujillo y estados andinos |
+| **73473** | **Radio Club Venezolano** | Slot 2 | Institucional | Actividad institucional y ruedas temáticas RCV |
+| **73411** | **Red Venezolana de Radiodifusión** | Slot 2 | Temático / Difusión | Ruedas y enlaces de la Red Venezolana de Radiodifusión (monitoreado en Petra) |
 | **7341** | **Región Capital / Central** | Slot 2 | Regional | Caracas, Miranda, La Guaira y zona central |
 | **7342** | **Región Occidental** | Slot 2 | Regional | Zulia, Falcón, Lara |
 | **7343** | **Región Oriental** | Slot 2 | Regional | Anzoátegui, Sucre, Monagas, Nueva Esparta |

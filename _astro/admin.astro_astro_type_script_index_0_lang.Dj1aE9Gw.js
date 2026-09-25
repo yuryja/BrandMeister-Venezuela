@@ -144,7 +144,7 @@ import{t as e}from"./preload-helper.B3nfOi5I.js";var t={admin:`Administrador`,ed
                 ${n(e.last_active)}
               </td>
             </tr>
-          `}).join(``):`<tr><td colspan="4" class="analytics-empty">Sin oyentes en este periodo.</td></tr>`}let l=Y(`petra-talkgroups-container`);if(l){let t=e.petra?.talkgroups||[];l.innerHTML=t.length?t.map(e=>{let t=e.views||0,r=e.unique_users||0,i=Math.max(0,Math.min(100,Number(e.percent)||0)),a=e.id===`734`?`badge-tg-main`:e.id===`73452`?`badge-tg-alert`:`badge-tg-rcv`;return`
+          `}).join(``):`<tr><td colspan="4" class="analytics-empty">Sin oyentes en este periodo.</td></tr>`}let l=Y(`petra-talkgroups-container`);if(l){let t=e.petra?.talkgroups||[];l.innerHTML=t.length?t.map(e=>{let t=e.views||0,r=e.unique_users||0,i=Math.max(0,Math.min(100,Number(e.percent)||0)),a=e.id===`734`?`badge-tg-main`:e.id===`73452`?`badge-tg-alert`:e.id===`73473`?`badge-tg-rcv`:`badge-tg-rvr`;return`
             <div class="petra-tg-card">
               <div class="petra-tg-head">
                 <div class="petra-tg-info">
