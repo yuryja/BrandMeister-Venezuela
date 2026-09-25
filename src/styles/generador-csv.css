@@ -172,11 +172,23 @@
   margin: 0.15rem 0 0;
 }
 
-/* ── Grid de Radios (Limpio, Sin Íconos ni Badges) ────────────────────────── */
+/* ── Grid de Radios (Filas de 3 Columnas) ────────────────────────────────── */
 .radios-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .radios-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .radios-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .radio-card {
