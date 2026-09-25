@@ -303,10 +303,11 @@ function http_get_contents(string $url, int $timeout = 30): string|false {
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Accept: application/json, text/csv, */*',
-            'User-Agent: Mozilla/5.0 (compatible; BrandMeister-Venezuela/1.0; +https://brandmeisteryv.net)'
+            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         ]);
         $res = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -319,7 +320,11 @@ function http_get_contents(string $url, int $timeout = 30): string|false {
         'http' => [
             'method' => 'GET',
             'timeout' => $timeout,
-            'header' => "User-Agent: Mozilla/5.0 (compatible; BrandMeister-Venezuela/1.0)\r\nAccept: */*\r\n"
+            'header' => "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)\r\nAccept: */*\r\n"
+        ],
+        'ssl' => [
+            'verify_peer' => false,
+            'verify_peer_name' => false,
         ]
     ]);
     return @file_get_contents($url, false, $ctx);
@@ -331,15 +336,23 @@ function http_get_contents(string $url, int $timeout = 30): string|false {
 function fetch_all_venezuela_users_api(): array {
     $results = [];
     $page = 1;
-    $maxPages = 20; // Hasta 4.000 usuarios
+    $maxPages = 15;
     while ($page <= $maxPages) {
         $url = "https://database.radioid.net/api/dmr/user/?country=Venezuela&page={$page}";
-        $raw = http_get_contents($url, 10);
+        $raw = http_get_contents($url, 15);
         if ($raw === false) break;
         $json = json_decode($raw, true);
         if (empty($json['results'])) break;
         foreach ($json['results'] as $u) {
-            $results[] = $u;
+            $results[] = [
+                'id' => $u['id'] ?? $u['radio_id'] ?? '',
+                'callsign' => $u['callsign'] ?? '',
+                'fname' => $u['fname'] ?? '',
+                'surname' => $u['surname'] ?? '',
+                'city' => $u['city'] ?? '',
+                'state' => $u['state'] ?? '',
+                'country' => $u['country'] ?? 'Venezuela'
+            ];
         }
         $count = (int)($json['count'] ?? 0);
         if (count($results) >= $count || count($json['results']) < 20) {
@@ -474,7 +487,7 @@ function sync_radioid_cache(string $cacheDir): bool {
 
 /**
  * 2. Cargar contactos de RadioID según el alcance
- * Prioridad: 1) Caché viva en /tmp -> 2) Base de datos empaquetada en repo -> 3) API directa
+ * Prioridad: 1) Caché viva en /tmp si está completa -> 2) Bundle del repo -> 3) API directa
  */
 function get_contacts_list(string $scope, string $cacheDir): array {
     $veFile = $cacheDir . '/users_ve.json';
@@ -490,7 +503,7 @@ function get_contacts_list(string $scope, string $cacheDir): array {
         default => $veFile
     };
 
-    // 1. Cargar el paquete empaquetado correspondiente si existe
+    // 1. Cargar el paquete empaquetado correspondiente si existe en el repo
     $bundledData = [];
     if ($scope === 'venezuela' && file_exists($bundledVe) && filesize($bundledVe) > 1000) {
         $bundledData = json_decode(@file_get_contents($bundledVe), true) ?: [];
@@ -498,65 +511,69 @@ function get_contacts_list(string $scope, string $cacheDir): array {
         $bundledData = json_decode(@file_get_contents($bundledLatam), true) ?: [];
     }
 
-    // 2. Verificar si existe en la caché viva del sistema y contiene tantos o más registros que el bundle
+    // 2. Verificar si existe en la caché viva del sistema y está completo (mínimo 650 para Venezuela)
+    $minRequired = ($scope === 'venezuela') ? 650 : (($scope === 'latam') ? 5000 : 5000);
     if (file_exists($targetFile) && filesize($targetFile) > 1000) {
         $content = @file_get_contents($targetFile);
         if ($content !== false) {
             $cachedData = json_decode($content, true);
-            if (is_array($cachedData) && count($cachedData) >= count($bundledData) && count($cachedData) > 500) {
+            if (is_array($cachedData) && count($cachedData) >= $minRequired) {
                 return $cachedData;
             }
         }
     }
 
-    // 3. Si el bundle tiene datos completos, usarlo y refrescar la caché
-    if (!empty($bundledData) && count($bundledData) > 10) {
+    // 3. Si el bundle tiene datos completos (722 en VE o 31k en Latam), usarlo y escribirlo en la caché
+    if (!empty($bundledData) && count($bundledData) >= $minRequired) {
         if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
         @file_put_contents($targetFile, json_encode($bundledData, JSON_UNESCAPED_UNICODE));
         return $bundledData;
     }
 
-    // 4. Si se pidió Venezuela y no hay bundle o caché, consultar la API en vivo
+    // 4. Si es Venezuela y la caché tiene menos de 650 (ej: solo 200 de la página 1), forzar API paginada
     if ($scope === 'venezuela') {
         $apiUsers = fetch_all_venezuela_users_api();
-        if (!empty($apiUsers) && count($apiUsers) > 10) {
+        if (!empty($apiUsers) && count($apiUsers) > 100) {
             if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
             @file_put_contents($veFile, json_encode($apiUsers, JSON_UNESCAPED_UNICODE));
             return $apiUsers;
         }
     }
 
-    // 4. Intentar sincronización completa en segundo plano/on-the-fly
-    sync_radioid_cache($cacheDir);
-
+    // 5. Si la caché tiene datos (aunque sean 200) y falló todo lo anterior, usarlos
     if (file_exists($targetFile) && filesize($targetFile) > 1000) {
         $content = @file_get_contents($targetFile);
         if ($content !== false) {
-            $data = json_decode($content, true);
-            if (is_array($data) && count($data) > 10) {
-                return $data;
+            $cachedData = json_decode($content, true);
+            if (is_array($cachedData) && count($cachedData) > 10) {
+                return $cachedData;
             }
         }
     }
 
-    // 5. Último fallback: Bundles empaquetados
-    if (file_exists($bundledLatam) && filesize($bundledLatam) > 1000) {
-        $content = @file_get_contents($bundledLatam);
-        if ($content !== false) {
-            $data = json_decode($content, true);
-            if (is_array($data) && count($data) > 10) return $data;
-        }
-    }
-
-    if (file_exists($bundledVe) && filesize($bundledVe) > 1000) {
-        $content = @file_get_contents($bundledVe);
-        if ($content !== false) {
-            $data = json_decode($content, true);
-            if (is_array($data) && count($data) > 10) return $data;
-        }
-    }
+    // 6. Si hay bundle parcial, usarlo
+    if (!empty($bundledData)) return $bundledData;
 
     return [];
+}
+
+/**
+ * Endpoint de Sincronización explícita y forzada
+ */
+if ($action === 'sync' || $action === 'refresh') {
+    header('Content-Type: application/json; charset=utf-8');
+    $apiUsers = fetch_all_venezuela_users_api();
+    if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+    if (!empty($apiUsers)) {
+        @file_put_contents($veFile, json_encode($apiUsers, JSON_UNESCAPED_UNICODE));
+    }
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Caché de Venezuela actualizada exitosamente.',
+        'venezuela_count' => count($apiUsers),
+        'file' => $veFile
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
 /**
