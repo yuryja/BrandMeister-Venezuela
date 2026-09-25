@@ -154,9 +154,9 @@ export const PETRA_TALKGROUPS: PetraTalkgroup[] = [
   },
   {
     id: '73411',
-    name: 'Red Venezolana de Radiodifusión',
+    name: 'Red Venezolana de Radioaficionados',
     short: 'RVR',
-    description: 'Frecuencia y rueda temática de la Red Venezolana de Radiodifusión en BrandMeister Venezuela, con estadísticas de participación e intervenciones en vivo.',
+    description: 'Frecuencia y rueda temática de la Red Venezolana de Radioaficionados en BrandMeister Venezuela, con estadísticas de participación e intervenciones en vivo.',
     modules: [...BASE_MODULES, 'rne-stats', 'rne-report']
   }
 ];
