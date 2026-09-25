@@ -512,6 +512,27 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     });
   }
 
+  // Retroalimentación visual al descargar
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+      const label = downloadBtn.querySelector('span');
+      if (label) {
+        const originalText = label.textContent;
+        label.textContent = 'Generando codeplug...';
+        downloadBtn.style.opacity = '0.75';
+        setTimeout(() => {
+          label.textContent = originalText;
+          downloadBtn.style.opacity = '1';
+        }, 4000);
+      }
+    });
+  }
+
+  // Pre-calentar la caché de RadioID en segundo plano
+  try {
+    fetch('/api/codeplug-generator.php?action=meta').catch(() => {});
+  } catch (_) {}
+
   // Inicializar estado
   updateState();
 </script>
