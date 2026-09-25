@@ -626,3 +626,79 @@
   color: #EE6C1F;
   margin-top: 0.15rem;
 }
+/* ---------------------------------------------------------
+   Descarga en el dispositivo: fecha de los datos y medidor de progreso
+   --------------------------------------------------------- */
+.download-summary__meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: #64748B;
+}
+
+.btn-codeplug-download:disabled {
+  opacity: 0.7;
+  cursor: progress;
+  transform: none;
+}
+
+.download-progress {
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+}
+
+.download-progress[hidden] {
+  display: none;
+}
+
+.download-progress__bar {
+  height: 10px;
+  background: #F1F5F9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.download-progress__fill {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 100%);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+/* Mientras se arma el archivo no hay porcentaje: la barra late */
+.download-progress.is-indeterminate .download-progress__fill {
+  animation: codeplug-pulso 1.1s ease-in-out infinite alternate;
+}
+
+.download-progress.is-error .download-progress__fill {
+  background: #94A3B8;
+}
+
+.download-progress__text {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  color: #334155;
+  font-variant-numeric: tabular-nums;
+}
+
+.download-progress.is-error .download-progress__text {
+  color: #B91C1C;
+}
+
+@keyframes codeplug-pulso {
+  from { opacity: 0.45; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .download-progress__fill {
+    transition: none;
+  }
+
+  .download-progress.is-indeterminate .download-progress__fill {
+    animation: none;
+  }
+}

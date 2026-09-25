@@ -167,7 +167,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
                       <span class="pill-btn__title">Solo Talkgroups (TGs)</span>
                       <span class="pill-btn__desc">Nacionales 734, circuitos y canales mundiales</span>
                     </div>
-                    <span class="pill-btn__count">22 TGs</span>
+                    <span class="pill-btn__count">23 TGs</span>
                   </button>
                   <button type="button" class="pill-btn" data-type="contacts">
                     <div class="pill-btn__info">
@@ -188,21 +188,21 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
                       <span class="pill-btn__title">Venezuela (MCC 734)</span>
                       <span class="pill-btn__desc">Cabe en cualquier radio DMR sin límites</span>
                     </div>
-                    <span class="pill-btn__count">~1.800 IDs</span>
+                    <span class="pill-btn__count">~720 IDs</span>
                   </button>
                   <button type="button" class="pill-btn" data-scope="latam">
                     <div class="pill-btn__info">
                       <span class="pill-btn__title">Iberoamérica / Latam</span>
                       <span class="pill-btn__desc">Venezuela, Colombia, México, Chile, España, etc.</span>
                     </div>
-                    <span class="pill-btn__count">~45.000 IDs</span>
+                    <span class="pill-btn__count">~31.000 IDs</span>
                   </button>
                   <button type="button" class="pill-btn" data-scope="global">
                     <div class="pill-btn__info">
                       <span class="pill-btn__title">Mundial Completo (Global)</span>
                       <span class="pill-btn__desc">Para radios de 200k+ contactos (AnyTone 878 / OpenGD77)</span>
                     </div>
-                    <span class="pill-btn__count">~260.000 IDs</span>
+                    <span class="pill-btn__count">~314.000 IDs</span>
                   </button>
                 </div>
               </div>
@@ -222,6 +222,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
               <div>
                 <h3 class="download-summary__title" id="summary-title">AnyTone · Pack Completo (Venezuela)</h3>
                 <p class="download-summary__details" id="summary-desc">Generará archivo ZIP con TalkGroups.csv y DigitalContactList.csv listos para importar.</p>
+                <p class="download-summary__meta" id="summary-meta"></p>
               </div>
             </div>
 
@@ -234,15 +235,23 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
                 <span>Ver Previa</span>
               </button>
 
-              <a href="/api/codeplug-generator.php?model=anytone&type=all&scope=venezuela" id="btn-download" class="btn-codeplug-download">
+              <button type="button" id="btn-download" class="btn-codeplug-download">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
                 <span>Descargar Archivos</span>
-              </a>
+              </button>
             </div>
+          </div>
+
+          <!-- Progreso: los contactos se descargan en el dispositivo del visitante -->
+          <div class="download-progress" id="download-progress" hidden>
+            <div class="download-progress__bar" id="download-progress-bar" role="progressbar" aria-label="Descarga de contactos" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="download-progress__fill" id="download-progress-fill"></div>
+            </div>
+            <p class="download-progress__text" id="download-progress-text" aria-live="polite"></p>
           </div>
 
           <!-- Previsualizador de Filas CSV -->
@@ -330,16 +339,29 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
 </Layout>
 
 <script>
+  import {
+    cargarManifest,
+    cargarContactos,
+    generarArchivo,
+    guardarArchivo,
+    type Alcance,
+    type Manifest,
+    type Modelo,
+    type Tipo,
+    TALKGROUPS,
+  } from '../scripts/codeplug';
+
   // Estado actual del generador
   let currentModel = 'anytone';
   let currentType = 'all';
   let currentScope = 'venezuela';
+  let manifest: Manifest | null = null;
 
   // Elementos DOM
   const radioCards = document.querySelectorAll('.radio-card');
   const typeButtons = document.querySelectorAll('#type-selector .pill-btn');
   const scopeButtons = document.querySelectorAll('#scope-selector .pill-btn');
-  const downloadBtn = document.getElementById('btn-download') as HTMLAnchorElement | null;
+  const downloadBtn = document.getElementById('btn-download') as HTMLButtonElement | null;
   const summaryTitle = document.getElementById('summary-title');
   const summaryDesc = document.getElementById('summary-desc');
   const btnTogglePreview = document.getElementById('btn-toggle-preview');
@@ -365,7 +387,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
 
   const typeNames: Record<string, string> = {
     all: 'Pack Completo (TGs + Contactos)',
-    talkgroups: 'Solo Talkgroups (22 TGs)',
+    talkgroups: `Solo Talkgroups (${TALKGROUPS.length} TGs)`,
     contacts: 'Solo Contactos Digitales'
   };
 
@@ -428,19 +450,23 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     }
   };
 
-  function updateState() {
-    // Actualizar URL de descarga directa
-    if (downloadBtn) {
-      downloadBtn.href = `/api/codeplug-generator.php?model=${currentModel}&type=${currentType}&scope=${currentScope}&include_tgs=1`;
-    }
+  const numero = (n: number) => n.toLocaleString('es-VE');
+  const megas = (bytes: number) =>
+    bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1048576).toFixed(1).replace('.', ',')} MB`;
 
+  function updateState() {
     // Actualizar textos informativos
     if (summaryTitle) {
       summaryTitle.textContent = `${modelNames[currentModel] || 'AnyTone'} · ${typeNames[currentType] || 'Pack'}`;
     }
     if (summaryDesc) {
       const scopeText = scopeNames[currentScope] || 'Venezuela';
-      summaryDesc.textContent = `Generará archivo adaptado para ${modelNames[currentModel]} con alcance: ${scopeText}.`;
+      let desc = `Generará archivo adaptado para ${modelNames[currentModel]} con alcance: ${scopeText}.`;
+      const info = manifest?.alcances[currentScope as Alcance];
+      if (info && currentType !== 'talkgroups') {
+        desc += ` Se descargarán ${numero(info.registros)} contactos (${megas(info.bytes)}) directamente en tu dispositivo.`;
+      }
+      summaryDesc.textContent = desc;
     }
 
     // Actualizar Previa
@@ -512,26 +538,80 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     });
   }
 
-  // Retroalimentación visual al descargar
-  if (downloadBtn) {
-    downloadBtn.addEventListener('click', () => {
-      const label = downloadBtn.querySelector('span');
-      if (label) {
-        const originalText = label.textContent;
-        label.textContent = 'Generando codeplug...';
-        downloadBtn.style.opacity = '0.75';
-        setTimeout(() => {
-          label.textContent = originalText;
-          downloadBtn.style.opacity = '1';
-        }, 4000);
-      }
-    });
+  // Descarga: los contactos llegan desde jsDelivr al dispositivo y el archivo se arma aquí
+  const progreso = document.getElementById('download-progress');
+  const progresoBarra = document.getElementById('download-progress-bar');
+  const progresoRelleno = document.getElementById('download-progress-fill');
+  const progresoTexto = document.getElementById('download-progress-text');
+
+  function mostrarProgreso(porcentaje: number | null, texto: string, esError = false) {
+    if (!progreso || !progresoRelleno || !progresoTexto || !progresoBarra) return;
+    progreso.hidden = false;
+    progreso.classList.toggle('is-error', esError);
+    progreso.classList.toggle('is-indeterminate', porcentaje === null);
+    const valor = porcentaje ?? 100;
+    progresoRelleno.style.width = `${valor}%`;
+    progresoBarra.setAttribute('aria-valuenow', String(Math.round(valor)));
+    progresoTexto.textContent = texto;
   }
 
-  // Pre-calentar la caché de RadioID en segundo plano
-  try {
-    fetch('/api/codeplug-generator.php?action=meta').catch(() => {});
-  } catch (_) {}
+  let generando = false;
+  downloadBtn?.addEventListener('click', async () => {
+    if (generando) return;
+    generando = true;
+    const etiqueta = downloadBtn.querySelector('span');
+    const textoOriginal = etiqueta?.textContent ?? 'Descargar Archivos';
+    downloadBtn.disabled = true;
+    if (etiqueta) etiqueta.textContent = 'Preparando…';
+
+    try {
+      const alcance = currentScope as Alcance;
+      let contactos: Awaited<ReturnType<typeof cargarContactos>> = [];
+      if (currentType !== 'talkgroups') {
+        mostrarProgreso(0, 'Conectando con el directorio de RadioID…');
+        contactos = await cargarContactos(alcance, (recibidos, total) => {
+          const pct = total ? (recibidos / total) * 100 : 0;
+          mostrarProgreso(pct, `Descargando contactos… ${Math.round(pct)} % (${megas(recibidos)} de ${megas(total)})`);
+        });
+      }
+      mostrarProgreso(null, 'Generando el archivo para tu radio…');
+      // Un respiro para que se pinte el mensaje antes del trabajo pesado (313.000 contactos en el mundial)
+      await new Promise((r) => setTimeout(r, 30));
+      const { nombre, blob } = generarArchivo(currentModel as Modelo, currentType as Tipo, alcance, contactos);
+      guardarArchivo(blob, nombre);
+      mostrarProgreso(100, `Listo: ${nombre} (${megas(blob.size)}).`);
+    } catch (err) {
+      mostrarProgreso(
+        100,
+        `No se pudo generar el archivo: ${(err as Error).message} Revisa tu conexión e inténtalo de nuevo.`,
+        true
+      );
+    } finally {
+      generando = false;
+      downloadBtn.disabled = false;
+      if (etiqueta) etiqueta.textContent = textoOriginal;
+    }
+  });
+
+  // Cuántos contactos tiene cada alcance y de cuándo son (índice pequeño, de pocos KB)
+  cargarManifest()
+    .then((m) => {
+      manifest = m;
+      scopeButtons.forEach((btn) => {
+        const info = m.alcances[(btn.getAttribute('data-scope') || '') as Alcance];
+        const cuenta = btn.querySelector('.pill-btn__count');
+        if (info && cuenta) cuenta.textContent = `${numero(info.registros)} IDs`;
+      });
+      const meta = document.getElementById('summary-meta');
+      if (meta) {
+        const fecha = new Date(m.actualizado).toLocaleDateString('es-VE', { day: 'numeric', month: 'long', year: 'numeric' });
+        meta.textContent = `Contactos de RadioID actualizados el ${fecha}.`;
+      }
+      updateState();
+    })
+    .catch(() => {
+      /* Sin índice se puede seguir: el aviso aparecerá al descargar si falla la conexión */
+    });
 
   // Inicializar estado
   updateState();

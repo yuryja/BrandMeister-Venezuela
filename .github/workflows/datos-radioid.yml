@@ -1,0 +1,50 @@
+name: Datos de RadioID
+
+# Actualiza cada semana los contactos de RadioID que usa el generador de codeplugs y los publica
+# en la rama `datos-radioid`. El navegador del visitante los descarga desde jsDelivr, así que ni el
+# hosting ni sus despliegues cargan con estos archivos.
+on:
+  schedule:
+    - cron: '17 6 * * 1' # lunes 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: datos-radioid
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Descargar y preparar los datos
+        run: node scripts/radioid-datos.mjs out
+
+      - name: Publicar en la rama datos-radioid
+        run: |
+          set -euo pipefail
+          cd out
+          # Una sola versión, sin historial: así la rama no crece semana a semana
+          git init --quiet -b datos-radioid
+          git config user.name "github-actions[bot]"
+          git config user.email "41898299+github-actions[bot]@users.noreply.github.com"
+          printf '# Datos de RadioID\n\nGenerado automáticamente por la tarea "Datos de RadioID". No editar a mano.\n' > README.md
+          git add -A
+          git commit --quiet -m "datos: RadioID $(date -u +%F)"
+          git push --quiet --force "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" datos-radioid
+
+      - name: Refrescar la caché de jsDelivr
+        run: |
+          for f in manifest.json $(cd out && ls *.tsv); do
+            curl -sS -o /dev/null -w "%{http_code} $f\n" "https://purge.jsdelivr.net/gh/${{ github.repository }}@datos-radioid/$f" || true
+          done
