@@ -27,6 +27,10 @@ Options -Indexes
   RewriteRule ^api/radioid/?$ api/radioid.php [QSA,L]
   RewriteRule ^api/radioid/(.*)$ api/radioid.php?endpoint=$1 [QSA,L]
 
+  # Codeplug CSV Generator & Sync
+  RewriteRule ^api/codeplug-generator/?$ api/codeplug-generator.php [QSA,L]
+  RewriteRule ^api/cron-radioid-sync/?$ api/cron-radioid-sync.php [QSA,L]
+
   # Blog dinámico: las noticias salen de MySQL a través de blog.php
   RewriteRule ^plantillas(/|$) - [F]
   RewriteRule ^blog/?$ /blog.php [L]
