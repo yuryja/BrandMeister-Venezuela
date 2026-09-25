@@ -1,6 +1,6 @@
 /* ==========================================================================
    ESTILOS: GENERADOR DE CSV Y CODEPLUGS DMR
-   BrandMeister Venezuela · Paleta Petra / Analytics (Violet & Slate)
+   BrandMeister Venezuela · Paleta Oficial Naranja & Roja (BM Brand)
    ========================================================================== */
 
 .codeplug-page {
@@ -50,9 +50,9 @@
   gap: 0.5rem;
   font-size: 0.78rem;
   font-weight: 700;
-  color: #7C3AED;
-  border: 1px solid rgba(124, 58, 237, 0.35);
-  background: rgba(124, 58, 237, 0.08);
+  color: #E8261C;
+  border: 1px solid rgba(232, 38, 28, 0.4);
+  background: rgba(232, 38, 28, 0.05);
   padding: 0.35rem 0.9rem;
   border-radius: var(--radius-pill, 9999px);
   margin-bottom: 1.1rem;
@@ -93,7 +93,7 @@
 .codeplug-hero__dot {
   width: 4px;
   height: 4px;
-  background: #7C3AED;
+  background: #EE6C1F;
   border-radius: 50%;
   display: inline-block;
 }
@@ -151,11 +151,11 @@
   width: 32px;
   height: 32px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+  background: linear-gradient(135deg, #E8261C 0%, #EE6C1F 100%);
   color: #FFFFFF;
   font-weight: 800;
   font-size: 0.92rem;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 4px 12px rgba(238, 108, 31, 0.28);
 }
 
 .step-title {
@@ -172,7 +172,7 @@
   margin: 0.15rem 0 0;
 }
 
-/* ── Grid de Radios (Filas de 3 Columnas · Estilo Petra Cards) ─────────────── */
+/* ── Grid de Radios (Filas de 3 Columnas · Estilo Petra Cards Naranja/Rojo) ─ */
 .radios-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -215,8 +215,8 @@
 
 .radio-card.active {
   background: #FFFFFF;
-  border-color: #7C3AED;
-  box-shadow: 0 0 0 1.5px #7C3AED, 0 4px 14px -2px rgba(124, 58, 237, 0.12);
+  border-color: #EE6C1F;
+  box-shadow: 0 0 0 1.5px #EE6C1F, 0 4px 14px -2px rgba(238, 108, 31, 0.15);
 }
 
 .radio-card__head {
@@ -228,8 +228,9 @@
 
 .badge-tag-category {
   display: inline-block;
-  background: rgba(124, 58, 237, 0.1);
-  color: #7C3AED;
+  background: rgba(238, 108, 31, 0.12);
+  color: #EE6C1F;
+  border: 1px solid rgba(238, 108, 31, 0.25);
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.2rem 0.55rem;
@@ -265,7 +266,7 @@
   padding-top: 0.65rem;
   margin-top: auto;
   font-size: 0.75rem;
-  color: #7C3AED;
+  color: #EE6C1F;
   font-weight: 700;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -280,7 +281,7 @@
 }
 
 .radio-card.active .radio-card__bar {
-  background: linear-gradient(90deg, #7C3AED, #8B5CF6);
+  background: linear-gradient(90deg, #E8261C, #EE6C1F);
 }
 
 /* ── Selectores de Alcance y Contenido ───────────────────────────────────── */
@@ -332,8 +333,8 @@
 
 .pill-btn.active {
   background: #FFFFFF;
-  border-color: #7C3AED;
-  box-shadow: 0 0 0 1.5px #7C3AED;
+  border-color: #EE6C1F;
+  box-shadow: 0 0 0 1.5px #EE6C1F;
 }
 
 .pill-btn__info {
@@ -363,8 +364,8 @@
 }
 
 .pill-btn.active .pill-btn__count {
-  background: rgba(124, 58, 237, 0.12);
-  color: #7C3AED;
+  background: rgba(238, 108, 31, 0.15);
+  color: #EE6C1F;
   font-weight: 700;
 }
 
@@ -395,8 +396,8 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: rgba(124, 58, 237, 0.1);
-  color: #7C3AED;
+  background: rgba(238, 108, 31, 0.12);
+  color: #EE6C1F;
   flex-shrink: 0;
 }
 
@@ -427,21 +428,21 @@
   gap: 0.65rem;
   padding: 0.85rem 1.75rem;
   border-radius: 10px;
-  background: linear-gradient(90deg, #7C3AED 0%, #8B5CF6 100%);
+  background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 100%);
   color: #FFFFFF;
   font-size: 0.95rem;
   font-weight: 700;
   text-decoration: none;
   border: none;
   cursor: pointer;
-  box-shadow: 0 8px 20px -4px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 8px 20px -4px rgba(238, 108, 31, 0.35);
   transition: all 0.2s ease;
 }
 
 .btn-codeplug-download:hover {
   opacity: 0.95;
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px -4px rgba(124, 58, 237, 0.45);
+  box-shadow: 0 12px 25px -4px rgba(238, 108, 31, 0.45);
 }
 
 .btn-preview-toggle {
@@ -508,7 +509,7 @@
 .preview-table th {
   background: #F8FAFC;
   padding: 0.65rem 0.85rem;
-  color: #7C3AED;
+  color: #E8261C;
   font-weight: 700;
   border-bottom: 1px solid #E2E8F0;
   white-space: nowrap;
@@ -522,7 +523,7 @@
 }
 
 .preview-table tr:hover td {
-  background: rgba(124, 58, 237, 0.03);
+  background: rgba(238, 108, 31, 0.04);
 }
 
 /* ── Guía de Importación y FAQ ───────────────────────────────────────────── */
@@ -596,7 +597,7 @@
   content: "→";
   position: absolute;
   left: 0;
-  color: #7C3AED;
+  color: #E8261C;
   font-weight: 800;
 }
 
@@ -604,7 +605,7 @@
 .brands-protocol-notice {
   margin-top: 2rem;
   background: #FFFFFF;
-  border: 1px solid #E2E8F0;
+  border: 1px solid rgba(238, 108, 31, 0.25);
   border-radius: 12px;
   padding: 1.35rem 1.5rem;
   display: flex;
@@ -622,6 +623,6 @@
 
 .brands-protocol-notice svg {
   flex-shrink: 0;
-  color: #7C3AED;
+  color: #EE6C1F;
   margin-top: 0.15rem;
 }
