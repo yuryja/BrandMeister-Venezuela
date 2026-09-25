@@ -7,63 +7,71 @@
   min-height: 100vh;
 }
 
-/* ── Hero Principal con imagen Motorola del post de RadioID ─────────────── */
+/* ── Hero Principal con imagen Motorola del post de RadioID (Overlay Blanco) ─────────────── */
 .radioid-hero {
-  background-color: #0F172A;
+  position: relative;
+  min-height: 50vh;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background-color: #FFFFFF;
   background-image:
-    linear-gradient(90deg, rgba(15, 23, 42, 0.94) 0%, rgba(15, 23, 42, 0.88) 50%, rgba(15, 23, 42, 0.75) 100%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 45%, rgba(255, 255, 255, 0.65) 75%, rgba(255, 255, 255, 0.18) 100%),
+    linear-gradient(0deg, #FAFAFA 0%, rgba(255, 255, 255, 0.8) 12%, transparent 35%),
     url('/assets/news-motorola-bg.webp');
-  background-position: center right;
+  background-position: right center;
   background-size: cover;
   background-repeat: no-repeat;
-  color: #FFFFFF;
-  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
-  position: relative;
+  padding: 3.5rem 0;
 }
 
 @media (max-width: 768px) {
   .radioid-hero {
+    min-height: 50vh;
     background-image:
-      linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.85) 100%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 60%, rgba(255, 255, 255, 0.88) 100%),
       url('/assets/news-motorola-bg-m.webp');
-    background-position: top center;
-    padding: 3rem 0;
+    background-position: center top;
+    background-size: cover;
+    padding: 2.5rem 0;
   }
 }
 
 .radioid-hero__content {
-  max-width: 780px;
+  max-width: 820px;
 }
 
 .radioid-hero__badge {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(238, 108, 31, 0.18);
-  border: 1px solid rgba(238, 108, 31, 0.45);
-  color: #FFA552;
   font-size: 0.78rem;
   font-weight: 700;
-  text-transform: uppercase;
+  color: var(--bm-red);
+  border: 1px solid rgba(232, 38, 28, 0.45);
+  background: rgba(232, 38, 28, 0.04);
   padding: 0.35rem 0.9rem;
   border-radius: var(--radius-pill);
-  margin-bottom: 1.15rem;
-  letter-spacing: 0.03em;
+  margin-bottom: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .radioid-hero__title {
-  color: #FFFFFF;
-  font-size: clamp(2.2rem, 4.8vw, 3.4rem);
+  font-family: var(--font-heading);
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
   font-weight: 800;
+  color: var(--text-main);
   line-height: 1.15;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
 .radioid-hero__subtitle {
-  color: #CBD5E1;
-  font-size: clamp(1.05rem, 1.8vw, 1.22rem);
-  line-height: 1.65;
-  margin-bottom: 1.5rem;
+  font-size: clamp(1.02rem, 1.8vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
 }
 
 .radioid-hero__meta {
@@ -71,13 +79,13 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.75rem 1.25rem;
-  color: #94A3B8;
-  font-size: 0.85rem;
-  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .radioid-hero__meta span {
-  color: #F1F5F9;
+  color: var(--text-muted);
 }
 
 .radioid-hero__dot {
@@ -88,15 +96,16 @@
   display: inline-block;
 }
 
-/* ── Franja divisoria ─────────────────────────────────────────────────── */
+/* ── Franja divisoria tricolor BrandMeister ───────────────────────────────── */
 .radioid-stripe {
-  height: 4px;
-  background: var(--bm-gradient);
+  height: 3px;
+  background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
+  width: 100%;
 }
 
 /* ── Cuerpo y Buscador ─────────────────────────────────────────────────── */
 .radioid-body {
-  padding-top: clamp(2.5rem, 5vw, 4rem);
+  padding-top: 0;
   padding-bottom: clamp(4rem, 8vw, 6rem);
 }
 
@@ -106,7 +115,7 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   padding: clamp(1.5rem, 3.5vw, 2.25rem);
-  margin-top: -3.5rem;
+  margin-top: 2.75rem;
   position: relative;
   z-index: 10;
   margin-bottom: 2.5rem;
@@ -114,7 +123,7 @@
 
 @media (max-width: 640px) {
   .radioid-search-panel {
-    margin-top: -2.5rem;
+    margin-top: 1.75rem;
     padding: 1.25rem;
   }
 }
