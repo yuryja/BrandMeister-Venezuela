@@ -460,9 +460,98 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
     `;
   }
 
+  const KNOWN_REPEATERS: Record<string, {
+    tx: string;
+    rx: string;
+    offset: string;
+    color_code?: number;
+    callsign?: string;
+    city?: string;
+    state?: string;
+    trustee?: string[];
+    coverage?: string;
+    description?: string;
+  }> = {
+    '734013': {
+      tx: '146.7000',
+      rx: '146.1000',
+      offset: '-0.600 MHz',
+      color_code: 1,
+      callsign: 'YV4EGG',
+      city: 'Valencia',
+      state: 'Carabobo',
+      trustee: ['YV4EGG', 'YV5VE'],
+      coverage: 'BrandMeister DMR (Master 7301)',
+      description: 'Repetidor DMR, Red Brandmeister VHF 146.700 -600 cc1 (TS 1: TG 734, TS 2: TG 73452). Cerro El Café, Valencia, Edo. Carabobo.'
+    },
+    '734014': {
+      tx: '439.6000',
+      rx: '434.6000',
+      offset: '-5.000 MHz',
+      color_code: 1,
+      callsign: 'YV5VE',
+      city: 'Caracas',
+      state: 'Distrito Capital',
+      trustee: ['YV5VE', 'YY5EHT'],
+      coverage: 'BrandMeister DMR (Master 7301)',
+      description: 'Repetidor DMR BrandMeister UHF Caracas 439.600 -5000 CC1.'
+    },
+    '734009': {
+      tx: '147.3900',
+      rx: '147.9900',
+      offset: '+0.600 MHz',
+      color_code: 1,
+      callsign: 'YV5VE',
+      city: 'Altagracia de Orituco',
+      state: 'Guárico',
+      trustee: ['YV5VE'],
+      coverage: 'BrandMeister DMR (Master 7301)',
+      description: 'Altagracia de Orituco, Guárico frecuencia 147.390 +600 CC1.'
+    },
+    '734016': {
+      tx: '147.1500',
+      rx: '147.7500',
+      offset: '+0.600 MHz',
+      color_code: 1,
+      callsign: 'YV5CBO',
+      city: 'La Guaira',
+      state: 'La Guaira',
+      trustee: ['YV5CBO', 'YV5VE'],
+      coverage: 'BrandMeister DMR (Master 7301)',
+      description: 'Repetidor Ubicado en el Waraira Repano (El Ávila), La Guaira.'
+    },
+    '734015': {
+      tx: '439.6000',
+      rx: '434.6000',
+      offset: '-5.000 MHz',
+      color_code: 1,
+      callsign: 'YV1GDQ',
+      city: 'Ciudad Ojeda',
+      state: 'Zulia',
+      trustee: ['YV1GDQ'],
+      coverage: 'BrandMeister DMR (Master 7301)',
+      description: 'Frecuencia 439.600 -5000 CC1. Ciudad Ojeda, Edo. Zulia.'
+    }
+  };
+
   function renderRepeaterCard(item: any): string {
     const callsign = (item.callsign || '').trim().toUpperCase();
     const id = String(item.locator || item.id || item.radio_id || '');
+
+    // Sobrescritura garantizada con catálogo oficial de repetidores verificados
+    const known = KNOWN_REPEATERS[id] || (callsign ? Object.values(KNOWN_REPEATERS).find((k) => k.callsign === callsign) : null);
+    if (known) {
+      item.tx = item.tx || known.tx;
+      item.rx = item.rx || known.rx;
+      item.offset = known.offset;
+      item.frequency = known.tx;
+      if (known.color_code !== undefined && item.color_code === undefined) item.color_code = known.color_code;
+      if (known.trustee && (!item.trustee || item.trustee === 'No especificado')) item.trustee = known.trustee;
+      if (known.description && !item.description) item.description = known.description;
+      if (known.coverage && (!item.coverage || item.coverage === 'BrandMeister' || item.coverage === 'Peer')) item.coverage = known.coverage;
+      if (known.city && !item.city) item.city = known.city;
+    }
+
     const city = item.city || '';
     const state = item.state || '';
     const country = item.country || 'Venezuela';
@@ -671,8 +760,12 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
 
       // 1. Probar proxy PHP (servidor de producción Apache + PHP)
       try {
-        const res = await fetch(`/api/radioid.php?q=${encodeURIComponent(q)}`, {
-          headers: { accept: 'application/json' },
+        const res = await fetch(`/api/radioid.php?q=${encodeURIComponent(q)}&_t=${Date.now()}`, {
+          headers: {
+            accept: 'application/json',
+            'cache-control': 'no-cache, no-store, must-revalidate',
+            pragma: 'no-cache'
+          },
           signal: activeAbortController.signal
         });
         if (res.ok) {
