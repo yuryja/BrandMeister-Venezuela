@@ -73,9 +73,46 @@ export const TALKGROUPS: Talkgroup[] = [
   { tg: '9', name: 'TG 9 Local Reflector Slot 2', slot: '2', city: 'Local', state: 'Local', country: 'Local', notes: 'Tráfico Local en Ranura 2' },
 ];
 
-// --------------------------------------------------------------------
-// Descarga de datos
-// --------------------------------------------------------------------
+export type TgFilter = 'all' | 'national' | 'circuit' | 'regional' | 'international';
+
+export interface CircuitoRegional {
+  tg: string;
+  numero: string;
+  nombre: string;
+  region: string;
+  estados: string;
+}
+
+export const CIRCUITOS_REGIONALES: CircuitoRegional[] = [
+  { tg: '7341', numero: '1', nombre: 'Circuito 1: Occidente', region: 'Occidente', estados: 'Zulia, Falcón, Trujillo' },
+  { tg: '7342', numero: '2', nombre: 'Circuito 2: Los Andes', region: 'Los Andes y Piedemonte', estados: 'Táchira, Mérida, Barinas' },
+  { tg: '7343', numero: '3', nombre: 'Circuito 3: Centroccidente', region: 'Centroccidente', estados: 'Lara, Portuguesa, Yaracuy' },
+  { tg: '7344', numero: '4', nombre: 'Circuito 4: Región Central', region: 'Región Central', estados: 'Carabobo, Aragua, Cojedes' },
+  { tg: '7345', numero: '5', nombre: 'Circuito 5: Capital, Litoral y Llanos', region: 'Capital, Litoral y Llanos', estados: 'Caracas, Miranda, La Guaira, Guárico' },
+  { tg: '7346', numero: '6', nombre: 'Circuito 6: Oriente Sur y Guayana', region: 'Oriente Sur y Guayana', estados: 'Anzoátegui, Bolívar' },
+  { tg: '7347', numero: '7', nombre: 'Circuito 7: Oriente Norte e Insular', region: 'Oriente Norte e Insular', estados: 'Nueva Esparta, Sucre' },
+  { tg: '7348', numero: '8', nombre: 'Circuito 8: Oriente Deltaico', region: 'Oriente Deltaico', estados: 'Monagas, Delta Amacuro' },
+  { tg: '7349', numero: '9', nombre: 'Circuito 9: Llanos del Sur y Amazonía', region: 'Llanos del Sur y Amazonía', estados: 'Apure, Amazonas' },
+];
+
+/** Filtra los talkgroups según el criterio de selección y circuito regional opcional */
+export function filtrarTalkgroups(filtro: TgFilter, circuitoId?: string): Talkgroup[] {
+  if (filtro === 'all') return TALKGROUPS;
+  if (filtro === 'national') {
+    return TALKGROUPS.filter(t => ['734', '734911', '73452', '73473', '73411', '7340', '73499'].includes(t.tg));
+  }
+  if (filtro === 'regional') {
+    return TALKGROUPS.filter(t => ['7341', '7342', '7343', '7344', '7345', '7346', '7347', '7348', '7349'].includes(t.tg));
+  }
+  if (filtro === 'circuit') {
+    const tgCircuito = circuitoId || '7341';
+    return TALKGROUPS.filter(t => ['734', '7340', '73411', '73452', '73473', '734911'].includes(t.tg) || t.tg === tgCircuito);
+  }
+  if (filtro === 'international') {
+    return TALKGROUPS.filter(t => ['91', '913', '334', '730', '732', '214', '9'].includes(t.tg));
+  }
+  return TALKGROUPS;
+}
 
 /** Pide un archivo al primer origen que responda */
 async function pedir(archivo: string): Promise<Response> {
@@ -313,10 +350,17 @@ const hoy = () => {
 const csv = (contenido: string) => new Blob([contenido], { type: 'text/csv;charset=utf-8' });
 
 /** Arma el archivo para la radio elegida. `contactos` va vacío si solo se piden talkgroups. */
-export function generarArchivo(modelo: Modelo, tipo: Tipo, alcance: Alcance, contactos: Contacto[]): { nombre: string; blob: Blob } {
+export function generarArchivo(
+  modelo: Modelo,
+  tipo: Tipo,
+  alcance: Alcance,
+  contactos: Contacto[],
+  talkgroupsPersonalizados?: Talkgroup[]
+): { nombre: string; blob: Blob } {
   const fecha = hoy();
-  // "Solo contactos" no lleva los talkgroups (antes los incluía igualmente)
-  const tgs = tipo === 'contacts' ? [] : TALKGROUPS;
+  const baseTgs = talkgroupsPersonalizados && talkgroupsPersonalizados.length > 0 ? talkgroupsPersonalizados : TALKGROUPS;
+  // "Solo contactos" no lleva los talkgroups
+  const tgs = tipo === 'contacts' ? [] : baseTgs;
 
   if (modelo === 'anytone') {
     if (tipo === 'all') {
@@ -334,25 +378,25 @@ export function generarArchivo(modelo: Modelo, tipo: Tipo, alcance: Alcance, con
       return {
         nombre: `AnyTone_Codeplug_BM_Venezuela_${alcance}_${fecha}.zip`,
         blob: crearZip([
-          { nombre: 'TalkGroups.csv', contenido: anytoneTalkgroups(TALKGROUPS) },
+          { nombre: 'TalkGroups.csv', contenido: anytoneTalkgroups(tgs) },
           { nombre: 'DigitalContactList.csv', contenido: anytoneContactos(contactos) },
           { nombre: 'LEEME_INSTRUCCIONES.txt', contenido: leeme },
         ]),
       };
     }
     if (tipo === 'talkgroups') {
-      return { nombre: `AnyTone_TalkGroups_BM_YV_${fecha}.csv`, blob: csv(anytoneTalkgroups(TALKGROUPS)) };
+      return { nombre: `AnyTone_TalkGroups_BM_YV_${fecha}.csv`, blob: csv(anytoneTalkgroups(tgs)) };
     }
     return { nombre: `AnyTone_DigitalContactList_${alcance}_${fecha}.csv`, blob: csv(anytoneContactos(contactos)) };
   }
 
   if (modelo === 'opengd77' || modelo === 'baofeng') {
-    const radioName = modelo === 'baofeng' ? 'Baofeng DM-1701 / DM-1801 (OpenGD77)' : 'OpenGD77 / OpenUV380';
-    const filePrefix = modelo === 'baofeng' ? 'Baofeng_DM1701' : 'OpenGD77';
+    const radioName = modelo === 'baofeng' ? 'Baofeng DM-32UV / DM-1701 / DM-1801 (OpenGD77)' : 'OpenGD77 / OpenUV380';
+    const filePrefix = modelo === 'baofeng' ? 'Baofeng_DM32UV' : 'OpenGD77';
     if (tipo === 'all') {
       const leeme = [
         `BrandMeister Venezuela - Archivos para ${radioName}`,
-        'Compatible con: Baofeng DM-1701, DM-1801, Retevis RT3S, TYT MD-UV380, MD-UV390, MD-9600, Radioddity GD-77',
+        'Compatible con: Baofeng DM-32UV, DM-1701, DM-1801, Retevis RT3S, TYT MD-UV380, MD-UV390, MD-9600, Radioddity GD-77',
         `Generado el: ${new Date().toLocaleString('es-VE')}`,
         '',
         'INSTRUCCIONES DE IMPORTACIÓN EN OPENGD77 CPS:',
@@ -367,7 +411,7 @@ export function generarArchivo(modelo: Modelo, tipo: Tipo, alcance: Alcance, con
       return {
         nombre: `${filePrefix}_Codeplug_BM_Venezuela_${alcance}_${fecha}.zip`,
         blob: crearZip([
-          { nombre: 'OpenGD77_Talkgroups.csv', contenido: opengd77Talkgroups(TALKGROUPS) },
+          { nombre: 'OpenGD77_Talkgroups.csv', contenido: opengd77Talkgroups(tgs) },
           { nombre: 'OpenGD77_DMRID_Database.csv', contenido: opengd77DmrIdDatabase(contactos) },
           { nombre: 'LEEME_OPENGD77.txt', contenido: leeme },
         ]),
@@ -376,7 +420,7 @@ export function generarArchivo(modelo: Modelo, tipo: Tipo, alcance: Alcance, con
     if (tipo === 'talkgroups') {
       return {
         nombre: `${filePrefix}_TalkGroups_BM_YV_${fecha}.csv`,
-        blob: csv(opengd77Talkgroups(TALKGROUPS))
+        blob: csv(opengd77Talkgroups(tgs))
       };
     }
     return {
