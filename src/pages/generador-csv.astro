@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import '../styles/generador-csv.css';
+import { OPCIONES_PERSONALIZADAS } from '../scripts/codeplug';
 
 const metaTitle = "Generador de CSV y Codeplugs DMR · BrandMeister Venezuela";
 const metaDescription = "Genera y descarga archivos CSV formateados para programar tu radio DMR (Baofeng DM-32UV, DM-1701, OpenGD77, Retevis RT3S, AnyTone, TYT, Motorola). Incluye Talkgroups oficiales de Venezuela y base de contactos de RadioID.";
@@ -55,102 +56,46 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
       <div class="container">
         <div class="codeplug-main-card">
 
-          <!-- PASO 1: Seleccionar Modelo de Radio -->
+          <!-- PASO 1: Seleccionar Modelo de Radio (Select Grueso) -->
           <div class="config-step">
             <div class="step-header">
               <div class="step-header__main">
                 <span class="step-number">1</span>
                 <div>
                   <h2 class="step-title">Selecciona el modelo o software de tu radio</h2>
-                  <p class="step-subtitle">El generador adaptará los encabezados y columnas al formato que espera tu software de programación (CPS).</p>
+                  <p class="step-subtitle">El generador adaptará los encabezados, columnas y estructura según tu software de programación (CPS).</p>
                 </div>
-              </div>
-
-              <!-- Selector de Vista: Tarjetas / Lista -->
-              <div class="view-toggle" role="group" aria-label="Cambiar modo de vista">
-                <button type="button" class="view-toggle__btn active" id="view-mode-grid" title="Vista en tarjetas">
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                  </svg>
-                  <span>Tarjetas</span>
-                </button>
-                <button type="button" class="view-toggle__btn" id="view-mode-list" title="Vista en lista">
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12"></line>
-                    <line x1="8" y1="18" x2="21" y2="18"></line>
-                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                  </svg>
-                  <span>Lista</span>
-                </button>
               </div>
             </div>
 
-            <div class="radios-grid" id="radios-grid">
-              <!-- AnyTone -->
-              <div class="radio-card active" data-model="anytone">
-                <div class="radio-card__name">AnyTone & BTECH / Alinco</div>
-                <div class="radio-card__models">AT-D878UV (I/II Plus), AT-D578UV, BTECH DMR-6X2, Alinco DJ-MD5</div>
-                <div class="radio-card__format">TalkGroups.csv / DigitalContactList.csv</div>
-                <div class="radio-card__bar"></div>
+            <div class="model-select-wrapper">
+              <div class="select-wrapper select-wrapper--hero">
+                <select id="select-model" class="form-control-select form-control-select--hero" aria-label="Seleccionar modelo de radio">
+                  <option value="anytone" selected>AnyTone & BTECH / Alinco · AT-D878UV (I/II Plus), AT-D578UV, BTECH DMR-6X2, Alinco DJ-MD5</option>
+                  <option value="opengd77">OpenGD77 / OpenUV380 · Firmware Libre (Baofeng DM-32UV, DM-1701, RT3S, TYT UV380/390, GD-77)</option>
+                  <option value="baofeng">Baofeng DM-32UV / DM-1701 / DM-1801 · OpenGD77 / CPS Nativo</option>
+                  <option value="tyt">TYT & Retevis · CPS Oficial (Retevis RT3S, RT3, RT82, RT84, TYT MD-UV380, MD-9600, MD-380)</option>
+                  <option value="radioddity">Radioddity CPS · GD-77 (CPS original de fábrica), DB25-D</option>
+                  <option value="motorola">Motorola MOTOTRBO · Serie DGP (8550/5550), DGM, DP, XPR</option>
+                  <option value="universal">Universal / Excel · Chirp, Planillas de cálculo y otros CPS</option>
+                </select>
+                <span class="select-chevron select-chevron--hero"></span>
               </div>
 
-              <!-- OpenGD77 Firmware Libre General -->
-              <div class="radio-card" data-model="opengd77">
-                <div class="radio-card__name">OpenGD77 / OpenUV380</div>
-                <div class="radio-card__models">Baofeng DM-32UV, DM-1701, DM-1801, Retevis RT3S, TYT MD-UV380/390, MD-9600, GD-77</div>
-                <div class="radio-card__format">Pack ZIP: Talkgroups (Contacts) + DMR ID User DB</div>
-                <div class="radio-card__bar"></div>
-              </div>
-
-              <!-- Baofeng DM-32UV / DM-1701 / DM-1801 Dedicado -->
-              <div class="radio-card" data-model="baofeng">
-                <div class="radio-card__name">Baofeng DM-32UV / DM-1701</div>
-                <div class="radio-card__models">Baofeng DM-32UV, DM-32, DM-1701, DM-1801, RD-5R (OpenGD77 / CPS)</div>
-                <div class="radio-card__format">Pack ZIP: Contacts.csv + DMR ID Database</div>
-                <div class="radio-card__bar"></div>
-              </div>
-
-              <!-- TYT / Retevis -->
-              <div class="radio-card" data-model="tyt">
-                <div class="radio-card__name">TYT & Retevis (CPS Stock)</div>
-                <div class="radio-card__models">Retevis RT3S, RT3, RT82, RT84, TYT MD-UV380, MD-UV390, MD-9600, MD-380</div>
-                <div class="radio-card__format">Contact.csv (Call Name / 16 chars)</div>
-                <div class="radio-card__bar"></div>
-              </div>
-
-              <!-- Radioddity Oficial -->
-              <div class="radio-card" data-model="radioddity">
-                <div class="radio-card__name">Radioddity CPS</div>
-                <div class="radio-card__models">GD-77 (CPS original de fábrica), DB25-D</div>
-                <div class="radio-card__format">DigitalContacts.csv</div>
-                <div class="radio-card__bar"></div>
-              </div>
-
-              <!-- Motorola MOTOTRBO -->
-              <div class="radio-card" data-model="motorola">
-                <div class="radio-card__name">Motorola MOTOTRBO</div>
-                <div class="radio-card__models">Serie DGP (8550/5550), DGM, DP, XPR</div>
-                <div class="radio-card__format">Contacts.csv (Group Call / Private)</div>
-                <div class="radio-card__bar"></div>
-              </div>
-
-              <!-- Universal / Excel -->
-              <div class="radio-card" data-model="universal">
-                <div class="radio-card__name">Universal / Excel</div>
-                <div class="radio-card__models">Chirp, Planillas de cálculo, respaldos y otros CPS</div>
-                <div class="radio-card__format">CSV completo con todos los metadatos</div>
-                <div class="radio-card__bar"></div>
+              <!-- Detalle del modelo seleccionado -->
+              <div class="model-info-banner" id="model-info-banner">
+                <div class="model-info-banner__main">
+                  <span class="model-info-banner__name" id="model-box-title">AnyTone & BTECH / Alinco</span>
+                  <span class="model-info-banner__desc" id="model-box-desc">AT-D878UV (I/II Plus), AT-D578UV, BTECH DMR-6X2, Alinco DJ-MD5</span>
+                </div>
+                <div class="model-info-banner__badge">
+                  <span class="model-info-banner__format-tag" id="model-box-format">TalkGroups.csv + DigitalContactList.csv (Pack ZIP)</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- PASO 2: Opciones de Contenido y Alcance (Selects Anidados) -->
+          <!-- PASO 2: Opciones de Contenido y Alcance -->
           <div class="config-step">
             <div class="step-header">
               <div class="step-header__main">
@@ -177,7 +122,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
                 <div class="select-wrapper">
                   <select id="select-content-type" class="form-control-select">
                     <option value="all" selected>Pack Completo (Talkgroups + Contactos)</option>
-                    <option value="talkgroups">Solo Talkgroups (TGs nacionales / regionales)</option>
+                    <option value="talkgroups">Solo Talkgroups (TGs)</option>
                     <option value="contacts">Solo Directorio de Contactos (RadioID)</option>
                   </select>
                   <span class="select-chevron"></span>
@@ -185,7 +130,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
                 <p class="form-select-hint" id="type-hint">Generará tanto los canales digitales (Talkgroups) como la libreta para identificar llamadas.</p>
               </div>
 
-              <!-- Select 2: Selección de Talkgroups y Circuitos Regionales -->
+              <!-- Select 2: Selección de Talkgroups (Solo 3 opciones solicitadas) -->
               <div class="form-select-card" id="card-talkgroups-config">
                 <label class="form-select-label" for="select-tg-filter">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -195,38 +140,48 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
                     <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path>
                     <path d="M19.1 4.9C23 8.8 23 15.2 19.1 19.1"></path>
                   </svg>
-                  <span>2. Talkgroups y Circuitos:</span>
+                  <span>2. Canales Talkgroups:</span>
                 </label>
                 <div class="select-wrapper">
                   <select id="select-tg-filter" class="form-control-select">
-                    <option value="all" selected>Todos los TGs oficiales (Nacionales + 9 Regionales + Internacionales · 23 TGs)</option>
-                    <option value="national">Solo Canales Nacionales y Tácticos (734, 7340, 73411, 73452, 73473, 73499, 734911 · 7 TGs)</option>
-                    <option value="circuit">Circuito Regional Específico (+ Nacionales base)</option>
-                    <option value="regional">Todos los 9 Circuitos Regionales (7341 al 7349 · 9 TGs)</option>
-                    <option value="international">Solo Internacionales y Enlaces (91, 913, 334, 730, 732, 214, 9 · 7 TGs)</option>
+                    <option value="oficiales" selected>TGs Oficiales</option>
+                    <option value="globales">TGs Globales</option>
+                    <option value="personalizado">Personalizado</option>
                   </select>
                   <span class="select-chevron"></span>
                 </div>
+                <p class="form-select-hint" id="tg-hint">TGs Oficiales de Venezuela (16 TGs: Troncales Nacionales + 9 Circuitos Regionales).</p>
 
-                <!-- Select Anidado de Tercer Nivel (Circuito Regional individual) -->
-                <div class="nested-subselect" id="nested-circuit-wrapper" style="display: none;">
-                  <label class="form-subselect-label" for="select-regional-circuit">Elige tu Circuito Regional:</label>
-                  <div class="select-wrapper">
-                    <select id="select-regional-circuit" class="form-control-select form-control-select--sub">
-                      <option value="7341" selected>Circuito 1: Occidente (Zulia, Falcón, Trujillo · TG 7341)</option>
-                      <option value="7342">Circuito 2: Los Andes (Táchira, Mérida, Barinas · TG 7342)</option>
-                      <option value="7343">Circuito 3: Centroccidente (Lara, Portuguesa, Yaracuy · TG 7343)</option>
-                      <option value="7344">Circuito 4: Región Central (Carabobo, Aragua, Cojedes · TG 7344)</option>
-                      <option value="7345">Circuito 5: Capital, Litoral y Llanos (Caracas, Miranda, La Guaira, Guárico · TG 7345)</option>
-                      <option value="7346">Circuito 6: Oriente Sur y Guayana (Anzoátegui, Bolívar · TG 7346)</option>
-                      <option value="7347">Circuito 7: Oriente Norte e Insular (Nueva Esparta, Sucre · TG 7347)</option>
-                      <option value="7348">Circuito 8: Oriente Deltaico (Monagas, Delta Amacuro · TG 7348)</option>
-                      <option value="7349">Circuito 9: Llanos del Sur y Amazonía (Apure, Amazonas · TG 7349)</option>
-                    </select>
-                    <span class="select-chevron"></span>
+                <!-- Lista de Opciones Personalizadas (Checklist interactiva) -->
+                <div class="custom-tgs-wrapper" id="custom-tgs-wrapper" style="display: none;">
+                  <div class="custom-tgs-header">
+                    <span class="custom-tgs-title">Elige los canales y circuitos:</span>
+                    <div class="custom-tgs-actions">
+                      <button type="button" class="btn-check-all" id="btn-tg-select-all">Todos</button>
+                      <button type="button" class="btn-check-all" id="btn-tg-select-vzla">Solo Venezuela</button>
+                    </div>
                   </div>
+                  <div class="custom-tgs-list" id="custom-tgs-list">
+                    {OPCIONES_PERSONALIZADAS.map(opc => (
+                      <label class="custom-tg-item">
+                        <input
+                          type="checkbox"
+                          class="custom-tg-checkbox"
+                          value={opc.id}
+                          checked={opc.categoria === 'Venezuela' || opc.categoria.includes('Circuitos')}
+                        />
+                        <div class="custom-tg-item__text">
+                          <div class="custom-tg-item__name">
+                            <span>{opc.nombre}</span>
+                            <span class="custom-tg-item__badge">{opc.tgs.length} TG{opc.tgs.length > 1 ? 's' : ''}</span>
+                          </div>
+                          <div class="custom-tg-item__desc">{opc.descripcion}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  <div class="custom-tgs-counter" id="custom-tgs-counter">Total seleccionados: 16 TGs</div>
                 </div>
-                <p class="form-select-hint" id="tg-hint">Incluye los 23 canales oficiales de BrandMeister Venezuela e internacionales.</p>
               </div>
 
               <!-- Select 3: Alcance de Contactos RadioID -->
@@ -242,7 +197,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
                 </label>
                 <div class="select-wrapper">
                   <select id="select-scope" class="form-control-select">
-                    <option value="venezuela" selected>Venezuela (MCC 734 · ~720 IDs - Cabe en cualquier radio DMR)</option>
+                    <option value="venezuela" selected>Venezuela (MCC 734 · ~720 IDs - Todos los radios)</option>
                     <option value="latam">Iberoamérica / Latam (~31.000 IDs - Radios gama media/alta)</option>
                     <option value="global">Mundial Completo (Global ~314.000 IDs - AnyTone 878 / OpenGD77 flash)</option>
                   </select>
@@ -271,8 +226,9 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
             </div>
 
             <div class="download-btn-group">
-              <button type="button" class="btn-preview-toggle" id="btn-toggle-preview">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <!-- Botón con el ojito (Abre el Modal) -->
+              <button type="button" class="btn-preview-toggle" id="btn-toggle-preview" aria-label="Ver vista previa en modal">
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
@@ -298,16 +254,58 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
             <p class="download-progress__text" id="download-progress-text" aria-live="polite"></p>
           </div>
 
-          <!-- Previsualizador de Filas CSV -->
-          <div class="preview-drawer" id="preview-drawer" style="display: none;">
-            <div class="preview-drawer__header">
-              <span class="preview-drawer__title">Estructura del archivo para tu radio:</span>
-              <span id="preview-format-tag" style="font-size: 0.76rem; color: #f87171; font-family: monospace;">AnyTone CPS</span>
-            </div>
-            <div class="preview-table-container">
-              <table class="preview-table" id="preview-table">
-                <!-- Se llena dinámicamente con JavaScript -->
-              </table>
+          <!-- Modal de Previsualización (Opción 3: Ojito en Modal) -->
+          <div class="preview-modal-overlay" id="preview-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" style="display: none;">
+            <div class="preview-modal">
+              <div class="preview-modal__header">
+                <div class="preview-modal__header-left">
+                  <div class="preview-modal__icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="preview-modal__title" id="modal-title">Vista previa del archivo</h3>
+                    <p class="preview-modal__subtitle" id="modal-subtitle">Estructura adaptada para AnyTone CPS</p>
+                  </div>
+                </div>
+                <button type="button" class="preview-modal__close" id="btn-close-modal" aria-label="Cerrar ventana">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="preview-modal__body">
+                <div class="preview-notice">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                  </svg>
+                  <span>Muestra preliminar de las primeras columnas y registros según la selección activa.</span>
+                </div>
+
+                <div class="preview-table-container">
+                  <table class="preview-table" id="preview-table">
+                    <!-- Se llena dinámicamente con JavaScript -->
+                  </table>
+                </div>
+              </div>
+
+              <div class="preview-modal__footer">
+                <button type="button" class="btn-modal-secondary" id="btn-modal-close-footer">Cerrar</button>
+                <button type="button" class="btn-modal-primary" id="btn-modal-download">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>Descargar Archivos</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -392,84 +390,125 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     type Manifest,
     type Modelo,
     type Tipo,
-    type TgFilter,
-    CIRCUITOS_REGIONALES,
+    type TgOptionMode,
+    OPCIONES_PERSONALIZADAS,
     TALKGROUPS,
   } from '../scripts/codeplug';
 
-  // Estado actual del generador
-  let currentModel = 'anytone';
-  let currentType = 'all';
-  let currentScope = 'venezuela';
-  let currentTgFilter: TgFilter = 'all';
-  let currentCircuit = '7341';
+  // Metadatos explicativos por modelo de radio
+  const modelMeta: Record<Modelo, { title: string; desc: string; format: string }> = {
+    anytone: {
+      title: 'AnyTone & BTECH / Alinco',
+      desc: 'Compatible con AnyTone AT-D878UV (I/II Plus), AT-D578UV, BTECH DMR-6X2 y Alinco DJ-MD5.',
+      format: 'TalkGroups.csv + DigitalContactList.csv (Pack ZIP)'
+    },
+    opengd77: {
+      title: 'OpenGD77 / OpenUV380 (Firmware Libre)',
+      desc: 'Compatible con Baofeng DM-32UV, DM-1701, RT3S, TYT MD-UV380/390, MD-9600 y Radioddity GD-77 con OpenGD77.',
+      format: 'OpenGD77_Talkgroups.csv + OpenGD77_DMRID_Database.csv (Pack ZIP)'
+    },
+    baofeng: {
+      title: 'Baofeng DM-32UV / DM-1701 / DM-1801',
+      desc: 'Compatible con Baofeng DM-32UV, DM-32, DM-1701, DM-1801 y RD-5R (OpenGD77 y CPS nativo).',
+      format: 'Pack ZIP: Contacts.csv + DMR ID Database'
+    },
+    tyt: {
+      title: 'TYT & Retevis (CPS Oficial de Fábrica)',
+      desc: 'Compatible con Retevis RT3S, RT3, RT82, RT84, TYT MD-UV380, MD-UV390, MD-9600 y MD-380.',
+      format: 'Contact.csv (Nombre de contacto máx. 16 caracteres)'
+    },
+    radioddity: {
+      title: 'Radioddity CPS',
+      desc: 'Compatible con Radioddity GD-77 (CPS original de fábrica) y DB25-D.',
+      format: 'DigitalContacts.csv'
+    },
+    motorola: {
+      title: 'Motorola MOTOTRBO',
+      desc: 'Compatible con MOTOTRBO Serie DGP (8550/5550), DGM, DP y Serie XPR.',
+      format: 'Contacts.csv (Group Call / Private Call)'
+    },
+    universal: {
+      title: 'Universal / Planillas de Cálculo',
+      desc: 'Formato estándar compatible con Chirp, Excel, LibreOffice Calc y respaldos generales.',
+      format: 'CSV Completo con todos los atributos DMR'
+    }
+  };
+
+  const scopeNames: Record<string, string> = {
+    venezuela: 'Venezuela (MCC 734)',
+    latam: 'Iberoamérica / Latam',
+    global: 'Mundial Completo'
+  };
+
+  // Estado del generador
+  let currentModel: Modelo = 'anytone';
+  let currentType: Tipo = 'all';
+  let currentScope: Alcance = 'venezuela';
+  let currentTgMode: TgOptionMode = 'oficiales';
+  let currentCustomIds: string[] = OPCIONES_PERSONALIZADAS
+    .filter(o => o.categoria === 'Venezuela' || o.categoria.includes('Circuitos'))
+    .map(o => o.id);
   let manifest: Manifest | null = null;
 
-  // Elementos DOM
-  const radioCards = document.querySelectorAll('.radio-card');
-  const radiosGrid = document.getElementById('radios-grid');
-  const btnViewGrid = document.getElementById('view-mode-grid');
-  const btnViewList = document.getElementById('view-mode-list');
+  // Elementos DOM: Paso 1 (Select Grueso)
+  const selectModel = document.getElementById('select-model') as HTMLSelectElement | null;
+  const modelBoxTitle = document.getElementById('model-box-title');
+  const modelBoxDesc = document.getElementById('model-box-desc');
+  const modelBoxFormat = document.getElementById('model-box-format');
 
-  // Selects anidados (Paso 2)
+  // Elementos DOM: Paso 2 (Selects)
   const selectContentType = document.getElementById('select-content-type') as HTMLSelectElement | null;
   const selectTgFilter = document.getElementById('select-tg-filter') as HTMLSelectElement | null;
-  const selectRegionalCircuit = document.getElementById('select-regional-circuit') as HTMLSelectElement | null;
   const selectScope = document.getElementById('select-scope') as HTMLSelectElement | null;
 
   const cardTalkgroupsConfig = document.getElementById('card-talkgroups-config');
   const cardContactsConfig = document.getElementById('card-contacts-config');
-  const nestedCircuitWrapper = document.getElementById('nested-circuit-wrapper');
+
+  const customTgsWrapper = document.getElementById('custom-tgs-wrapper');
+  const customTgCheckboxes = document.querySelectorAll('.custom-tg-checkbox') as NodeListOf<HTMLInputElement>;
+  const customTgsCounter = document.getElementById('custom-tgs-counter');
+  const btnTgSelectAll = document.getElementById('btn-tg-select-all');
+  const btnTgSelectVzla = document.getElementById('btn-tg-select-vzla');
 
   const typeHint = document.getElementById('type-hint');
   const tgHint = document.getElementById('tg-hint');
   const scopeHint = document.getElementById('scope-hint');
 
+  // Elementos DOM: Descarga y Resumen
   const downloadBtn = document.getElementById('btn-download') as HTMLButtonElement | null;
   const summaryTitle = document.getElementById('summary-title');
   const summaryDesc = document.getElementById('summary-desc');
+
+  // Elementos DOM: Modal de Previsualización (Opción 3)
   const btnTogglePreview = document.getElementById('btn-toggle-preview');
-  const previewDrawer = document.getElementById('preview-drawer');
+  const previewModalOverlay = document.getElementById('preview-modal-overlay');
+  const btnCloseModal = document.getElementById('btn-close-modal');
+  const btnModalCloseFooter = document.getElementById('btn-modal-close-footer');
+  const btnModalDownload = document.getElementById('btn-modal-download');
+  const modalSubtitle = document.getElementById('modal-subtitle');
   const previewTable = document.getElementById('preview-table');
-  const previewFormatTag = document.getElementById('preview-format-tag');
-
-  // Nombres descriptivos para la tarjeta de resumen
-  const modelNames: Record<string, string> = {
-    anytone: 'AnyTone (D878 / D578 / BTECH)',
-    opengd77: 'OpenGD77 / OpenUV380',
-    baofeng: 'Baofeng (DM-32UV / DM-1701 / DM-1801)',
-    tyt: 'TYT / Retevis (MD-380 / UV380 / RT3S)',
-    radioddity: 'Radioddity CPS',
-    motorola: 'Motorola MOTOTRBO',
-    universal: 'Universal / Excel'
-  };
-
-  const scopeNames: Record<string, string> = {
-    venezuela: 'Venezuela (734)',
-    latam: 'Iberoamérica / Latam',
-    global: 'Mundial Completo'
-  };
 
   const numero = (n: number) => n.toLocaleString('es-VE');
   const megas = (bytes: number) =>
     bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1048576).toFixed(1).replace('.', ',')} MB`;
 
-  // Toggle de Vista: Tarjetas vs Lista
-  btnViewGrid?.addEventListener('click', () => {
-    btnViewGrid.classList.add('active');
-    btnViewList?.classList.remove('active');
-    radiosGrid?.classList.remove('view-list');
+  function getActiveTalkgroups() {
+    return filtrarTalkgroups(currentTgMode, currentCustomIds);
+  }
+
+  // 1. Selector Grueso de Modelo de Radio
+  selectModel?.addEventListener('change', () => {
+    currentModel = (selectModel.value as Modelo) || 'anytone';
+    const meta = modelMeta[currentModel] || modelMeta.anytone;
+    if (modelBoxTitle) modelBoxTitle.textContent = meta.title;
+    if (modelBoxDesc) modelBoxDesc.textContent = meta.desc;
+    if (modelBoxFormat) modelBoxFormat.textContent = meta.format;
+    updateState();
   });
 
-  btnViewList?.addEventListener('click', () => {
-    btnViewList.classList.add('active');
-    btnViewGrid?.classList.remove('active');
-    radiosGrid?.classList.add('view-list');
-  });
-
-  // Event Listeners: Selects Anidados
+  // 2. Select: Tipo de Contenido
   selectContentType?.addEventListener('change', () => {
-    currentType = selectContentType.value;
+    currentType = (selectContentType.value as Tipo) || 'all';
     if (currentType === 'all') {
       cardTalkgroupsConfig?.classList.remove('is-disabled');
       cardContactsConfig?.classList.remove('is-disabled');
@@ -486,47 +525,77 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     updateState();
   });
 
+  // 3. Select: Opciones de Talkgroups (Oficiales, Globales, Personalizado)
   selectTgFilter?.addEventListener('change', () => {
-    currentTgFilter = selectTgFilter.value as TgFilter;
-    if (currentTgFilter === 'circuit') {
-      if (nestedCircuitWrapper) nestedCircuitWrapper.style.display = 'block';
+    currentTgMode = (selectTgFilter.value as TgOptionMode) || 'oficiales';
+    if (currentTgMode === 'personalizado') {
+      if (customTgsWrapper) customTgsWrapper.style.display = 'block';
     } else {
-      if (nestedCircuitWrapper) nestedCircuitWrapper.style.display = 'none';
+      if (customTgsWrapper) customTgsWrapper.style.display = 'none';
     }
     updateState();
   });
 
-  selectRegionalCircuit?.addEventListener('change', () => {
-    currentCircuit = selectRegionalCircuit.value;
+  // Checklist de Personalizado
+  function syncCheckboxes() {
+    customTgCheckboxes.forEach((cb) => {
+      cb.checked = currentCustomIds.includes(cb.value);
+    });
+  }
+
+  function readCheckboxes() {
+    const seleccionados: string[] = [];
+    customTgCheckboxes.forEach((cb) => {
+      if (cb.checked) seleccionados.push(cb.value);
+    });
+    currentCustomIds = seleccionados;
+    updateState();
+  }
+
+  customTgCheckboxes.forEach((cb) => {
+    cb.addEventListener('change', readCheckboxes);
+  });
+
+  btnTgSelectAll?.addEventListener('click', () => {
+    currentCustomIds = OPCIONES_PERSONALIZADAS.map(o => o.id);
+    syncCheckboxes();
     updateState();
   });
 
+  btnTgSelectVzla?.addEventListener('click', () => {
+    currentCustomIds = OPCIONES_PERSONALIZADAS
+      .filter(o => o.categoria === 'Venezuela' || o.categoria.includes('Circuitos'))
+      .map(o => o.id);
+    syncCheckboxes();
+    updateState();
+  });
+
+  // 4. Select: Alcance de Contactos
   selectScope?.addEventListener('change', () => {
-    currentScope = selectScope.value;
+    currentScope = (selectScope.value as Alcance) || 'venezuela';
     updateState();
   });
 
   function updateState() {
-    const selectedTgs = filtrarTalkgroups(currentTgFilter, currentCircuit);
+    const selectedTgs = getActiveTalkgroups();
 
     // Actualizar hints
     if (tgHint) {
-      if (currentTgFilter === 'all') {
-        tgHint.textContent = `Incluye los ${selectedTgs.length} canales oficiales de BrandMeister Venezuela e internacionales.`;
-      } else if (currentTgFilter === 'national') {
-        tgHint.textContent = `Incluye los ${selectedTgs.length} canales troncales nacionales y tácticos.`;
-      } else if (currentTgFilter === 'circuit') {
-        const circ = CIRCUITOS_REGIONALES.find(c => c.tg === currentCircuit);
-        tgHint.textContent = `Incluye canales nacionales + ${circ?.nombre || 'Circuito'} (${circ?.estados || ''}). Total: ${selectedTgs.length} TGs.`;
-      } else if (currentTgFilter === 'regional') {
-        tgHint.textContent = `Incluye exclusivamente los ${selectedTgs.length} circuitos regionales (7341 a 7349).`;
+      if (currentTgMode === 'oficiales') {
+        tgHint.textContent = `TGs Oficiales de Venezuela (${selectedTgs.length} TGs: Troncales Nacionales + 9 Circuitos Regionales).`;
+      } else if (currentTgMode === 'globales') {
+        tgHint.textContent = `TGs Globales (${selectedTgs.length} TGs: Venezuela + América Latina + Enlaces Mundiales).`;
       } else {
-        tgHint.textContent = `Incluye ${selectedTgs.length} canales internacionales y enlaces en español.`;
+        tgHint.textContent = `Selección Personalizada: ${selectedTgs.length} canales Talkgroups configurados.`;
       }
     }
 
+    if (customTgsCounter) {
+      customTgsCounter.textContent = `Total seleccionados: ${selectedTgs.length} TGs`;
+    }
+
     if (scopeHint && manifest) {
-      const info = manifest.alcances[currentScope as Alcance];
+      const info = manifest.alcances[currentScope];
       if (info) {
         scopeHint.textContent = `${numero(info.registros)} indicativos (${megas(info.bytes)}) sincronizados desde RadioID.`;
       }
@@ -535,41 +604,76 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     // Actualizar resumen
     if (summaryTitle) {
       const typeLabel = currentType === 'all' ? 'Pack Completo' : currentType === 'talkgroups' ? 'Solo Talkgroups' : 'Directorio de Contactos';
-      summaryTitle.textContent = `${modelNames[currentModel] || 'AnyTone'} · ${typeLabel}`;
+      const meta = modelMeta[currentModel] || modelMeta.anytone;
+      summaryTitle.textContent = `${meta.title} · ${typeLabel}`;
     }
 
     if (summaryDesc) {
       const scopeText = scopeNames[currentScope] || 'Venezuela';
+      const meta = modelMeta[currentModel] || modelMeta.anytone;
       let desc = '';
       if (currentType === 'all') {
-        if (currentModel === 'anytone') {
-          desc = `Generará archivo ZIP con TalkGroups.csv (${selectedTgs.length} TGs) y DigitalContactList.csv (${scopeText}) para AnyTone CPS.`;
-        } else if (currentModel === 'opengd77' || currentModel === 'baofeng') {
-          desc = `Generará archivo ZIP con OpenGD77_Talkgroups.csv (${selectedTgs.length} TGs) y OpenGD77_DMRID_Database.csv (${scopeText}) para OpenGD77 CPS.`;
-        } else {
-          desc = `Generará archivo CSV completo para ${modelNames[currentModel]} con ${selectedTgs.length} Talkgroups y alcance: ${scopeText}.`;
-        }
+        desc = `Generará archivo ZIP para ${meta.title} con ${selectedTgs.length} Talkgroups y contactos de ${scopeText}.`;
       } else if (currentType === 'talkgroups') {
-        desc = `Generará archivo CSV con ${selectedTgs.length} canales (Talkgroups) adaptados al formato de ${modelNames[currentModel]}.`;
+        desc = `Generará archivo CSV con ${selectedTgs.length} canales (Talkgroups) adaptados al formato de ${meta.title}.`;
       } else {
-        desc = `Generará archivo CSV con la libreta de contactos RadioID (${scopeText}) para ${modelNames[currentModel]}.`;
+        desc = `Generará archivo CSV con la libreta de contactos RadioID (${scopeText}) para ${meta.title}.`;
       }
 
-      const info = manifest?.alcances[currentScope as Alcance];
+      const info = manifest?.alcances[currentScope];
       if (info && currentType !== 'talkgroups') {
         desc += ` Se descargarán ${numero(info.registros)} contactos (${megas(info.bytes)}) directamente en tu dispositivo.`;
       }
       summaryDesc.textContent = desc;
     }
 
-    // Actualizar Previa
-    renderPreview();
+    // Actualizar subtítulo en el modal
+    if (modalSubtitle) {
+      const meta = modelMeta[currentModel] || modelMeta.anytone;
+      modalSubtitle.textContent = `Estructura adaptada para ${meta.title} (${selectedTgs.length} TGs)`;
+    }
   }
 
+  // 5. Modal de Previsualización (Opción 3)
+  function openModal() {
+    renderPreview();
+    if (previewModalOverlay) {
+      previewModalOverlay.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeModal() {
+    if (previewModalOverlay) {
+      previewModalOverlay.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+
+  btnTogglePreview?.addEventListener('click', openModal);
+  btnCloseModal?.addEventListener('click', closeModal);
+  btnModalCloseFooter?.addEventListener('click', closeModal);
+
+  previewModalOverlay?.addEventListener('click', (e) => {
+    if (e.target === previewModalOverlay) {
+      closeModal();
+    }
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && previewModalOverlay?.style.display === 'flex') {
+      closeModal();
+    }
+  });
+
+  btnModalDownload?.addEventListener('click', () => {
+    closeModal();
+    downloadBtn?.click();
+  });
+
   function renderPreview() {
-    if (!previewTable || !previewFormatTag) return;
-    previewFormatTag.textContent = modelNames[currentModel] || 'Formato CSV';
-    const selectedTgs = filtrarTalkgroups(currentTgFilter, currentCircuit);
+    if (!previewTable) return;
+    const selectedTgs = getActiveTalkgroups();
 
     let headers: string[] = [];
     let rows: string[][] = [];
@@ -667,29 +771,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     previewTable.innerHTML = html;
   }
 
-  // Event Listeners: Selección de Radios
-  radioCards.forEach(card => {
-    card.addEventListener('click', () => {
-      radioCards.forEach(c => c.classList.remove('active'));
-      card.classList.add('active');
-      currentModel = card.getAttribute('data-model') || 'anytone';
-      updateState();
-    });
-  });
-
-  // Toggle de Previsualización
-  if (btnTogglePreview && previewDrawer) {
-    btnTogglePreview.addEventListener('click', () => {
-      const isVisible = previewDrawer.style.display !== 'none';
-      previewDrawer.style.display = isVisible ? 'none' : 'block';
-      const label = btnTogglePreview.querySelector('span');
-      if (label) {
-        label.textContent = isVisible ? 'Ver Previa' : 'Ocultar Previa';
-      }
-    });
-  }
-
-  // Descarga: los contactos llegan desde jsDelivr al dispositivo y el archivo se arma aquí
+  // 6. Descarga y Generación
   const progreso = document.getElementById('download-progress');
   const progresoBarra = document.getElementById('download-progress-bar');
   const progresoRelleno = document.getElementById('download-progress-fill');
@@ -716,12 +798,11 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     if (etiqueta) etiqueta.textContent = 'Preparando…';
 
     try {
-      const alcance = currentScope as Alcance;
-      const selectedTgs = filtrarTalkgroups(currentTgFilter, currentCircuit);
+      const selectedTgs = getActiveTalkgroups();
       let contactos: Awaited<ReturnType<typeof cargarContactos>> = [];
       if (currentType !== 'talkgroups') {
         mostrarProgreso(0, 'Conectando con el directorio de RadioID…');
-        contactos = await cargarContactos(alcance, (recibidos, total) => {
+        contactos = await cargarContactos(currentScope, (recibidos, total) => {
           const pct = total ? (recibidos / total) * 100 : 0;
           mostrarProgreso(pct, `Descargando contactos… ${Math.round(pct)} % (${megas(recibidos)} de ${megas(total)})`);
         });
@@ -729,9 +810,9 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
       mostrarProgreso(null, 'Generando el archivo para tu radio…');
       await new Promise((r) => setTimeout(r, 30));
       const { nombre, blob } = generarArchivo(
-        currentModel as Modelo,
-        currentType as Tipo,
-        alcance,
+        currentModel,
+        currentType,
+        currentScope,
         contactos,
         selectedTgs
       );
@@ -747,7 +828,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
           event_category: currentModel,
           entity_id: currentScope,
           entity_title: currentType,
-          metadata: { contactos: contactos.length, tgs: selectedTgs.length, filtro_tg: currentTgFilter },
+          metadata: { contactos: contactos.length, tgs: selectedTgs.length, modo_tg: currentTgMode },
         }),
         keepalive: true,
       }).catch(() => {});

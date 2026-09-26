@@ -63,53 +63,155 @@ export const TALKGROUPS: Talkgroup[] = [
   { tg: '7347', name: 'TG 7347 C7 Oriente Norte Insular', slot: '2', city: 'Porlamar / Cumaná', state: 'Nueva Esparta, Sucre', country: 'Venezuela', notes: 'Circuito Regional 7' },
   { tg: '7348', name: 'TG 7348 C8 Oriente Deltaico', slot: '2', city: 'Maturín / Tucupita', state: 'Monagas, Delta Amacuro', country: 'Venezuela', notes: 'Circuito Regional 8' },
   { tg: '7349', name: 'TG 7349 C9 Llanos Sur Amazonia', slot: '2', city: 'San Fernando / Pto Ayacucho', state: 'Apure, Amazonas', country: 'Venezuela', notes: 'Circuito Regional 9' },
-  // Internacionales
+  // Internacionales e Iberoamérica
   { tg: '91', name: 'TG 91 Worldwide Mundial', slot: '1', city: 'Global', state: 'Mundo', country: 'Global', notes: 'Canal Mundial BrandMeister' },
   { tg: '913', name: 'TG 913 America Latina Iberoam', slot: '1', city: 'Latam', state: 'Iberoamérica', country: 'Regional', notes: 'Enlace en Español de Habla Hispana' },
-  { tg: '334', name: 'TG 334 Mexico Nacional', slot: '1', city: 'Ciudad de México', state: 'CDMX', country: 'México', notes: 'Red Hermana México' },
-  { tg: '730', name: 'TG 730 Chile Nacional', slot: '1', city: 'Santiago', state: 'RM', country: 'Chile', notes: 'Master Primario 7301' },
-  { tg: '732', name: 'TG 732 Colombia Nacional', slot: '1', city: 'Bogotá', state: 'Cundinamarca', country: 'Colombia', notes: 'Red Hermana Colombia' },
   { tg: '214', name: 'TG 214 Espana Nacional', slot: '1', city: 'Madrid', state: 'España', country: 'España', notes: 'Red BrandMeister España' },
+  { tg: '334', name: 'TG 334 Mexico Nacional', slot: '1', city: 'Ciudad de México', state: 'CDMX', country: 'México', notes: 'Red Hermana México' },
+  { tg: '732', name: 'TG 732 Colombia Nacional', slot: '1', city: 'Bogotá', state: 'Cundinamarca', country: 'Colombia', notes: 'Red Hermana Colombia' },
+  { tg: '730', name: 'TG 730 Chile Nacional', slot: '1', city: 'Santiago', state: 'RM', country: 'Chile', notes: 'Master Primario 7301' },
+  { tg: '722', name: 'TG 722 Argentina Nacional', slot: '1', city: 'Buenos Aires', state: 'Argentina', country: 'Argentina', notes: 'Red Argentina BrandMeister' },
+  { tg: '724', name: 'TG 724 Brasil Nacional', slot: '1', city: 'Brasilia', state: 'Brasil', country: 'Brasil', notes: 'Rede DMR Brasil' },
+  { tg: '716', name: 'TG 716 Peru Nacional', slot: '1', city: 'Lima', state: 'Perú', country: 'Perú', notes: 'Red DMR Perú' },
+  { tg: '740', name: 'TG 740 Ecuador Nacional', slot: '1', city: 'Quito', state: 'Ecuador', country: 'Ecuador', notes: 'Red DMR Ecuador' },
+  { tg: '748', name: 'TG 748 Uruguay Nacional', slot: '1', city: 'Montevideo', state: 'Uruguay', country: 'Uruguay', notes: 'Red DMR Uruguay' },
+  { tg: '744', name: 'TG 744 Paraguay Nacional', slot: '1', city: 'Asunción', state: 'Paraguay', country: 'Paraguay', notes: 'Red DMR Paraguay' },
+  { tg: '736', name: 'TG 736 Bolivia Nacional', slot: '1', city: 'La Paz', state: 'Bolivia', country: 'Bolivia', notes: 'Red DMR Bolivia' },
+  { tg: '370', name: 'TG 370 Rep Dominicana', slot: '1', city: 'Santo Domingo', state: 'Rep Dominicana', country: 'República Dominicana', notes: 'Red DMR Rep Dominicana' },
+  { tg: '330', name: 'TG 330 Puerto Rico', slot: '1', city: 'San Juan', state: 'Puerto Rico', country: 'Puerto Rico', notes: 'Red DMR Puerto Rico' },
+  { tg: '382', name: 'TG 382 Costa Rica Nacional', slot: '1', city: 'San José', state: 'Costa Rica', country: 'Costa Rica', notes: 'Red DMR Costa Rica' },
+  { tg: '3100', name: 'TG 3100 USA Nationwide', slot: '1', city: 'Nationwide', state: 'USA', country: 'Estados Unidos', notes: 'USA Bridge BrandMeister' },
+  { tg: '268', name: 'TG 268 Portugal Nacional', slot: '1', city: 'Lisboa', state: 'Portugal', country: 'Portugal', notes: 'Rede DMR Portugal' },
+  { tg: '222', name: 'TG 222 Italia Nazionale', slot: '1', city: 'Roma', state: 'Italia', country: 'Italia', notes: 'Rete DMR Italia' },
   { tg: '9', name: 'TG 9 Local Reflector Slot 2', slot: '2', city: 'Local', state: 'Local', country: 'Local', notes: 'Tráfico Local en Ranura 2' },
 ];
 
-export type TgFilter = 'all' | 'national' | 'circuit' | 'regional' | 'international';
+export type TgOptionMode = 'oficiales' | 'globales' | 'personalizado';
 
-export interface CircuitoRegional {
-  tg: string;
-  numero: string;
+export interface OpcionPersonalizadaTG {
+  id: string;
+  categoria: string;
   nombre: string;
-  region: string;
-  estados: string;
+  tgs: string[];
+  descripcion: string;
 }
 
-export const CIRCUITOS_REGIONALES: CircuitoRegional[] = [
-  { tg: '7341', numero: '1', nombre: 'Circuito 1: Occidente', region: 'Occidente', estados: 'Zulia, Falcón, Trujillo' },
-  { tg: '7342', numero: '2', nombre: 'Circuito 2: Los Andes', region: 'Los Andes y Piedemonte', estados: 'Táchira, Mérida, Barinas' },
-  { tg: '7343', numero: '3', nombre: 'Circuito 3: Centroccidente', region: 'Centroccidente', estados: 'Lara, Portuguesa, Yaracuy' },
-  { tg: '7344', numero: '4', nombre: 'Circuito 4: Región Central', region: 'Región Central', estados: 'Carabobo, Aragua, Cojedes' },
-  { tg: '7345', numero: '5', nombre: 'Circuito 5: Capital, Litoral y Llanos', region: 'Capital, Litoral y Llanos', estados: 'Caracas, Miranda, La Guaira, Guárico' },
-  { tg: '7346', numero: '6', nombre: 'Circuito 6: Oriente Sur y Guayana', region: 'Oriente Sur y Guayana', estados: 'Anzoátegui, Bolívar' },
-  { tg: '7347', numero: '7', nombre: 'Circuito 7: Oriente Norte e Insular', region: 'Oriente Norte e Insular', estados: 'Nueva Esparta, Sucre' },
-  { tg: '7348', numero: '8', nombre: 'Circuito 8: Oriente Deltaico', region: 'Oriente Deltaico', estados: 'Monagas, Delta Amacuro' },
-  { tg: '7349', numero: '9', nombre: 'Circuito 9: Llanos del Sur y Amazonía', region: 'Llanos del Sur y Amazonía', estados: 'Apure, Amazonas' },
+export const OPCIONES_PERSONALIZADAS: OpcionPersonalizadaTG[] = [
+  {
+    id: 'nacionales',
+    categoria: 'Venezuela',
+    nombre: 'Canales Troncales Nacionales y Tácticos',
+    tgs: ['734', '7340', '73411', '73452', '73473', '73499'],
+    descripcion: 'TG 734, desborde 7340, ruedas 73411, boletines 73452, RCV 73473 y eventos 73499.',
+  },
+  {
+    id: 'emcom',
+    categoria: 'Venezuela',
+    nombre: 'Red de Emergencia EMCOM YV5RNE',
+    tgs: ['734911'],
+    descripcion: 'Canal prioritario nacional de emergencia y contingencias.',
+  },
+  {
+    id: 'c1_occidente',
+    categoria: 'Circuitos Regionales YV',
+    nombre: 'Circuito 1: Occidente (TG 7341)',
+    tgs: ['7341'],
+    descripcion: 'Zulia, Falcón, Trujillo.',
+  },
+  {
+    id: 'c2_andes',
+    categoria: 'Circuitos Regionales YV',
+    nombre: 'Circuito 2: Los Andes (TG 7342)',
+    tgs: ['7342'],
+    descripcion: 'Táchira, Mérida, Barinas.',
+  },
+  {
+    id: 'c3_centroccidente',
+    categoria: 'Circuitos Regionales YV',
+    nombre: 'Circuito 3: Centroccidente (TG 7343)',
+    tgs: ['7343'],
+    descripcion: 'Lara, Portuguesa, Yaracuy.',
+  },
+  {
+    id: 'c4_central',
+    categoria: 'Circuitos Regionales YV',
+    nombre: 'Circuito 4: Región Central (TG 7344)',
+    tgs: ['7344'],
+    descripcion: 'Carabobo, Aragua, Cojedes.',
+  },
+  {
+    id: 'c5_capital',
+    categoria: 'Circuitos Regionales YV',
+    nombre: 'Circuito 5: Capital, Litoral y Llanos (TG 7345)',
+    tgs: ['7345'],
+    descripcion: 'Caracas, Miranda, La Guaira, Guárico.',
+  },
+  {
+    id: 'c6_oriente_sur',
+    categoria: 'Circuitos Regionales YV',
+    nombre: 'Circuito 6: Oriente Sur y Guayana (TG 7346)',
+    tgs: ['7346'],
+    descripcion: 'Anzoátegui, Bolívar.',
+  },
+  {
+    id: 'c7_insular',
+    categoria: 'Circuitos Regionales YV',
+    nombre: 'Circuito 7: Oriente Norte e Insular (TG 7347)',
+    tgs: ['7347'],
+    descripcion: 'Nueva Esparta, Sucre.',
+  },
+  {
+    id: 'c8_deltaico',
+    categoria: 'Circuitos Regionales YV',
+    nombre: 'Circuito 8: Oriente Deltaico (TG 7348)',
+    tgs: ['7348'],
+    descripcion: 'Monagas, Delta Amacuro.',
+  },
+  {
+    id: 'c9_amazonia',
+    categoria: 'Circuitos Regionales YV',
+    nombre: 'Circuito 9: Llanos del Sur y Amazonía (TG 7349)',
+    tgs: ['7349'],
+    descripcion: 'Apure, Amazonas.',
+  },
+  {
+    id: 'iberoamerica',
+    categoria: 'Internacional',
+    nombre: 'América Latina y Conexiones en Español',
+    tgs: ['913', '214', '334', '732', '730', '722', '716', '740', '748', '744', '736', '370', '330', '382'],
+    descripcion: 'Latam 913, España, México, Colombia, Chile, Argentina, Perú, etc.',
+  },
+  {
+    id: 'mundial',
+    categoria: 'Internacional',
+    nombre: 'Mundial Global y Enlaces Especiales',
+    tgs: ['91', '3100', '268', '222', '9'],
+    descripcion: 'TG 91 Worldwide, USA 3100, Portugal, Italia y Reflector Local 9.',
+  },
 ];
 
-/** Filtra los talkgroups según el criterio de selección y circuito regional opcional */
-export function filtrarTalkgroups(filtro: TgFilter, circuitoId?: string): Talkgroup[] {
-  if (filtro === 'all') return TALKGROUPS;
-  if (filtro === 'national') {
-    return TALKGROUPS.filter(t => ['734', '734911', '73452', '73473', '73411', '7340', '73499'].includes(t.tg));
+/** Filtra los talkgroups según el modo de selección: Oficiales, Globales o Personalizado */
+export function filtrarTalkgroups(modo: TgOptionMode, idsSeleccionados?: string[]): Talkgroup[] {
+  if (modo === 'oficiales') {
+    return TALKGROUPS.filter(t => t.country === 'Venezuela');
   }
-  if (filtro === 'regional') {
-    return TALKGROUPS.filter(t => ['7341', '7342', '7343', '7344', '7345', '7346', '7347', '7348', '7349'].includes(t.tg));
+  if (modo === 'globales') {
+    return TALKGROUPS;
   }
-  if (filtro === 'circuit') {
-    const tgCircuito = circuitoId || '7341';
-    return TALKGROUPS.filter(t => ['734', '7340', '73411', '73452', '73473', '734911'].includes(t.tg) || t.tg === tgCircuito);
-  }
-  if (filtro === 'international') {
-    return TALKGROUPS.filter(t => ['91', '913', '334', '730', '732', '214', '9'].includes(t.tg));
+  if (modo === 'personalizado') {
+    if (!idsSeleccionados || idsSeleccionados.length === 0) {
+      return TALKGROUPS.filter(t => t.country === 'Venezuela');
+    }
+    const tgsPermitidos = new Set<string>();
+    for (const opcId of idsSeleccionados) {
+      const opc = OPCIONES_PERSONALIZADAS.find(o => o.id === opcId);
+      if (opc) {
+        opc.tgs.forEach(tg => tgsPermitidos.add(tg));
+      } else {
+        tgsPermitidos.add(opcId);
+      }
+    }
+    return TALKGROUPS.filter(t => tgsPermitidos.has(t.tg));
   }
   return TALKGROUPS;
 }
