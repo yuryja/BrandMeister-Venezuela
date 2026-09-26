@@ -569,6 +569,31 @@
   text-transform: uppercase;
 }
 
+.result-repeater-note {
+  background: #F8FAFC;
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--bm-orange);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.result-repeater-note-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bm-orange);
+  margin-bottom: 0.35rem;
+}
+
+.result-repeater-note-body {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
 /* ── Estados Vacíos y de Error ─────────────────────────────────────────── */
 .radioid-state-card {
   background: var(--bg-surface);

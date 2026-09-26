@@ -94,6 +94,52 @@ function fetchRadioId(string $url): string|false {
     return false;
 }
 
+/**
+ * Consulta la API oficial de BrandMeister Network (v2) para un repetidor/dispositivo
+ */
+function fetchBrandMeisterDevice(string|int $deviceId): ?array {
+    $cleanId = preg_replace('/[^0-9]/', '', (string)$deviceId);
+    if (!$cleanId) return null;
+
+    $url = "https://api.brandmeister.network/v2/device/{$cleanId}";
+    $response = false;
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Accept: application/json',
+            'User-Agent: BrandMeister-Venezuela/1.0'
+        ]);
+        $response = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($response !== false && $code === 200) {
+            $data = json_decode($response, true);
+            return (is_array($data) && isset($data['id'])) ? $data : null;
+        }
+    } else {
+        $ctx = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'timeout' => 4,
+                'header' => "Accept: application/json\r\nUser-Agent: BrandMeister-Venezuela/1.0\r\n"
+            ]
+        ]);
+        $response = @file_get_contents($url, false, $ctx);
+        if ($response !== false) {
+            $data = json_decode($response, true);
+            return (is_array($data) && isset($data['id'])) ? $data : null;
+        }
+    }
+    return null;
+}
+
 // 1. Intentar consulta principal (por ID o indicativo)
 $paramName = $isNumeric ? 'id' : 'callsign';
 $apiUrl = "https://database.radioid.net/api/dmr/{$type}/?{$paramName}=" . urlencode($cleanQuery);
@@ -112,10 +158,112 @@ if ($rawResponse !== false) {
                     $item['_entity_type'] = 'repeater';
                 }
                 unset($item);
-                $rawResponse = json_encode($repDecoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                $decoded = $repDecoded;
             }
         }
     }
+}
+
+// 3. Si no hubo resultados en RadioID.net y es un ID numérico, buscar directamente en BrandMeister Devices
+if ((!isset($decoded) || empty($decoded['results'])) && $isNumeric) {
+    $bmDevice = fetchBrandMeisterDevice($cleanQuery);
+    if ($bmDevice) {
+        $tx = isset($bmDevice['tx']) ? (float)$bmDevice['tx'] : 0.0;
+        $rx = isset($bmDevice['rx']) ? (float)$bmDevice['rx'] : 0.0;
+        $shift = ($tx > 0 && $rx > 0) ? ($rx - $tx) : 0.0;
+        $offsetStr = abs($shift) < 0.0001 ? 'Simplex' : sprintf('%+0.3f MHz', $shift);
+
+        $sysops = [];
+        if (!empty($bmDevice['permissions']) && is_array($bmDevice['permissions'])) {
+            foreach ($bmDevice['permissions'] as $p) {
+                if (!empty($p['username']) && !in_array($p['username'], $sysops, true)) {
+                    $sysops[] = $p['username'];
+                }
+            }
+        }
+
+        $decoded = [
+            'count' => 1,
+            'page' => 1,
+            'pages' => 1,
+            'per_page' => 200,
+            'results' => [
+                [
+                    'id' => (string)$bmDevice['id'],
+                    'locator' => (string)$bmDevice['id'],
+                    'callsign' => $bmDevice['callsign'] ?? '',
+                    'city' => $bmDevice['city'] ?? '',
+                    'state' => '',
+                    'country' => 'Venezuela',
+                    'frequency' => (string)($bmDevice['tx'] ?? ''),
+                    'tx' => (string)($bmDevice['tx'] ?? ''),
+                    'rx' => (string)($bmDevice['rx'] ?? ''),
+                    'offset' => $offsetStr,
+                    'color_code' => $bmDevice['colorcode'] ?? 1,
+                    'status' => $bmDevice['statusText'] ?? 'Activo',
+                    'coverage' => 'BrandMeister DMR' . (!empty($bmDevice['lastKnownMaster']) ? " (Master {$bmDevice['lastKnownMaster']})" : ''),
+                    'trustee' => !empty($sysops) ? $sysops : [$bmDevice['callsign'] ?? ''],
+                    'hardware' => $bmDevice['hardware'] ?? ($bmDevice['linkname'] ?? null),
+                    'linkname' => $bmDevice['linkname'] ?? null,
+                    'description' => $bmDevice['description'] ?? '',
+                    '_entity_type' => 'repeater',
+                    'bm_device' => $bmDevice
+                ]
+            ]
+        ];
+    }
+}
+
+// 4. Si hay repetidores en los resultados, sincronizar Frequency Details con la API oficial de BrandMeister
+if (isset($decoded) && is_array($decoded) && !empty($decoded['results'])) {
+    foreach ($decoded['results'] as &$item) {
+        $isRep = ($item['_entity_type'] ?? '') === 'repeater' || isset($item['locator']) || $type === 'repeater';
+        if ($isRep) {
+            $item['_entity_type'] = 'repeater';
+            $repId = $item['locator'] ?? $item['id'] ?? null;
+            if ($repId) {
+                $bmDevice = fetchBrandMeisterDevice($repId);
+                if ($bmDevice) {
+                    $tx = isset($bmDevice['tx']) ? (float)$bmDevice['tx'] : 0.0;
+                    $rx = isset($bmDevice['rx']) ? (float)$bmDevice['rx'] : 0.0;
+                    $shift = ($tx > 0 && $rx > 0) ? ($rx - $tx) : 0.0;
+                    $offsetStr = abs($shift) < 0.0001 ? 'Simplex' : sprintf('%+0.3f MHz', $shift);
+
+                    $item['tx'] = (string)($bmDevice['tx'] ?? '');
+                    $item['rx'] = (string)($bmDevice['rx'] ?? '');
+                    $item['frequency'] = (string)($bmDevice['tx'] ?? $item['frequency'] ?? '');
+                    $item['offset'] = $offsetStr;
+                    $item['color_code'] = $bmDevice['colorcode'] ?? $item['color_code'] ?? 1;
+                    $item['status'] = $bmDevice['statusText'] ?? $item['status'] ?? 'Activo';
+                    $item['coverage'] = 'BrandMeister DMR' . (!empty($bmDevice['lastKnownMaster']) ? " (Master {$bmDevice['lastKnownMaster']})" : '');
+                    $item['hardware'] = $bmDevice['hardware'] ?? ($bmDevice['linkname'] ?? null);
+                    $item['linkname'] = $bmDevice['linkname'] ?? null;
+                    if (!empty($bmDevice['city'])) {
+                        $item['city'] = $bmDevice['city'];
+                    }
+                    if (!empty($bmDevice['description'])) {
+                        $item['description'] = $bmDevice['description'];
+                    }
+
+                    if (!empty($bmDevice['permissions']) && is_array($bmDevice['permissions'])) {
+                        $sysops = [];
+                        foreach ($bmDevice['permissions'] as $p) {
+                            if (!empty($p['username']) && !in_array($p['username'], $sysops, true)) {
+                                $sysops[] = $p['username'];
+                            }
+                        }
+                        if (!empty($sysops)) {
+                            $item['trustee'] = $sysops;
+                        }
+                    }
+
+                    $item['bm_device'] = $bmDevice;
+                }
+            }
+        }
+    }
+    unset($item);
+    $rawResponse = json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 }
 
 if ($rawResponse !== false) {
