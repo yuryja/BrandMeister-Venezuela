@@ -73,7 +73,7 @@ import{t as e}from"./callsign-country.CaNU7VBD.js";var t=document.getElementById
             <a href="https://www.qrz.com/db/${encodeURIComponent(n)}" target="_blank" rel="noopener noreferrer" class="btn-ext">
               <span>QRZ.com ↗</span>
             </a>
-            <a href="https://brandmeister.network/?page=profile&id=${encodeURIComponent(r)}" target="_blank" rel="noopener noreferrer" class="btn-ext">
+            <a href="https://brandmeister.network/#/profile/${encodeURIComponent(n||r)}" target="_blank" rel="noopener noreferrer" class="btn-ext">
               <span>Perfil BrandMeister ↗</span>
             </a>
             <a href="https://radioid.net/" target="_blank" rel="noopener noreferrer" class="btn-ext">
@@ -82,7 +82,7 @@ import{t as e}from"./callsign-country.CaNU7VBD.js";var t=document.getElementById
           </div>
         </div>
       </article>
-    `}function x(e){let t=(e.callsign||``).trim().toUpperCase(),n=e.locator||e.id||e.radio_id||``,r=[e.city||``,e.state||``,e.country||`Venezuela`].filter(Boolean).join(`, `),i=e.frequency?`${e.frequency} MHz`:`No indicada`,a=e.offset?`${e.offset} MHz`:`Simplex`,o=e.color_code===void 0?`CC1`:`CC${e.color_code}`,s=e.status===`on-air`?`Activo en el aire`:e.status||`Registrado`,c=Array.isArray(e.trustee)?e.trustee.join(`, `):e.trustee||`No especificado`;return`
+    `}function x(e){let t=(e.callsign||``).trim().toUpperCase(),n=String(e.locator||e.id||e.radio_id||``),r=[e.city||``,e.state||``,e.country||`Venezuela`].filter(Boolean).join(`, `),i=e.tx||e.frequency,a=e.rx,o=i?parseFloat(i):null,s=a?parseFloat(a):null,c=`No indicada`,l=``,u=e.offset||``,d=!1;if(o!==null&&!isNaN(o)&&(c=`${o.toFixed(4)} MHz`),s!==null&&!isNaN(s)&&(l=`${s.toFixed(4)} MHz`),o!==null&&s!==null&&!isNaN(o)&&!isNaN(s)){let e=s-o;d=Math.abs(e)>1e-4,u=d?`${e>0?`+`:``}${e.toFixed(3)} MHz`:`Simplex`}else u||=`Simplex`;let f=l?`RX: ${h(l)} • Shift: ${h(u)}`:`Offset: ${h(u)}`,p=`CC${e.color_code===void 0?e.colorcode===void 0?1:e.colorcode:e.color_code}`,m=d?`Duplex (RPT)`:`Simplex`,g=e.status===`on-air`?`Activo en el aire`:e.status||`Activo en BrandMeister`,_=`No especificado`;Array.isArray(e.trustee)&&e.trustee.length?_=e.trustee.join(`, `):e.trustee?_=String(e.trustee):t&&(_=t);let v=e.coverage||(e.bm_device?.lastKnownMaster?`Master ${e.bm_device.lastKnownMaster}`:`BrandMeister DMR`),y=e.status||`Interconexión digital`,b=e.description||e.bm_device?.description||``,x=`https://brandmeister.network/#/device/${encodeURIComponent(n)}`;return`
       <article class="radioid-result-card" data-callsign="${h(t)}" data-id="${h(n)}">
         <header class="result-card-header">
           <div class="result-operator-meta">
@@ -97,7 +97,7 @@ import{t as e}from"./callsign-country.CaNU7VBD.js";var t=document.getElementById
           </div>
 
           <div class="result-header-badges">
-            <span class="badge-status-validated"><span class="badge-status-dot"></span>${h(s)}</span>
+            <span class="badge-status-validated"><span class="badge-status-dot"></span>${h(g)}</span>
             <div class="result-dmrid-box">
               <span class="dmrid-label">ID Repetidor</span>
               <span class="dmrid-value">${h(n)}</span>
@@ -123,38 +123,45 @@ import{t as e}from"./callsign-country.CaNU7VBD.js";var t=document.getElementById
 
           <div class="result-telemetry-grid">
             <div class="telemetry-item">
-              <div class="telemetry-label">Frecuencia</div>
-              <div class="telemetry-val">${h(i)}</div>
-              <div class="telemetry-sub">Offset: ${h(a)}</div>
+              <div class="telemetry-label">Frecuencia TX (Salida)</div>
+              <div class="telemetry-val">${h(c)}</div>
+              <div class="telemetry-sub">${f}</div>
             </div>
 
             <div class="telemetry-item">
               <div class="telemetry-label">Código de Color</div>
-              <div class="telemetry-val">${h(o)}</div>
-              <div class="telemetry-sub">Slot 1 y Slot 2</div>
+              <div class="telemetry-val">${h(p)}</div>
+              <div class="telemetry-sub">Slot 1 y Slot 2 • ${h(m)}</div>
             </div>
 
             <div class="telemetry-item">
               <div class="telemetry-label">Administrador / Trustee</div>
-              <div class="telemetry-val">${h(c)}</div>
+              <div class="telemetry-val">${h(_)}</div>
               <div class="telemetry-sub">Responsable técnico</div>
             </div>
 
             <div class="telemetry-item">
               <div class="telemetry-label">Red y Cobertura</div>
-              <div class="telemetry-val">${h(e.coverage||`BrandMeister`)}</div>
-              <div class="telemetry-sub">Interconexión digital</div>
+              <div class="telemetry-val">${h(v)}</div>
+              <div class="telemetry-sub">${h(y)}</div>
             </div>
           </div>
+
+          ${b?`
+            <div class="result-repeater-note">
+              <div class="result-repeater-note-title">Información técnica en BrandMeister Network</div>
+              <div class="result-repeater-note-body">${h(b)}</div>
+            </div>
+          `:``}
 
           <div class="result-actions-bar">
             <a href="/repetidores" class="btn-ext">
               <span>Directorio de Repetidores ↗</span>
             </a>
-            <a href="https://brandmeister.network/?page=repeater&id=${encodeURIComponent(n)}" target="_blank" rel="noopener noreferrer" class="btn-ext">
+            <a href="${x}" target="_blank" rel="noopener noreferrer" class="btn-ext">
               <span>Ficha en BrandMeister ↗</span>
             </a>
           </div>
         </div>
       </article>
-    `}var S=0,C=``;function w(e,t){window.clearTimeout(S),!(e.length<3)&&(S=window.setTimeout(()=>{e===m&&e!==C&&(C=e,fetch(`/api/analytics.php?action=track`,{method:`POST`,headers:{"Content-Type":`application/json`},body:JSON.stringify({event_type:`callsign_lookup`,event_category:t?`encontrado`:`no_encontrado`,entity_id:e}),keepalive:!0}).catch(()=>{}))},2e3))}async function T(e,t=!0){let n=e.trim().toUpperCase();if(!n){if(window.clearTimeout(S),g(`initial`),a&&(a.innerHTML=``),t){let e=new URL(window.location.href);e.searchParams.delete(`q`),window.history.replaceState({},``,e.toString())}return}if(n!==m){if(m=n,window.clearTimeout(S),t){let e=new URL(window.location.href);e.searchParams.set(`q`,n),window.history.replaceState({},``,e.toString())}p?.abort(),p=new AbortController,g(`loading`);try{let e=/^\d+$/.test(n)?`id=${encodeURIComponent(n)}`:`callsign=${encodeURIComponent(n)}`,t=null;try{let e=await fetch(`/api/radioid.php?q=${encodeURIComponent(n)}`,{headers:{accept:`application/json`},signal:p.signal});e.ok&&(t=await e.json())}catch(e){if(e.name===`AbortError`)return}if(!t)try{let n=await fetch(`/api/radioid/user/?${e}`,{headers:{accept:`application/json`},signal:p.signal});if(n.ok&&(t=await n.json(),t&&(!t.results||!t.results.length))){let n=await fetch(`/api/radioid/repeater/?${e}`,{headers:{accept:`application/json`},signal:p.signal});if(n.ok){let e=await n.json();e&&e.results&&e.results.length&&(e.results.forEach(e=>{e._entity_type=`repeater`}),t=e)}}}catch(e){if(e.name===`AbortError`)return}if(!t)throw Error(`No se pudo obtener respuesta del servidor`);let r=Array.isArray(t.results)?t.results:[];if(!r.length){c&&(c.innerHTML=`No se encontró ningún registro activo para <strong>${h(n)}</strong> en RadioID.net.`),g(`notfound`),w(n,!1);return}a&&(a.innerHTML=r.map(e=>e._entity_type===`repeater`||e.locator?x(e):b(e)).join(``),a.querySelectorAll(`.js-copy-id`).forEach(e=>{e.addEventListener(`click`,t=>{t.stopPropagation();let n=e.dataset.copy||``;n&&v(n,e)})})),g(`results`),w(n,!0)}catch(e){if(e.name===`AbortError`)return;u&&(u.textContent=`No pudimos conectar con los servidores de RadioID.net. Intente nuevamente en unos instantes.`),g(`error`)}}}t&&(t.addEventListener(`input`,()=>{let e=t.value.trim();if(n&&n.classList.toggle(`is-visible`,!!e),window.clearTimeout(f),!e){T(``);return}f=window.setTimeout(()=>{T(e)},400)}),t.addEventListener(`keydown`,e=>{e.key===`Enter`&&(e.preventDefault(),window.clearTimeout(f),T(t.value))})),n&&n.addEventListener(`click`,()=>{t&&(t.value=``,t.focus()),n.classList.remove(`is-visible`),T(``)}),r&&r.addEventListener(`submit`,e=>{e.preventDefault(),t&&(window.clearTimeout(f),T(t.value))}),document.querySelectorAll(`[data-query]`).forEach(e=>{e.addEventListener(`click`,()=>{let r=e.dataset.query||``;t&&(t.value=r,n&&n.classList.add(`is-visible`),t.focus()),T(r)})}),d&&d.addEventListener(`click`,()=>{t&&T(t.value)});var E=new URLSearchParams(window.location.search),D=E.get(`q`)||E.get(`callsign`)||E.get(`id`)||``;D&&t&&(t.value=D,n&&n.classList.add(`is-visible`),T(D,!1));
+    `}var S=0,C=``;function w(e,t){window.clearTimeout(S),!(e.length<3)&&(S=window.setTimeout(()=>{e===m&&e!==C&&(C=e,fetch(`/api/analytics.php?action=track`,{method:`POST`,headers:{"Content-Type":`application/json`},body:JSON.stringify({event_type:`callsign_lookup`,event_category:t?`encontrado`:`no_encontrado`,entity_id:e}),keepalive:!0}).catch(()=>{}))},2e3))}async function T(e,t=!0){let n=e.trim().toUpperCase();if(!n){if(window.clearTimeout(S),g(`initial`),a&&(a.innerHTML=``),t){let e=new URL(window.location.href);e.searchParams.delete(`q`),window.history.replaceState({},``,e.toString())}return}if(n!==m){if(m=n,window.clearTimeout(S),t){let e=new URL(window.location.href);e.searchParams.set(`q`,n),window.history.replaceState({},``,e.toString())}p?.abort(),p=new AbortController,g(`loading`);try{let e=/^\d+$/.test(n),t=e?`id=${encodeURIComponent(n)}`:`callsign=${encodeURIComponent(n)}`,r=null;try{let e=await fetch(`/api/radioid.php?q=${encodeURIComponent(n)}`,{headers:{accept:`application/json`},signal:p.signal});e.ok&&(r=await e.json())}catch(e){if(e.name===`AbortError`)return}if(!r)try{let e=await fetch(`/api/radioid/user/?${t}`,{headers:{accept:`application/json`},signal:p.signal});if(e.ok&&(r=await e.json(),r&&(!r.results||!r.results.length))){let e=await fetch(`/api/radioid/repeater/?${t}`,{headers:{accept:`application/json`},signal:p.signal});if(e.ok){let t=await e.json();t&&t.results&&t.results.length&&(t.results.forEach(e=>{e._entity_type=`repeater`}),r=t)}}}catch(e){if(e.name===`AbortError`)return}if(!r)throw Error(`No se pudo obtener respuesta del servidor`);let i=Array.isArray(r.results)?r.results:[];if(!i.length&&e)try{let e=await fetch(`https://api.brandmeister.network/v2/device/${encodeURIComponent(n)}`,{signal:p.signal});if(e.ok){let t=await e.json();if(t&&t.id){let e=t.tx?parseFloat(t.tx):0,n=t.rx?parseFloat(t.rx):0,r=e>0&&n>0?n-e:0,a=Math.abs(r)<1e-4?`Simplex`:`${r>0?`+`:``}${r.toFixed(3)} MHz`,o=Array.isArray(t.permissions)&&t.permissions.length?[...new Set(t.permissions.map(e=>e.username).filter(Boolean))]:[t.callsign||``];i=[{id:String(t.id),locator:String(t.id),callsign:t.callsign||``,city:t.city||``,state:``,country:`Venezuela`,frequency:t.tx||``,tx:t.tx,rx:t.rx,offset:a,color_code:t.colorcode??1,status:t.statusText||`Both Slots Linked`,coverage:`BrandMeister DMR${t.lastKnownMaster?` (Master ${t.lastKnownMaster})`:``}`,trustee:o,hardware:t.hardware||t.linkname,linkname:t.linkname,description:t.description,_entity_type:`repeater`,bm_device:t}]}}}catch{}if(!i.length){c&&(c.innerHTML=`No se encontró ningún registro activo para <strong>${h(n)}</strong> en RadioID.net ni en BrandMeister Network.`),g(`notfound`),w(n,!1);return}for(let e of i)if(e._entity_type===`repeater`||e.locator){let t=e.locator||e.id||e.radio_id;if(t&&(!e.tx||!e.rx))try{let n=await fetch(`https://api.brandmeister.network/v2/device/${encodeURIComponent(t)}`,{signal:p.signal});if(n.ok){let t=await n.json();t&&t.id&&(e.tx=t.tx,e.rx=t.rx,e.frequency=t.tx||e.frequency,e.color_code=t.colorcode??e.color_code,e.status=t.statusText||e.status,t.lastKnownMaster&&(e.coverage=`BrandMeister DMR (Master ${t.lastKnownMaster})`),t.description&&(e.description=t.description),Array.isArray(t.permissions)&&t.permissions.length&&(e.trustee=[...new Set(t.permissions.map(e=>e.username).filter(Boolean))]),e.bm_device=t)}}catch{}}a&&(a.innerHTML=i.map(e=>e._entity_type===`repeater`||e.locator?x(e):b(e)).join(``),a.querySelectorAll(`.js-copy-id`).forEach(e=>{e.addEventListener(`click`,t=>{t.stopPropagation();let n=e.dataset.copy||``;n&&v(n,e)})})),g(`results`),w(n,!0)}catch(e){if(e.name===`AbortError`)return;u&&(u.textContent=`No pudimos conectar con los servidores de RadioID.net. Intente nuevamente en unos instantes.`),g(`error`)}}}t&&(t.addEventListener(`input`,()=>{let e=t.value.trim();if(n&&n.classList.toggle(`is-visible`,!!e),window.clearTimeout(f),!e){T(``);return}f=window.setTimeout(()=>{T(e)},400)}),t.addEventListener(`keydown`,e=>{e.key===`Enter`&&(e.preventDefault(),window.clearTimeout(f),T(t.value))})),n&&n.addEventListener(`click`,()=>{t&&(t.value=``,t.focus()),n.classList.remove(`is-visible`),T(``)}),r&&r.addEventListener(`submit`,e=>{e.preventDefault(),t&&(window.clearTimeout(f),T(t.value))}),document.querySelectorAll(`[data-query]`).forEach(e=>{e.addEventListener(`click`,()=>{let r=e.dataset.query||``;t&&(t.value=r,n&&n.classList.add(`is-visible`),t.focus()),T(r)})}),d&&d.addEventListener(`click`,()=>{t&&T(t.value)});var E=new URLSearchParams(window.location.search),D=E.get(`q`)||E.get(`callsign`)||E.get(`id`)||``;D&&t&&(t.value=D,n&&n.classList.add(`is-visible`),T(D,!1));
