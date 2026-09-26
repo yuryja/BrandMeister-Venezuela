@@ -185,12 +185,50 @@
 .model-select-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 1rem;
+}
+
+.select-hero-container {
+  position: relative;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(238, 108, 31, 0.08) 0%, rgba(232, 38, 28, 0.03) 100%);
+  padding: 4px;
+  box-shadow: 0 4px 20px -3px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.select-hero-container:focus-within {
+  box-shadow: 0 0 0 4px rgba(238, 108, 31, 0.18), 0 10px 25px -4px rgba(238, 108, 31, 0.15);
 }
 
 .select-wrapper--hero {
   position: relative;
   width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.select-hero-icon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(238, 108, 31, 0.12) 0%, rgba(232, 38, 28, 0.08) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #EE6C1F;
+  border: 1px solid rgba(238, 108, 31, 0.2);
+  z-index: 2;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.select-hero-container:hover .select-hero-icon {
+  transform: translateY(-50%) scale(1.05);
 }
 
 .form-control-select--hero {
@@ -200,129 +238,221 @@
   background-color: #FFFFFF;
   border: 2px solid #E2E8F0;
   border-radius: 14px;
-  padding: 1.1rem 3rem 1.1rem 1.25rem;
+  padding: 1.25rem 3.5rem 1.25rem 4.5rem;
   font-family: var(--font-sans, inherit);
-  font-size: 1.02rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #0F172A;
-  box-shadow: 0 4px 14px -2px rgba(15, 23, 42, 0.05);
   cursor: pointer;
   transition: all 0.2s ease;
-  line-height: 1.4;
+  line-height: 1.45;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
 }
 
 .form-control-select--hero:hover {
   border-color: #CBD5E1;
-  box-shadow: 0 6px 18px -2px rgba(15, 23, 42, 0.08);
+  background-color: #FAFAFA;
 }
 
 .form-control-select--hero:focus {
   outline: none;
   border-color: #EE6C1F;
-  box-shadow: 0 0 0 4px rgba(238, 108, 31, 0.15);
+  background-color: #FFFFFF;
 }
 
-.select-chevron--hero {
+.select-hero-chevron {
   position: absolute;
-  right: 1.35rem;
+  right: 1.25rem;
   top: 50%;
+  transform: translateY(-50%);
   pointer-events: none;
-  width: 10px;
-  height: 10px;
-  border-right: 2.5px solid #EE6C1F;
-  border-bottom: 2.5px solid #EE6C1F;
-  transform: translateY(-65%) rotate(45deg);
-  transition: transform 0.2s ease;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  z-index: 2;
+  transition: all 0.2s ease;
 }
 
+.select-hero-container:hover .select-hero-chevron {
+  background: #EE6C1F;
+  border-color: #EE6C1F;
+  color: #FFFFFF;
+  transform: translateY(-50%) scale(1.05);
+}
+
+/* Ficha de Información de Modelo */
 .model-info-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.25rem;
-  background: #F8FAFC;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%);
   border: 1px solid #E2E8F0;
+  border-left: 4px solid #EE6C1F;
   border-radius: 12px;
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.35rem;
   flex-wrap: wrap;
+  box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.04);
+}
+
+.model-info-banner__left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.model-info-banner__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  flex-shrink: 0;
 }
 
 .model-info-banner__main {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
+}
+
+.model-info-banner__heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .model-info-banner__name {
   font-family: var(--font-heading);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: #0F172A;
 }
 
+.model-info-banner__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #059669;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
 .model-info-banner__desc {
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   color: #64748B;
+  line-height: 1.4;
 }
 
 .model-info-banner__format-tag {
   display: inline-flex;
   align-items: center;
-  font-size: 0.8rem;
+  gap: 0.45rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: #EE6C1F;
+  color: #C2410C;
   background: rgba(238, 108, 31, 0.08);
-  border: 1px solid rgba(238, 108, 31, 0.2);
-  padding: 0.4rem 0.85rem;
+  border: 1px solid rgba(238, 108, 31, 0.25);
+  padding: 0.45rem 0.95rem;
   border-radius: 8px;
   font-family: var(--font-sans, inherit);
 }
 
-/* ── Lista de TGs Personalizada (Paso 2) ─────────────────────────────────── */
-.custom-tgs-wrapper {
-  margin-top: 0.85rem;
+/* ── Lista de TGs Personalizada (Paso 2 - Ancho Completo) ────────────────── */
+.custom-tgs-wrapper--fullwidth {
+  margin-top: 1.25rem;
+  width: 100%;
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.05);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
 }
 
 .custom-tgs-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.65rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
   border-bottom: 1px solid #F1F5F9;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 1rem;
+}
+
+.custom-tgs-header__left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.custom-tgs-header__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(238, 108, 31, 0.1);
+  color: #EE6C1F;
+  border: 1px solid rgba(238, 108, 31, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .custom-tgs-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
   color: #0F172A;
+  margin: 0;
+}
+
+.custom-tgs-subtitle {
+  font-size: 0.84rem;
+  color: #64748B;
+  margin: 0.2rem 0 0;
 }
 
 .custom-tgs-actions {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .btn-check-all {
   background: #F1F5F9;
   border: 1px solid #E2E8F0;
-  border-radius: 6px;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #475569;
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-check-all:hover {
@@ -330,78 +460,123 @@
   color: #0F172A;
 }
 
-.custom-tgs-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  max-height: 280px;
-  overflow-y: auto;
-  padding-right: 0.35rem;
+.btn-check-all--clear {
+  color: #64748B;
 }
 
-.custom-tg-item {
+.btn-check-all--clear:hover {
+  background: #FEE2E2;
+  border-color: #FCA5A5;
+  color: #DC2626;
+}
+
+.custom-tgs-counter-pill {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #E8261C 0%, #EE6C1F 100%);
+  padding: 0.45rem 0.95rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(238, 108, 31, 0.25);
+}
+
+/* Grid de Tarjetas a Ancho Completo */
+.custom-tgs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 0.95rem;
+}
+
+.custom-tg-card {
   display: flex;
   align-items: flex-start;
-  gap: 0.65rem;
-  padding: 0.55rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid #F1F5F9;
+  gap: 0.85rem;
+  padding: 0.95rem 1.1rem;
+  border-radius: 12px;
+  border: 1.5px solid #E2E8F0;
   background: #FAFAFA;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   user-select: none;
+  position: relative;
 }
 
-.custom-tg-item:hover {
-  background: #F1F5F9;
-  border-color: #E2E8F0;
+.custom-tg-card:hover {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+}
+
+.custom-tg-card.is-checked {
+  background: #FFF7ED;
+  border-color: #EE6C1F;
+  box-shadow: 0 4px 14px -3px rgba(238, 108, 31, 0.12);
 }
 
 .custom-tg-checkbox {
-  margin-top: 0.2rem;
+  margin-top: 0.25rem;
   accent-color: #EE6C1F;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-.custom-tg-item__text {
+.custom-tg-card__body {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
-.custom-tg-item__name {
+.custom-tg-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #0F172A;
+  gap: 0.5rem;
+  margin-bottom: 0.15rem;
 }
 
-.custom-tg-item__badge {
-  font-size: 0.7rem;
+.custom-tg-card__cat {
+  font-size: 0.72rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748B;
+}
+
+.custom-tg-card.is-checked .custom-tg-card__cat {
+  color: #C2410C;
+}
+
+.custom-tg-card__badge {
+  font-size: 0.72rem;
+  font-weight: 800;
   color: #EE6C1F;
   background: rgba(238, 108, 31, 0.1);
-  padding: 0.1rem 0.45rem;
+  padding: 0.15rem 0.55rem;
   border-radius: 999px;
+  border: 1px solid rgba(238, 108, 31, 0.2);
 }
 
-.custom-tg-item__desc {
-  font-size: 0.74rem;
-  color: #64748B;
-  margin-top: 0.1rem;
+.custom-tg-card__name {
+  font-family: var(--font-heading);
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0F172A;
   line-height: 1.35;
 }
 
-.custom-tgs-counter {
-  margin-top: 0.65rem;
-  padding-top: 0.55rem;
-  border-top: 1px solid #F1F5F9;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #EE6C1F;
-  text-align: right;
+.custom-tg-card.is-checked .custom-tg-card__name {
+  color: #9A3412;
+}
+
+.custom-tg-card__desc {
+  font-size: 0.8rem;
+  color: #64748B;
+  line-height: 1.4;
+  margin-top: 0.1rem;
 }
 
 /* ── Formulario de Selects Anidados (Paso 2) ─────────────────────────────── */
