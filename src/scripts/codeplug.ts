@@ -7,7 +7,7 @@
  * procesador, y los despliegues ya no cargan con megas de contactos.
  */
 
-export type Modelo = 'anytone' | 'opengd77' | 'tyt' | 'radioddity' | 'motorola' | 'universal';
+export type Modelo = 'anytone' | 'opengd77' | 'baofeng' | 'tyt' | 'radioddity' | 'motorola' | 'universal';
 export type Tipo = 'all' | 'talkgroups' | 'contacts';
 export type Alcance = 'venezuela' | 'latam' | 'global';
 
@@ -190,10 +190,18 @@ function anytoneContactos(contactos: Contacto[]) {
     ).join('');
 }
 
-function opengd77(tgs: Talkgroup[], contactos: Contacto[]) {
+/** OpenGD77: Lista de contactos/talkgroups para el Codeplug */
+function opengd77Talkgroups(tgs: Talkgroup[]) {
   return BOM + fila('Contact Name', 'ID', 'Type', 'Timeslot')
-    + tgs.map((t) => fila(t.name, t.tg, 'Group Call', `TS${t.slot}`)).join('')
-    + contactos.map((x) => fila(`${x.callsign} ${x.fname}`.trim(), x.id, 'Private Call', 'TS1')).join('');
+    + tgs.map((t) => fila(t.name, t.tg, 'Group Call', `TS${t.slot}`)).join('');
+}
+
+/** OpenGD77: Libreta de identificación para la memoria flash (DMR ID User Database) */
+function opengd77DmrIdDatabase(contactos: Contacto[]) {
+  return BOM + fila('Radio ID', 'Callsign', 'Name', 'City', 'State', 'Country')
+    + contactos.map((x) =>
+      fila(x.id, x.callsign, nombreCompleto(x) || x.callsign, x.city, x.state, x.country)
+    ).join('');
 }
 
 function tyt(tgs: Talkgroup[], contactos: Contacto[]) {
@@ -313,7 +321,7 @@ export function generarArchivo(modelo: Modelo, tipo: Tipo, alcance: Alcance, con
   if (modelo === 'anytone') {
     if (tipo === 'all') {
       const leeme = [
-        'BrandMeister Venezuela - Archivos CSV para AnyTone (D878 / D578)',
+        'BrandMeister Venezuela - Archivos CSV para AnyTone (D878 / D578 / BTECH / Alinco)',
         `Generado el: ${new Date().toLocaleString('es-VE')}`,
         '',
         'Instrucciones de importación:',
@@ -338,8 +346,46 @@ export function generarArchivo(modelo: Modelo, tipo: Tipo, alcance: Alcance, con
     return { nombre: `AnyTone_DigitalContactList_${alcance}_${fecha}.csv`, blob: csv(anytoneContactos(contactos)) };
   }
 
-  const formatos: Record<Exclude<Modelo, 'anytone'>, [string, (t: Talkgroup[], x: Contacto[]) => string]> = {
-    opengd77: [`OpenGD77_Contacts_BM_YV_${alcance}_${fecha}.csv`, opengd77],
+  if (modelo === 'opengd77' || modelo === 'baofeng') {
+    const radioName = modelo === 'baofeng' ? 'Baofeng DM-1701 / DM-1801 (OpenGD77)' : 'OpenGD77 / OpenUV380';
+    const filePrefix = modelo === 'baofeng' ? 'Baofeng_DM1701' : 'OpenGD77';
+    if (tipo === 'all') {
+      const leeme = [
+        `BrandMeister Venezuela - Archivos para ${radioName}`,
+        'Compatible con: Baofeng DM-1701, DM-1801, Retevis RT3S, TYT MD-UV380, MD-UV390, MD-9600, Radioddity GD-77',
+        `Generado el: ${new Date().toLocaleString('es-VE')}`,
+        '',
+        'INSTRUCCIONES DE IMPORTACIÓN EN OPENGD77 CPS:',
+        '1. Conecta tu radio por cable USB y abre el software OpenGD77 CPS.',
+        "2. IMPORTAR TALKGROUPS: En el árbol lateral ve a 'Contacts' -> clic en 'CSV Import' -> selecciona 'OpenGD77_Talkgroups.csv'.",
+        "3. IMPORTAR CONTACTOS (DMR ID): Ve al menú superior 'DMR ID' (o 'Radio ID Database') -> clic en 'Import CSV' -> selecciona 'OpenGD77_DMRID_Database.csv'.",
+        "4. TRANSFERIR A LA RADIO: Haz clic en 'Write Codeplug' para guardar los canales/talkgroups y luego en 'Write DMR ID' para cargar la libreta de indicativos en la memoria de pantalla.",
+        '',
+        '¡Listo! Al recibir transmisiones verás el indicativo, nombre y país del operador en la pantalla de tu radio.'
+      ].join(FIN);
+
+      return {
+        nombre: `${filePrefix}_Codeplug_BM_Venezuela_${alcance}_${fecha}.zip`,
+        blob: crearZip([
+          { nombre: 'OpenGD77_Talkgroups.csv', contenido: opengd77Talkgroups(TALKGROUPS) },
+          { nombre: 'OpenGD77_DMRID_Database.csv', contenido: opengd77DmrIdDatabase(contactos) },
+          { nombre: 'LEEME_OPENGD77.txt', contenido: leeme },
+        ]),
+      };
+    }
+    if (tipo === 'talkgroups') {
+      return {
+        nombre: `${filePrefix}_TalkGroups_BM_YV_${fecha}.csv`,
+        blob: csv(opengd77Talkgroups(TALKGROUPS))
+      };
+    }
+    return {
+      nombre: `${filePrefix}_DMRID_Database_${alcance}_${fecha}.csv`,
+      blob: csv(opengd77DmrIdDatabase(contactos))
+    };
+  }
+
+  const formatos: Record<'tyt' | 'radioddity' | 'motorola' | 'universal', [string, (t: Talkgroup[], x: Contacto[]) => string]> = {
     tyt: [`TYT_MD380_Contacts_BM_YV_${alcance}_${fecha}.csv`, tyt],
     radioddity: [`Radioddity_Contacts_BM_YV_${alcance}_${fecha}.csv`, radioddity],
     motorola: [`MOTOTRBO_Contacts_BM_YV_${alcance}_${fecha}.csv`, motorola],

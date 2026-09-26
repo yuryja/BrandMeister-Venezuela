@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import '../styles/generador-csv.css';
 
 const metaTitle = "Generador de CSV y Codeplugs DMR · BrandMeister Venezuela";
-const metaDescription = "Genera y descarga archivos CSV formateados para programar tu radio DMR (AnyTone, OpenGD77, TYT, Radioddity, Motorola). Incluye Talkgroups oficiales de Venezuela y base de contactos de RadioID.";
+const metaDescription = "Genera y descarga archivos CSV formateados para programar tu radio DMR (Baofeng DM-32UV, DM-1701, OpenGD77, Retevis RT3S, AnyTone, TYT, Motorola). Incluye Talkgroups oficiales de Venezuela y base de contactos de RadioID.";
 ---
 
 <Layout
@@ -37,7 +37,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
             Exporta al instante los Talkgroups oficiales de Venezuela (Plan 734) y la libreta de contactos digitales de RadioID en el formato exacto que exige el CPS de tu modelo de radio.
           </p>
           <div class="codeplug-hero__meta">
-            <span>AnyTone · OpenGD77 · TYT · Motorola</span>
+            <span>Baofeng DM-32UV · DM-1701 · OpenGD77 · Retevis RT3S · AnyTone · TYT · Motorola</span>
             <i class="codeplug-hero__dot" aria-hidden="true"></i>
             <span>Formato Nativo CPS</span>
             <i class="codeplug-hero__dot" aria-hidden="true"></i>
@@ -70,23 +70,35 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
               <div class="radio-card active" data-model="anytone">
                 <div class="radio-card__head">
                   <span class="badge-tag-category">CPS</span>
-                  <span class="radio-card-meta">ANYTONE</span>
+                  <span class="radio-card-meta">ANYTONE / BTECH</span>
                 </div>
-                <div class="radio-card__name">AnyTone</div>
-                <div class="radio-card__models">AT-D878UV, D878UVII, AT-D578UV, D868</div>
+                <div class="radio-card__name">AnyTone & BTECH / Alinco</div>
+                <div class="radio-card__models">AT-D878UV (I/II Plus), AT-D578UV, BTECH DMR-6X2, Alinco DJ-MD5</div>
                 <div class="radio-card__format">TalkGroups.csv / DigitalContactList.csv</div>
                 <div class="radio-card__bar"></div>
               </div>
 
-              <!-- OpenGD77 -->
+              <!-- OpenGD77 Firmware Libre General -->
               <div class="radio-card" data-model="opengd77">
                 <div class="radio-card__head">
-                  <span class="badge-tag-category">OPEN</span>
-                  <span class="radio-card-meta">OPENGD77</span>
+                  <span class="badge-tag-category" style="background: rgba(16, 185, 129, 0.12); color: #059669; border-color: rgba(16, 185, 129, 0.25);">FIRMWARE LIBRE</span>
+                  <span class="radio-card-meta">OPENGD77 / OPENUV380</span>
                 </div>
                 <div class="radio-card__name">OpenGD77 / OpenUV380</div>
-                <div class="radio-card__models">Radioddity GD-77, Baofeng DM-1801, RD-5R, TYT UV380</div>
-                <div class="radio-card__format">Contacts.csv (Group Call + TS)</div>
+                <div class="radio-card__models">Baofeng DM-32UV, DM-1701, DM-1801, Retevis RT3S, TYT MD-UV380/390, MD-9600, GD-77</div>
+                <div class="radio-card__format">Pack ZIP: Talkgroups (Contacts) + DMR ID User DB</div>
+                <div class="radio-card__bar"></div>
+              </div>
+
+              <!-- Baofeng DM-32UV / DM-1701 / DM-1801 Dedicado -->
+              <div class="radio-card" data-model="baofeng">
+                <div class="radio-card__head">
+                  <span class="badge-tag-category" style="background: rgba(238, 108, 31, 0.12); color: #EE6C1F; border-color: rgba(238, 108, 31, 0.25);">DE MODA</span>
+                  <span class="radio-card-meta">BAOFENG DMR</span>
+                </div>
+                <div class="radio-card__name">Baofeng DM-32UV / DM-1701</div>
+                <div class="radio-card__models">Baofeng DM-32UV, DM-32, DM-1701, DM-1801, RD-5R (OpenGD77 / CPS)</div>
+                <div class="radio-card__format">Pack ZIP: Contacts.csv + DMR ID Database</div>
                 <div class="radio-card__bar"></div>
               </div>
 
@@ -96,8 +108,8 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
                   <span class="badge-tag-category">CPS</span>
                   <span class="radio-card-meta">TYT / RETEVIS</span>
                 </div>
-                <div class="radio-card__name">TYT / Retevis</div>
-                <div class="radio-card__models">MD-380, MD-390, MD-9600, RT3, RT3S, RT82</div>
+                <div class="radio-card__name">TYT & Retevis (CPS Stock)</div>
+                <div class="radio-card__models">Retevis RT3S, RT3, RT82, RT84, TYT MD-UV380, MD-UV390, MD-9600, MD-380</div>
                 <div class="radio-card__format">Contact.csv (Call Name / 16 chars)</div>
                 <div class="radio-card__bar"></div>
               </div>
@@ -289,17 +301,16 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
               </ul>
             </div>
 
-            <!-- OpenGD77 -->
+            <!-- OpenGD77 / Baofeng DM-32UV / DM-1701 / Retevis RT3S -->
             <div class="guide-card">
               <div class="guide-card__header">
-                <h3 class="guide-card__title">OpenGD77 / OpenUV380</h3>
+                <h3 class="guide-card__title">OpenGD77 (DM-32UV / DM-1701 / RT3S / UV380)</h3>
               </div>
               <ul class="guide-card__steps">
-                <li>Inicia la aplicación <strong>OpenGD77 CPS</strong>.</li>
-                <li>Dirígete a la pestaña <strong>Contacts</strong> en el árbol de navegación.</li>
-                <li>Presiona <strong>CSV Import</strong> y selecciona el archivo <code>OpenGD77_Contacts.csv</code>.</li>
-                <li>Revisa que los Talkgroups tengan asignados sus ranuras (TS1 / TS2).</li>
-                <li>Presiona <strong>Write Codeplug</strong> para actualizar tu radio.</li>
+                <li>Conecta tu radio por USB y abre <strong>OpenGD77 CPS</strong>.</li>
+                <li><strong>Cargar Talkgroups:</strong> En el árbol lateral ve a <strong>Contacts</strong>, presiona <strong>CSV Import</strong> y selecciona <code>OpenGD77_Talkgroups.csv</code>.</li>
+                <li><strong>Cargar Libreta de Indicativos (DMR ID):</strong> Ve al menú superior <strong>DMR ID</strong> (o Radio ID Database), presiona <strong>Import CSV</strong> y selecciona <code>OpenGD77_DMRID_Database.csv</code>.</li>
+                <li><strong>Escribir al radio:</strong> Haz clic en <strong>Write Codeplug</strong> (canales) y luego en <strong>Write DMR ID</strong> (pantalla).</li>
               </ul>
             </div>
 
@@ -371,9 +382,10 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
 
   // Nombres descriptivos para la tarjeta de resumen
   const modelNames: Record<string, string> = {
-    anytone: 'AnyTone (D878 / D578)',
+    anytone: 'AnyTone (D878 / D578 / BTECH)',
     opengd77: 'OpenGD77 / OpenUV380',
-    tyt: 'TYT / Retevis (MD-380 / 9600)',
+    baofeng: 'Baofeng (DM-32UV / DM-1701 / DM-1801)',
+    tyt: 'TYT / Retevis (MD-380 / UV380 / RT3S)',
     radioddity: 'Radioddity CPS',
     motorola: 'Motorola MOTOTRBO',
     universal: 'Universal / Excel'
@@ -403,13 +415,23 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
       ]
     },
     opengd77: {
-      headers: ['Contact Name', 'ID', 'Type', 'Timeslot'],
+      headers: ['Contact Name (Talkgroups)', 'ID', 'Type', 'Timeslot'],
       rows: [
         ['TG 734 Venezuela', '734', 'Group Call', 'TS1'],
         ['TG 73411 Red Vzla', '73411', 'Group Call', 'TS2'],
         ['TG 73452 YVRNE', '73452', 'Group Call', 'TS2'],
-        ['YV5VE William', '7341003', 'Private Call', 'TS1'],
-        ['YV5OF Sysop', '734001', 'Private Call', 'TS1']
+        ['TG 91 Worldwide', '91', 'Group Call', 'TS1'],
+        ['TG 913 America Latina', '913', 'Group Call', 'TS1']
+      ]
+    },
+    baofeng: {
+      headers: ['Contact Name (OpenGD77)', 'ID', 'Type', 'Timeslot'],
+      rows: [
+        ['TG 734 Venezuela', '734', 'Group Call', 'TS1'],
+        ['TG 73411 Red Vzla', '73411', 'Group Call', 'TS2'],
+        ['TG 73452 YVRNE', '73452', 'Group Call', 'TS2'],
+        ['TG 7340 Tactico 1', '7340', 'Group Call', 'TS2'],
+        ['TG 91 Worldwide', '91', 'Group Call', 'TS1']
       ]
     },
     tyt: {
@@ -461,7 +483,18 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     }
     if (summaryDesc) {
       const scopeText = scopeNames[currentScope] || 'Venezuela';
-      let desc = `Generará archivo adaptado para ${modelNames[currentModel]} con alcance: ${scopeText}.`;
+      let desc = '';
+      if (currentType === 'all') {
+        if (currentModel === 'anytone') {
+          desc = `Generará archivo ZIP con TalkGroups.csv y DigitalContactList.csv listos para AnyTone / BTECH / Alinco (${scopeText}).`;
+        } else if (currentModel === 'opengd77' || currentModel === 'baofeng') {
+          desc = `Generará archivo ZIP con OpenGD77_Talkgroups.csv (Contacts) y OpenGD77_DMRID_Database.csv (pantalla) para ${modelNames[currentModel]} (${scopeText}).`;
+        } else {
+          desc = `Generará archivo CSV completo adaptado para ${modelNames[currentModel]} con alcance: ${scopeText}.`;
+        }
+      } else {
+        desc = `Generará archivo CSV adaptado para ${modelNames[currentModel]} con alcance: ${scopeText}.`;
+      }
       const info = manifest?.alcances[currentScope as Alcance];
       if (info && currentType !== 'talkgroups') {
         desc += ` Se descargarán ${numero(info.registros)} contactos (${megas(info.bytes)}) directamente en tu dispositivo.`;
