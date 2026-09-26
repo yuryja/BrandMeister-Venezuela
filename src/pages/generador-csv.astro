@@ -336,46 +336,18 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
           <h2 class="guide-section-title">Instrucciones de Importación en el CPS</h2>
           <p class="guide-section-desc">Sigue estos sencillos pasos para cargar los archivos descargados directamente en la memoria de tu radio.</p>
 
-          <div class="guide-cards-grid">
-            <!-- AnyTone -->
-            <div class="guide-card">
-              <div class="guide-card__header">
-                <h3 class="guide-card__title">AnyTone (D878 / D578)</h3>
+          <!-- Tarjeta de Instrucciones Completamente Horizontal (Depende del Modelo en Paso 1) -->
+          <div class="guide-card-horizontal" id="guide-card-horizontal">
+            <div class="guide-card-horizontal__header">
+              <div class="guide-card-horizontal__meta">
+                <span class="guide-card-horizontal__badge" id="guide-model-badge">AnyTone CPS Oficial</span>
+                <h3 class="guide-card-horizontal__title" id="guide-model-title">AnyTone & BTECH / Alinco (AT-D878UV, AT-D578UV, DMR-6X2, DJ-MD5)</h3>
+                <p class="guide-card-horizontal__desc" id="guide-model-desc">Pasos de importación directa en AnyTone CPS:</p>
               </div>
-              <ul class="guide-card__steps">
-                <li>Abre el software <strong>AnyTone CPS</strong> y conecta tu equipo.</li>
-                <li>Ve al menú superior <strong>Tool → Import</strong>.</li>
-                <li>Selecciona <strong>TalkGroups</strong> e importa <code>TalkGroups.csv</code>.</li>
-                <li>Selecciona <strong>Digital Contact List</strong> e importa <code>DigitalContactList.csv</code>.</li>
-                <li>Haz clic en <strong>Write to Radio</strong> para transferir la programación.</li>
-              </ul>
             </div>
 
-            <!-- OpenGD77 / Baofeng DM-32UV / DM-1701 / Retevis RT3S -->
-            <div class="guide-card">
-              <div class="guide-card__header">
-                <h3 class="guide-card__title">OpenGD77 (DM-32UV / DM-1701 / RT3S / UV380)</h3>
-              </div>
-              <ul class="guide-card__steps">
-                <li>Conecta tu radio por USB y abre <strong>OpenGD77 CPS</strong>.</li>
-                <li><strong>Cargar Talkgroups:</strong> En el árbol lateral ve a <strong>Contacts</strong>, presiona <strong>CSV Import</strong> y selecciona <code>OpenGD77_Talkgroups.csv</code>.</li>
-                <li><strong>Cargar Libreta de Indicativos (DMR ID):</strong> Ve al menú superior <strong>DMR ID</strong> (o Radio ID Database), presiona <strong>Import CSV</strong> y selecciona <code>OpenGD77_DMRID_Database.csv</code>.</li>
-                <li><strong>Escribir al radio:</strong> Haz clic en <strong>Write Codeplug</strong> (canales) y luego en <strong>Write DMR ID</strong> (pantalla).</li>
-              </ul>
-            </div>
-
-            <!-- TYT MD-380 / Retevis -->
-            <div class="guide-card">
-              <div class="guide-card__header">
-                <h3 class="guide-card__title">TYT / Retevis (MD-380 / RT3)</h3>
-              </div>
-              <ul class="guide-card__steps">
-                <li>Abre el <strong>CPS oficial de TYT o Retevis</strong>.</li>
-                <li>Selecciona <strong>Contacts → Digital Contacts</strong>.</li>
-                <li>Usa la opción de importación masiva CSV y elige <code>TYT_MD380_Contacts.csv</code>.</li>
-                <li>Guarda una copia de seguridad (<code>.rdx</code>) de tu codeplug original.</li>
-                <li>Transfiere la nueva libreta a tu radio con <strong>Write Data</strong>.</li>
-              </ul>
+            <div class="guide-steps-horizontal" id="guide-steps-container">
+              <!-- Se renderizan dinámicamente según el modelo seleccionado -->
             </div>
           </div>
 
@@ -454,6 +426,124 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     }
   };
 
+  interface GuideData {
+    badge: string;
+    title: string;
+    desc: string;
+    steps: { title: string; text: string }[];
+  }
+
+  const guideData: Record<Modelo, GuideData> = {
+    anytone: {
+      badge: 'AnyTone CPS Oficial',
+      title: 'AnyTone & BTECH / Alinco (AT-D878UV, AT-D578UV, DMR-6X2, DJ-MD5)',
+      desc: 'Secuencia de importación oficial en AnyTone CPS:',
+      steps: [
+        { title: 'Conectar Radio', text: 'Conecta tu equipo con su cable USB y ejecuta el software <strong>AnyTone CPS</strong>.' },
+        { title: 'Menú Import', text: 'En la barra superior de herramientas dirígete a <strong>Tool → Import</strong>.' },
+        { title: 'Cargar Talkgroups', text: 'Selecciona <strong>TalkGroups</strong> y carga el archivo <code>TalkGroups.csv</code>.' },
+        { title: 'Cargar Contactos', text: 'Selecciona <strong>Digital Contact List</strong> y carga <code>DigitalContactList.csv</code>.' },
+        { title: 'Escribir al Radio', text: 'Haz clic en <strong>Write to Radio</strong> para transferir la programación completa.' }
+      ]
+    },
+    opengd77: {
+      badge: 'OpenGD77 CPS',
+      title: 'OpenGD77 / OpenUV380 (Firmware Comunitario)',
+      desc: 'Secuencia para Baofeng DM-32UV, DM-1701, RT3S, TYT MD-UV380/390 y GD-77 con OpenGD77:',
+      steps: [
+        { title: 'Abrir OpenGD77', text: 'Conecta tu equipo por USB y abre el programa <strong>OpenGD77 CPS</strong>.' },
+        { title: 'Cargar Talkgroups', text: 'En el árbol lateral ve a <strong>Contacts</strong>, pulsa <strong>CSV Import</strong> y carga <code>OpenGD77_Talkgroups.csv</code>.' },
+        { title: 'Cargar Indicativos', text: 'Ve a <strong>DMR ID</strong> en la barra superior, pulsa <strong>Import CSV</strong> y elige <code>OpenGD77_DMRID_Database.csv</code>.' },
+        { title: 'Escribir Canales', text: 'Pulsa <strong>Write Codeplug</strong> en la barra de herramientas para enviar canales y Talkgroups.' },
+        { title: 'Escribir DMR ID', text: 'Pulsa <strong>Write DMR ID</strong> para guardar la libreta en la memoria flash del radio.' }
+      ]
+    },
+    baofeng: {
+      badge: 'Baofeng CPS Oficial',
+      title: 'Baofeng (CPS Oficial de Fábrica)',
+      desc: 'Secuencia para software original Baofeng (DM-32UV, DM-1701, DM-1801, RD-5R de fábrica):',
+      steps: [
+        { title: 'Conectar Cable', text: 'Conecta el cable de programación USB y abre el <strong>CPS oficial de Baofeng</strong>.' },
+        { title: 'Leer Equipo', text: 'Haz primero un <strong>Read from Radio</strong> para sincronizar la versión de tu codeplug.' },
+        { title: 'Importar Contactos', text: 'En la pestaña <strong>Digital Contact</strong>, presiona <strong>Import</strong> y carga <code>Contacts.csv</code>.' },
+        { title: 'Asignar Zonas', text: 'Asigna los canales o Talkgroups importados a tus zonas de canales deseadas.' },
+        { title: 'Escribir a Radio', text: 'Haz clic en <strong>Write to Radio</strong> para grabar los contactos en el equipo.' }
+      ]
+    },
+    tyt: {
+      badge: 'TYT & Retevis CPS',
+      title: 'TYT & Retevis CPS Oficial (RT3S, RT3, RT82, MD-UV380, MD-9600, MD-380)',
+      desc: 'Secuencia para el software oficial de fábrica de TYT y Retevis:',
+      steps: [
+        { title: 'Abrir Software', text: 'Abre el software <strong>CPS oficial de TYT o Retevis</strong> correspondiente a tu modelo.' },
+        { title: 'Digital Contacts', text: 'En el menú del árbol lateral dirígete a <strong>Contacts → Digital Contacts</strong>.' },
+        { title: 'Importar CSV', text: 'Presiona el botón <strong>Import</strong> y selecciona el archivo <code>Contact.csv</code> generado.' },
+        { title: 'Respaldar', text: 'Guarda una copia de seguridad (archivo <code>.rdx</code>) de tu codeplug activo.' },
+        { title: 'Escribir Data', text: 'Presiona el botón <strong>Write Data</strong> para cargar la libreta en la memoria del radio.' }
+      ]
+    },
+    radioddity: {
+      badge: 'Radioddity CPS',
+      title: 'Radioddity CPS (GD-77 fábrica, DB25-D)',
+      desc: 'Secuencia de importación para el CPS de fábrica original de Radioddity:',
+      steps: [
+        { title: 'Conectar Equipo', text: 'Conecta tu radio por USB y abre el software <strong>Radioddity CPS</strong>.' },
+        { title: 'Leer Codeplug', text: 'Realiza una lectura preliminar con <strong>Read</strong> para validar los bloques de memoria.' },
+        { title: 'Importar Contactos', text: 'En la sección <strong>Digital Contact</strong>, presiona <strong>Import</strong> y carga <code>DigitalContacts.csv</code>.' },
+        { title: 'Verificar Canales', text: 'Confirma que los Talkgroups importados aparezcan listados en tus listas de contactos.' },
+        { title: 'Escribir a Radio', text: 'Presiona <strong>Write</strong> para transferir la libreta de contactos a tu equipo.' }
+      ]
+    },
+    motorola: {
+      badge: 'Motorola MOTOTRBO',
+      title: 'Motorola MOTOTRBO CPS (Serie DGP, DGM, DP, Serie XPR)',
+      desc: 'Secuencia para el entorno profesional MOTOTRBO CPS:',
+      steps: [
+        { title: 'Abrir MOTOTRBO CPS', text: 'Ejecuta <strong>MOTOTRBO CPS</strong> (o CPS 2.0) y conecta tu radio al cable de programación.' },
+        { title: 'Leer Radio', text: 'Lee la configuración de tu equipo presionando el botón <strong>Read</strong>.' },
+        { title: 'Importar Contactos', text: 'En la sección <strong>Contacts → Digital</strong>, haz clic derecho y selecciona <strong>Import</strong>.' },
+        { title: 'Listas de Grupo', text: 'Asocia los Talkgroups a tus <strong>Rx Group Lists</strong> y canales en cada zona.' },
+        { title: 'Escribir al Radio', text: 'Presiona <strong>Write</strong> para programar los cambios en el transceptor.' }
+      ]
+    },
+    universal: {
+      badge: 'Universal / Planillas',
+      title: 'Universal / Planillas de Cálculo (Excel, Chirp, Calc)',
+      desc: 'Secuencia para consultar o adaptar datos a cualquier otro software:',
+      steps: [
+        { title: 'Descomprimir', text: 'Descomprime el archivo <code>.zip</code> o abre el archivo <code>.csv</code> directamente.' },
+        { title: 'Abrir en Planilla', text: 'Ábrelo en <strong>Microsoft Excel, Google Sheets, LibreOffice</strong> o <strong>Chirp</strong>.' },
+        { title: 'Revisar Columnas', text: 'Verifica las columnas de frecuencia, ranura (slot), código de color y Talkgroups.' },
+        { title: 'Copiar a Plantilla', text: 'Copia y pega los registros hacia la plantilla específica requerida por tu CPS.' },
+        { title: 'Guardar Respaldo', text: 'Guarda siempre un respaldo en tu computadora antes de escribir en tu equipo.' }
+      ]
+    }
+  };
+
+  function updateGuide(model: Modelo) {
+    const guide = guideData[model] || guideData.anytone;
+    const guideBadge = document.getElementById('guide-model-badge');
+    const guideTitle = document.getElementById('guide-model-title');
+    const guideDesc = document.getElementById('guide-model-desc');
+    const guideSteps = document.getElementById('guide-steps-container');
+
+    if (guideBadge) guideBadge.textContent = guide.badge;
+    if (guideTitle) guideTitle.textContent = guide.title;
+    if (guideDesc) guideDesc.textContent = guide.desc;
+
+    if (guideSteps) {
+      guideSteps.innerHTML = guide.steps.map((st, i) => `
+        <div class="guide-step-card">
+          <div class="guide-step-header">
+            <span class="guide-step-number">${i + 1}</span>
+            <span class="guide-step-title">${st.title}</span>
+          </div>
+          <p class="guide-step-text">${st.text}</p>
+        </div>
+      `).join('');
+    }
+  }
+
   const scopeNames: Record<string, string> = {
     venezuela: 'Venezuela (MCC 734)',
     latam: 'Iberoamérica / Latam',
@@ -522,6 +612,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     if (modelBoxTitle) modelBoxTitle.textContent = meta.title;
     if (modelBoxDesc) modelBoxDesc.textContent = meta.desc;
     if (modelBoxFormat) modelBoxFormat.textContent = meta.format;
+    updateGuide(currentModel);
     updateState();
   });
 
@@ -904,6 +995,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
       /* Sin índice se puede seguir */
     });
 
-  // Inicializar estado
+  // Inicializar estado y guía
   updateState();
+  updateGuide(currentModel);
 </script>

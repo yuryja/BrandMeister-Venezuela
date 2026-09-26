@@ -1038,57 +1038,144 @@
   margin: 0 auto 2.5rem;
 }
 
-.guide-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.guide-card {
+/* ── Tarjeta de Guía Completamente Horizontal (Depende del Modelo) ────────── */
+.guide-card-horizontal {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
-  border-radius: 14px;
-  padding: 1.75rem;
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+  margin-top: 1.5rem;
+  transition: all 0.25s ease;
+}
+
+.guide-card-horizontal__header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.15rem;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.guide-card-horizontal__meta {
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  gap: 0.35rem;
 }
 
-.guide-card__header {
-  margin-bottom: 1rem;
+.guide-card-horizontal__badge {
+  align-self: flex-start;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #C2410C;
+  background: rgba(238, 108, 31, 0.1);
+  border: 1px solid rgba(238, 108, 31, 0.25);
+  padding: 0.2rem 0.65rem;
+  border-radius: 6px;
 }
 
-.guide-card__title {
+.guide-card-horizontal__title {
   font-family: var(--font-heading);
-  font-size: 1.15rem;
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
   font-weight: 800;
   color: #0F172A;
   margin: 0;
+  line-height: 1.3;
 }
 
-.guide-card__steps {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.guide-card-horizontal__desc {
+  font-size: 0.88rem;
+  color: #64748B;
+  margin: 0.15rem 0 0;
+}
+
+.guide-steps-horizontal {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 1080px) {
+  .guide-steps-horizontal {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .guide-steps-horizontal {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guide-step-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 1.15rem;
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-  font-size: 0.88rem;
-  color: #64748B;
-  line-height: 1.55;
-}
-
-.guide-card__steps li {
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   position: relative;
-  padding-left: 1.4rem;
 }
 
-.guide-card__steps li::before {
-  content: "→";
-  position: absolute;
-  left: 0;
-  color: #E8261C;
+.guide-step-card:hover {
+  transform: translateY(-2px);
+  border-color: #CBD5E1;
+  background: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.guide-step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.guide-step-number {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #E8261C 0%, #EE6C1F 100%);
+  color: #FFFFFF;
   font-weight: 800;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(238, 108, 31, 0.3);
+}
+
+.guide-step-title {
+  font-family: var(--font-heading);
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0F172A;
+  line-height: 1.3;
+}
+
+.guide-step-text {
+  font-size: 0.81rem;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.guide-step-text strong {
+  color: #1E293B;
+  font-weight: 700;
+}
+
+.guide-step-text code {
+  background: #EEF2F6;
+  color: #C2410C;
+  font-weight: 700;
+  padding: 0.12rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.85em;
+  border: 1px solid rgba(238, 108, 31, 0.15);
+  word-break: break-all;
 }
 
 /* Alerta especial sobre marcas y protocolos */
