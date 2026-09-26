@@ -207,12 +207,12 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
 
               <div class="custom-tgs-grid" id="custom-tgs-list">
                 {OPCIONES_PERSONALIZADAS.map(opc => (
-                  <label class={`custom-tg-card ${(opc.categoria === 'Venezuela' || opc.categoria.includes('Circuitos')) ? 'is-checked' : ''}`}>
+                  <label class={`custom-tg-card ${opc.id === 'venezuela_todos' ? 'is-checked' : ''}`}>
                     <input
                       type="checkbox"
                       class="custom-tg-checkbox"
                       value={opc.id}
-                      checked={opc.categoria === 'Venezuela' || opc.categoria.includes('Circuitos')}
+                      checked={opc.id === 'venezuela_todos'}
                     />
                     <div class="custom-tg-card__body">
                       <div class="custom-tg-card__top">
@@ -465,9 +465,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
   let currentType: Tipo = 'all';
   let currentScope: Alcance = 'venezuela';
   let currentTgMode: TgOptionMode = 'oficiales';
-  let currentCustomIds: string[] = OPCIONES_PERSONALIZADAS
-    .filter(o => o.categoria === 'Venezuela' || o.categoria.includes('Circuitos'))
-    .map(o => o.id);
+  let currentCustomIds: string[] = ['venezuela_todos'];
   let manifest: Manifest | null = null;
 
   // Elementos DOM: Paso 1 (Select Grueso)
@@ -594,9 +592,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
   });
 
   btnTgSelectVzla?.addEventListener('click', () => {
-    currentCustomIds = OPCIONES_PERSONALIZADAS
-      .filter(o => o.categoria === 'Venezuela' || o.categoria.includes('Circuitos'))
-      .map(o => o.id);
+    currentCustomIds = ['venezuela_todos'];
     syncCheckboxes();
     updateState();
   });
@@ -628,7 +624,7 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     }
 
     if (customTgsCounter) {
-      customTgsCounter.textContent = `Total seleccionados: ${selectedTgs.length} TGs`;
+      customTgsCounter.textContent = `Total: ${selectedTgs.length} TG${selectedTgs.length === 1 ? '' : 's'}`;
     }
 
     if (scopeHint && manifest) {
@@ -796,13 +792,17 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
     });
     html += '</tr></thead><tbody>';
 
-    rows.forEach(r => {
-      html += '<tr>';
-      r.forEach(col => {
-        html += `<td>${col}</td>`;
+    if (rows.length === 0) {
+      html += `<tr><td colspan="${headers.length}" style="text-align: center; padding: 2.5rem 1rem; color: #64748B; font-weight: 500;">No hay canales Talkgroups seleccionados en este momento. Marca al menos una opción en el Paso 2.</td></tr>`;
+    } else {
+      rows.forEach(r => {
+        html += '<tr>';
+        r.forEach(col => {
+          html += `<td>${col}</td>`;
+        });
+        html += '</tr>';
       });
-      html += '</tr>';
-    });
+    }
     html += '</tbody>';
 
     previewTable.innerHTML = html;
@@ -836,6 +836,13 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
 
     try {
       const selectedTgs = getActiveTalkgroups();
+      if (currentType !== 'contacts' && selectedTgs.length === 0) {
+        mostrarProgreso(100, 'Debes seleccionar al menos un canal o paquete de Talkgroups.', true);
+        generando = false;
+        downloadBtn.disabled = false;
+        if (etiqueta) etiqueta.textContent = textoOriginal;
+        return;
+      }
       let contactos: Awaited<ReturnType<typeof cargarContactos>> = [];
       if (currentType !== 'talkgroups') {
         mostrarProgreso(0, 'Conectando con el directorio de RadioID…');

@@ -81,6 +81,8 @@ export const TALKGROUPS: Talkgroup[] = [
   { tg: '330', name: 'TG 330 Puerto Rico', slot: '1', city: 'San Juan', state: 'Puerto Rico', country: 'Puerto Rico', notes: 'Red DMR Puerto Rico' },
   { tg: '382', name: 'TG 382 Costa Rica Nacional', slot: '1', city: 'San José', state: 'Costa Rica', country: 'Costa Rica', notes: 'Red DMR Costa Rica' },
   { tg: '3100', name: 'TG 3100 USA Nationwide', slot: '1', city: 'Nationwide', state: 'USA', country: 'Estados Unidos', notes: 'USA Bridge BrandMeister' },
+  { tg: '302', name: 'TG 302 Canada Nationwide', slot: '1', city: 'Ottawa', state: 'Canadá', country: 'Canadá', notes: 'Red BrandMeister Canadá' },
+  { tg: '374', name: 'TG 374 Panama Nacional', slot: '1', city: 'Ciudad de Panamá', state: 'Panamá', country: 'Panamá', notes: 'Red DMR Panamá' },
   { tg: '268', name: 'TG 268 Portugal Nacional', slot: '1', city: 'Lisboa', state: 'Portugal', country: 'Portugal', notes: 'Rede DMR Portugal' },
   { tg: '222', name: 'TG 222 Italia Nazionale', slot: '1', city: 'Roma', state: 'Italia', country: 'Italia', notes: 'Rete DMR Italia' },
   { tg: '9', name: 'TG 9 Local Reflector Slot 2', slot: '2', city: 'Local', state: 'Local', country: 'Local', notes: 'Tráfico Local en Ranura 2' },
@@ -98,95 +100,32 @@ export interface OpcionPersonalizadaTG {
 
 export const OPCIONES_PERSONALIZADAS: OpcionPersonalizadaTG[] = [
   {
-    id: 'nacionales',
+    id: 'venezuela_todos',
     categoria: 'Venezuela',
-    nombre: 'Canales Troncales Nacionales y Tácticos',
-    tgs: ['734', '7340', '73411', '73452', '73473', '73499'],
-    descripcion: 'TG 734, desborde 7340, ruedas 73411, boletines 73452, RCV 73473 y eventos 73499.',
+    nombre: 'Venezuela (Todos los canales y circuitos)',
+    tgs: ['734', '7340', '73411', '73452', '73473', '73499', '734911', '7341', '7342', '7343', '7344', '7345', '7346', '7347', '7348', '7349'],
+    descripcion: 'Troncales nacionales (734, desborde, ruedas, boletines, tácticos, EMCOM 734911) y los 9 Circuitos Regionales (C1 a C9).',
   },
   {
-    id: 'emcom',
-    categoria: 'Venezuela',
-    nombre: 'Red de Emergencia EMCOM YV5RNE',
-    tgs: ['734911'],
-    descripcion: 'Canal prioritario nacional de emergencia y contingencias.',
+    id: 'america',
+    categoria: 'Continental',
+    nombre: 'América (Completa)',
+    tgs: ['913', '3100', '302', '724', '334', '732', '730', '722', '716', '740', '748', '744', '736', '370', '330', '382', '374'],
+    descripcion: 'Toda América: Norte (USA 3100, Canadá 302), Brasil (724), Centroamérica, el Caribe y Sudamérica completa.',
   },
   {
-    id: 'c1_occidente',
-    categoria: 'Circuitos Regionales YV',
-    nombre: 'Circuito 1: Occidente (TG 7341)',
-    tgs: ['7341'],
-    descripcion: 'Zulia, Falcón, Trujillo.',
-  },
-  {
-    id: 'c2_andes',
-    categoria: 'Circuitos Regionales YV',
-    nombre: 'Circuito 2: Los Andes (TG 7342)',
-    tgs: ['7342'],
-    descripcion: 'Táchira, Mérida, Barinas.',
-  },
-  {
-    id: 'c3_centroccidente',
-    categoria: 'Circuitos Regionales YV',
-    nombre: 'Circuito 3: Centroccidente (TG 7343)',
-    tgs: ['7343'],
-    descripcion: 'Lara, Portuguesa, Yaracuy.',
-  },
-  {
-    id: 'c4_central',
-    categoria: 'Circuitos Regionales YV',
-    nombre: 'Circuito 4: Región Central (TG 7344)',
-    tgs: ['7344'],
-    descripcion: 'Carabobo, Aragua, Cojedes.',
-  },
-  {
-    id: 'c5_capital',
-    categoria: 'Circuitos Regionales YV',
-    nombre: 'Circuito 5: Capital, Litoral y Llanos (TG 7345)',
-    tgs: ['7345'],
-    descripcion: 'Caracas, Miranda, La Guaira, Guárico.',
-  },
-  {
-    id: 'c6_oriente_sur',
-    categoria: 'Circuitos Regionales YV',
-    nombre: 'Circuito 6: Oriente Sur y Guayana (TG 7346)',
-    tgs: ['7346'],
-    descripcion: 'Anzoátegui, Bolívar.',
-  },
-  {
-    id: 'c7_insular',
-    categoria: 'Circuitos Regionales YV',
-    nombre: 'Circuito 7: Oriente Norte e Insular (TG 7347)',
-    tgs: ['7347'],
-    descripcion: 'Nueva Esparta, Sucre.',
-  },
-  {
-    id: 'c8_deltaico',
-    categoria: 'Circuitos Regionales YV',
-    nombre: 'Circuito 8: Oriente Deltaico (TG 7348)',
-    tgs: ['7348'],
-    descripcion: 'Monagas, Delta Amacuro.',
-  },
-  {
-    id: 'c9_amazonia',
-    categoria: 'Circuitos Regionales YV',
-    nombre: 'Circuito 9: Llanos del Sur y Amazonía (TG 7349)',
-    tgs: ['7349'],
-    descripcion: 'Apure, Amazonas.',
-  },
-  {
-    id: 'iberoamerica',
+    id: 'hispanoamerica',
     categoria: 'Internacional',
-    nombre: 'América Latina y Conexiones en Español',
-    tgs: ['913', '214', '334', '732', '730', '722', '716', '740', '748', '744', '736', '370', '330', '382'],
-    descripcion: 'Latam 913, España, México, Colombia, Chile, Argentina, Perú, etc.',
+    nombre: 'Hispanoamérica',
+    tgs: ['913', '214', '334', '732', '730', '722', '716', '740', '748', '744', '736', '370', '330', '382', '374'],
+    descripcion: 'Canales oficiales de habla hispana: España (214), México (334), Colombia (732), Chile (730), Argentina (722), Latam (913), etc.',
   },
   {
     id: 'mundial',
-    categoria: 'Internacional',
+    categoria: 'Global',
     nombre: 'Mundial Global y Enlaces Especiales',
-    tgs: ['91', '3100', '268', '222', '9'],
-    descripcion: 'TG 91 Worldwide, USA 3100, Portugal, Italia y Reflector Local 9.',
+    tgs: ['91', '268', '222', '9'],
+    descripcion: 'TG 91 Worldwide (Mundial), Portugal (268), Italia (222) y Reflector Local Ranura 2 (TG 9).',
   },
 ];
 
@@ -199,11 +138,12 @@ export function filtrarTalkgroups(modo: TgOptionMode, idsSeleccionados?: string[
     return TALKGROUPS;
   }
   if (modo === 'personalizado') {
-    if (!idsSeleccionados || idsSeleccionados.length === 0) {
-      return TALKGROUPS.filter(t => t.country === 'Venezuela');
+    if (idsSeleccionados !== undefined && idsSeleccionados.length === 0) {
+      return [];
     }
+    const seleccion = idsSeleccionados || ['venezuela_todos'];
     const tgsPermitidos = new Set<string>();
-    for (const opcId of idsSeleccionados) {
+    for (const opcId of seleccion) {
       const opc = OPCIONES_PERSONALIZADAS.find(o => o.id === opcId);
       if (opc) {
         opc.tgs.forEach(tg => tgsPermitidos.add(tg));
