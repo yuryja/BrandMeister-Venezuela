@@ -76,7 +76,7 @@ import{t as e}from"./callsign-country.CaNU7VBD.js";var t=document.getElementById
             <a href="https://brandmeister.network/#/profile/${encodeURIComponent(n||r)}" target="_blank" rel="noopener noreferrer" class="btn-ext">
               <span>Perfil BrandMeister ↗</span>
             </a>
-            <a href="https://radioid.net/" target="_blank" rel="noopener noreferrer" class="btn-ext">
+            <a href="https://radioid.net/database/view?callsign=${encodeURIComponent(n||r)}" target="_blank" rel="noopener noreferrer" class="btn-ext">
               <span>Ficha RadioID.net ↗</span>
             </a>
           </div>
