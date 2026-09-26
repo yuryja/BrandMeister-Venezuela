@@ -69,64 +69,33 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
             </div>
 
             <div class="model-select-wrapper">
-              <div class="select-hero-container">
-                <div class="select-wrapper select-wrapper--hero">
-                  <div class="select-hero-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M16 2v4"></path>
-                      <rect x="5" y="6" width="14" height="15" rx="3"></rect>
-                      <circle cx="12" cy="11" r="2"></circle>
-                      <line x1="9" y1="16" x2="15" y2="16"></line>
-                    </svg>
-                  </div>
-
-                  <select id="select-model" class="form-control-select form-control-select--hero" aria-label="Seleccionar modelo de radio">
+              <div class="select-wrapper select-wrapper--model">
+                <select id="select-model" class="form-control-select form-control-select--model" aria-label="Seleccionar modelo de radio">
+                  <optgroup label="Firmware Alternativo / Comunitario">
+                    <option value="opengd77">OpenGD77 / OpenUV380 · Firmware Libre (DM-32UV, DM-1701, RT3S, TYT UV380/390, GD-77)</option>
+                  </optgroup>
+                  <optgroup label="Software CPS Oficial de Fábrica">
                     <option value="anytone" selected>AnyTone & BTECH / Alinco · AT-D878UV (I/II Plus), AT-D578UV, BTECH DMR-6X2, Alinco DJ-MD5</option>
-                    <option value="opengd77">OpenGD77 / OpenUV380 · Firmware Libre (Baofeng DM-32UV, DM-1701, RT3S, TYT UV380/390, GD-77)</option>
-                    <option value="baofeng">Baofeng DM-32UV / DM-1701 / DM-1801 · OpenGD77 / CPS Nativo</option>
-                    <option value="tyt">TYT & Retevis · CPS Oficial (Retevis RT3S, RT3, RT82, RT84, TYT MD-UV380, MD-9600, MD-380)</option>
-                    <option value="radioddity">Radioddity CPS · GD-77 (CPS original de fábrica), DB25-D</option>
-                    <option value="motorola">Motorola MOTOTRBO · Serie DGP (8550/5550), DGM, DP, XPR</option>
-                    <option value="universal">Universal / Excel · Chirp, Planillas de cálculo y otros CPS</option>
-                  </select>
-
-                  <div class="select-hero-chevron" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                  </div>
-                </div>
+                    <option value="baofeng">Baofeng CPS Oficial · DM-32UV, DM-1701, DM-1801, RD-5R (Software original de fábrica)</option>
+                    <option value="tyt">TYT & Retevis CPS Oficial · Retevis RT3S, RT3, RT82, RT84, TYT MD-UV380, MD-9600, MD-380</option>
+                    <option value="radioddity">Radioddity CPS Oficial · GD-77 original de fábrica, DB25-D</option>
+                    <option value="motorola">Motorola MOTOTRBO · Serie DGP (8550/5550), DGM, DP, Serie XPR</option>
+                  </optgroup>
+                  <optgroup label="Formatos Universales">
+                    <option value="universal">Universal / Excel · CSV estándar, Chirp, Planillas de cálculo y otros CPS</option>
+                  </optgroup>
+                </select>
+                <span class="select-chevron"></span>
               </div>
 
-              <!-- Detalle del modelo seleccionado -->
+              <!-- Detalle del modelo seleccionado (Limpio: sin icono, sin píldora y sin borde grueso) -->
               <div class="model-info-banner" id="model-info-banner">
-                <div class="model-info-banner__left">
-                  <div class="model-info-banner__icon">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="4" y="4" width="16" height="16" rx="3"></rect>
-                      <circle cx="9" cy="9" r="1.5"></circle>
-                      <circle cx="15" cy="9" r="1.5"></circle>
-                      <path d="M8 15h8"></path>
-                    </svg>
-                  </div>
-                  <div class="model-info-banner__main">
-                    <div class="model-info-banner__heading">
-                      <span class="model-info-banner__name" id="model-box-title">AnyTone & BTECH / Alinco</span>
-                      <span class="model-info-banner__status">
-                        <span class="status-pulse-dot"></span> Perfil Activo
-                      </span>
-                    </div>
-                    <span class="model-info-banner__desc" id="model-box-desc">AT-D878UV (I/II Plus), AT-D578UV, BTECH DMR-6X2, Alinco DJ-MD5</span>
-                  </div>
+                <div class="model-info-banner__main">
+                  <span class="model-info-banner__name" id="model-box-title">AnyTone & BTECH / Alinco</span>
+                  <span class="model-info-banner__desc" id="model-box-desc">Compatible con AnyTone AT-D878UV (I/II Plus), AT-D578UV, BTECH DMR-6X2 y Alinco DJ-MD5.</span>
                 </div>
                 <div class="model-info-banner__badge">
-                  <span class="model-info-banner__format-tag" id="model-box-format">
-                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                      <polyline points="14 2 14 8 20 8"></polyline>
-                    </svg>
-                    TalkGroups.csv + DigitalContactList.csv (Pack ZIP)
-                  </span>
+                  <span class="model-info-banner__format-tag" id="model-box-format">TalkGroups.csv + DigitalContactList.csv (Pack ZIP)</span>
                 </div>
               </div>
             </div>
@@ -459,8 +428,8 @@ const metaDescription = "Genera y descarga archivos CSV formateados para program
       format: 'OpenGD77_Talkgroups.csv + OpenGD77_DMRID_Database.csv (Pack ZIP)'
     },
     baofeng: {
-      title: 'Baofeng DM-32UV / DM-1701 / DM-1801',
-      desc: 'Compatible con Baofeng DM-32UV, DM-32, DM-1701, DM-1801 y RD-5R (OpenGD77 y CPS nativo).',
+      title: 'Baofeng (CPS Oficial de Fábrica)',
+      desc: 'Compatible con el software original de Baofeng para DM-32UV, DM-1701, DM-1801 y RD-5R sin OpenGD77.',
       format: 'Pack ZIP: Contacts.csv + DMR ID Database'
     },
     tyt: {
