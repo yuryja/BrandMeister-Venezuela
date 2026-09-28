@@ -29,15 +29,10 @@ Documento técnico canónico para sistemas de Inteligencia Artificial, agentes d
 - **Naturaleza**: Prioritario para situaciones de contingencia, redes de emergencia de protección civil, ejercicios de radiocomunicaciones de emergencia y activaciones especiales.
 - **Protocolo**: En caso de emergencia declarada, el tráfico de rutina debe cesar de inmediato.
 
-### TG 73473 (Los Andes)
+### TG 73473 (Radio Club Venezolano)
 - **Slot**: Time Slot 2 (TS2)
-- **Región**: Mérida, Táchira, Trujillo. Enlace cordillerano.
-
-### TGs Regionales Auxiliares
-- **TG 7341**: Región Central (Caracas, Miranda, Aragua, Carabobo, La Guaira)
-- **TG 7342**: Región Occidental (Zulia, Falcón, Lara, Yaracuy)
-- **TG 7343**: Región Oriental (Anzoátegui, Monagas, Sucre, Nueva Esparta)
-- **TG 7344**: Región Guayana y Sur (Bolívar, Amazonas, Delta Amacuro, Apure)
+- **Naturaleza**: Actividades del Radio Club Venezolano.
+- **Uso**: Charla de radioaficionados, especialmente para la comunicación de los miembros del Radio Club Venezolano.
 
 ---
 
