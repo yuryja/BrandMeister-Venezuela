@@ -125,6 +125,7 @@ export interface PetraTalkgroup {
   short: string;
   description: string;
   modules: PetraModule[];
+  hidden?: boolean;
 }
 
 const BASE_MODULES: PetraModule[] = ['live', 'summary', 'hourly', 'calendar', 'top', 'recent', 'heatmap'];
@@ -157,7 +158,8 @@ export const PETRA_TALKGROUPS: PetraTalkgroup[] = [
     name: 'Red Venezolana de Radioaficionados',
     short: 'RVR',
     description: 'Frecuencia y rueda temática de la Red Venezolana de Radioaficionados en BrandMeister Venezuela, con estadísticas de participación e intervenciones en vivo.',
-    modules: [...BASE_MODULES, 'rne-stats', 'rne-report']
+    modules: [...BASE_MODULES, 'rne-stats', 'rne-report'],
+    hidden: true
   }
 ];
 

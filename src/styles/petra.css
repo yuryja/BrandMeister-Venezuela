@@ -103,8 +103,7 @@
 /* ── Selector de talkgroup ────────────────────────────────────────────── */
 
 .pt-tabs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
   gap: 0.5rem;
   margin-bottom: clamp(1rem, 2vw, 1.5rem);
   padding: 0.4rem;
@@ -115,6 +114,8 @@
 }
 
 .pt-tab {
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
@@ -122,6 +123,10 @@
   border-radius: var(--radius-md);
   color: var(--text-muted);
   transition: background 0.18s ease, color 0.18s ease;
+}
+
+.pt-tab--hidden {
+  display: none !important;
 }
 
 .pt-tab:hover {
@@ -169,11 +174,12 @@
 
 @media (max-width: 640px) {
   .pt-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-wrap: wrap;
     gap: 0.4rem;
   }
 
   .pt-tab {
+    flex: 1 1 calc(50% - 0.4rem);
     align-items: flex-start;
     padding: 0.6rem 0.75rem;
   }
