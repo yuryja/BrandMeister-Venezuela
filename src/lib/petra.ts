@@ -126,6 +126,10 @@ export interface PetraTalkgroup {
   description: string;
   modules: PetraModule[];
   hidden?: boolean;
+  emision?: {
+    eyebrow: string;
+    title: string;
+  };
 }
 
 const BASE_MODULES: PetraModule[] = ['live', 'summary', 'hourly', 'calendar', 'top', 'recent', 'heatmap'];
@@ -144,14 +148,22 @@ export const PETRA_TALKGROUPS: PetraTalkgroup[] = [
     name: 'Emisiones Técnicas YV5RNE',
     short: 'YV5RNE',
     description: 'Comunicados técnicos y ruedas operativas de la Red Nacional de Emergencia, con estadística de la emisión de las 19:30.',
-    modules: [...BASE_MODULES, 'rne-stats', 'rne-report']
+    modules: [...BASE_MODULES, 'rne-stats', 'rne-report'],
+    emision: {
+      eyebrow: 'Emisión YV5RNE',
+      title: 'Promedio de estaciones por día entre las 19:30 y las 20:15'
+    }
   },
   {
     id: '73473',
     name: 'Radio Club Venezolano',
     short: 'RCV',
-    description: 'Frecuencia institucional del Radio Club Venezolano para ruedas temáticas, eventos y enlaces.',
-    modules: [...BASE_MODULES]
+    description: 'Frecuencia institucional del Radio Club Venezolano: emisión Cadena YV (martes y sábados de 19:30 a 20:00), ruedas temáticas y eventos.',
+    modules: [...BASE_MODULES, 'rne-stats', 'rne-report'],
+    emision: {
+      eyebrow: 'Emisión Cadena YV',
+      title: 'Promedio de estaciones por emisión, martes y sábados entre las 19:30 y las 20:00'
+    }
   },
   {
     id: '73411',
@@ -159,7 +171,11 @@ export const PETRA_TALKGROUPS: PetraTalkgroup[] = [
     short: 'RVR',
     description: 'Frecuencia y rueda temática de la Red Venezolana de Radioaficionados en BrandMeister Venezuela, con estadísticas de participación e intervenciones en vivo.',
     modules: [...BASE_MODULES, 'rne-stats', 'rne-report'],
-    hidden: true
+    hidden: true,
+    emision: {
+      eyebrow: 'Emisión RVR',
+      title: 'Promedio de estaciones por día entre las 19:30 y las 20:30'
+    }
   }
 ];
 
