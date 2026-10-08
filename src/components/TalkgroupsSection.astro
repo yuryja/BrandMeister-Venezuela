@@ -20,7 +20,8 @@ const nationalTGs = [
     name: "Red Venezolana de Radioaficionados",
     slot: "Slot 2",
     desc: "Ruedas y enlaces de radioaficionados",
-    badge: "Comunidad"
+    badge: "Comunidad",
+    hidden: true // TG 73411 suspendido hasta nuevo aviso
   },
   {
     tg: "73452",
@@ -80,7 +81,7 @@ const circuits = [
 
         <!-- Canales Secundarios Compactos -->
         <div class="tg-national-list">
-          {nationalTGs.map(item => (
+          {nationalTGs.filter(item => !item.hidden).map(item => (
             <div class={`tg-compact-row ${item.isEmergency ? 'is-emergency' : ''}`}>
               <div class="compact-left">
                 <span class="compact-tg">{item.tg}</span>

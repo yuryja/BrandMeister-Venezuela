@@ -44,13 +44,13 @@ const ORIGENES = [
 ];
 
 /** Talkgroups oficiales de BrandMeister Venezuela e internacionales de uso frecuente */
-export const TALKGROUPS: Talkgroup[] = [
+const TALKGROUPS_REGISTRADOS: (Talkgroup & { oculto?: boolean })[] = [
   // Nacionales
   { tg: '734', name: 'TG 734 Venezuela', slot: '1', city: 'Venezuela', state: 'Nacional', country: 'Venezuela', notes: 'Canal Principal de Cobertura Nacional' },
   { tg: '734911', name: 'TG 734911 Emergencias EMCOM', slot: '1', city: 'Caracas', state: 'Nacional', country: 'Venezuela', notes: 'Red Nacional de Emergencia YV5RNE' },
   { tg: '73452', name: 'TG 73452 Boletines YVRNE', slot: '2', city: 'Caracas', state: 'Nacional', country: 'Venezuela', notes: 'Boletines y emisiones técnicas' },
   { tg: '73473', name: 'TG 73473 Radio Club Vzla', slot: '2', city: 'Caracas', state: 'Distrito Capital', country: 'Venezuela', notes: 'Ruedas y enlaces institucionales' },
-  { tg: '73411', name: 'TG 73411 Red Vzlana Radioafic', slot: '2', city: 'Venezuela', state: 'Nacional', country: 'Venezuela', notes: 'Red Venezolana de Radioaficionados' },
+  { tg: '73411', name: 'TG 73411 Red Vzlana Radioafic', slot: '2', city: 'Venezuela', state: 'Nacional', country: 'Venezuela', notes: 'Red Venezolana de Radioaficionados', oculto: true }, // suspendido hasta nuevo aviso
   { tg: '7340', name: 'TG 7340 Tactico 1 Desborde', slot: '2', city: 'Venezuela', state: 'Nacional', country: 'Venezuela', notes: 'Canal de QSO y desborde para liberar TG 734' },
   { tg: '73499', name: 'TG 73499 Tactico 2 Eventos', slot: '2', city: 'Venezuela', state: 'Nacional', country: 'Venezuela', notes: 'Expediciones y actividades especiales' },
   // Circuitos regionales
@@ -87,6 +87,9 @@ export const TALKGROUPS: Talkgroup[] = [
   { tg: '222', name: 'TG 222 Italia Nazionale', slot: '1', city: 'Roma', state: 'Italia', country: 'Italia', notes: 'Rete DMR Italia' },
   { tg: '9', name: 'TG 9 Local Reflector Slot 2', slot: '2', city: 'Local', state: 'Local', country: 'Local', notes: 'Tráfico Local en Ranura 2' },
 ];
+
+/** Los TG marcados como ocultos no salen en los archivos generados */
+export const TALKGROUPS: Talkgroup[] = TALKGROUPS_REGISTRADOS.filter(t => !t.oculto);
 
 export type TgOptionMode = 'oficiales' | 'globales' | 'personalizado';
 
