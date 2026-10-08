@@ -361,6 +361,14 @@ function feedItem(tone: 'alert' | 'beacon' | 'error', title: string, meta: strin
   return `<li class="pt-feed__item pt-feed__item--${tone}"><div class="pt-feed__t">${esc(title)}</div><div class="pt-feed__m">${meta}</div></li>`;
 }
 
+/** " · a las 14:00 y 17:00": horas en que se omitió la baliza */
+function skippedTimes(times: number[] | undefined): string {
+  const clocks = (times ?? []).map(num).filter((t) => t > 0).sort((a, b) => a - b).map((t) => esc(formatClock(t)));
+  if (!clocks.length) return '';
+  const list = clocks.length === 1 ? clocks[0] : `${clocks.slice(0, -1).join(', ')} y ${clocks[clocks.length - 1]}`;
+  return ` · ${clocks.length === 1 && clocks[0].startsWith('01:') ? 'a la' : 'a las'} ${list}`;
+}
+
 function renderHealth(el: HTMLElement, h: PetraHealth) {
   const skipped = Object.entries(h.beacons_skipped ?? {}).map(([k, v]) => [k, num(v)] as const);
   const skippedTotal = skipped.reduce((acc, [, v]) => acc + v, 0);
@@ -377,7 +385,7 @@ function renderHealth(el: HTMLElement, h: PetraHealth) {
       feedItem(
         reason === 'missing' ? 'error' : 'beacon',
         `${count} ${count === 1 ? 'baliza omitida' : 'balizas omitidas'}`,
-        esc(BEACON_SKIP_REASONS[reason] ?? reason)
+        esc(BEACON_SKIP_REASONS[reason] ?? reason) + skippedTimes(h.beacons_skipped_at?.[reason])
       )
     );
   }

@@ -72,6 +72,8 @@ export interface PetraHealth {
   beacons_sent: number;
   /** Balizas omitidas por motivo: activity, busy, missing… */
   beacons_skipped: Record<string, number>;
+  /** Hora (ms) de cada baliza omitida, agrupada por motivo */
+  beacons_skipped_at?: Record<string, number[]>;
   alerts_sent: number;
   alerts_seismic: number;
   alerts_meteo: number;
