@@ -653,7 +653,7 @@ import Layout from '../layouts/Layout.astro';
       carouselCounter.textContent = `${currentCarouselIndex + 1} / ${carousel.length}`;
       modalMediaWrap.innerHTML = `
         <div class="carousel-slide-view">
-          <img src="${escapeHtml(safeUrl(slide.url))}" alt="Foto ${currentCarouselIndex + 1}" class="lightbox-img" />
+          <img src="${escapeHtml(safeUrl(slide.url))}" alt="Foto ${currentCarouselIndex + 1} de la galería de BrandMeister Venezuela" class="lightbox-img" />
           ${slide.caption ? `<div class="slide-caption-bar">${escapeHtml(slide.caption)}</div>` : ''}
         </div>`;
 
