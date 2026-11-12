@@ -35,6 +35,9 @@ Options -Indexes
   RewriteRule ^api/codeplug-generator/?$ api/codeplug-generator.php [QSA,L]
   RewriteRule ^api/cron-radioid-sync/?$ api/cron-radioid-sync.php [QSA,L]
 
+  # Sitemap: páginas fijas + noticias publicadas de MySQL
+  RewriteRule ^sitemap\.xml$ /sitemap.php [L]
+
   # Blog dinámico: las noticias salen de MySQL a través de blog.php
   RewriteRule ^plantillas(/|$) - [F]
   RewriteRule ^blog/?$ /blog.php [L]
