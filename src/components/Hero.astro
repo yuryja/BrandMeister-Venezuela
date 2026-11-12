@@ -77,21 +77,21 @@
         <div class="hero-metrics">
           <div class="metric-item">
             <div class="metric-value">
-              <span>TG </span><span class="hero-counter" data-target="734">0</span>
+              <span>TG </span><span class="hero-counter" data-target="734">734</span>
             </div>
             <div class="metric-label">Talkgroup Nacional Oficial</div>
           </div>
           <div class="metric-divider"></div>
           <div class="metric-item">
             <div class="metric-value">
-              <span class="hero-counter" data-target="100">0</span><span>%</span>
+              <span class="hero-counter" data-target="100">100</span><span>%</span>
             </div>
             <div class="metric-label">Arquitectura Digital DMR</div>
           </div>
           <div class="metric-divider"></div>
           <div class="metric-item">
             <div class="metric-value">
-              <span class="hero-counter" data-target="9">0</span><span> Circuitos</span>
+              <span class="hero-counter" data-target="9">9</span><span> Circuitos</span>
             </div>
             <div class="metric-label">Cobertura Regional Slot 2</div>
           </div>
@@ -104,12 +104,15 @@
 <!-- Self-incrementing Numbers Animation Script -->
 <script>
   function runHeroCounters() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const counters = document.querySelectorAll<HTMLElement>('.hero-counter');
     counters.forEach(counter => {
       const targetStr = counter.getAttribute('data-target');
       if (!targetStr) return;
       const target = parseInt(targetStr, 10);
       const duration = 1600; // ms
+      // El valor real ya viene en el HTML: la animación arranca cerca de él (sin parpadeo a 0)
+      const from = Math.floor(target * 0.6);
       const startTime = performance.now();
 
       function update(now: number) {
@@ -117,7 +120,7 @@
         const progress = Math.min(elapsed / duration, 1);
         // Exponential ease-out curve
         const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-        const current = Math.floor(easeOut * target);
+        const current = Math.floor(from + easeOut * (target - from));
         counter.textContent = current.toString();
 
         if (progress < 1) {
@@ -508,6 +511,7 @@
 
   .hero-counter {
     display: inline-block;
+    font-variant-numeric: tabular-nums;
     color: var(--text-main);
   }
 

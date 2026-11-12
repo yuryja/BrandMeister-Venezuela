@@ -94,8 +94,12 @@ const carouselList = [...teamMembers, ...teamMembers, ...teamMembers];
 
       <div class="team-carousel-container" aria-label="Carrusel de equipo coordinador">
         <div class="team-carousel-track">
-          {carouselList.map((m) => (
-            <div class="team-card">
+          {carouselList.map((m, i) => {
+            // Solo la primera copia es contenido real; las otras dos son relleno visual del bucle
+            const isClone = i >= teamMembers.length;
+            const NameTag = isClone ? 'div' : 'h4';
+            return (
+            <div class="team-card" aria-hidden={isClone ? 'true' : undefined}>
               <!-- Foto en círculo -->
               <div class="team-avatar-ring">
                 <div class="team-avatar-circle">
@@ -110,22 +114,27 @@ const carouselList = [...teamMembers, ...teamMembers, ...teamMembers];
               <span class="team-callsign">{m.callsign}</span>
 
               <!-- Nombre (Montserrat 800) -->
-              <h4 class="team-name">{m.name}</h4>
+              <NameTag class="team-name">{m.name}</NameTag>
 
               <!-- Texto / Rol -->
               <p class="team-role">{m.role}</p>
 
               <!-- Enlace -->
-              <a
-                href={m.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="team-link"
-              >
-                <span>Perfil BM ↗</span>
-              </a>
+              {isClone ? (
+                <span class="team-link"><span>Perfil BM ↗</span></span>
+              ) : (
+                <a
+                  href={m.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="team-link"
+                >
+                  <span>Perfil BM ↗</span>
+                </a>
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
