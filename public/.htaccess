@@ -6,6 +6,10 @@ Options -Indexes
   RewriteEngine On
   RewriteBase /
 
+  # Dominio único: www.brandmeisteryv.net -> brandmeisteryv.net (301, evita contenido duplicado)
+  RewriteCond %{HTTP_HOST} ^www\.brandmeisteryv\.net$ [NC]
+  RewriteRule ^ https://brandmeisteryv.net%{REQUEST_URI} [L,R=301]
+
   # Todo el sitio por HTTPS: sin esto la contraseña y la cookie del panel viajan sin cifrar
   # (localhost queda fuera para poder probar el sitio en local, donde no hay certificado)
   RewriteCond %{HTTPS} !=on
