@@ -20,9 +20,11 @@ interface Props {
   noindex?: boolean;
 }
 
+const defaultDescription = "Comunidad oficial de radioaficionados en la red BrandMeister DMR en Venezuela. Talkgroups nacionales, circuitos, repetidores, Petra y voz digital.";
+
 const {
   title = "BrandMeister Venezuela · Red Digital DMR TG 734",
-  description = "Comunidad oficial de radioaficionados en la red BrandMeister DMR en Venezuela. Talkgroups nacionales, circuitos, repetidores, Petra y voz digital.",
+  description = defaultDescription,
   image = "/assets/og-brandmeister-dmr-con-radio.jpg",
   heroImage,
   chrome = true,
@@ -167,7 +169,7 @@ if (pathSegments.length > 0) {
             "height": 1024
           },
           "image": `${siteOrigin}/assets/og-brandmeister-dmr-con-radio.jpg`,
-          "description": "Comunidad oficial de radioaficionados en la red BrandMeister DMR Master 734 en Venezuela. Talkgroups nacionales, circuitos, repetidores activos, monitor Petra y voz digital para radioafición.",
+          "description": defaultDescription,
           "slogan": "DMR con Radio",
           "address": {
             "@type": "PostalAddress",
@@ -190,7 +192,7 @@ if (pathSegments.length > 0) {
           "@id": `${siteOrigin}/#website`,
           "url": siteOrigin,
           "name": "BrandMeister Venezuela",
-          "description": "Portal oficial de la red digital DMR BrandMeister en Venezuela",
+          "description": description,
           "publisher": {
             "@id": `${siteOrigin}/#organization`
           },

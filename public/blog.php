@@ -85,6 +85,30 @@ function blog_head(&$html, $title, $description, $canonical, $image = null) {
     $html = preg_replace('#(<meta property="og:type" content=")[^"]*(")#', '${1}article${2}', $html, 1);
 }
 
+/**
+ * Sustituye el BreadcrumbList del <head> (Astro lo genera con la ruta de la plantilla,
+ * /plantillas/...) por el de la página real y, si se indica, añade un BlogPosting al @graph.
+ * $crumbs: lista de [nombre, url]. $post: BlogPosting ya armado como array, o null.
+ */
+function blog_jsonld(&$html, $siteUrl, $canonical, array $crumbs, $post = null) {
+    $items = [];
+    foreach ($crumbs as $i => $crumb) {
+        $items[] = ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $crumb[0], 'item' => $crumb[1]];
+    }
+    $nodes = [['@type' => 'BreadcrumbList', '@id' => $canonical . '#breadcrumb', 'itemListElement' => $items]];
+    if ($post) {
+        $nodes[] = $post;
+    }
+    $flags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+    $json = implode(',', array_map(function ($node) use ($flags) { return json_encode($node, $flags); }, $nodes));
+    $html = preg_replace_callback(
+        '#\{"@type":"BreadcrumbList".*?"itemListElement":\[.*?\]\}#s',
+        function () use ($json) { return $json; },
+        $html,
+        1
+    );
+}
+
 /** Enlace de la noticia con la etiqueta del canal por el que se comparte */
 function blog_url_compartir($url, $canal) {
     return $url . (strpos($url, '?') === false ? '?' : '&') . 'utm_source=' . rawurlencode($canal);
@@ -151,6 +175,32 @@ if ($slug !== '') {
         $html = blog_drop_optional($html, 'imagen');
     }
     blog_head($html, $post['title'] . ' · ' . BLOG_SITE_NAME, $post['description'], $url, $imagen ? $siteUrl . $imagen : null);
+    $publicado = (int)$post['ts'];
+    $modificado = !empty($post['updated_at']) ? (int)strtotime((string)$post['updated_at']) : $publicado;
+    $articuloLd = [
+        '@type' => 'BlogPosting',
+        '@id' => $url . '#article',
+        'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => $url],
+        'headline' => mb_substr((string)$post['title'], 0, 110),
+        'description' => (string)$post['description'],
+        'datePublished' => date('c', $publicado),
+        'dateModified' => date('c', $modificado ?: $publicado),
+        'inLanguage' => 'es-VE',
+        'articleSection' => (string)$post['category'],
+        'author' => ['@type' => 'Person', 'name' => (string)$post['author_name']],
+        'publisher' => ['@id' => $siteUrl . '/#organization'],
+    ];
+    if ($imagen) {
+        $articuloLd['image'] = [$siteUrl . $imagen];
+    }
+    if ($tags) {
+        $articuloLd['keywords'] = implode(', ', $tags);
+    }
+    blog_jsonld($html, $siteUrl, $url, [
+        ['Inicio', $siteUrl . '/'],
+        ['Noticias y Artículos', $siteUrl . '/blog'],
+        [(string)$post['title'], $url],
+    ], $articuloLd);
     $html = blog_fill($html, [
         'TITULO' => e($post['title']),
         'DESCRIPCION' => e($post['description']),
@@ -236,6 +286,10 @@ blog_head(
     'Noticias, guías de configuración de hotspots, protocolos de emergencia y novedades de la comunidad BrandMeister Venezuela DMR.',
     "$siteUrl/blog"
 );
+blog_jsonld($html, $siteUrl, "$siteUrl/blog", [
+    ['Inicio', $siteUrl . '/'],
+    ['Noticias y Artículos', "$siteUrl/blog"],
+]);
 $html = blog_fill($html, [
     'TOTAL' => (string)count($posts),
     'CATEGORIAS' => $categoryButtons,
