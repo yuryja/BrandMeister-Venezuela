@@ -3,6 +3,7 @@
 
 User-agent: *
 Allow: /
+Allow: /api/sitemap-blog.php
 Disallow: /admin
 Disallow: /panel
 Disallow: /api/
@@ -13,12 +14,14 @@ Disallow: /plantillas/
 # ==============================================================================
 User-agent: Googlebot
 Allow: /
+Allow: /api/sitemap-blog.php
 Disallow: /admin
 Disallow: /panel
 Disallow: /api/
 
 User-agent: Bingbot
 Allow: /
+Allow: /api/sitemap-blog.php
 Disallow: /admin
 Disallow: /panel
 Disallow: /api/
@@ -39,6 +42,7 @@ Disallow: /panel
 # ==============================================================================
 User-agent: GPTBot
 Allow: /
+Allow: /api/sitemap-blog.php
 Disallow: /admin
 Disallow: /panel
 Disallow: /api/
@@ -48,12 +52,14 @@ Allow: /
 
 User-agent: PerplexityBot
 Allow: /
+Allow: /api/sitemap-blog.php
 Disallow: /admin
 Disallow: /panel
 Disallow: /api/
 
 User-agent: ClaudeBot
 Allow: /
+Allow: /api/sitemap-blog.php
 Disallow: /admin
 Disallow: /panel
 Disallow: /api/
@@ -80,5 +86,6 @@ Allow: /
 # Sitemaps y Archivos de Conocimiento para IA (llms.txt standard)
 # ==============================================================================
 Sitemap: https://brandmeisteryv.net/sitemap.xml
+Sitemap: https://brandmeisteryv.net/api/sitemap-blog.php
 # AI Model Context Guide: https://brandmeisteryv.net/llms.txt
 # Full LLM Knowledge Base: https://brandmeisteryv.net/llms-full.txt

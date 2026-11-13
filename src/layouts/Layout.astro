@@ -16,6 +16,7 @@ interface Props {
   heroImage?: string | { desktop: string; mobile: string };
   /** false para páginas como el panel: sin menú del sitio, pie, dock de audio ni "volver arriba" */
   chrome?: boolean;
+  ogType?: 'website' | 'article';
 }
 
 const {
@@ -23,7 +24,8 @@ const {
   description = "Comunidad oficial de radioaficionados en la red BrandMeister DMR en Venezuela. Talkgroups nacionales, circuitos, repetidores, Petra y voz digital.",
   image = "/assets/og-brandmeister-dmr-con-radio.jpg",
   heroImage,
-  chrome = true
+  chrome = true,
+  ogType = 'website'
 } = Astro.props;
 
 const heroPreload = typeof heroImage === 'string' ? { desktop: heroImage, mobile: heroImage } : heroImage;
@@ -83,6 +85,11 @@ if (pathSegments.length > 0) {
 
     <!-- Favicon Oficial BrandMeister -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- TODO: generar favicon-32x32.png y apple-touch-icon.png desde favicon.svg -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#E8261C" />
     <meta name="msapplication-TileColor" content="#E8261C" />
 
@@ -104,7 +111,7 @@ if (pathSegments.length > 0) {
     <!-- Open Graph / Redes Sociales (Facebook, WhatsApp, Telegram, LinkedIn, Discord, iMessage) -->
     <meta property="og:site_name" content="BrandMeister Venezuela" />
     <meta property="og:locale" content="es_VE" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

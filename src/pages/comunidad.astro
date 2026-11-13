@@ -7,6 +7,47 @@ import Layout from '../layouts/Layout.astro';
   title="Nuestra Comunidad · Historia, Valores y Radioaficionados de BrandMeister Venezuela"
   description="Conoce la historia, orígenes y evolución de la Red BrandMeister Venezuela. Un homenaje a los pioneros del DMR en 2010 y un sincero agradecimiento a todos los colegas que hacen posible la red."
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "AboutPage",
+          "@id": "https://brandmeisteryv.net/comunidad#page",
+          "name": "Nuestra Comunidad · BrandMeister Venezuela",
+          "description": "Historia, orígenes y evolución de la Red BrandMeister Venezuela. Homenaje a los pioneros del DMR desde 2010 y reconocimiento a la comunidad de radioaficionados YV.",
+          "url": "https://brandmeisteryv.net/comunidad",
+          "inLanguage": "es-VE",
+          "isPartOf": { "@id": "https://brandmeisteryv.net/#website" },
+          "about": { "@id": "https://brandmeisteryv.net/#organization" },
+          "mainEntity": { "@id": "https://brandmeisteryv.net/#organization" },
+          "keywords": "BrandMeister Venezuela historia, radioaficionados DMR Venezuela, YV5DMR, pioneros DMR Venezuela, comunidad radioafición Venezuela"
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://brandmeisteryv.net/comunidad#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "¿Cuándo comenzó BrandMeister Venezuela?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "BrandMeister Venezuela inició operaciones en 2010 con el repetidor YV5DMR en Caracas, el primero de la red DMR en Venezuela, pionero en toda América Latina."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "¿Qué es la Red BrandMeister Venezuela?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "BrandMeister Venezuela es la comunidad oficial de radioaficionados que gestiona la infraestructura de repetidores, hotspots y enlaces de voz digital DMR (Digital Mobile Radio) en Venezuela, conectada al Master Server 734 de la red global BrandMeister. Sitio oficial: https://brandmeisteryv.net"
+              }
+            }
+          ]
+        }
+      ]
+    })} />
+  </Fragment>
   <main class="comunidad-page">
     <!-- Hero 50vh con fondo del Hero Principal y degradado lateral -->
     <section class="comunidad-hero">

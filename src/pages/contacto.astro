@@ -49,6 +49,19 @@ const categories = [
   title="Contacto y Soporte Técnico · BrandMeister Venezuela"
   description="Canal oficial de contacto de BrandMeister Venezuela (TG 734). Envía consultas, solicitudes de soporte para hotspots MMDVM, integración de repetidores o dudas al equipo de sysops."
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      "@id": "https://brandmeisteryv.net/contacto#page",
+      "name": "Contacto y Soporte Técnico · BrandMeister Venezuela",
+      "description": "Formulario de contacto, soporte técnico y comunicación con los Sysops de BrandMeister Venezuela. Para consultas sobre repetidores DMR, hotspots y la red TG 734.",
+      "url": "https://brandmeisteryv.net/contacto",
+      "inLanguage": "es-VE",
+      "isPartOf": { "@id": "https://brandmeisteryv.net/#website" },
+      "mainEntity": { "@id": "https://brandmeisteryv.net/#organization" }
+    })} />
+  </Fragment>
   <main class="contact-page">
     <!-- Hero 50vh con fotografía real del transceptor Motorola EM200 y Hotspot MMDVM -->
     <section class="contact-hero">

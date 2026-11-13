@@ -183,6 +183,52 @@ const internationalChannels = [
         "description": `${c.desc} (${c.slot}, ${c.colorCode})`
       }))
     })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Cuál es el talkgroup principal de Venezuela en BrandMeister?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "El talkgroup principal de Venezuela en BrandMeister es el TG 734 en Slot 1. Es el canal nacional de llamada general (CQ) y tráfico prioritario. Para conversaciones largas se recomienda pasar a un circuito regional en Slot 2. Más información en https://brandmeisteryv.net/talkgroups"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué talkgroup usar para emergencias en Venezuela con BrandMeister?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "El talkgroup de emergencias en Venezuela es el TG 734911 en Slot 1, reservado exclusivamente para la Red Nacional de Emergencia YV5RNE, Protección Civil y situaciones de contingencia. Está estrictamente libre de charlas cotidianas."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cuántos circuitos regionales tiene BrandMeister Venezuela?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "BrandMeister Venezuela tiene 9 circuitos regionales: Circuito 1 (TG 7341 - Occidente: Falcón, Trujillo, Zulia), Circuito 2 (TG 7342 - Los Andes: Barinas, Mérida, Táchira), Circuito 3 (TG 7343 - Centroccidente: Lara, Portuguesa, Yaracuy), Circuito 4 (TG 7344 - Central: Aragua, Carabobo, Cojedes), Circuito 5 (TG 7345 - Capital y Llanos: Caracas, Miranda, La Guaira, Guárico), Circuito 6 (TG 7346 - Oriente Sur: Anzoátegui, Bolívar), Circuito 7 (TG 7347 - Oriente Norte: Nueva Esparta, Sucre), Circuito 8 (TG 7348 - Delta: Monagas, Delta Amacuro) y Circuito 9 (TG 7349 - Sur: Apure, Amazonas)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cuál es la diferencia entre Slot 1 y Slot 2 en DMR BrandMeister Venezuela?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "En DMR, un repetidor transporta dos conversaciones independientes simultáneas gracias a TDMA. En BrandMeister Venezuela: Slot 1 se usa para tráfico nacional (TG 734), emergencias (TG 734911) e internacionales. Slot 2 se usa para circuitos regionales (TG 7341-7349), canales institucionales (RCV TG 73473, boletines TG 73452) y hotspots residenciales."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Qué frecuencia simplex usar en hotspots DMR en Venezuela?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Las frecuencias simplex estándar para hotspots DMR en Venezuela son: VHF 146.550 MHz en Slot 2, CC1; y UHF 436.550 MHz en Slot 2, CC1. El servidor recomendado es 7301.master.brandmeister.network (BM Master Chile, con la menor latencia para Venezuela)."
+          }
+        }
+      ]
+    })} />
   </Fragment>
   <main class="tg-page">
     <!-- Hero 50vh con fondo services-dmr-composition.webp y tratamiento lateral -->
