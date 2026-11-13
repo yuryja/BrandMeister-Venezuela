@@ -86,6 +86,7 @@ Allow: /
 # Sitemaps y Archivos de Conocimiento para IA (llms.txt standard)
 # ==============================================================================
 Sitemap: https://brandmeisteryv.net/sitemap.xml
+Sitemap: https://brandmeisteryv.net/sitemap-posts.xml
 Sitemap: https://brandmeisteryv.net/api/sitemap-blog.php
 # AI Model Context Guide: https://brandmeisteryv.net/llms.txt
 # Full LLM Knowledge Base: https://brandmeisteryv.net/llms-full.txt

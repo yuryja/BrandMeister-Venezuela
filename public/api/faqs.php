@@ -440,3 +440,4 @@ if ($method === 'POST') {
 }
 
 send_json(['success' => false, 'error' => 'Método no permitido'], 405);
+

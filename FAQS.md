@@ -250,3 +250,4 @@ Si aún no posees un radio digital DMR, puedes monitorear la actividad de la red
 2. **Monitor y Telemetría en Vivo (Petra):**
    - Visita [brandmeisteryv.net/petra](https://brandmeisteryv.net/petra) o las salas por circuito como [brandmeisteryv.net/petra/734](https://brandmeisteryv.net/petra/734).
    - Observarás el registro en directo de quién está hablando, su indicativo, nombre, repetidor o hotspot utilizado, nivel de pérdida de paquetes y duración de cada cambio.
+
