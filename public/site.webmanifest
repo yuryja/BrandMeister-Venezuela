@@ -1,0 +1,27 @@
+{
+  "name": "BrandMeister Venezuela",
+  "short_name": "BM Venezuela",
+  "description": "Red Digital DMR BrandMeister Venezuela · TG 734 · DMR con Radio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#E8261C",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
+

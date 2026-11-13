@@ -206,6 +206,36 @@ const repeaters = [
         }
       }))
     })} />
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "¿Cuáles son los repetidores DMR activos en Caracas Venezuela?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "En Caracas operan repetidores DMR BrandMeister de gran cobertura: YV5DMR (ID 734500) en VHF 147.840/147.240 MHz (+0.600 MHz, CC1), pionero en Venezuela desde 2010 con cobertura en Gran Caracas y Valles del Tuy; y YV5VE (ID 734014) en UHF 434.600/439.600 MHz (-5.000 MHz, CC1) con alta penetración urbana. Consulta frecuencias y telemetría en https://brandmeisteryv.net/repetidores"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cómo conectarme a un repetidor DMR en Venezuela?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Para conectarte a un repetidor DMR BrandMeister Venezuela: programa tu radio con la frecuencia del repetidor de tu zona, Color Code 1 (CC1), Time Slot 1 para TG 734 (canal nacional) o Slot 2 para circuitos regionales. Requiere indicativo de radioaficionado y DMR ID registrado en radioid.net. Consulta el directorio completo en https://brandmeisteryv.net/repetidores"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "¿Cuántos repetidores y puntos de acceso DMR tiene Venezuela?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "BrandMeister Venezuela cuenta con una red de repetidores y puntos de acceso comunitarios en múltiples regiones: Caracas (YV5DMR en VHF, YV5VE en UHF), La Guaira (YV5CBO en VHF), Valencia-Carabobo (YV4EGG en VHF), Guárico y Llanos centrales (Altagracia de Orituco YV5VE, Cerro Portachuelo YV5VE, Cerro Platillón YV4KWT), Costa Oriental del Lago-Zulia (YV1GDQ en UHF), y puntos de acceso comunitarios de alta potencia en Araure-Portuguesa (YV3ARO) y La Boyera/El Hatillo-Miranda (YV5FBP). Directorio actualizado: https://brandmeisteryv.net/repetidores"
+          }
+        }
+      ]
+    })} />
   </Fragment>
   <main class="repeaters-page">
     <!-- Hero 50vh con fotografía real de trabajo de campo -->

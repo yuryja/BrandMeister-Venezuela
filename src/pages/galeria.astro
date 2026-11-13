@@ -7,8 +7,44 @@ import Layout from '../layouts/Layout.astro';
 <Layout
   heroImage={{ desktop: '/assets/news-motorola-bg.webp', mobile: '/assets/news-motorola-bg-m.webp' }}
   title="Galería de Fotos y Videos DMR · BrandMeister Venezuela"
-  description="Fotografías de campo, montajes en repetidores, estaciones y videos de la comunidad de radioaficionados de BrandMeister Venezuela en la red DMR."
+  description="Fotografías de campo, montajes en repetidores de cerros venezolanos, instalación de antenas y hotspots DMR. La comunidad radioaficionada BrandMeister Venezuela en imágenes."
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "CollectionPage",
+          "@id": "https://brandmeisteryv.net/galeria#page",
+          "name": "Galería BrandMeister Venezuela",
+          "description": "Fotografías de campo, montajes en repetidores, instalación de antenas, configuraciones de hotspots, estaciones y videos de la comunidad de radioaficionados DMR en Venezuela.",
+          "url": "https://brandmeisteryv.net/galeria",
+          "inLanguage": "es-VE",
+          "isPartOf": { "@id": "https://brandmeisteryv.net/#website" },
+          "about": { "@id": "https://brandmeisteryv.net/#organization" },
+          "image": {
+            "@type": "ImageObject",
+            "url": "https://brandmeisteryv.net/assets/news-motorola-bg.webp",
+            "description": "Galería multimedia de la comunidad BrandMeister Venezuela"
+          },
+          "keywords": "BrandMeister Venezuela, DMR, radioaficionados, repetidores, hotspots, YV5DMR, fotografías radio, activaciones campo Venezuela"
+        },
+        {
+          "@type": "ImageGallery",
+          "@id": "https://brandmeisteryv.net/galeria#gallery",
+          "name": "Galería Fotográfica BrandMeister Venezuela",
+          "description": "Colección de fotografías y videos de activaciones de campo, montajes en repetidores en cerros venezolanos, instalación de duplexores, antenas y hotspots de la comunidad de radioaficionados DMR.",
+          "url": "https://brandmeisteryv.net/galeria",
+          "isPartOf": { "@id": "https://brandmeisteryv.net/galeria#page" },
+          "creator": { "@id": "https://brandmeisteryv.net/#organization" },
+          "about": { "@id": "https://brandmeisteryv.net/#organization" },
+          "inLanguage": "es-VE",
+          "genre": "Fotografía técnica de radioafición",
+          "keywords": "BrandMeister DMR Venezuela, radioaficionados YV, repetidores DMR, trabajo de campo, instalación antenas, hotspot MMDVM"
+        }
+      ]
+    })} />
+  </Fragment>
   <main class="gallery-page">
     <!-- Hero 50vh con fotografía de radioafición y tratamiento de marca -->
     <section class="gallery-hero">
@@ -19,7 +55,7 @@ import Layout from '../layouts/Layout.astro';
           </div>
           <h1 class="hero-title">Galería BrandMeister</h1>
           <p class="hero-subtitle">
-            La voz, las vivencias y la tecnología que unen a los radioaficionados de Venezuela. Descubre las activaciones de campo, instalaciones en cerros, configuraciones de hotspots y transmisiones compartidas en nuestra red.
+            La voz, las vivencias y la tecnología <strong>DMR</strong> que unen a los radioaficionados de <strong>Venezuela</strong>. Descubre las activaciones de campo, instalaciones en cerros, configuraciones de hotspots y transmisiones compartidas en nuestra red.
           </p>
           <div class="hero-actions">
             <a
@@ -43,6 +79,22 @@ import Layout from '../layouts/Layout.astro';
 
     <!-- Franja divisoria con degradado de 3 colores BrandMeister -->
     <div class="bm-stripe"></div>
+
+    <!-- Contenido SEO estático: visible para Google en el primer renderizado -->
+    <section class="gallery-seo-context" style="max-width:var(--container-max);margin:0 auto;padding:2rem 1.5rem 0;color:var(--text-muted);font-size:0.95rem;line-height:1.65;">
+      <p>
+        La galería de <strong>BrandMeister Venezuela</strong> reúne el registro visual de nuestra comunidad de <strong>radioaficionados DMR</strong>:
+        activaciones de campo en cerros y montañas venezolanas, instalación y mantenimiento de repetidores en zonas de alta altitud,
+        configuración de estaciones <strong>hotspot MMDVM</strong> (Pi-Star, OpenGD77, WPSD),
+        trabajos de torre y antenas en <strong>Caracas, Valencia, Maracaibo, Barquisimeto y Los Andes</strong>,
+        así como momentos de la comunidad en ruedas, eventos y activaciones <abbr title="Summits on the Air">SOTA</abbr>.
+      </p>
+      <p>
+        Todas las fotografías y videos son de producción propia o aportados por miembros de la red <strong>TG 734</strong>.
+        Síguenos en Instagram <a href="https://www.instagram.com/brandmeister_yv/" rel="noopener" target="_blank">@brandmeister_yv</a>
+        para ver las publicaciones más recientes de la red <strong>DMR digital Venezuela</strong>.
+      </p>
+    </section>
 
     <!-- Sección Principal de Galería -->
     <section class="gallery-section section-padding">
