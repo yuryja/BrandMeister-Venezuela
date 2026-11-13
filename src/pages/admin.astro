@@ -4,11 +4,13 @@ import UsersView from "../components/admin/UsersView.astro";
 import ProfileView from "../components/admin/ProfileView.astro";
 import GalleryView from "../components/admin/GalleryView.astro";
 import PostsView from "../components/admin/PostsView.astro";
+import FaqView from "../components/admin/FaqView.astro";
 import "../styles/admin-accounts.css";
 import "../styles/admin-gallery.css";
 import "../styles/admin-posts.css";
 import "../styles/admin-layout.css";
 import "../styles/admin-analytics.css";
+import "../styles/admin-faqs.css";
 
 // Clave pública de reCAPTCHA v3 (GitHub → Variables → PUBLIC_RECAPTCHA_SITE_KEY). Sin clave, el login funciona sin él
 const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
@@ -452,6 +454,27 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
                 ></path>
               </svg>
               <span>Textos del Portal</span>
+            </button>
+          </li>
+
+          <!-- Preguntas Frecuentes (FAQ) -->
+          <li class="wp-menu-item" id="menu-faqs-item">
+            <button class="menu-link" data-view="faqs">
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <span>Preguntas Frecuentes</span>
             </button>
           </li>
 
@@ -1389,6 +1412,11 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
 
         <!-- ========================================================= -->
         <GalleryView />
+
+        <!-- ========================================================= -->
+        <!-- PREGUNTAS FRECUENTES (FAQ) -->
+        <!-- ========================================================= -->
+        <FaqView />
       </main>
     </div>
   </div>
@@ -2318,6 +2346,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
   import { initGallery } from "../scripts/admin/gallery";
   import { initPosts } from "../scripts/admin/posts";
   import { initNav } from "../scripts/admin/nav";
+  import { initFaqs } from "../scripts/admin/faqs";
   import { preloadRecaptcha, recaptchaToken } from "../scripts/admin/recaptcha";
   import { initAccount, showAccountPanel } from "../scripts/admin/account";
   import { initAnalytics } from "../scripts/admin/analytics";
@@ -2337,6 +2366,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
     users: ["admin"],
     "user-new": ["admin"],
     "site-content": ["admin", "editor"],
+    faqs: ["admin", "editor"],
     posts: ["admin", "editor", "author"],
     "new-post": ["admin", "editor", "author"],
     gallery: ["admin", "editor"],
@@ -2450,6 +2480,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
     show("menu-users-item", currentUser.role === "admin");
     show("menu-profile-item", currentUser.role !== "admin");
     show("menu-site-content-item", currentUser.role !== "author");
+    show("menu-faqs-item", currentUser.role !== "author");
     show("menu-gallery-item", currentUser.role !== "author");
   };
 
@@ -2597,6 +2628,7 @@ const recaptchaSiteKey = import.meta.env.PUBLIC_RECAPTCHA_SITE_KEY || "";
   initProfile();
   initGallery();
   initPosts();
+  initFaqs();
   initNav();
   initAnalytics();
   initAccount().then((handledToken) => {
