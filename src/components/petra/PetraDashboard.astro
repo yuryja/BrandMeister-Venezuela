@@ -4,9 +4,11 @@ import { PETRA_TALKGROUPS, type PetraTalkgroup } from '../../lib/petra';
 
 interface Props {
   talkgroup: PetraTalkgroup;
+  /** H1 de la página; por defecto el de la presentación general de Petra */
+  heading?: string;
 }
 
-const { talkgroup } = Astro.props;
+const { talkgroup, heading = "Conoce a Petra" } = Astro.props;
 const has = (m: string) => talkgroup.modules.includes(m as any);
 ---
 
@@ -15,7 +17,7 @@ const has = (m: string) => talkgroup.modules.includes(m as any);
     <div class="container">
       <div class="pt-hero__content">
         <span class="pt-hero__badge">Desarrollo comunitario venezolano</span>
-        <h1 class="pt-hero__title">Conoce a Petra</h1>
+        <h1 class="pt-hero__title">{heading}</h1>
         <p class="pt-hero__lead">
           Plataforma informativa y de telemetría de BrandMeister Venezuela. Emite al <strong>TG 734</strong> boletines
           meteorológicos y alertas sísmicas en tiempo real, y una baliza horaria en telegrafía que evoca los repetidores

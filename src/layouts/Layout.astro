@@ -17,15 +17,20 @@ interface Props {
   /** false para páginas como el panel: sin menú del sitio, pie, dock de audio ni "volver arriba" */
   chrome?: boolean;
   ogType?: 'website' | 'article';
+  /** true para páginas privadas (panel): noindex, nofollow */
+  noindex?: boolean;
 }
+
+const defaultDescription = "Comunidad oficial de radioaficionados en la red BrandMeister DMR en Venezuela. Talkgroups nacionales, circuitos, repetidores, Petra y voz digital.";
 
 const {
   title = "BrandMeister Venezuela · Red Digital DMR TG 734",
-  description = "Comunidad oficial de radioaficionados en la red BrandMeister DMR en Venezuela. Talkgroups nacionales, circuitos, repetidores, Petra y voz digital.",
+  description = defaultDescription,
   image = "/assets/og-brandmeister-dmr-con-radio.jpg",
   heroImage,
   chrome = true,
-  ogType = 'website'
+  ogType = 'website',
+  noindex = false
 } = Astro.props;
 
 const heroPreload = typeof heroImage === 'string' ? { desktop: heroImage, mobile: heroImage } : heroImage;
@@ -94,9 +99,19 @@ if (pathSegments.length > 0) {
     <meta name="msapplication-TileColor" content="#E8261C" />
 
     <!-- Metadatos de Indexación y Rastreo para Buscadores Tradicionales y Motores de IA -->
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    {noindex ? (
+      <>
+        <meta name="robots" content="noindex, nofollow" />
+        <meta name="googlebot" content="noindex, nofollow" />
+        <meta name="bingbot" content="noindex, nofollow" />
+      </>
+    ) : (
+      <>
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+      </>
+    )}
     <meta name="author" content="BrandMeister Venezuela" />
     <meta name="publisher" content="BrandMeister Venezuela" />
     <meta name="geo.region" content="VE" />
@@ -161,7 +176,7 @@ if (pathSegments.length > 0) {
             "height": 1024
           },
           "image": `${siteOrigin}/assets/og-brandmeister-dmr-con-radio.jpg`,
-          "description": "Comunidad oficial de radioaficionados en la red BrandMeister DMR Master 734 en Venezuela. Talkgroups nacionales, circuitos, repetidores activos, monitor Petra y voz digital para radioafición.",
+          "description": defaultDescription,
           "slogan": "DMR con Radio",
           "address": {
             "@type": "PostalAddress",
@@ -184,7 +199,7 @@ if (pathSegments.length > 0) {
           "@id": `${siteOrigin}/#website`,
           "url": siteOrigin,
           "name": "BrandMeister Venezuela",
-          "description": "Portal oficial de la red digital DMR BrandMeister en Venezuela",
+          "description": description,
           "publisher": {
             "@id": `${siteOrigin}/#organization`
           },

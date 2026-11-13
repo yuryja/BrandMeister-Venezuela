@@ -6,6 +6,10 @@ Options -Indexes
   RewriteEngine On
   RewriteBase /
 
+  # Dominio único: www.brandmeisteryv.net -> brandmeisteryv.net (301, evita contenido duplicado)
+  RewriteCond %{HTTP_HOST} ^www\.brandmeisteryv\.net$ [NC]
+  RewriteRule ^ https://brandmeisteryv.net%{REQUEST_URI} [L,R=301]
+
   # Todo el sitio por HTTPS: sin esto la contraseña y la cookie del panel viajan sin cifrar
   # (localhost queda fuera para poder probar el sitio en local, donde no hay certificado)
   RewriteCond %{HTTPS} !=on
@@ -30,6 +34,9 @@ Options -Indexes
   # Codeplug CSV Generator & Sync
   RewriteRule ^api/codeplug-generator/?$ api/codeplug-generator.php [QSA,L]
   RewriteRule ^api/cron-radioid-sync/?$ api/cron-radioid-sync.php [QSA,L]
+
+  # Sitemap: páginas fijas + noticias publicadas de MySQL
+  RewriteRule ^sitemap\.xml$ /sitemap.php [L]
 
   # Blog dinámico: las noticias salen de MySQL a través de blog.php
   RewriteRule ^plantillas(/|$) - [F]
@@ -79,6 +86,10 @@ Options -Indexes
     Header set Cache-Control "no-cache"
   </FilesMatch>
   # Archivos con hash en el nombre (CSS, JS, fuentes): inmutables durante un año
+  # Panel y plantillas internas: nunca en el índice de los buscadores
+  <If "%{REQUEST_URI} =~ m#^/(admin|panel|plantillas)(/|$)#">
+    Header set X-Robots-Tag "noindex, nofollow"
+  </If>
   <If "%{REQUEST_URI} =~ m#^/_astro/#">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </If>

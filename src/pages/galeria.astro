@@ -6,7 +6,7 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout
   heroImage={{ desktop: '/assets/news-motorola-bg.webp', mobile: '/assets/news-motorola-bg-m.webp' }}
-  title="Galería · Fotos y Videos DMR · BrandMeister Venezuela"
+  title="Galería de Fotos y Videos DMR · BrandMeister Venezuela"
   description="Fotografías de campo, montajes en repetidores de cerros venezolanos, instalación de antenas y hotspots DMR. La comunidad radioaficionada BrandMeister Venezuela en imágenes."
 >
   <Fragment slot="head">
@@ -705,7 +705,7 @@ import Layout from '../layouts/Layout.astro';
       carouselCounter.textContent = `${currentCarouselIndex + 1} / ${carousel.length}`;
       modalMediaWrap.innerHTML = `
         <div class="carousel-slide-view">
-          <img src="${escapeHtml(safeUrl(slide.url))}" alt="Foto ${currentCarouselIndex + 1}" class="lightbox-img" />
+          <img src="${escapeHtml(safeUrl(slide.url))}" alt="Foto ${currentCarouselIndex + 1} de la galería de BrandMeister Venezuela" class="lightbox-img" />
           ${slide.caption ? `<div class="slide-caption-bar">${escapeHtml(slide.caption)}</div>` : ''}
         </div>`;
 
