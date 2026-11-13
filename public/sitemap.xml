@@ -101,6 +101,19 @@
     </image:image>
   </url>
 
+  <!-- Preguntas Frecuentes (FAQ) sobre DMR y BrandMeister -->
+  <url>
+    <loc>https://brandmeisteryv.net/faq/</loc>
+    <lastmod>2026-11-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <image:image>
+      <image:loc>https://brandmeisteryv.net/assets/news-motorola-bg.webp</image:loc>
+      <image:title>Preguntas Frecuentes sobre DMR - BrandMeister Venezuela</image:title>
+      <image:caption>Respuestas técnicas sobre DMR, repetidores, hotspots, slots y operación sin internet</image:caption>
+    </image:image>
+  </url>
+
   <!-- Noticias, Comunicados y Artículos Técnicos (Blog — índice) -->
   <!-- Los artículos individuales se indexan en /api/sitemap-blog.php -->
   <url>

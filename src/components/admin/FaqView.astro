@@ -1,0 +1,144 @@
+---
+// Vista de Preguntas Frecuentes (FAQ) en el panel de administración
+// Permite edición ágil en Markdown sincronizada con MySQL y Schema.org
+---
+
+<section id="view-faqs" class="wp-view">
+  <div class="view-header">
+    <div>
+      <h1 class="view-title">Preguntas Frecuentes (FAQ)</h1>
+      <p class="view-subtitle" style="margin: 0.25rem 0 0; font-size: 0.88rem; color: var(--text-muted);">
+        Edición ágil en Markdown. Cada cambio actualiza la vista pública, la base de datos y los microdatos Schema.org para Google.
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+      <a href="/faq" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" title="Abrir página pública en una nueva pestaña">
+        Ver en el portal ↗
+      </a>
+      <button type="button" id="btn-reload-faqs" class="btn btn-secondary btn-sm" title="Descartar cambios no guardados y recargar">
+        Recargar
+      </button>
+      <button type="button" id="btn-save-faqs" class="btn btn-primary">
+        Guardar Cambios
+      </button>
+    </div>
+  </div>
+
+  <div id="faqs-notice"></div>
+
+  <div class="faqs-admin-wrap">
+    <!-- Instrucciones de formato -->
+    <div class="faqs-hero-info">
+      <strong>Instrucciones de formato Markdown:</strong>
+      Usa <code>## Categoría</code> para agrupar temas (ej. <code>## Conceptos Fundamentales</code>) y <code>### Pregunta</code> para cada pregunta. Todo el texto siguiente es la respuesta explicativa (soporta listas <code>- item</code>, negritas <code>**texto**</code>, código <code>`código`</code> y enlaces).
+    </div>
+
+    <!-- Barra de estado y contadores -->
+    <div class="faqs-stats-bar">
+      <div class="faqs-stat-badges">
+        <span class="faqs-stat-pill" id="faqs-stat-questions">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <strong id="faqs-count-val">0</strong> preguntas
+        </span>
+        <span class="faqs-stat-pill" id="faqs-stat-categories">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <strong id="faqs-cats-val">0</strong> categorías
+        </span>
+        <span class="faqs-stat-pill is-live" id="faqs-db-badge">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+          Sincronizado con MySQL
+        </span>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--text-faint);" id="faqs-char-count">
+        0 caracteres
+      </div>
+    </div>
+
+    <!-- Pestañas de modo -->
+    <nav class="faqs-tabs-nav" aria-label="Modo de visualización de FAQs">
+      <button type="button" class="faqs-tab-btn is-active" data-faq-tab="editor">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+        Editor Markdown
+      </button>
+      <button type="button" class="faqs-tab-btn" data-faq-tab="preview">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        Vista Previa Interactiva
+      </button>
+      <button type="button" class="faqs-tab-btn" data-faq-tab="table">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+        Resumen en Tabla
+      </button>
+    </nav>
+
+    <!-- Panel 1: Editor Markdown -->
+    <div id="faqs-panel-editor" class="faqs-tab-panel">
+      <div class="faqs-toolbar" role="toolbar" aria-label="Herramientas Markdown">
+        <button type="button" class="faqs-toolbar-btn" data-action="insert-cat" title="Añadir nueva categoría">
+          <strong>+ Categoría</strong>
+        </button>
+        <button type="button" class="faqs-toolbar-btn" data-action="insert-q" title="Añadir nueva pregunta">
+          <strong>+ Pregunta</strong>
+        </button>
+        <div class="faqs-toolbar-divider" aria-hidden="true"></div>
+        <button type="button" class="faqs-toolbar-btn" data-action="bold" title="Texto en Negrita">
+          <strong>B</strong> Negrita
+        </button>
+        <button type="button" class="faqs-toolbar-btn" data-action="italic" title="Texto en Cursiva">
+          <em>I</em> Cursiva
+        </button>
+        <button type="button" class="faqs-toolbar-btn" data-action="list" title="Lista con viñetas">
+          • Lista
+        </button>
+        <button type="button" class="faqs-toolbar-btn" data-action="code" title="Código en línea">
+          &lt;/&gt; Código
+        </button>
+        <button type="button" class="faqs-toolbar-btn" data-action="link" title="Enlace web">
+          🔗 Enlace
+        </button>
+        <div class="faqs-toolbar-divider" aria-hidden="true"></div>
+        <button type="button" class="faqs-toolbar-btn" data-action="copy-md" title="Copiar todo el Markdown al portapapeles">
+          📋 Copiar MD
+        </button>
+        <button type="button" class="faqs-toolbar-btn" data-action="download-md" title="Descargar como archivo .md">
+          💾 Descargar .md
+        </button>
+      </div>
+      <textarea
+        id="faqs-markdown-input"
+        class="faqs-editor-area"
+        placeholder="Cargando preguntas frecuentes desde el servidor..."
+        spellcheck="false"
+      ></textarea>
+    </div>
+
+    <!-- Panel 2: Vista Previa Interactiva -->
+    <div id="faqs-panel-preview" class="faqs-tab-panel" hidden>
+      <div class="faqs-preview-wrap" id="faqs-preview-body">
+        <p style="color: var(--text-muted); text-align: center; padding: 2rem;">Cargando vista previa interactiva…</p>
+      </div>
+    </div>
+
+    <!-- Panel 3: Resumen en Tabla -->
+    <div id="faqs-panel-table" class="faqs-tab-panel" hidden>
+      <div class="faqs-table-wrap">
+        <table class="wp-list-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th style="width: 220px;">Categoría</th>
+              <th>Pregunta</th>
+              <th style="width: 120px; text-align: center;">Longitud</th>
+            </tr>
+          </thead>
+          <tbody id="faqs-table-body">
+            <tr>
+              <td colspan="4" class="table-empty" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                Cargando datos...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

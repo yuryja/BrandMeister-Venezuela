@@ -1,0 +1,897 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Metadatos de la página
+const metaTitle = "Preguntas Frecuentes (FAQ) sobre DMR · BrandMeister Venezuela";
+const metaDescription = "Respuestas claras a dudas técnicas sobre la red digital DMR en Venezuela: repetidores, frecuencias, hotspots MMDVM, slots TDMA y si necesitas internet para operar.";
+
+// Catálogo pre-renderizado para indexación SEO inmediata (Googlebot no espera JS)
+const staticFaqs = [
+  {
+    category: "Conceptos Fundamentales",
+    question: "¿Es necesario tener internet para usar DMR?",
+    isKey: true,
+    badge: "Pregunta Frecuente Principal",
+    answerHtml: `<p><strong>No, no es obligatorio tener internet para usar DMR.</strong></p>
+<p>El estándar <strong>DMR (Digital Mobile Radio Tier II)</strong> es, ante todo, un protocolo de <strong>radiofrecuencia pura (RF)</strong>. Dos radios portátiles o móviles DMR transmiten y reciben paquetes de voz digital modulados en <strong>4FSK</strong> directamente por el aire, de equipo a equipo, exactamente igual que un radio analógico en FM.</p>
+<ul>
+  <li><strong>Modo Directo / Simplex (Radio a Radio sin Internet):</strong> Dos o más operadores en una montaña, en carretera o en una zona de emergencia sin cobertura celular ni electricidad pueden comunicarse en cualquier frecuencia simplex autorizada (como <code>146.550 MHz</code> en VHF o <code>436.550 MHz</code> en UHF) sin requerir internet, sin repetidor y sin servidor alguno.</li>
+  <li><strong>A través de Repetidores Físicos Locales (RF Pura):</strong> Si te encuentras dentro del área de cobertura de un repetidor físico (por ejemplo, en Caracas con <strong>YV5DMR</strong> en VHF o <strong>YV5VE</strong> en UHF), tu radio se comunica por ondas de radio directas con la torre del cerro. Incluso si el repetidor perdiera su enlace a internet, los operadores locales pueden continuar comunicándose entre sí a través del repetidor por RF.</li>
+  <li><strong>¿Cuándo SÍ se utiliza internet?:</strong> Internet interviene únicamente como <strong>medio de transporte troncal (Backhaul IP)</strong> para interconectar repetidores distantes entre ciudades o países (la red mundial BrandMeister) o cuando el operador utiliza en su casa un <strong>Hotspot personal (MMDVM / Pi-Star)</strong>.</li>
+</ul>`
+  },
+  {
+    category: "Conceptos Fundamentales",
+    question: "¿Puedo comunicarme entre un radio analógico y uno digital DMR en la misma frecuencia?",
+    answerHtml: `<p><strong>No de forma directa por radiofrecuencia.</strong></p>
+<p>Aunque ambos radios operen en la misma frecuencia exacta (por ejemplo, <code>146.550 MHz</code>), el tipo de modulación es completamente distinto:</p>
+<ul>
+  <li>El radio analógico modula en <strong>FM convencional</strong>.</li>
+  <li>El radio DMR modula un flujo binario en <strong>4FSK</strong> codificado por el vocoder <strong>AMBE+2</strong>.</li>
+</ul>
+<p>En un radio analógico solo escucharás ruido digital estridente. Solo es posible cruzarlos mediante repetidores o servidores que tengan habilitadas pasarelas mixtas analógico-digitales (puentes IP).</p>`
+  },
+  {
+    category: "Conceptos Fundamentales",
+    question: "¿Por qué la batería de un radio dura hasta un 40% más en DMR que en analógico?",
+    answerHtml: `<p>En FM analógica, el transmisor de potencia emite radiación de forma continua durante toda tu intervención.</p>
+<p>En <strong>DMR Tier II</strong>, gracias a la tecnología <strong>TDMA (Time Division Multiple Access)</strong>, el canal se divide en dos ranuras de tiempo de <strong>30 milisegundos</strong>. Cuando transmites en Slot 1, tu radio enciende la etapa de amplificación durante 30 ms y <strong>la apaga durante los siguientes 30 ms</strong> mientras corresponde el turno al Slot 2.</p>
+<p>Este ciclo de trabajo del <strong>50% encendido / 50% apagado</strong> reduce a la mitad el consumo eléctrico y la temperatura del equipo, otorgando hasta un 40% más de autonomía.</p>`
+  },
+  {
+    category: "Conceptos Fundamentales",
+    question: "¿Qué es la regla de los 3 segundos en DMR y por qué es obligatoria?",
+    answerHtml: `<p>Consiste en esperar al menos <strong>3 segundos</strong> después de que tu corresponsal suelta el PTT antes de comenzar a hablar tú.</p>
+<p>Es fundamental porque:</p>
+<ol>
+  <li>Permite que los servidores IP y repetidores liberen la portadora troncal.</li>
+  <li>Concede una ventana de tiempo indispensable para que estaciones con tráfico urgente o de emergencia (como la Red Nacional de Emergencia YV5RNE en TG 734911) puedan interrumpir.</li>
+  <li>En DMR, si dos personas transmiten a la vez, no se escuchan montadas: las tramas se cancelan y se produce silencio.</li>
+</ol>`
+  },
+  {
+    category: "Conceptos Fundamentales",
+    question: "¿Cómo funciona el canal de eco / Parrot (9990) para probar mi transmisión?",
+    answerHtml: `<p>Permite verificar tu modulación y audio sin molestar a otros colegas:</p>
+<ol>
+  <li>En tu radio, selecciona o digita una <strong>Llamada Privada (Private Call)</strong> al ID <strong><code>9990</code></strong>.</li>
+  <li>Pulsa PTT en tu repetidor o hotspot e identifícate: <em>"YV5XXX haciendo prueba de modulación en 9990"</em>.</li>
+  <li>Suelta el PTT. El servidor BrandMeister te devolverá tu propia grabación segundos después exactamente como te escuchan los demás.</li>
+</ol>`
+  },
+  {
+    category: "Arquitectura de Red",
+    question: "¿Cuál es la diferencia técnica entre Time Slot 1 (TS1) y Time Slot 2 (TS2) en DMR?",
+    answerHtml: `<p>DMR divide una misma frecuencia en dos ranuras temporales independientes:</p>
+<ul>
+  <li><strong>Time Slot 1 (Slot 1):</strong> Reservado en BrandMeister Venezuela para <strong>tráfico nacional e internacional de amplia cobertura</strong>: TG 734 (Nacional), TG 734911 (Emergencias EMCOM) y canales globales (TG 91, TG 913).</li>
+  <li><strong>Time Slot 2 (Slot 2):</strong> Reservado para <strong>tráfico regional, local y comunitario</strong>: los 9 circuitos regionales venezolanos (TG 7341-7349), Radio Club Venezolano (TG 73473), canales tácticos (TG 7340/73499) y hotspots personales.</li>
+</ul>`
+  },
+  {
+    category: "Arquitectura de Red",
+    question: "¿Qué es un Talkgroup (TG) y cómo funciona la activación estática vs dinámica?",
+    answerHtml: `<p>Un <strong>Talkgroup (TG)</strong> es un canal o grupo de conversación virtual identificado por un número.</p>
+<ul>
+  <li><strong>Talkgroups Estáticos:</strong> Están permanentemente abiertos en el repetidor. En Venezuela, el <strong>TG 734</strong> está anclado de forma estática en todos los repetidores oficiales.</li>
+  <li><strong>Talkgroups Dinámicos (Bajo Demanda):</strong> Se activan en el repetidor cuando pulsas el PTT en ese grupo durante 1 segundo. El servidor mantiene enlazado el canal durante 10 a 15 minutos; si no hay transmisiones en ese lapso, se desconecta automáticamente.</li>
+</ul>`
+  },
+  {
+    category: "Arquitectura de Red",
+    question: "¿Cuándo y cómo debo hacer QSY (cambio de canal) desde el Talkgroup 734?",
+    answerHtml: `<p>El <strong>TG 734</strong> es para llamada y encuentro general (CQ) a escala nacional. Si tu contacto durará más de 2 o 3 minutos, lo correcto es invitar a tu corresponsal a pasar a un circuito regional en Slot 2 (como TG 7345 en la región central o TG 7340 táctico) para dejar libre el canal nacional para otros colegas.</p>`
+  },
+  {
+    category: "Arquitectura de Red",
+    question: "¿Qué es el Color Code (CC) y por qué usamos Color Code 1 (CC1) en toda Venezuela?",
+    answerHtml: `<p>El <strong>Color Code (CC)</strong> equivale al subtono CTCSS digital. En la red BrandMeister Venezuela se ha estandarizado el <strong>Color Code 1 (CC1)</strong> en todos los repetidores y puntos de acceso para mantener la compatibilidad y facilitar la programación uniforme de los codeplugs.</p>`
+  },
+  {
+    category: "Repetidores y Cobertura",
+    question: "¿Cómo me conecto a los repetidores DMR de Caracas (YV5DMR en VHF y YV5VE en UHF)?",
+    answerHtml: `<p>En Caracas operan dos repetidores principales:</p>
+<ul>
+  <li><strong>YV5DMR (ID 734500) en VHF:</strong> TX <code>147.240 MHz</code> / RX <code>147.840 MHz</code> (+0.600 MHz), Color Code 1. Emplazamiento pionero en El Ávila con cobertura en Gran Caracas y Valles del Tuy.</li>
+  <li><strong>YV5VE (ID 734014) en UHF:</strong> TX <code>439.600 MHz</code> / RX <code>434.600 MHz</code> (-5.000 MHz), Color Code 1. Alta penetración urbana metropolitana.</li>
+</ul>`
+  },
+  {
+    category: "Repetidores y Cobertura",
+    question: "¿Qué repetidores cubren Valencia, La Guaira, los Llanos y el Occidente de Venezuela?",
+    answerHtml: `<ul>
+  <li><strong>La Guaira:</strong> YV5CBO (ID 734016) en VHF <code>147.150 MHz</code> (+0.600 MHz), CC1.</li>
+  <li><strong>Valencia / Carabobo:</strong> YV4EGG (ID 734013) en VHF <code>146.700 MHz</code> (-0.600 MHz), CC1.</li>
+  <li><strong>Llanos (Guárico):</strong> Altagracia YV5VE (<code>147.390 MHz</code>), Cerro Portachuelo YV5VE (<code>146.820 MHz</code>), Platillón YV4KWT (<code>147.090 MHz</code>).</li>
+  <li><strong>Zulia (Costa Oriental):</strong> YV1GDQ (ID 734015) en UHF <code>439.600 MHz</code> (-5.000 MHz), CC1.</li>
+</ul>
+<p>Consulta el mapa y telemetría en <a href="/repetidores">brandmeisteryv.net/repetidores</a>.</p>`
+  },
+  {
+    category: "Repetidores y Cobertura",
+    question: "¿Qué son los puntos de acceso comunitarios de alta potencia (Araure y La Boyera)?",
+    answerHtml: `<p>Son estaciones base comunitarias con radios de 25 a 50 vatios y antenas omnidireccionales elevadas que operan en <strong>frecuencia simplex VHF 146.550 MHz (CC1)</strong> en <strong>Araure (YV3ARO)</strong> y en <strong>La Boyera / El Hatillo (YV5FBP)</strong>, permitiendo que cualquier radioaficionado con un radio portátil de mano acceda a la red BrandMeister sin tener un hotspot propio.</p>`
+  },
+  {
+    category: "Hotspots y Equipos",
+    question: "¿Qué es un Hotspot MMDVM (Pi-Star / OpenGD77 / WPSD) y cuándo necesito uno?",
+    answerHtml: `<p>Un Hotspot es un micro-punto de acceso digital de baja potencia (10-20 mW) conectado a internet que emite en tu hogar o vehículo. Es ideal si vives fuera del radio de cobertura de los repetidores físicos o si deseas explorar salas y talkgroups internacionales.</p>`
+  },
+  {
+    category: "Hotspots y Equipos",
+    question: "¿Cuáles son las frecuencias y el servidor máster recomendados para hotspots en Venezuela?",
+    answerHtml: `<ul>
+  <li><strong>Servidor Máster:</strong> <code>7301.master.brandmeister.network</code> (BM Master Chile, mínima latencia hacia Venezuela).</li>
+  <li><strong>Frecuencia VHF Simplex:</strong> <code>146.550 MHz</code> (CC1, Slot 2).</li>
+  <li><strong>Frecuencia UHF Simplex:</strong> <code>436.550 MHz</code> (CC1, Slot 2).</li>
+  <li><strong>Contraseña:</strong> Tu <em>Hotspot Security Password</em> configurada en el SelfCare de <a href="https://brandmeister.network/" target="_blank" rel="noopener">brandmeister.network</a>.</li>
+</ul>`
+  },
+  {
+    category: "Hotspots y Equipos",
+    question: "¿Qué es un Codeplug y cómo lo descargo para mi radio (AnyTone, Baofeng, Retevis, OpenGD77)?",
+    answerHtml: `<p>Es el archivo de configuración que carga en la memoria de tu radio todos los repetidores, talkgroups, canales y frecuencias oficiales. Puedes generar y descargar el tuyo listo para importar en <a href="/generador-csv">brandmeisteryv.net/generador-csv</a>.</p>`
+  },
+  {
+    category: "Hotspots y Equipos",
+    question: "¿Puedo escuchar las conversaciones de BrandMeister Venezuela sin tener radio (Hoseline / Petra)?",
+    answerHtml: `<p><strong>Sí, de forma gratuita desde tu navegador web:</strong></p>
+<ul>
+  <li><strong>Audio en Vivo (Hoseline):</strong> En <a href="/">brandmeisteryv.net</a> pulsa el botón de audio en la cabecera para escuchar el TG 734 en tiempo real.</li>
+  <li><strong>Telemetría Petra:</strong> En <a href="/petra">brandmeisteryv.net/petra</a> puedes ver quién está en el aire, duración y estadísticas de la red en directo.</li>
+</ul>`
+  }
+];
+
+// Categorías únicas
+const categories = Array.from(new Set(staticFaqs.map(f => f.category)));
+---
+
+<Layout
+  heroImage={{ desktop: '/assets/news-motorola-bg.webp', mobile: '/assets/news-motorola-bg-m.webp' }}
+  title={metaTitle}
+  description={metaDescription}
+>
+  <Fragment slot="head">
+    <!-- Schema.org FAQPage para Google Rich Results -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "@id": "https://brandmeisteryv.net/faq/#faqpage",
+      "mainEntity": staticFaqs.map(f => ({
+        "@type": "Question",
+        "name": f.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": f.answerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+        }
+      }))
+    })} />
+  </Fragment>
+
+  <main class="faq-page">
+    <!-- Cabecera Oficial Experiencia DMR (conforme a AGENTS.md) -->
+    <section class="faq-hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span>Experiencia DMR · Base de Conocimiento</span>
+          </div>
+          <h1 class="hero-title">Preguntas Frecuentes</h1>
+          <p class="hero-subtitle">
+            Respuestas técnicas claras y verificadas sobre la red <strong>DMR en Venezuela</strong>: uso de repetidores, configuración de hotspots, slots TDMA, talkgroups y buenas prácticas operativas.
+          </p>
+          <div class="hero-meta">
+            <span>{staticFaqs.length} Preguntas Verificadas</span> · <span>4 Categorías Técnicas</span> · <span>Red TG 734</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Franja divisoria tricolor BrandMeister -->
+    <div class="bm-stripe"></div>
+
+    <!-- Contenedor Principal de Preguntas -->
+    <section class="faq-section section-padding">
+      <div class="container">
+
+        <!-- Barra interactiva: Buscador en vivo y Contador -->
+        <div class="faq-toolbar">
+          <div class="faq-search-wrap">
+            <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="text"
+              id="faq-search-input"
+              class="faq-search-input"
+              placeholder="Buscar por palabra clave: internet, hotspot, slot, repetidor, caracas..."
+              aria-label="Buscar en preguntas frecuentes"
+              autocomplete="off"
+            />
+            <button type="button" id="faq-search-clear" class="btn-clear-search" aria-label="Limpiar búsqueda" hidden>
+              ✕
+            </button>
+          </div>
+
+          <div class="faq-search-stats" id="faq-search-stats">
+            Mostrando <strong>{staticFaqs.length}</strong> preguntas
+          </div>
+        </div>
+
+        <!-- Filtros por Categoría -->
+        <div class="faq-categories-bar" id="faq-categories-bar" role="tablist" aria-label="Categorías de preguntas frecuentes">
+          <button type="button" class="category-pill is-active" data-cat="all" role="tab" aria-selected="true">
+            Todas ({staticFaqs.length})
+          </button>
+          {categories.map((cat) => (
+            <button type="button" class="category-pill" data-cat={cat} role="tab" aria-selected="false">
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <!-- Lista de Acordeones -->
+        <div class="faq-accordion-list" id="faq-accordion-list">
+          {staticFaqs.map((faq, index) => (
+            <article
+              class={`faq-item ${faq.isKey ? 'is-key-faq' : ''}`}
+              data-category={faq.category}
+              data-question={faq.question.toLowerCase()}
+              id={`faq-item-${index}`}
+            >
+              <button
+                type="button"
+                class="faq-question-btn"
+                aria-expanded={index === 0 ? "true" : "false"}
+                aria-controls={`faq-answer-${index}`}
+                id={`faq-btn-${index}`}
+              >
+                <div class="question-main">
+                  {faq.badge && (
+                    <span class="key-badge">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                      {faq.badge}
+                    </span>
+                  )}
+                  <h3 class="question-title">{faq.question}</h3>
+                  <span class="faq-category-tag">{faq.category}</span>
+                </div>
+                <div class="toggle-indicator" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
+              </button>
+
+              <div
+                id={`faq-answer-${index}`}
+                class={`faq-answer-panel ${index === 0 ? 'is-open' : ''}`}
+                role="region"
+                aria-labelledby={`faq-btn-${index}`}
+                style={index === 0 ? "" : "display: none;"}
+              >
+                <div class="answer-content" set:html={faq.answerHtml} />
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <!-- Estado vacío si la búsqueda no arroja resultados -->
+        <div class="faq-no-results" id="faq-no-results" hidden>
+          <div class="no-results-icon">🔍</div>
+          <h3>No encontramos preguntas con ese término</h3>
+          <p>Intenta con otra palabra clave como <em>"internet"</em>, <em>"repetidor"</em>, <em>"hotspot"</em> o <em>"ranura"</em>.</p>
+          <button type="button" class="btn btn-outline" id="btn-reset-filters">Restablecer Búsqueda</button>
+        </div>
+
+        <!-- Tarjeta de Soporte y Contacto -->
+        <div class="faq-support-box">
+          <div class="support-badge">¿Tienes otra consulta técnica?</div>
+          <h2 class="support-title">¿Necesitas soporte para tu repetidor o hotspot?</h2>
+          <p class="support-desc">
+            Los Sysops de BrandMeister Venezuela estamos a disposición para ayudarte a programar tu radio, coordinar frecuencias de nuevos repetidores o afinar tu punto de acceso.
+          </p>
+          <div class="support-actions">
+            <a href="/contacto" class="btn-support-contact">
+              <span>Formulario de Contacto</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </a>
+            <a href="https://t.me/+_NUvASaZZGxhYTkx" target="_blank" rel="noopener noreferrer" class="btn-support-telegram">
+              <span>Grupo Oficial Telegram</span>
+              <span class="ext-arrow">↗</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('faq-search-input');
+    const clearBtn = document.getElementById('faq-search-clear');
+    const statsEl = document.getElementById('faq-search-stats');
+    const noResults = document.getElementById('faq-no-results');
+    const resetBtn = document.getElementById('btn-reset-filters');
+    const categoryButtons = document.querySelectorAll('#faq-categories-bar .category-pill');
+    const items = document.querySelectorAll('#faq-accordion-list .faq-item');
+
+    let currentCategory = 'all';
+    let currentSearch = '';
+
+    // Manejo de acordeones (abrir / cerrar con animación suave y ARIA)
+    items.forEach((item) => {
+      const btn = item.querySelector('.faq-question-btn');
+      const panel = item.querySelector('.faq-answer-panel');
+
+      btn?.addEventListener('click', () => {
+        const isOpen = btn.getAttribute('aria-expanded') === 'true';
+        if (isOpen) {
+          btn.setAttribute('aria-expanded', 'false');
+          panel.style.display = 'none';
+          panel.classList.remove('is-open');
+        } else {
+          btn.setAttribute('aria-expanded', 'true');
+          panel.style.display = 'block';
+          panel.classList.add('is-open');
+        }
+      });
+    });
+
+    // Función de filtrado reactivo
+    const filterFaqs = () => {
+      let visibleCount = 0;
+      const term = currentSearch.toLowerCase().trim();
+
+      items.forEach((item) => {
+        const itemCat = item.getAttribute('data-category') || '';
+        const questionText = item.querySelector('.question-title')?.textContent?.toLowerCase() || '';
+        const answerText = item.querySelector('.answer-content')?.textContent?.toLowerCase() || '';
+
+        const matchesCat = currentCategory === 'all' || itemCat === currentCategory;
+        const matchesSearch = term === '' || questionText.includes(term) || answerText.includes(term);
+
+        if (matchesCat && matchesSearch) {
+          item.style.display = 'block';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      if (statsEl) {
+        statsEl.innerHTML = `Mostrando <strong>${visibleCount}</strong> ${visibleCount === 1 ? 'pregunta' : 'preguntas'}`;
+      }
+
+      if (noResults) {
+        noResults.hidden = visibleCount > 0;
+      }
+    };
+
+    // Búsqueda por texto
+    searchInput?.addEventListener('input', (e) => {
+      currentSearch = e.target.value;
+      if (clearBtn) clearBtn.hidden = currentSearch === '';
+      filterFaqs();
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      currentSearch = '';
+      clearBtn.hidden = true;
+      filterFaqs();
+      searchInput?.focus();
+    });
+
+    // Filtro por pestañas de categoría
+    categoryButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        categoryButtons.forEach((b) => {
+          b.classList.remove('is-active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        btn.classList.add('is-active');
+        btn.setAttribute('aria-selected', 'true');
+        currentCategory = btn.getAttribute('data-cat') || 'all';
+        filterFaqs();
+      });
+    });
+
+    resetBtn?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      currentSearch = '';
+      if (clearBtn) clearBtn.hidden = true;
+      categoryButtons.forEach((b) => {
+        b.classList.toggle('is-active', b.getAttribute('data-cat') === 'all');
+        b.setAttribute('aria-selected', b.getAttribute('data-cat') === 'all' ? 'true' : 'false');
+      });
+      currentCategory = 'all';
+      filterFaqs();
+    });
+  });
+</script>
+
+<style>
+  .faq-page {
+    background-color: var(--bg-page);
+    min-height: 100vh;
+  }
+
+  /* ====================================================================
+     CABECERA OFICIAL EXPERIENCIA DMR (Regla estricta AGENTS.md)
+     ==================================================================== */
+  .faq-hero {
+    position: relative;
+    min-height: 50vh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    background-image:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.94) 45%, rgba(255, 255, 255, 0.65) 75%, rgba(255, 255, 255, 0.2) 100%),
+      linear-gradient(0deg, #FAFAFA 0%, rgba(255, 255, 255, 0.8) 12%, transparent 35%),
+      url('/assets/news-motorola-bg.webp');
+    background-size: cover;
+    background-position: right center;
+    background-repeat: no-repeat;
+    padding: 3.5rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .faq-hero {
+      min-height: 50vh;
+      background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 60%, rgba(255, 255, 255, 0.88) 100%),
+        url('/assets/news-motorola-bg-m.webp');
+      background-position: center top;
+      background-size: cover;
+      padding: 2.5rem 0;
+    }
+  }
+
+  .hero-content {
+    max-width: 820px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--bm-red);
+    border: 1px solid rgba(232, 38, 28, 0.45);
+    background: rgba(232, 38, 28, 0.04);
+    padding: 0.35rem 0.9rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .hero-title {
+    font-family: var(--font-heading);
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.15;
+    margin-bottom: 0.85rem;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.02rem, 1.8vw, 1.2rem);
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero-meta {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  /* Franja divisoria tricolor BrandMeister */
+  .bm-stripe {
+    height: 3px;
+    background: linear-gradient(90deg, #E8261C 0%, #EE6C1F 50%, #F2A93B 100%);
+    width: 100%;
+  }
+
+  .section-padding {
+    padding: 3.5rem 0 5rem;
+  }
+
+  .container {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Barra de herramientas / buscador */
+  .faq-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .faq-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 290px;
+    max-width: 640px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 1.1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  .faq-search-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--font-body);
+    font-size: 0.98rem;
+    padding: 0.9rem 2.8rem 0.9rem 2.9rem;
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-sm);
+    color: var(--text-main);
+    transition: all 0.2s ease;
+  }
+
+  .faq-search-input:focus {
+    outline: none;
+    border-color: var(--bm-orange);
+    box-shadow: 0 0 0 3px rgba(238, 108, 31, 0.15);
+  }
+
+  .btn-clear-search {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #E2E8F0;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
+    color: #475569;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .faq-search-stats {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+  }
+
+  /* Pestañas de categorías */
+  .faq-categories-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .category-pill {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 0.55rem 1.15rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border-subtle);
+    background: #FFFFFF;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .category-pill:hover {
+    border-color: rgba(238, 108, 31, 0.4);
+    color: var(--text-main);
+  }
+
+  .category-pill.is-active {
+    background: var(--bm-orange);
+    color: #FFFFFF;
+    border-color: var(--bm-orange);
+    box-shadow: 0 2px 8px rgba(238, 108, 31, 0.25);
+  }
+
+  /* Lista de acordeones */
+  .faq-accordion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 4rem;
+  }
+
+  .faq-item {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .faq-item:hover {
+    border-color: rgba(238, 108, 31, 0.35);
+    box-shadow: var(--shadow-md);
+  }
+
+  .faq-item.is-key-faq {
+    border-left: 4px solid var(--bm-red);
+  }
+
+  .faq-question-btn {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.35rem 1.75rem;
+    background: transparent;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .faq-question-btn:hover {
+    background: #FFFDF9;
+  }
+
+  .question-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .key-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--bm-red);
+    background: #FEE2E2;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    width: fit-content;
+    letter-spacing: 0.03em;
+  }
+
+  .question-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  .faq-category-tag {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .toggle-indicator {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #F8FAFC;
+    border: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bm-orange);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+  }
+
+  .faq-question-btn[aria-expanded="true"] .toggle-indicator {
+    transform: rotate(180deg);
+    background: #FFF7ED;
+    border-color: rgba(238, 108, 31, 0.3);
+  }
+
+  /* Panel de respuesta */
+  .faq-answer-panel {
+    border-top: 1px solid #F1F5F9;
+    background: #FFFFFF;
+  }
+
+  .answer-content {
+    padding: 1.5rem 1.75rem 1.75rem;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--text-muted);
+  }
+
+  .answer-content p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+
+  .answer-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .answer-content strong {
+    color: var(--text-main);
+  }
+
+  .answer-content ul,
+  .answer-content ol {
+    margin: 0.85rem 0 1.15rem;
+    padding-left: 1.5rem;
+  }
+
+  .answer-content li {
+    margin-bottom: 0.5rem;
+  }
+
+  .answer-content code {
+    background: #F1F5F9;
+    color: var(--bm-red);
+    font-family: monospace;
+    font-size: 0.9em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+
+  .answer-content a {
+    color: var(--bm-orange);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 600;
+  }
+
+  .answer-content a:hover {
+    color: var(--bm-red);
+  }
+
+  /* Estado sin resultados */
+  .faq-no-results {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    background: #FFFFFF;
+    border: 1px dashed var(--border-subtle);
+    border-radius: var(--radius-lg);
+    margin-bottom: 4rem;
+  }
+
+  .no-results-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .faq-no-results h3 {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+  }
+
+  .faq-no-results p {
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+  }
+
+  /* Tarjeta de Soporte */
+  .faq-support-box {
+    background: #FFFDF9;
+    border: 1px solid rgba(238, 108, 31, 0.25);
+    border-radius: var(--radius-lg);
+    padding: clamp(2rem, 4vw, 3rem);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .support-badge {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--bm-orange);
+    background: #FFEDD5;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-pill);
+    margin-bottom: 0.85rem;
+    letter-spacing: 0.04em;
+  }
+
+  .support-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 0.65rem;
+  }
+
+  .support-desc {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    max-width: 780px;
+    margin-bottom: 1.5rem;
+  }
+
+  .support-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .btn-support-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bm-orange);
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 0.92rem;
+    padding: 0.7rem 1.4rem;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-support-contact:hover {
+    background: var(--bm-red);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(232, 38, 28, 0.25);
+  }
+
+  .btn-support-telegram {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #FFFFFF;
+    color: #0284C7;
+    border: 1px solid #BAE6FD;
+    font-weight: 700;
+    font-size: 0.92rem;
+    padding: 0.7rem 1.4rem;
+    border-radius: var(--radius-pill);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-support-telegram:hover {
+    background: #F0F9FF;
+    border-color: #0284C7;
+  }
+
+  .ext-arrow {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+</style>
