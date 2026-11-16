@@ -1,0 +1,39 @@
+{
+  "actualizado": "2026-11-16T15:43:19.479Z",
+  "fuente": "RadioID.net · user.csv",
+  "columnas": [
+    "id",
+    "callsign",
+    "fname",
+    "surname",
+    "city",
+    "state",
+    "country"
+  ],
+  "alcances": {
+    "venezuela": {
+      "registros": 744,
+      "bytes": 42473,
+      "partes": [
+        "venezuela.tsv"
+      ]
+    },
+    "latam": {
+      "registros": 31646,
+      "bytes": 1647509,
+      "partes": [
+        "latam.tsv"
+      ]
+    },
+    "global": {
+      "registros": 317591,
+      "bytes": 16976661,
+      "partes": [
+        "global-1.tsv",
+        "global-2.tsv",
+        "global-3.tsv",
+        "global-4.tsv"
+      ]
+    }
+  }
+}
