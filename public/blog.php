@@ -128,6 +128,13 @@ if (!$pdo) {
 $slug = isset($_GET['slug']) ? preg_replace('/[^a-z0-9_-]/i', '', (string)$_GET['slug']) : '';
 $siteUrl = blog_site_url();
 
+// Si la petición del cliente incluyó explícitamente ?slug=... en la URL,
+// redirigir con 301 a la URL limpia con barra final para evitar duplicados en Google.
+if ($slug !== '' && strpos($_SERVER['REQUEST_URI'] ?? '', 'slug=') !== false) {
+    header('Location: ' . $siteUrl . '/blog/' . $slug . '/', true, 301);
+    exit;
+}
+
 // --------------------------------------------------------------------
 // Detalle de la noticia
 // --------------------------------------------------------------------
