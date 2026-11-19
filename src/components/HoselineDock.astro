@@ -61,22 +61,15 @@
 </div>
 
 <script>
-  import type { hoseline as HoselineInstance } from "../scripts/hoseline";
+  import { hoseline as HoselineInstance } from "../scripts/hoseline";
 
-  // El reproductor (WebSocket + msgpack + audio) no se carga con la página:
-  // se importa cuando el navegador está libre o al acercarse a un botón de audio.
-  let hoseline: typeof HoselineInstance | null = null;
-  let hoselineLoading: Promise<typeof HoselineInstance> | null = null;
+  // Instancia del reproductor Hoseline
+  const hoseline = HoselineInstance;
   let pendingVolume: number | null = null;
 
-  function loadHoseline(): Promise<typeof HoselineInstance> {
-    if (hoseline) return Promise.resolve(hoseline);
-    hoselineLoading ??= import("../scripts/hoseline").then((m) => {
-      hoseline = m.hoseline;
-      if (pendingVolume !== null) hoseline.setVolume(pendingVolume);
-      return hoseline;
-    });
-    return hoselineLoading;
+  function getHoseline() {
+    if (pendingVolume !== null) hoseline.setVolume(pendingVolume);
+    return Promise.resolve(hoseline);
   }
 
   // ── Desbloqueo de audio en móviles ────────────────────────────────────────
@@ -411,13 +404,13 @@
           sendAudioStop();
         }
       }
-      loadHoseline().then((player) => player.toggle(734));
+      getHoseline().then((player) => player.toggle(734));
     }
   });
 
   // Precarga anticipada bajo demanda: al acercar el cursor/dedo o enfocar un botón de audio
   const warmUp = (e: Event) => {
-    if ((e.target as HTMLElement | null)?.closest?.(".js-toggle-hoseline")) loadHoseline();
+    if ((e.target as HTMLElement | null)?.closest?.(".js-toggle-hoseline")) getHoseline();
   };
   document.addEventListener("pointerover", warmUp, { passive: true });
   document.addEventListener("touchstart", warmUp, { passive: true });

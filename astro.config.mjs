@@ -49,6 +49,11 @@ export default defineConfig({
     clientPrerender: true
   },
   vite: {
+    build: {
+      modulePreload: {
+        polyfill: false
+      }
+    },
     plugins: [phpDevServer()],
     server: {
       proxy: {
