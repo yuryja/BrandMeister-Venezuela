@@ -147,78 +147,93 @@ const formatDate = (ts: number, opts: Intl.DateTimeFormatOptions) => new Date(ts
 </section>
 
 <script is:inline>
-  (async () => {
+  (() => {
     const layout = document.getElementById('blog-preview-layout');
     if (!layout) return;
 
-    const escapeHtml = (value) =>
-      String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    const fecha = (ts, opts) => new Date(ts * 1000).toLocaleDateString('es-VE', opts);
+    const fetchLatestPosts = async () => {
+      const escapeHtml = (value) =>
+        String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      const fecha = (ts, opts) => new Date(ts * 1000).toLocaleDateString('es-VE', opts);
 
-    let posts = [];
-    try {
-      const res = await fetch('/api/posts.php?limit=4', { headers: { Accept: 'application/json' } });
-      if (res.ok) {
-        const data = await res.json();
-        posts = Array.isArray(data?.posts) ? data.posts : [];
+      let posts = [];
+      try {
+        const res = await fetch('/api/posts.php?limit=4', { headers: { Accept: 'application/json' } });
+        if (res.ok) {
+          const data = await res.json();
+          posts = Array.isArray(data?.posts) ? data.posts : [];
+        }
+      } catch {
+        posts = [];
       }
-    } catch {
-      posts = [];
+
+      // Si la API no retorna noticias (ej. entorno de desarrollo estático), mantenemos las prerenderizadas
+      if (!posts || !posts.length) return;
+
+      const destacada = posts.find((p) => p.featured) || posts[0];
+      const resto = posts.filter((p) => p.id !== destacada.id).slice(0, 3);
+
+      const autor = (p) => escapeHtml(p.author_callsign || p.author_name);
+      const hasImgDestacada = Boolean(destacada.image_url);
+
+      layout.innerHTML = `
+        <article class="featured-post ${hasImgDestacada ? 'has-bg-image' : ''}">
+          ${hasImgDestacada ? `<div class="post-bg-layer" style="background-image: url('${escapeHtml(destacada.image_url)}');" aria-hidden="true"></div>` : ''}
+          <div class="post-meta-top">
+            <span class="post-cat">${escapeHtml(destacada.category)}</span>
+            <span class="post-date">${fecha(destacada.published_ts, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            <span class="post-read">${escapeHtml(destacada.read_time)}</span>
+          </div>
+          <div class="featured-body">
+            <h3 class="featured-title"><a href="${escapeHtml(destacada.url)}">${escapeHtml(destacada.title)}</a></h3>
+            <p class="featured-excerpt">${escapeHtml(destacada.description)}</p>
+          </div>
+          <div class="post-author-row">
+            <span class="author-badge">
+              <strong>${escapeHtml(destacada.author_name)}</strong>
+              ${destacada.author_callsign ? `<span class="callsign-tag">${escapeHtml(destacada.author_callsign)}</span>` : ''}
+            </span>
+            <a href="${escapeHtml(destacada.url)}" class="read-more-link">
+              <span>Leer artículo completo</span>
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </article>
+        <div class="articles-stream">
+          ${resto.map((post) => {
+            const hasImg = Boolean(post.image_url);
+            return `
+              <article class="stream-article ${hasImg ? 'has-bg-image' : ''}">
+                ${hasImg ? `<div class="post-bg-layer" style="background-image: url('${escapeHtml(post.image_url)}');" aria-hidden="true"></div>` : ''}
+                <div class="stream-content">
+                  <div class="post-meta-top">
+                    <span class="post-cat">${escapeHtml(post.category)}</span>
+                    <span class="post-date">${fecha(post.published_ts, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                  <h4 class="stream-title"><a href="${escapeHtml(post.url)}">${escapeHtml(post.title)}</a></h4>
+                  <p class="stream-excerpt">${escapeHtml(post.description)}</p>
+                  <div class="stream-footer">
+                    <span class="stream-author">${autor(post)}</span>
+                    <span class="stream-read">${escapeHtml(post.read_time)}</span>
+                  </div>
+                </div>
+              </article>`;
+          }).join('')}
+        </div>`;
+    };
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0]?.isIntersecting) {
+          observer.disconnect();
+          fetchLatestPosts();
+        }
+      }, { rootMargin: '300px 0px' });
+      const section = layout.closest('.blog-preview-section') || layout;
+      observer.observe(section);
+    } else {
+      setTimeout(fetchLatestPosts, 3500);
     }
-
-    // Si la API no retorna noticias (ej. entorno de desarrollo estático), mantenemos las prerenderizadas
-    if (!posts || !posts.length) return;
-
-    const destacada = posts.find((p) => p.featured) || posts[0];
-    const resto = posts.filter((p) => p.id !== destacada.id).slice(0, 3);
-
-    const autor = (p) => escapeHtml(p.author_callsign || p.author_name);
-    const hasImgDestacada = Boolean(destacada.image_url);
-
-    layout.innerHTML = `
-      <article class="featured-post ${hasImgDestacada ? 'has-bg-image' : ''}">
-        ${hasImgDestacada ? `<div class="post-bg-layer" style="background-image: url('${escapeHtml(destacada.image_url)}');" aria-hidden="true"></div>` : ''}
-        <div class="post-meta-top">
-          <span class="post-cat">${escapeHtml(destacada.category)}</span>
-          <span class="post-date">${fecha(destacada.published_ts, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-          <span class="post-read">${escapeHtml(destacada.read_time)}</span>
-        </div>
-        <div class="featured-body">
-          <h3 class="featured-title"><a href="${escapeHtml(destacada.url)}">${escapeHtml(destacada.title)}</a></h3>
-          <p class="featured-excerpt">${escapeHtml(destacada.description)}</p>
-        </div>
-        <div class="post-author-row">
-          <span class="author-badge">
-            <strong>${escapeHtml(destacada.author_name)}</strong>
-            ${destacada.author_callsign ? `<span class="callsign-tag">${escapeHtml(destacada.author_callsign)}</span>` : ''}
-          </span>
-          <a href="${escapeHtml(destacada.url)}" class="read-more-link">
-            <span>Leer artículo completo</span>
-            <span aria-hidden="true">→</span>
-          </a>
-        </div>
-      </article>
-      <div class="articles-stream">
-        ${resto.map((post) => {
-          const hasImg = Boolean(post.image_url);
-          return `
-            <article class="stream-article ${hasImg ? 'has-bg-image' : ''}">
-              ${hasImg ? `<div class="post-bg-layer" style="background-image: url('${escapeHtml(post.image_url)}');" aria-hidden="true"></div>` : ''}
-              <div class="stream-content">
-                <div class="post-meta-top">
-                  <span class="post-cat">${escapeHtml(post.category)}</span>
-                  <span class="post-date">${fecha(post.published_ts, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                </div>
-                <h4 class="stream-title"><a href="${escapeHtml(post.url)}">${escapeHtml(post.title)}</a></h4>
-                <p class="stream-excerpt">${escapeHtml(post.description)}</p>
-                <div class="stream-footer">
-                  <span class="stream-author">${autor(post)}</span>
-                  <span class="stream-read">${escapeHtml(post.read_time)}</span>
-                </div>
-              </div>
-            </article>`;
-        }).join('')}
-      </div>`;
   })();
 </script>
 

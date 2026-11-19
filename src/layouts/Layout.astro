@@ -266,19 +266,35 @@ if (pathSegments.length > 0) {
           // De un enlace compartido por nosotros: ?utm_source=whatsapp o el más corto ?ref=whatsapp
           const hint = (params.get('utm_source') || params.get('ref') || '').slice(0, 40);
 
-          fetch('/api/analytics.php?action=track', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+          const trackView = () => {
+            const payload = JSON.stringify({
               event_type: 'page_view',
               event_category: 'pagina',
               entity_id: window.location.pathname.slice(0, 100),
               entity_title: (document.title || '').slice(0, 120),
               referrer: (document.referrer || '').slice(0, 250),
               source_hint: hint,
-            }),
-            keepalive: true,
-          }).catch(() => {});
+            });
+
+            if (navigator.sendBeacon) {
+              const blob = new Blob([payload], { type: 'application/json' });
+              navigator.sendBeacon('/api/analytics.php?action=track', blob);
+            } else {
+              fetch('/api/analytics.php?action=track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload,
+                keepalive: true,
+              }).catch(() => {});
+            }
+          };
+
+          // Despachar en tiempo ocioso (idle) para no encadenar solicitudes en la ruta crítica
+          if ('requestIdleCallback' in window) {
+            (window as any).requestIdleCallback(trackView, { timeout: 3000 });
+          } else {
+            setTimeout(trackView, 1500);
+          }
         } catch (_) {}
       })();
 

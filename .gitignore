@@ -19,6 +19,10 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 
+# local agent skills
+.agents/
+skills-lock.json
+
 # OS files
 .DS_Store
 Thumbs.db

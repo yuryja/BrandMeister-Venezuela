@@ -415,17 +415,13 @@
     }
   });
 
-  // Precarga anticipada: al acercar el cursor/dedo o enfocar un botón de audio,
-  // y en cualquier caso cuando el navegador quede libre tras la carga.
+  // Precarga anticipada bajo demanda: al acercar el cursor/dedo o enfocar un botón de audio
   const warmUp = (e: Event) => {
     if ((e.target as HTMLElement | null)?.closest?.(".js-toggle-hoseline")) loadHoseline();
   };
   document.addEventListener("pointerover", warmUp, { passive: true });
   document.addEventListener("touchstart", warmUp, { passive: true });
   document.addEventListener("focusin", warmUp);
-
-  const idle = (window as any).requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 2500));
-  window.addEventListener("load", () => idle(() => loadHoseline(), { timeout: 5000 }), { once: true });
 </script>
 
 <style>
