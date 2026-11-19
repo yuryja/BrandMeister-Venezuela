@@ -34,7 +34,7 @@ const has = (m: string) => talkgroup.modules.includes(m as any);
       <nav class="pt-tabs" aria-label="Talkgroups monitoreados por Petra">
         {PETRA_TALKGROUPS.map((tg) => (
           <a
-            href={`/petra/${tg.id}`}
+            href={`/petra/${tg.id}/`}
             class={`pt-tab ${tg.id === talkgroup.id ? 'is-active' : ''} ${tg.hidden ? 'pt-tab--hidden' : ''}`}
             aria-current={tg.id === talkgroup.id ? 'page' : undefined}
             style={tg.hidden ? 'display: none;' : undefined}
