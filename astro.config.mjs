@@ -29,32 +29,39 @@ function phpDevServer() {
   };
 }
 
+function bundleHoselineDock() {
+  return {
+    name: 'bundle-hoseline-dock',
+    async buildStart() {
+      try {
+        const esbuild = await import('esbuild');
+        await esbuild.build({
+          entryPoints: ['src/scripts/hoseline-dock.ts'],
+          outfile: 'public/assets/hoseline-dock.js',
+          bundle: true,
+          minify: true,
+          format: 'esm',
+          target: 'es2020'
+        });
+      } catch (err) {
+        console.error('[bundle-hoseline-dock] Error:', err);
+      }
+    }
+  };
+}
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://brandmeisteryv.net',
   trailingSlash: 'always',
   output: 'static',
-  // Precarga la página de destino al pasar el ratón o tocar un enlace: navegación casi instantánea
-  prefetch: {
-    prefetchAll: true,
-    defaultStrategy: 'hover'
-  },
   build: {
     format: 'directory',
     // CSS incrustado en el HTML: la página se pinta con la primera respuesta, sin hojas que bloqueen
     inlineStylesheets: 'always'
   },
-  experimental: {
-    // Prerenderiza la página de destino (Speculation Rules) para abrirla al instante en Chrome/Edge
-    clientPrerender: true
-  },
   vite: {
-    build: {
-      modulePreload: {
-        polyfill: false
-      }
-    },
-    plugins: [phpDevServer()],
+    plugins: [phpDevServer(), bundleHoselineDock()],
     server: {
       proxy: {
         '/api/petra': {

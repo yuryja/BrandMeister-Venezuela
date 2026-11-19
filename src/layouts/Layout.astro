@@ -160,6 +160,22 @@ if (pathSegments.length > 0) {
       </>
     )}
 
+    <!-- Native Speculation Rules: Precarga instantánea en Chrome/Edge sin dependencias ni JS externo -->
+    <script type="speculationrules" set:html={JSON.stringify({
+      prefetch: [
+        {
+          source: "document",
+          where: {
+            and: [
+              { href_matches: "/*" },
+              { not: { href_matches: "/admin/*" } }
+            ]
+          },
+          eagerness: "moderate"
+        }
+      ]
+    })} />
+
     <!-- JSON-LD Datos Estructurados Schema.org (Google Rich Results & LLMs / AI Overviews) -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
