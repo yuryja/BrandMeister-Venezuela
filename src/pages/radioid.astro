@@ -166,7 +166,7 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
               <a href="https://radioid.net/account/register" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
                 Registrar nuevo ID en RadioID.net ↗
               </a>
-              <a href="/blog/verificacion-radioid-dmr" class="btn btn-secondary">
+              <a href="/blog/verificacion-radioid-dmr/" class="btn btn-secondary">
                 Guía de Verificación Anual
               </a>
             </div>
@@ -211,7 +211,7 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
               <p class="guide-card-desc">
                 Todos los operadores de Venezuela tienen un ID de 7 dígitos que inicia con <strong>734</strong> (código de país UIT). Los repetidores físicos y puntos de acceso utilizan identificadores en las series <strong>7340xx</strong> y <strong>7345xx</strong>.
               </p>
-              <a href="/talkgroups" class="guide-card-link">
+              <a href="/talkgroups/" class="guide-card-link">
                 <span>Ver Talkgroups nacionales</span>
                 <span>→</span>
               </a>
@@ -232,7 +232,7 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
               <p class="guide-card-desc">
                 RadioID.net exige confirmar tu cuenta una vez al año para preservar los números asignados y evitar cuentas inactivas. Si tu estatus cambia a "no validado", podrías perder tráfico en másteres BrandMeister.
               </p>
-              <a href="/blog/verificacion-radioid-dmr" class="guide-card-link">
+              <a href="/blog/verificacion-radioid-dmr/" class="guide-card-link">
                 <span>Leer artículo completo</span>
                 <span>→</span>
               </a>
@@ -375,7 +375,7 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
     // Enlace directo a Petra si el último TG es nacional monitoreado
     const isPetraTg = ['734', '73452', '73473', '73411'].includes(String(item.lasttg || ''));
     const tgLinkHtml = isPetraTg
-      ? `<a href="/petra/${encodeURIComponent(item.lasttg)}" class="telemetry-val telemetry-val--highlight" title="Ver actividad en Petra">${tg} ↗</a>`
+      ? `<a href="/petra/${encodeURIComponent(item.lasttg)}/" class="telemetry-val telemetry-val--highlight" title="Ver actividad en Petra">${tg} ↗</a>`
       : `<span class="telemetry-val">${tg}</span>`;
 
     return `
@@ -686,7 +686,7 @@ const metaDescription = "Buscador en tiempo real de indicativos y RadioID DMR en
           ` : ''}
 
           <div class="result-actions-bar">
-            <a href="/repetidores" class="btn-ext">
+            <a href="/repetidores/" class="btn-ext">
               <span>Directorio de Repetidores ↗</span>
             </a>
             <a href="${bmDeviceUrl}" target="_blank" rel="noopener noreferrer" class="btn-ext">

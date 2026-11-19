@@ -74,7 +74,7 @@ if (pathSegments.length > 0) {
       "@type": "ListItem",
       "position": idx + 2,
       "name": titlesMap[segment] || segment.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-      "item": `${siteOrigin}${accumulatedPath}`
+      "item": `${siteOrigin}${accumulatedPath}/`
     });
   });
 }

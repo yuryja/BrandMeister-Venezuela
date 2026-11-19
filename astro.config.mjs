@@ -32,6 +32,7 @@ function phpDevServer() {
 // https://astro.build/config
 export default defineConfig({
   site: 'https://brandmeisteryv.net',
+  trailingSlash: 'always',
   output: 'static',
   // Precarga la página de destino al pasar el ratón o tocar un enlace: navegación casi instantánea
   prefetch: {

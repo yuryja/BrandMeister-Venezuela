@@ -27,7 +27,7 @@ try {
             if ($slug === '') continue;
             $ts = strtotime((string)($row['updated_at'] ?: $row['created_at']));
             $extra .= "  <url>\n"
-                . '    <loc>https://brandmeisteryv.net/blog/' . $slug . "</loc>\n"
+                . '    <loc>https://brandmeisteryv.net/blog/' . $slug . "/</loc>\n"
                 . ($ts ? '    <lastmod>' . gmdate('Y-m-d', $ts) . "</lastmod>\n" : '')
                 . "    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>\n";
         }

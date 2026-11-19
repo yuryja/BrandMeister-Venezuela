@@ -419,7 +419,7 @@ function renderDashboard(data: AnalyticsData) {
                   <span class="badge-tag-category ${badgeClass}">TG ${escapeHtml(tg.id)}</span>
                   <span class="petra-tg-badge-meta">${escapeHtml(tg.badge)}</span>
                 </div>
-                <a href="/petra/${encodeURIComponent(tg.id)}" target="_blank" rel="noopener" class="petra-tg-link" title="Ver monitoreo en vivo">
+                <a href="/petra/${encodeURIComponent(tg.id)}/" target="_blank" rel="noopener" class="petra-tg-link" title="Ver monitoreo en vivo">
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                     <polyline points="15 3 21 3 21 9"></polyline>

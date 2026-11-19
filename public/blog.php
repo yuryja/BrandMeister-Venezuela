@@ -144,11 +144,11 @@ if ($slug !== '') {
         blog_extract_template($html, 'articulo');
         blog_extract_template($html, 'categoria');
         blog_extract_template($html, 'etiqueta');
-        blog_head($html, 'Noticia no encontrada · ' . BLOG_SITE_NAME, 'La noticia que buscas no existe o fue retirada.', "$siteUrl/blog");
+        blog_head($html, 'Noticia no encontrada · ' . BLOG_SITE_NAME, 'La noticia que buscas no existe o fue retirada.', "$siteUrl/blog/");
         $html = blog_fill($html, [
             'TOTAL' => '0',
             'CATEGORIAS' => '',
-            'ARTICULOS' => '<p class="archive-empty">La noticia que buscas no existe o fue retirada. <a href="/blog">Ver todas las noticias</a>.</p>',
+            'ARTICULOS' => '<p class="archive-empty">La noticia que buscas no existe o fue retirada. <a href="/blog/">Ver todas las noticias</a>.</p>',
         ]);
         echo $html;
         exit;
@@ -164,7 +164,7 @@ if ($slug !== '') {
     $html = blog_template('articulo');
     $tagTemplate = blog_extract_template($html, 'etiqueta');
 
-    $url = "$siteUrl/blog/" . $post['slug'];
+    $url = "$siteUrl/blog/" . $post['slug'] . '/';
     $tags = array_values(array_filter(array_map('trim', explode(',', (string)$post['tags']))));
     $tagsHtml = implode("\n", array_map(function ($tag) use ($tagTemplate) {
         return blog_fill($tagTemplate, ['ETIQUETA' => e($tag)]);
@@ -198,7 +198,7 @@ if ($slug !== '') {
     }
     blog_jsonld($html, $siteUrl, $url, [
         ['Inicio', $siteUrl . '/'],
-        ['Noticias y Artículos', $siteUrl . '/blog'],
+        ['Noticias y Artículos', $siteUrl . '/blog/'],
         [(string)$post['title'], $url],
     ], $articuloLd);
     $html = blog_fill($html, [
@@ -284,11 +284,11 @@ blog_head(
     $html,
     'Noticias & Comunicados Técnicos · ' . BLOG_SITE_NAME,
     'Noticias, guías de configuración de hotspots, protocolos de emergencia y novedades de la comunidad BrandMeister Venezuela DMR.',
-    "$siteUrl/blog"
+    "$siteUrl/blog/"
 );
-blog_jsonld($html, $siteUrl, "$siteUrl/blog", [
+blog_jsonld($html, $siteUrl, "$siteUrl/blog/", [
     ['Inicio', $siteUrl . '/'],
-    ['Noticias y Artículos', "$siteUrl/blog"],
+    ['Noticias y Artículos', "$siteUrl/blog/"],
 ]);
 $html = blog_fill($html, [
     'TOTAL' => (string)count($posts),
