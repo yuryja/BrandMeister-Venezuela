@@ -10,3 +10,5 @@ deployment:
     # (un tar de "." copiaba los permisos privados del repositorio a public_html → 403)
     - /bin/cp -R -- * .htaccess "$DEPLOYPATH"
     - /bin/rm -f "${DEPLOYPATH}DEPLOY.md"
+    # Eliminar la carpeta obsoleta blog/ de public_html para evitar que mod_dir interfiera con blog.php
+    - /bin/rm -rf "${DEPLOYPATH}blog"

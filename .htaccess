@@ -40,8 +40,17 @@ Options -Indexes
 
   # Blog dinámico: las noticias salen de MySQL a través de blog.php
   RewriteRule ^plantillas(/|$) - [F]
+
+  # 1. Si la petición del cliente viene con ?slug=, redirigir 301 a la URL canónica limpia
+  RewriteCond %{THE_REQUEST} \s/blog/([^?]+)\?slug=[^\s]* [NC]
+  RewriteRule ^blog/([A-Za-z0-9_-]+)/?$ /blog/$1/? [R=301,L]
+
+  # 2. Forzar trailing slash en artículos del blog sin query string
+  RewriteRule ^blog/([A-Za-z0-9_-]+)$ /blog/$1/ [R=301,L]
+
+  # 3. Servir listado y artículos dinámicos a través de blog.php
   RewriteRule ^blog/?$ /blog.php [L]
-  RewriteRule ^blog/([A-Za-z0-9_-]+)/?$ /blog.php?slug=$1 [L,QSA]
+  RewriteRule ^blog/([A-Za-z0-9_-]+)/$ /blog.php?slug=$1 [L,QSA]
 
   # Redirect trailing slashes if not a directory
   RewriteCond %{REQUEST_FILENAME} !-d
