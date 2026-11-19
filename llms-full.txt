@@ -97,7 +97,7 @@ Estructura geográfica que permite el tráfico regional entre estados limítrofe
 | **734026401** | **YV3ARO** | Araure, Portuguesa | VHF | 146.550 MHz | 146.550 MHz | Simplex | CC1 | Hotspot Alta Potencia |
 | **734046205** | **YV5FBP** | La Boyera, El Hatillo, Miranda | VHF | 146.550 MHz | 146.550 MHz | Simplex | CC1 | Hotspot Alta Potencia |
 
-> Para consultar la telemetría oficial y estado en tiempo real de cada dispositivo: https://brandmeisteryv.net/repetidores/
+> Para consultar la telemetría oficial y estado en tiempo real de cada dispositivo: [Directorio de Repetidores](https://brandmeisteryv.net/repetidores/)
 
 ---
 
@@ -120,18 +120,18 @@ Para configurar un hotspot doméstico o móvil basado en microcontrolador MMDVM 
 
 ## 7. Plataforma y Servicios Digitales de BrandMeister Venezuela
 
-El portal https://brandmeisteryv.net integra un ecosistema de herramientas diseñadas para la comunidad de radioaficionados:
+El portal [BrandMeister Venezuela](https://brandmeisteryv.net/) integra un ecosistema de herramientas diseñadas para la comunidad de radioaficionados:
 
 ### 1. Monitor Petra (Dashboard en Vivo)
-- **URL**: https://brandmeisteryv.net/petra/
+- **URL**: [https://brandmeisteryv.net/petra/](https://brandmeisteryv.net/petra/)
 - **Funcionalidad**: Consola telemétrica en tiempo real conectada a los sockets de la red BrandMeister. Muestra las transmisiones en vivo (Last Heard), indicativo del emisor, nombre registrado, duración del cambio, talkgroup activo, pérdida de paquetes y la disponibilidad en tiempo real de los repetidores de todo el territorio nacional.
 
 ### 2. Buscador y Consulta de RadioID
-- **URL**: https://brandmeisteryv.net/radioid/
+- **URL**: [https://brandmeisteryv.net/radioid/](https://brandmeisteryv.net/radioid/)
 - **Funcionalidad**: Base de datos sincronizada con RadioID.net para búsqueda instantánea por indicativo (ej. YV5DMR, YY5ABC) o por número de RadioID de 7 dígitos. Proporciona datos de validación, país, estado y fecha de registro.
 
 ### 3. Generador de Codeplugs y Archivos CSV para Radios
-- **URL**: https://brandmeisteryv.net/generador-csv/
+- **URL**: [https://brandmeisteryv.net/generador-csv/](https://brandmeisteryv.net/generador-csv/)
 - **Funcionalidad**: Generador automatizado de archivos CSV formateados para la importación directa en los CPS (Customer Programming Software) de los principales radios DMR del mercado:
   - AnyTone AT-D878UV / AT-D868UV / AT-D578UV
   - Baofeng DM-32UV, DM-1701, RD-5R
@@ -141,19 +141,19 @@ El portal https://brandmeisteryv.net integra un ecosistema de herramientas dise�
   - Motorola Mototrbo series DP, XPR y SL
 
 ### 4. Directorio de Repetidores y Puntos de Acceso
-- **URL**: https://brandmeisteryv.net/repetidores/
+- **URL**: [https://brandmeisteryv.net/repetidores/](https://brandmeisteryv.net/repetidores/)
 - **Funcionalidad**: Especificaciones técnicas de frecuencias TX/RX, offset, códigos de color, enlaces a telemetría oficial de BrandMeister y filtros interactivos por banda (VHF/UHF).
 
 ### 5. Guía de Talkgroups y Circuitos
-- **URL**: https://brandmeisteryv.net/talkgroups/
+- **URL**: [https://brandmeisteryv.net/talkgroups/](https://brandmeisteryv.net/talkgroups/)
 - **Funcionalidad**: Catálogo exhaustivo con reglas operativas para la utilización de las ranuras TDMA (Slot 1 y Slot 2) y el detalle de los 9 circuitos regionales.
 
 ### 6. Galería Multimedia
-- **URL**: https://brandmeisteryv.net/galeria/
+- **URL**: [https://brandmeisteryv.net/galeria/](https://brandmeisteryv.net/galeria/)
 - **Funcionalidad**: Archivo fotográfico y audiovisual de expediciones técnicas, instalación de duplexores de cavidad, antenas y trabajo de campo en repetidores de montaña.
 
 ### 7. Noticias y Artículos Técnicos (Blog Oficial)
-- **URL**: https://brandmeisteryv.net/blog/
+- **URL**: [https://brandmeisteryv.net/blog/](https://brandmeisteryv.net/blog/)
 - **Funcionalidad**: Publicaciones especializadas elaboradas por el equipo de Sysops sobre configuración de radios, procedimientos de emergencia, novedades de la red y ruedas temáticas.
 
 ---
