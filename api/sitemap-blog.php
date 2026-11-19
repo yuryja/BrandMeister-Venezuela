@@ -84,7 +84,7 @@ foreach ($rows as $row) {
     }
 
     echo "  <url>\n";
-    echo '    <loc>' . xml_e(SITE_BASE . '/blog/' . $slug) . "</loc>\n";
+    echo '    <loc>' . xml_e(SITE_BASE . '/blog/' . $slug . '/') . "</loc>\n";
     echo '    <lastmod>' . xml_e($lastmod) . "</lastmod>\n";
     echo "    <changefreq>never</changefreq>\n";
     echo "    <priority>0.75</priority>\n";

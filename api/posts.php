@@ -50,7 +50,7 @@ function post_payload(array $r, $withContent = false) {
         'views_count' => (int)($r['views_count'] ?? 0),
         'image_url' => (string)($r['image_url'] ?? ''),
         'published_ts' => (int)$r['published_ts'],
-        'url' => '/blog/' . $r['slug'],
+        'url' => '/blog/' . $r['slug'] . '/',
     ];
     if ($withContent) {
         $data['content'] = $r['content'];

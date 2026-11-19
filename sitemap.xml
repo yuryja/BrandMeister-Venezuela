@@ -157,14 +157,21 @@
   <!-- Páginas de Monitoreo de Talkgroups en Petra -->
   <url>
     <loc>https://brandmeisteryv.net/petra/734/</loc>
-    <lastmod>2026-11-13</lastmod>
+    <lastmod>2026-11-19</lastmod>
+    <changefreq>always</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://brandmeisteryv.net/petra/73411/</loc>
+    <lastmod>2026-11-19</lastmod>
     <changefreq>always</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
     <loc>https://brandmeisteryv.net/petra/73452/</loc>
-    <lastmod>2026-11-13</lastmod>
+    <lastmod>2026-11-19</lastmod>
     <changefreq>always</changefreq>
     <priority>0.7</priority>
   </url>
