@@ -326,7 +326,7 @@ function renderDashboard(data: AnalyticsData) {
   if ($('kpi-top-countries')) $('kpi-top-countries')!.textContent = topCountries.length ? topCountries.join(', ') : 'Sin datos aún';
   const topPlatform = (data.shares?.platforms || [])[0];
   if ($('kpi-top-platform')) $('kpi-top-platform')!.textContent = topPlatform ? `Más usado: ${topPlatform.name}` : 'Sin compartidos aún';
-  const rangeLabels: Record<string, string> = { '7d': 'Últimos 7 días', '30d': 'Últimos 30 días', all: 'Histórico' };
+  const rangeLabels: Record<string, string> = { today: 'Hoy', '7d': 'Últimos 7 días', '30d': 'Últimos 30 días', all: 'Histórico' };
   document.querySelectorAll('[data-range-label]').forEach((el) => (el.textContent = rangeLabels[currentRange] ?? ''));
 
   // 2. Mapa

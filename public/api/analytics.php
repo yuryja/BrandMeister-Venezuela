@@ -218,9 +218,10 @@ function resolve_ip_location(string $ip): ?array {
 }
 
 // Estructura vacía cuando la base de datos no tiene eventos aún
-function get_empty_stats(): array {
+function get_empty_stats(string $rangeKey = '7d'): array {
     return [
         'success' => true,
+        'range' => $rangeKey,
         'kpis' => [
             'player_plays' => 0,
             'unique_listeners' => 0,
@@ -452,18 +453,35 @@ if ($action === 'stats' || $action === 'summary') {
         send_json(get_empty_stats());
     }
 
-    // Rango: 7d, 30d o all (histórico). Se aplica a todas las consultas de eventos
-    $ranges = ['7d' => 7, '30d' => 30, 'all' => 0];
+    // Sincronizar sesión con hora legal de Venezuela (UTC-4) para que CURDATE() y horas coincidan con Caracas
+    try {
+        $pdo->exec("SET time_zone = '-04:00'");
+    } catch (Throwable $e) {}
+
+    // Rango: today (hoy), 7d (7 días), 30d (30 días) o all (histórico). Se aplica a todas las consultas de eventos
+    $ranges = ['today' => 1, '7d' => 7, '30d' => 30, 'all' => 0];
     $rangeKey = isset($ranges[$_GET['range'] ?? '']) ? $_GET['range'] : '7d';
-    $days = $ranges[$rangeKey];
-    $since = $days ? " AND created_at >= DATE_SUB(NOW(), INTERVAL $days DAY)" : '';
+
+    if ($rangeKey === 'today') {
+        $since = " AND created_at >= CURDATE()";
+        $joinSince = " AND e.created_at >= CURDATE()";
+        $days = 1;
+    } elseif ($rangeKey === 'all') {
+        $since = '';
+        $joinSince = '';
+        $days = 0;
+    } else {
+        $days = $ranges[$rangeKey];
+        $since = " AND created_at >= DATE_SUB(NOW(), INTERVAL $days DAY)";
+        $joinSince = " AND e.created_at >= DATE_SUB(NOW(), INTERVAL $days DAY)";
+    }
 
     try {
         // Verificar si la tabla existe y tiene registros
         $check = $pdo->query("SELECT COUNT(*) FROM bm_analytics_events WHERE 1 = 1 $since");
         $totalEvents = (int)$check->fetchColumn();
         if ($totalEvents === 0) {
-            send_json(get_empty_stats());
+            send_json(get_empty_stats($rangeKey));
         }
 
         // KPIs
@@ -578,8 +596,7 @@ if ($action === 'stats' || $action === 'summary') {
         $linkClicks = $linksStmt->fetchAll() ?: [];
 
         // Lecturas de publicaciones: en el histórico se usa el contador total de la noticia;
-        // en 7/30 días, las lecturas registradas en ese periodo
-        $joinSince = $days ? " AND e.created_at >= DATE_SUB(NOW(), INTERVAL $days DAY)" : '';
+        // en hoy / 7 / 30 días, las lecturas registradas en ese periodo ($joinSince calculado según el rango)
         $postsStmt = $pdo->query("SELECT
             p.title,
             p.slug,
@@ -1056,7 +1073,7 @@ if ($action === 'stats' || $action === 'summary') {
         ]);
     } catch (Exception $e) {
         error_log('[BM-YV Analytics Stats Error] ' . $e->getMessage());
-        send_json(get_empty_stats());
+        send_json(get_empty_stats($rangeKey));
     }
 }
 
